@@ -32,6 +32,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private EditText pinInput;
     private SharedPreferences preferences;
+    private boolean isLaunchingWhitelistedApp = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +119,11 @@ public class LockScreenActivity extends AppCompatActivity {
         }
 
         // Set adapter
-        whitelistedAppsRecycler.setAdapter(new AllowedAppsAdapter(this, allowedApps));
+        AllowedAppsAdapter adapter = new AllowedAppsAdapter(this, allowedApps);
+        adapter.setOnAppLaunchListener(() -> {
+            isLaunchingWhitelistedApp = true;
+        });
+        whitelistedAppsRecycler.setAdapter(adapter);
 
 
         // -----------------------------------------------------------
@@ -173,6 +178,13 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        
+        // If we're launching a whitelisted app, don't restart the lock screen immediately
+        if (isLaunchingWhitelistedApp) {
+            isLaunchingWhitelistedApp = false; // Reset the flag
+            return;
+        }
+        
         // Restart LockScreenActivity if user tries to minimize
         Intent intent = new Intent(this, LockScreenActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

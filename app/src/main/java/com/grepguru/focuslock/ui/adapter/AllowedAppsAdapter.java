@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.grepguru.focuslock.R;
@@ -16,10 +17,19 @@ import java.util.List;
 public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.ViewHolder> {
     private List<AppModel> allowedApps;
     private Context context;
+    private OnAppLaunchListener onAppLaunchListener;
+
+    public interface OnAppLaunchListener {
+        void onAppLaunching();
+    }
 
     public AllowedAppsAdapter(Context context, List<AppModel> allowedApps) {
         this.context = context;
         this.allowedApps = allowedApps;
+    }
+
+    public void setOnAppLaunchListener(OnAppLaunchListener listener) {
+        this.onAppLaunchListener = listener;
     }
 
     @NonNull
@@ -37,9 +47,18 @@ public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.
 
         // Launch the app when clicked
         holder.itemView.setOnClickListener(v -> {
+            // Show toast notification for click feedback
+            Toast.makeText(context, "Opening " + app.getAppName(), Toast.LENGTH_SHORT).show();
+            
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
             if (launchIntent != null) {
+                // Notify that we're about to launch an app
+                if (onAppLaunchListener != null) {
+                    onAppLaunchListener.onAppLaunching();
+                }
                 context.startActivity(launchIntent);
+            } else {
+                Toast.makeText(context, "Cannot open " + app.getAppName() + " - App not found", Toast.LENGTH_SHORT).show();
             }
         });
     }

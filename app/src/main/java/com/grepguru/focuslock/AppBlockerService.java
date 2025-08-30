@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.grepguru.focuslock.utils.AppUtils;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,9 +27,20 @@ public class AppBlockerService extends AccessibilityService {
     }
 
     private boolean isAllowedApp(String packageName) {
+        // Always allow the Focus Lock app itself
+        if ("com.grepguru.focuslock".equals(packageName)) {
+            return true;
+        }
+        
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
-        boolean isAllowed = whitelistedApps.contains(packageName);
+        
+        // Add default apps (phone, SMS, alarm) to the whitelist
+        Set<String> allAllowedApps = new HashSet<>(whitelistedApps);
+        allAllowedApps.addAll(AppUtils.getDefaultApps(this));
+        
+        boolean isAllowed = allAllowedApps.contains(packageName);
+        Log.d("AppBlockerService", "Checking app: " + packageName + " - Allowed: " + isAllowed);
         return isAllowed;
     }
 
