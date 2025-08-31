@@ -59,6 +59,12 @@
             android:exported="true"
             android:theme="@style/Theme.FocusLock" />
 
+        <!-- Partner Contact Activity -->
+        <activity
+            android:name=".PartnerContactActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FocusLock" />
+
         <!-- Accessibility Service for App Blocking -->
         <service
             android:name=".AppBlockerService"

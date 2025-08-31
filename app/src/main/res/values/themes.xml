@@ -2,45 +2,109 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.FocusLock" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primaryTeal</item>
-        <item name="colorPrimaryVariant">@color/darkTeal</item>
+        <!-- Modern Primary Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primaryDark</item>
         <item name="colorOnPrimary">@color/white</item>
 
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/white</item>
-        <item name="colorSecondaryVariant">@color/white</item>
-        <item name="colorOnSecondary">@color/red</item>
+        <!-- Modern Secondary Colors -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondaryDark</item>
+        <item name="colorOnSecondary">@color/white</item>
 
+        <!-- Surface Colors -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/textPrimary</item>
 
-        <item name="android:colorBackground">@color/luxuryBackground</item>
-        <!--        <item name="android:background">@color/red</item>-->
+        <!-- Background Colors -->
+        <item name="android:colorBackground">@color/backgroundPrimary</item>
+        <item name="android:windowBackground">@color/backgroundPrimary</item>
 
-        <!-- Global Background for All Fragments -->
-<!--        <item name="android:windowBackground">"@color/darkBackground"</item>-->
-        <item name="android:windowBackground">#424242</item>
+        <!-- Status Bar (Modern Dark) -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/backgroundPrimary</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
 
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">@color/blue_moon</item>
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor" tools:targetApi="l">@color/backgroundPrimary</item>
 
-        <!-- Force AppCompat styling for switches -->
-<!--                <item name="switchStyle">@style/CustomSwitch</item>-->
-
-        <!-- Remove Action Bar -->
+        <!-- No Action Bar -->
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
 
 
+    <!-- Modern Button Styles -->
+    <style name="ModernButton.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/modern_button_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
+
+    <style name="ModernButton.Secondary" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/modern_button_secondary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
+
+    <!-- Modern Text Styles -->
+    <style name="ModernText.Heading" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="ModernText.Subheading" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textColor">@color/textSecondary</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="ModernText.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ModernText.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textColor">@color/textTertiary</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Legacy Styles -->
     <style name="AppTheme.Picker" parent="Theme.AppCompat.Light.NoActionBar" >
-        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
     </style>
 
-    <style name="CustomSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
-        <item name="android:track">@drawable/track_backgrounds</item>
-        <item name="android:thumb">@drawable/thumb_backgrounds</item>
+    <!-- Switch Theme -->
+    <style name="AppTheme.Switch" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
     </style>
-
 
     <style name="Theme.FocusLock" parent="Base.Theme.FocusLock" />
 </resources>

@@ -1,38 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Basic Colors -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="red">#FF3B30</color>
-    <color name="fadedOrange">#FFA726</color> <!-- Light Orange Shade -->
-    <color name="darkOrange">#FB8C00</color> <!-- Darker Orange for Thumb -->
-    <color name="softGrey">#BDBDBD</color> <!-- Default Grey for Off State -->
-    <color name="lightGrey">#E0E0E0</color> <!-- Light Grey Thumb -->
-    <color name="blue_soft">#64B5F6</color>  <!-- Light Blue -->
-    <color name="blue_moon">#1976D2</color>  <!-- Dark Blue -->
-    <color name="yellow_soft">#FFEB3B</color>
-    <color name="gray">#BDBDBD</color>  <!-- Neutral Gray -->
+    <!-- Base Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
 
-
-
-    <!-- App Background Colors -->
-    <color name="luxuryBackground">#121212</color>
-    <color name="darkBackground">#1A1919</color>
-    <color name="lightBrownBackground">#8B6C42</color>
-
-    <!-- Primary Theme Colors -->
-    <color name="primaryTeal">#00796B</color>        <!-- Main Theme Color -->
-    <color name="darkTeal">#004D40</color>          <!-- Darker Shade for Contrast -->
-    <color name="lightTeal">#48A999</color>        <!-- Light Teal for Highlights -->
-    <color name="accentTeal">#1DE9B6</color>       <!-- Bright Teal for Accents -->
-    <color name="softTeal">#80CBC4</color>         <!-- Subtle Teal for Text/Unselected Items -->
-
-    <!-- Bottom Navigation Bar Colors -->
-    <color name="navigationBarColor">@color/primaryTeal</color>
-    <color name="bottomNavSelectedItem">@color/darkTeal</color>
-    <color name="bottomNavUnselectedItem">@color/softTeal</color>
-
-    <!-- Button Colors -->
-    <color name="buttonPurple">#673AB7</color>
-    <color name="buttonBackground">#6A1B9A</color> <!-- Primary Button Purple -->
+    <!-- Vibrant Focus App Color Palette -->
+    <!-- Primary Colors (Energizing Blue) -->
+    <color name="primary">#2563EB</color>           <!-- Vibrant blue - Main brand color -->
+    <color name="primaryDark">#1D4ED8</color>       <!-- Rich blue for depth -->
+    <color name="primaryLight">#60A5FA</color>      <!-- Light blue for highlights -->
+    
+    <!-- Secondary Colors (Focus Orange) -->
+    <color name="secondary">#F97316</color>         <!-- Energizing orange for accents -->
+    <color name="secondaryDark">#EA580C</color>     <!-- Dark orange for contrast -->
+    <color name="secondaryLight">#FB923C</color>    <!-- Light orange for subtle elements -->
+    
+    <!-- Accent Colors (Success & Focus) -->
+    <color name="accent">#10B981</color>            <!-- Success green -->
+    <color name="accentWarning">#F59E0B</color>     <!-- Warning amber -->
+    <color name="accentDanger">#EF4444</color>      <!-- Error red -->
+    
+    <!-- Background Colors (Balanced Dark Theme) -->
+    <color name="backgroundPrimary">#1F2937</color>     <!-- Softer dark background -->
+    <color name="backgroundSecondary">#374151</color>   <!-- Card/surface background -->
+    <color name="backgroundTertiary">#4B5563</color>    <!-- Elevated surfaces -->
+    
+    <!-- Text Colors (Professional Hierarchy) -->
+    <color name="textPrimary">#F8FAFC</color>       <!-- Main text - near white -->
+    <color name="textSecondary">#CBD5E1</color>     <!-- Secondary text - light gray -->
+    <color name="textTertiary">#64748B</color>      <!-- Tertiary text - medium gray -->
+    <color name="textHint">#475569</color>          <!-- Hint text - darker gray -->
+    
+    <!-- Surface Colors (Cards & Components) -->
+    <color name="surface">#1E293B</color>           <!-- Card backgrounds -->
+    <color name="surfaceElevated">#334155</color>   <!-- Elevated cards -->
+    <color name="surfaceHighlight">#475569</color>  <!-- Highlighted surfaces -->
+    
+    <!-- Border & Divider Colors -->
+    <color name="border">#374151</color>            <!-- Subtle borders -->
+    <color name="borderLight">#4B5563</color>       <!-- Lighter borders -->
+    <color name="divider">#374151</color>           <!-- Section dividers -->
+    
+    <!-- Status Colors -->
+    <color name="success">#10B981</color>           <!-- Success states -->
+    <color name="warning">#F59E0B</color>           <!-- Warning states -->
+    <color name="error">#EF4444</color>             <!-- Error states -->
+    <color name="info">#3B82F6</color>              <!-- Info states -->
+    
+    <!-- Legacy Compatibility (Gradually Remove) -->
+    <color name="primaryTeal">@color/primary</color>
+    <color name="darkTeal">@color/primaryDark</color>
+    <color name="lightTeal">@color/primaryLight</color>
+    <color name="luxuryBackground">@color/backgroundPrimary</color>
+    <color name="darkBackground">@color/backgroundSecondary</color>
+    <color name="lightGrey">@color/textSecondary</color>
+    
+    <!-- Navigation Colors -->
+    <color name="navigationBarColor">@color/backgroundSecondary</color>
+    <color name="bottomNavSelectedItem">@color/primary</color>
+    <color name="bottomNavUnselectedItem">@color/textTertiary</color>
 </resources>

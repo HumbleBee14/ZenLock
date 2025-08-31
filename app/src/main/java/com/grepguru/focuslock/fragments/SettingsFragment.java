@@ -23,7 +23,7 @@ import com.grepguru.focuslock.WhitelistActivity;
 public class SettingsFragment extends Fragment {
 
     private EditText pinInput;
-    private SwitchCompat superStrictModeToggle, defaultAppsToggle;
+    private SwitchCompat superStrictModeToggle, defaultAppsToggle, quotesToggle;
     private SharedPreferences preferences;
 
     public SettingsFragment() {}
@@ -39,12 +39,14 @@ public class SettingsFragment extends Fragment {
         pinInput = view.findViewById(R.id.pinInput);
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
         defaultAppsToggle = view.findViewById(R.id.defaultAppsToggle);
+        quotesToggle = view.findViewById(R.id.quotesToggle);
 
         // Load existing settings
         pinInput.setText("");
         pinInput.setText(preferences.getString("lock_pin", ""));
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         defaultAppsToggle.setChecked(preferences.getBoolean("allow_default_apps", true));
+        quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
 
         // Set up event listeners
         setupListeners(view);
@@ -74,14 +76,34 @@ public class SettingsFragment extends Fragment {
             editor.apply();
         });
 
+        // Toggle Motivational Quotes
+        quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("show_quotes", isChecked);
+            editor.apply();
+        });
+
         // Navigate to Whitelist Management
         whitelistButton.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), WhitelistActivity.class);
             startActivity(intent);
         });
 
+        // Partner Contact Configuration
+        Button accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
+        
+        // Enable the button and launch PartnerContactActivity
+        accountabilityPartnerButton.setEnabled(true);
+        accountabilityPartnerButton.setAlpha(1.0f);
+        accountabilityPartnerButton.setText("Configure Partner Contact");
+        
+        accountabilityPartnerButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), com.grepguru.focuslock.PartnerContactActivity.class);
+            startActivity(intent);
+        });
+
         setPinButton.setOnClickListener(v -> {
-            String pin = pinInput.getText().toString();
+            String pin = pinInput.getText().toString().trim();
 
             if (pin.isEmpty()) {
                 // Show confirmation dialog to clear PIN
@@ -98,6 +120,10 @@ public class SettingsFragment extends Fragment {
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .show();
+            } else if (pin.length() < 4) {
+                Toast.makeText(getActivity(), "PIN must be 4 digits", Toast.LENGTH_SHORT).show();
+            } else if (!pin.matches("\\d{4}")) {
+                Toast.makeText(getActivity(), "PIN must contain only numbers", Toast.LENGTH_SHORT).show();
             } else {
                 // Save the PIN
                 SharedPreferences.Editor editor = preferences.edit();
@@ -114,6 +140,7 @@ public class SettingsFragment extends Fragment {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("super_strict_mode", superStrictModeToggle.isChecked());
         editor.putBoolean("allow_default_apps", defaultAppsToggle.isChecked());
+        editor.putBoolean("show_quotes", quotesToggle.isChecked());
         editor.apply();
 
         Toast.makeText(getActivity(), "Settings Saved!", Toast.LENGTH_SHORT).show();
