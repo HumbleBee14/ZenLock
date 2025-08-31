@@ -43,17 +43,20 @@ public class HomeFragment extends Fragment {
         enableLockButton = view.findViewById(R.id.enableLockButton);
 
         setupNumberPickers();
+        setupPresetButtons(view);
         enableLockButton.setOnClickListener(v -> checkAndStartLockService());
 
         return view;
     }
 
+    
+
     private void setupNumberPickers() {
         hoursPicker.setMinValue(0);
         hoursPicker.setMaxValue(23);
         minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(6);
-        String[] minuteValues = {"0", "1", "10", "20", "30", "40", "50"};
+        minutesPicker.setMaxValue(8); // Updated for new values
+        String[] minuteValues = {"0", "1", "5", "10", "15", "20", "30", "40", "50"}; // Added 5 & 15
         minutesPicker.setDisplayedValues(minuteValues);
 
         hoursPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateSelectedTime());
@@ -65,10 +68,37 @@ public class HomeFragment extends Fragment {
         updateSelectedTime();
     }
 
+    private void setupPresetButtons(View view) {
+        Button preset15min = view.findViewById(R.id.preset15min);
+        Button preset30min = view.findViewById(R.id.preset30min);
+        Button preset1hour = view.findViewById(R.id.preset1hour);
+
+        preset15min.setOnClickListener(v -> setPresetTime(0, 15));
+        preset30min.setOnClickListener(v -> setPresetTime(0, 30));
+        preset1hour.setOnClickListener(v -> setPresetTime(1, 0));
+    }
+
+    private void setPresetTime(int hours, int minutes) {
+        hoursPicker.setValue(hours);
+        
+        // Convert minutes to picker index with new values
+        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50};
+        int minuteIndex = 0;
+        for (int i = 0; i < minuteValues.length; i++) {
+            if (minuteValues[i] == minutes) {
+                minuteIndex = i;
+                break;
+            }
+        }
+        minutesPicker.setValue(minuteIndex);
+        
+        updateSelectedTime();
+    }
+
     private void updateSelectedTime() {
         selectedHours = hoursPicker.getValue();
         int minuteIndex = minutesPicker.getValue();
-        int[] minuteValues = {0, 1, 10, 20, 30, 40, 50};
+        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50}; // Updated with 5 & 15
         selectedMinutes = minuteValues[minuteIndex];
 
         if (selectedHours == 0 && selectedMinutes == 0) {

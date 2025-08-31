@@ -1,101 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundPrimary"
+    android:fillViewport="true">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
     tools:context=".fragments.HomeFragment">
-<!--    android:background="@color/luxuryBackground"-->
 
-    <!-- Timer Selection Container -->
-    <LinearLayout
-        android:id="@+id/timerSelectionContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="50dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
-
-            <!-- Hours Picker -->
-            <NumberPicker
-                android:id="@+id/hoursPicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:padding="5dp"
-                android:background="@android:color/transparent"
-                android:textColor="@color/white"
-                android:theme="@style/AppTheme.Picker" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="hrs"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:layout_marginEnd="20dp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
-
-            <!-- Minutes Picker -->
-            <NumberPicker
-                android:id="@+id/minutesPicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:textColor="@color/white"
-                android:theme="@style/AppTheme.Picker"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="mins"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:layout_marginStart="10dp"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Selected Time Display -->
+    <!-- Welcome Section -->
     <TextView
-        android:id="@+id/selectedTimeDisplay"
+        android:id="@+id/welcomeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Please select a time"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/timerSelectionContainer"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="20dp"/>
+        android:text="Focus Time"
+        style="@style/ModernText.Heading"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"/>
 
-    <!-- Enable Focus Lock Button -->
+    <TextView
+        android:id="@+id/welcomeSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set your focus duration and lock distracting apps"
+        style="@style/ModernText.Caption"
+        app:layout_constraintTop_toBottomOf="@id/welcomeTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Timer Selection Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/timerCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toBottomOf="@id/welcomeSubtitle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Timer Selection Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Duration"
+                style="@style/ModernText.Subheading"
+                android:layout_gravity="center"/>
+
+            <!-- Timer Pickers Container -->
+            <LinearLayout
+                android:id="@+id/timerSelectionContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp">
+
+                <!-- Hours Section -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_marginEnd="32dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hours"
+                        style="@style/ModernText.Caption"
+                        android:layout_marginBottom="8dp"/>
+
+                    <NumberPicker
+                        android:id="@+id/hoursPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Picker"/>
+
+                </LinearLayout>
+
+                <!-- Minutes Section -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Minutes"
+                        style="@style/ModernText.Caption"
+                        android:layout_marginBottom="8dp"/>
+
+                    <NumberPicker
+                        android:id="@+id/minutesPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Picker"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Selected Time Display -->
+            <TextView
+                android:id="@+id/selectedTimeDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set a time to start Focus Lock"
+                style="@style/ModernText.Body"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:textAlignment="center"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Action Button -->
     <Button
         android:id="@+id/enableLockButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Focus Session"
+        style="@style/ModernButton.Primary"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/timerCard"/>
+
+    <!-- Quick Timer Presets -->
+    <TextView
+        android:id="@+id/presetsLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enable Focus Lock"
-        android:textColor="@color/white"
-        android:background="@drawable/rounded_button"
-        app:layout_constraintTop_toBottomOf="@id/selectedTimeDisplay"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="40dp"/>
+        android:text="Quick Presets"
+        style="@style/ModernText.Caption"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/enableLockButton"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/quickPresetsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/presetsLabel">
+
+        <Button
+            android:id="@+id/preset15min"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="15m"
+            style="@style/ModernButton.Secondary"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/preset30min"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="30m"
+            style="@style/ModernButton.Secondary"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/preset1hour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="1h"
+            style="@style/ModernButton.Secondary"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
