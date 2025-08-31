@@ -6,7 +6,7 @@
     <corners android:radius="50dp"/>
 
     <!-- Button color -->
-    <solid android:color="@color/buttonPurple"/>
+    <solid android:color="@color/primary"/>
 
     <!-- Padding for better appearance -->
     <padding

@@ -2,18 +2,18 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/fadedOrange" />
+            <solid android:color="@color/primaryLight" />
             <corners android:radius="100dp" />
-            <stroke android:width="2dp" android:color="@color/darkOrange" />
+            <stroke android:width="2dp" android:color="@color/primary" />
             <size android:height="20dp" />
         </shape>
     </item>
 
     <item android:state_checked="false">
         <shape android:shape="rectangle">
-            <solid android:color="@color/softGrey" />
+            <solid android:color="@color/backgroundTertiary" />
             <corners android:radius="100dp" />
-            <stroke android:width="2dp" android:color="@color/gray" />
+            <stroke android:width="2dp" android:color="@color/border" />
             <size android:height="20dp" />
         </shape>
     </item>
