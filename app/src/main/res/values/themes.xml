@@ -46,6 +46,10 @@
         <item name="android:minHeight">48dp</item>
         <item name="android:elevation">4dp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
     </style>
 
     <style name="ModernButton.Secondary" parent="Widget.MaterialComponents.Button">
@@ -60,6 +64,10 @@
         <item name="android:minHeight">48dp</item>
         <item name="android:elevation">4dp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
     </style>
 
     <!-- Modern Text Styles -->
