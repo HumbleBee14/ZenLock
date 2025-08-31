@@ -10,6 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,6 +29,14 @@ public class SettingsFragment extends Fragment {
 
     private EditText pinInput;
     private SwitchCompat superStrictModeToggle, defaultAppsToggle, quotesToggle;
+    private SwitchCompat persistentNotificationToggle, autoRestartToggle;
+    private RadioGroup securityLevelGroup;
+    private RadioButton basicSecurity, enhancedSecurity, maximumSecurity;
+    
+    // Expandable UI elements
+    private LinearLayout lockProtectionHeader, lockProtectionContent;
+    private ImageView lockProtectionExpandIcon;
+    private TextView lockProtectionSummary;
     private SharedPreferences preferences;
 
     public SettingsFragment() {}
@@ -40,6 +53,20 @@ public class SettingsFragment extends Fragment {
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
         defaultAppsToggle = view.findViewById(R.id.defaultAppsToggle);
         quotesToggle = view.findViewById(R.id.quotesToggle);
+        
+        // Security settings
+        persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
+        autoRestartToggle = view.findViewById(R.id.autoRestartToggle);
+        securityLevelGroup = view.findViewById(R.id.securityLevelGroup);
+        basicSecurity = view.findViewById(R.id.basicSecurity);
+        enhancedSecurity = view.findViewById(R.id.enhancedSecurity);
+        maximumSecurity = view.findViewById(R.id.maximumSecurity);
+        
+        // Expandable UI elements
+        lockProtectionHeader = view.findViewById(R.id.lockProtectionHeader);
+        lockProtectionContent = view.findViewById(R.id.lockProtectionContent);
+        lockProtectionExpandIcon = view.findViewById(R.id.lockProtectionExpandIcon);
+        lockProtectionSummary = view.findViewById(R.id.lockProtectionSummary);
 
         // Load existing settings
         pinInput.setText("");
@@ -47,6 +74,27 @@ public class SettingsFragment extends Fragment {
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         defaultAppsToggle.setChecked(preferences.getBoolean("allow_default_apps", true));
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
+        
+        // Load security settings
+        persistentNotificationToggle.setChecked(preferences.getBoolean("persistent_notification", true));
+        autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
+        
+        // Load security level
+        int securityLevel = preferences.getInt("security_level", 1); // Default to enhanced
+        switch (securityLevel) {
+            case 0:
+                basicSecurity.setChecked(true);
+                lockProtectionSummary.setText("Basic Security");
+                break;
+            case 1:
+                enhancedSecurity.setChecked(true);
+                lockProtectionSummary.setText("Enhanced Security");
+                break;
+            case 2:
+                maximumSecurity.setChecked(true);
+                lockProtectionSummary.setText("Maximum Security");
+                break;
+        }
 
         // Set up event listeners
         setupListeners(view);
@@ -82,6 +130,41 @@ public class SettingsFragment extends Fragment {
             editor.putBoolean("show_quotes", isChecked);
             editor.apply();
         });
+        
+        // Security settings listeners
+        persistentNotificationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("persistent_notification", isChecked);
+            editor.apply();
+        });
+        
+        autoRestartToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("auto_restart", isChecked);
+            editor.apply();
+        });
+        
+        // Security level selection
+        securityLevelGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            int securityLevel = 1; // Default to enhanced
+            if (checkedId == R.id.basicSecurity) {
+                securityLevel = 0;
+                lockProtectionSummary.setText("Basic Security");
+            } else if (checkedId == R.id.enhancedSecurity) {
+                securityLevel = 1;
+                lockProtectionSummary.setText("Enhanced Security");
+            } else if (checkedId == R.id.maximumSecurity) {
+                securityLevel = 2;
+                lockProtectionSummary.setText("Maximum Security");
+            }
+            
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("security_level", securityLevel);
+            editor.apply();
+        });
+        
+        // Setup expandable functionality
+        setupExpandableSections();
 
         // Navigate to Whitelist Management
         whitelistButton.setOnClickListener(v -> {
@@ -152,6 +235,29 @@ public class SettingsFragment extends Fragment {
                 .commit();
     }
 
+
+    private void setupExpandableSections() {
+        // Lock Protection expandable section
+        lockProtectionHeader.setOnClickListener(v -> {
+            boolean isExpanded = lockProtectionContent.getVisibility() == View.VISIBLE;
+            
+            if (isExpanded) {
+                // Collapse
+                lockProtectionContent.setVisibility(View.GONE);
+                lockProtectionExpandIcon.animate()
+                    .rotation(0)
+                    .setDuration(200)
+                    .start();
+            } else {
+                // Expand
+                lockProtectionContent.setVisibility(View.VISIBLE);
+                lockProtectionExpandIcon.animate()
+                    .rotation(180)
+                    .setDuration(200)
+                    .start();
+            }
+        });
+    }
 
     @Override
     public void onResume() {

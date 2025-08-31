@@ -74,13 +74,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupPresetButtons(View view) {
-        Button preset15min = view.findViewById(R.id.preset15min);
         Button preset30min = view.findViewById(R.id.preset30min);
         Button preset1hour = view.findViewById(R.id.preset1hour);
+        Button preset3hour = view.findViewById(R.id.preset3hour);
 
-        preset15min.setOnClickListener(v -> setPresetTime(0, 15));
         preset30min.setOnClickListener(v -> setPresetTime(0, 30));
         preset1hour.setOnClickListener(v -> setPresetTime(1, 0));
+        preset3hour.setOnClickListener(v -> setPresetTime(3, 0));
     }
 
     private void setPresetTime(int hours, int minutes) {

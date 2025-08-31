@@ -99,9 +99,9 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Security Settings Card -->
+    <!-- Lock Protection Card (Expandable) -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/securityCard"
+        android:id="@+id/lockProtectionCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -116,14 +116,227 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Security Header -->
+            <!-- Header with Expand Button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:id="@+id/lockProtectionHeader"
+                android:padding="8dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lock Protection"
+                        style="@style/ModernText.Subheading"
+                        android:textColor="@color/textPrimary"/>
+
+                    <TextView
+                        android:id="@+id/lockProtectionSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enhanced Security"
+                        style="@style/ModernText.Caption"
+                        android:textColor="@color/textSecondary"
+                        android:layout_marginTop="4dp"/>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/lockProtectionExpandIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_expand_more"
+                    android:rotation="0"
+                    android:contentDescription="Expand"/>
+
+            </LinearLayout>
+
+            <!-- Expandable Content -->
+            <LinearLayout
+                android:id="@+id/lockProtectionContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="16dp">
+
+                <!-- Security Level -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Security Level"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RadioGroup
+                        android:id="@+id/securityLevelGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/basicSecurity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Basic (Standard lock screen)"
+                            android:textColor="@color/textPrimary"
+                            android:padding="8dp"/>
+
+                        <RadioButton
+                            android:id="@+id/enhancedSecurity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Enhanced (Foreground service + auto-restart)"
+                            android:textColor="@color/textPrimary"
+                            android:padding="8dp"/>
+
+                        <RadioButton
+                            android:id="@+id/maximumSecurity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Maximum (All mechanisms + persistent notification)"
+                            android:textColor="@color/textPrimary"
+                            android:padding="8dp"/>
+
+                    </RadioGroup>
+
+                </LinearLayout>
+
+                <!-- Lock Settings -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Notification Toggle -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/ModernText.Body"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Lock Notifications"
+                                android:textColor="@color/textPrimary" />
+
+                            <TextView
+                                style="@style/ModernText.Caption"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Show persistent notification when lock is active"
+                                android:textColor="@color/textSecondary" />
+
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/persistentNotificationToggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/AppTheme.Switch" />
+
+                    </LinearLayout>
+
+                    <!-- Auto-Restart Toggle -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/ModernText.Body"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Auto-Restart Protection"
+                                android:textColor="@color/textPrimary" />
+
+                            <TextView
+                                style="@style/ModernText.Caption"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Automatically restart lock if app is killed"
+                                android:textColor="@color/textSecondary" />
+
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/autoRestartToggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/AppTheme.Switch" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+        <!-- General Settings Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/generalSettingsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toBottomOf="@id/lockProtectionCard">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- General Settings Header -->
             <TextView
                 style="@style/ModernText.Subheading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="20dp"
-                android:text="Security Settings" />
+                android:text="General Settings" />
 
             <!-- Mode Toggles -->
             <LinearLayout
@@ -170,83 +383,83 @@
 
                 </LinearLayout>
 
-                                 <!-- Default Apps Toggle -->
-                 <LinearLayout
-                     android:layout_width="match_parent"
-                     android:layout_height="wrap_content"
-                     android:gravity="center_vertical"
-                     android:orientation="horizontal"
-                     android:paddingVertical="12dp">
+                <!-- Default Apps Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
 
-                     <LinearLayout
-                         android:layout_width="0dp"
-                         android:layout_height="wrap_content"
-                         android:layout_weight="1"
-                         android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                         <TextView
-                             style="@style/ModernText.Body"
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:text="Allow Default Apps"
-                             android:textColor="@color/textPrimary" />
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Allow Default Apps"
+                            android:textColor="@color/textPrimary" />
 
-                         <TextView
-                             style="@style/ModernText.Caption"
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:layout_marginTop="2dp"
-                             android:text="Phone, SMS, Clock apps"
-                             android:textColor="@color/textSecondary" />
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Phone, SMS, Clock apps"
+                            android:textColor="@color/textSecondary" />
 
-                     </LinearLayout>
+                    </LinearLayout>
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/defaultAppsToggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-                         android:theme="@style/AppTheme.Switch" />
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/defaultAppsToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
 
-                 </LinearLayout>
+                </LinearLayout>
 
-                 <!-- Motivational Quotes Toggle -->
-                 <LinearLayout
-                     android:layout_width="match_parent"
-                     android:layout_height="wrap_content"
-                     android:gravity="center_vertical"
-                     android:orientation="horizontal"
-                     android:paddingVertical="12dp">
+                <!-- Motivational Quotes Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
 
-                     <LinearLayout
-                         android:layout_width="0dp"
-                         android:layout_height="wrap_content"
-                         android:layout_weight="1"
-                         android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                         <TextView
-                             style="@style/ModernText.Body"
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:text="Motivational Quotes"
-                             android:textColor="@color/textPrimary" />
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Motivational Quotes"
+                            android:textColor="@color/textPrimary" />
 
-    <TextView
-                             style="@style/ModernText.Caption"
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:layout_marginTop="2dp"
-                             android:text="Show inspiring quotes on lock screen"
-                             android:textColor="@color/textSecondary" />
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Show inspiring quotes on lock screen"
+                            android:textColor="@color/textSecondary" />
 
-                     </LinearLayout>
+                    </LinearLayout>
 
-                     <androidx.appcompat.widget.SwitchCompat
-                         android:id="@+id/quotesToggle"
-        android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:theme="@style/AppTheme.Switch" />
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/quotesToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
 
-                 </LinearLayout>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -263,7 +476,7 @@
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/securityCard">
+        app:layout_constraintTop_toBottomOf="@id/generalSettingsCard">
 
         <LinearLayout
             android:layout_width="match_parent"

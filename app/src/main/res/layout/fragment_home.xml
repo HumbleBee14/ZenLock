@@ -164,23 +164,13 @@
         app:layout_constraintTop_toBottomOf="@id/presetsLabel">
 
         <Button
-            android:id="@+id/preset15min"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="15m"
-            style="@style/ModernButton.Secondary"
-            android:layout_marginEnd="8dp"/>
-
-        <Button
             android:id="@+id/preset30min"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="30m"
             style="@style/ModernButton.Secondary"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"/>
+            android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/preset1hour"
@@ -189,7 +179,19 @@
             android:layout_weight="1"
             android:text="1h"
             style="@style/ModernButton.Secondary"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/preset3hour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="3h"
+            style="@style/ModernButton.Secondary"
             android:layout_marginStart="8dp"/>
+
+
 
     </LinearLayout>
 
