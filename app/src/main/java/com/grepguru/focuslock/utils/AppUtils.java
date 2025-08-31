@@ -108,7 +108,8 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.samsung.android.authfw"); // Samsung Auth Framework
         addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpass"); // Samsung Pass
         addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpassautofill"); // Samsung Pass Autofill
-        addIfInstalled(pm, allAllowed, "com.android.settings"); // Settings (for security prompts)
+        // addIfInstalled(pm, allAllowed, "com.android.settings"); // Settings (for security prompts)
+        // Settings access removed - user must explicitly whitelist settings app
         addIfInstalled(pm, allAllowed, "com.google.android.gms.auth.api.credentials"); // Google Auth
         addIfInstalled(pm, allAllowed, "com.android.keyguard"); // Lock screen security
         addIfInstalled(pm, allAllowed, "com.android.credentialmanager"); // Credential Manager
