@@ -122,9 +122,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHeight_percent="0.3">
 
-        <!-- Default Apps Section -->
+                <!-- Apps Section with Expand Button at Top -->
         <LinearLayout
-            android:id="@+id/defaultAppsSection"
+            android:id="@+id/appsSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -132,17 +132,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Default Apps Header -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Expand Button at Top Center (only shown when additional apps exist) -->
+            <LinearLayout
+                android:id="@+id/expandButtonContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Essential Apps"
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                android:layout_gravity="center"
-                android:layout_marginBottom="12dp"/>
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:visibility="gone">
 
-            <!-- Default Apps RecyclerView -->
+                <ImageView
+                    android:id="@+id/expandAppsButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_expand_more"
+                    android:background="@drawable/circular_button"
+                    android:padding="12dp"
+                    android:contentDescription="Show more apps"
+                    android:alpha="0.9"/>
+
+            </LinearLayout>
+
+            <!-- Apps RecyclerView (Scrollable) -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/defaultAppsRecycler"
                 android:layout_width="match_parent"
@@ -151,52 +164,10 @@
                 android:scrollbars="none"
                 android:clipToPadding="false"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp"/>
-
-        </LinearLayout>
-
-        <!-- Additional Apps Section -->
-        <LinearLayout
-            android:id="@+id/additionalAppsSection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/defaultAppsSection"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="24dp">
-
-                        <!-- Additional Apps Header with Expand Button -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:id="@+id/additionalAppsHeader"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Additional Apps"
-                    android:textSize="14sp"
-                    android:textColor="@color/textSecondary"
-                    android:gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/expandAppsButton"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/ic_expand_more"
-                    android:background="@drawable/circular_button"
-                    android:padding="8dp"
-                    android:contentDescription="Expand additional apps"
-                    android:alpha="0.8"/>
-
-            </LinearLayout>
+                android:minHeight="140dp"
+                android:maxHeight="200dp"
+                android:nestedScrollingEnabled="true"/>
 
         </LinearLayout>
 

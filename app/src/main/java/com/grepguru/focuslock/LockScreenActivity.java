@@ -87,8 +87,7 @@ public class LockScreenActivity extends AppCompatActivity {
         //  TextView lockMessage = findViewById(R.id.lockscreenMessage);
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
-        LinearLayout defaultAppsSection = findViewById(R.id.defaultAppsSection);
-        LinearLayout additionalAppsSection = findViewById(R.id.additionalAppsSection);
+        LinearLayout appsSection = findViewById(R.id.appsSection);
 
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
@@ -100,6 +99,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Single RecyclerView for all apps (default + additional)
         RecyclerView appsRecycler = findViewById(R.id.defaultAppsRecycler);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
+        LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
 
         // Use GridLayoutManager for better organization - 3 apps per row
         androidx.recyclerview.widget.GridLayoutManager layoutManager = new androidx.recyclerview.widget.GridLayoutManager(this, 3);
@@ -161,16 +161,13 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Handle expand/collapse for additional apps
         boolean[] isExpanded = {false};
-        TextView additionalAppsHeader = findViewById(R.id.additionalAppsHeader);
 
         if (additionalAppModels.isEmpty()) {
-            // Hide entire additional apps section when no apps
-            additionalAppsSection.setVisibility(View.GONE);
+            // Hide expand button when no additional apps
+            expandButtonContainer.setVisibility(View.GONE);
         } else {
-            // Show section and set up expand functionality
-            additionalAppsSection.setVisibility(View.VISIBLE);
-            additionalAppsHeader.setText("Additional Apps");
-            expandAppsButton.setVisibility(View.VISIBLE);
+            // Show expand button container
+            expandButtonContainer.setVisibility(View.VISIBLE);
 
             expandAppsButton.setOnClickListener(v -> {
                 if (!isExpanded[0]) {
@@ -178,22 +175,27 @@ public class LockScreenActivity extends AppCompatActivity {
                     currentAppModels.addAll(additionalAppModels);
                     appsAdapter.notifyDataSetChanged();
 
-                    // Scroll to show the new apps
-                    appsRecycler.post(() -> {
+                    // Scroll to show the new apps after a short delay
+                    appsRecycler.postDelayed(() -> {
                         layoutManager.scrollToPosition(currentAppModels.size() - 1);
-                    });
+                    }, 100);
                 } else {
                     // Collapse: Remove additional apps from the list
                     currentAppModels.removeAll(additionalAppModels);
                     appsAdapter.notifyDataSetChanged();
+
+                    // Scroll back to top
+                    appsRecycler.postDelayed(() -> {
+                        layoutManager.scrollToPosition(0);
+                    }, 100);
                 }
 
                 isExpanded[0] = !isExpanded[0];
 
-                // Rotate the expand icon
+                // Rotate the expand icon (180° for expanded, 0° for collapsed)
                 expandAppsButton.animate()
                     .rotation(isExpanded[0] ? 180 : 0)
-                    .setDuration(200)
+                    .setDuration(300)
                     .start();
             });
         }
@@ -204,8 +206,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Initially Hide PIN Input and Keep Apps Visible
         unlockInputsContainer.setVisibility(View.GONE);
-        defaultAppsSection.setVisibility(View.VISIBLE);
-        // Additional apps section visibility is already handled above based on whether there are apps
+        appsSection.setVisibility(View.VISIBLE);
 
         unlockPromptButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,19 +214,14 @@ public class LockScreenActivity extends AppCompatActivity {
                 // Show PIN Input when unlocking and hide apps
                 unlockInputsContainer.setVisibility(View.VISIBLE);
                 unlockPromptButton.setVisibility(View.GONE);
-                defaultAppsSection.setVisibility(View.GONE);
+                appsSection.setVisibility(View.GONE);
 
-                // Hide additional apps section if visible
-                if (additionalAppsSection.getVisibility() == View.VISIBLE) {
-                    additionalAppsSection.setVisibility(View.GONE);
-
-                    // If additional apps were expanded, collapse them
-                    if (isExpanded[0]) {
-                        currentAppModels.removeAll(additionalAppModels);
-                        appsAdapter.notifyDataSetChanged();
-                        isExpanded[0] = false;
-                        expandAppsButton.setRotation(0);
-                    }
+                // If additional apps were expanded, collapse them
+                if (isExpanded[0]) {
+                    currentAppModels.removeAll(additionalAppModels);
+                    appsAdapter.notifyDataSetChanged();
+                    isExpanded[0] = false;
+                    expandAppsButton.setRotation(0);
                 }
             }
         });
@@ -240,12 +236,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     // Hide unlock inputs and show main lock screen
                     unlockInputsContainer.setVisibility(View.GONE);
                     unlockPromptButton.setVisibility(View.VISIBLE);
-                    defaultAppsSection.setVisibility(View.VISIBLE);
-
-                    // Only show additional apps section if it has apps
-                    if (!additionalAppModels.isEmpty()) {
-                        additionalAppsSection.setVisibility(View.VISIBLE);
-                    }
+                    appsSection.setVisibility(View.VISIBLE);
 
                     pinInput.setText("");
                 } else {
