@@ -103,6 +103,33 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.android.mms.service");
         addIfInstalled(pm, allAllowed, "com.android.providers.sms");
         
+        // Security and biometric authentication (essential for app access)
+        addIfInstalled(pm, allAllowed, "com.samsung.android.biometrics.app.setting"); // Samsung Biometrics
+        addIfInstalled(pm, allAllowed, "com.samsung.android.authfw"); // Samsung Auth Framework
+        addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpass"); // Samsung Pass
+        addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpassautofill"); // Samsung Pass Autofill
+        addIfInstalled(pm, allAllowed, "com.android.settings"); // Settings (for security prompts)
+        addIfInstalled(pm, allAllowed, "com.google.android.gms.auth.api.credentials"); // Google Auth
+        addIfInstalled(pm, allAllowed, "com.android.keyguard"); // Lock screen security
+        addIfInstalled(pm, allAllowed, "com.android.credentialmanager"); // Credential Manager
+        
+        // Face recognition and biometric services
+        addIfInstalled(pm, allAllowed, "com.miui.face"); // Xiaomi Face Recognition
+        addIfInstalled(pm, allAllowed, "com.oneplus.faceunlock"); // OnePlus Face Unlock
+        addIfInstalled(pm, allAllowed, "com.oppo.facerecognition"); // Oppo Face Recognition
+        addIfInstalled(pm, allAllowed, "com.vivo.facerecognition"); // Vivo Face Recognition
+        addIfInstalled(pm, allAllowed, "com.huawei.facerecognition"); // Huawei Face Recognition
+        
+        // Fingerprint and biometric authentication
+        addIfInstalled(pm, allAllowed, "com.android.server.biometrics"); // Biometric Service
+        addIfInstalled(pm, allAllowed, "com.fingerprints.serviceext"); // Fingerprint Service
+        addIfInstalled(pm, allAllowed, "com.samsung.android.biometrics"); // Samsung Biometrics Core
+        addIfInstalled(pm, allAllowed, "com.google.android.apps.authenticator2"); // Google Authenticator
+        
+        // PIN/Password/Pattern security
+        addIfInstalled(pm, allAllowed, "com.android.internal.policy"); // Security Policy
+        addIfInstalled(pm, allAllowed, "com.android.server.policy"); // Server Policy
+        
         return allAllowed;
     }
 

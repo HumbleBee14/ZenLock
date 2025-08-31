@@ -9,6 +9,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +40,7 @@ public class WhitelistActivity extends AppCompatActivity {
     // UI Components
     private RecyclerView recyclerView;
     private Button saveButton;
+    private LinearLayout loadingContainer;
     
     // Data Collections
     private List<SelectableAppModel> appList = new ArrayList<>();
@@ -52,17 +54,18 @@ public class WhitelistActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.whitelistRecyclerView);
         saveButton = findViewById(R.id.saveButton);
+        loadingContainer = findViewById(R.id.loadingContainer);
 
         defaultApps = AppUtils.getMainDefaultApps(this);
         loadUserSelections();
 
-        // Load all apps and organize them
-        loadAndOrganizeApps();
-
-        // Setup RecyclerView with updated adapter
+        // Setup RecyclerView first with empty list
         WhitelistAdapter adapter = new WhitelistAdapter(appList, selectedApps, MAX_ADDITIONAL_APPS);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        // Load apps in background to improve responsiveness
+        loadAndOrganizeAppsAsync(adapter);
 
         // Save Button Click Listener
         saveButton.setOnClickListener(v -> {
@@ -80,6 +83,28 @@ public class WhitelistActivity extends AppCompatActivity {
                 selectedApps.add(packageName);
             }
         }
+    }
+    
+    private void loadAndOrganizeAppsAsync(WhitelistAdapter adapter) {
+        // Show loading animation
+        loadingContainer.setVisibility(android.view.View.VISIBLE);
+        recyclerView.setVisibility(android.view.View.GONE);
+        
+        // Load apps in background thread to prevent UI blocking
+        new Thread(() -> {
+            loadAndOrganizeApps();
+            
+            // Update UI on main thread
+            runOnUiThread(() -> {
+                // Hide loading animation and show app list
+                loadingContainer.setVisibility(android.view.View.GONE);
+                recyclerView.setVisibility(android.view.View.VISIBLE);
+                adapter.notifyDataSetChanged();
+                
+                // Optional: Show completion message
+                Toast.makeText(this, "Loaded " + appList.size() + " apps", Toast.LENGTH_SHORT).show();
+            });
+        }).start();
     }
     
     private void loadAndOrganizeApps() {

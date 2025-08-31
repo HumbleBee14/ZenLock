@@ -13,6 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class AppBlockerService extends AccessibilityService {
+    private String lastLoggedPackage = "";
+    private long lastLogTime = 0;
+    private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
+    
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
@@ -26,10 +30,17 @@ public class AppBlockerService extends AccessibilityService {
                 return;
             }
             
-            // Log package events for debugging (essential for troubleshooting)
-            Log.d("AppBlockerService", "Event from package: " + packageName);
+            boolean isAllowed = isAllowedApp(packageName);
             
-            if (!isAllowedApp(packageName)) {
+            // Log package events for debugging (with debouncing to prevent spam)
+            long currentTime = System.currentTimeMillis();
+            if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
+                Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
+                lastLoggedPackage = packageName;
+                lastLogTime = currentTime;
+            }
+            
+            if (!isAllowed) {
                 launchLockScreen();
             }
         }
@@ -41,17 +52,8 @@ public class AppBlockerService extends AccessibilityService {
             return true;
         }
         
-        // Handle third-party apps that integrate with system functions
-        if (isThirdPartySystemIntegration(packageName)) {
-            // Allow briefly but return to lock screen after a short delay
-            android.os.Handler handler = new android.os.Handler();
-            handler.postDelayed(() -> {
-                if (getSharedPreferences("FocusLockPrefs", MODE_PRIVATE).getBoolean("isLocked", false)) {
-                    launchLockScreen();
-                }
-            }, 3000); // 3 second delay
-            return true;
-        }
+        // Future: Handle special system integrations if needed
+        // Currently disabled - all third-party apps must be explicitly whitelisted by user
         
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
@@ -64,22 +66,22 @@ public class AppBlockerService extends AccessibilityService {
     }
     
     private boolean isThirdPartySystemIntegration(String packageName) {
-        // Third-party apps that integrate with system functions (calls, SMS)
-        // These should be allowed briefly but not permanently
-        String[] thirdPartyIntegrations = {
-            "com.truecaller", // Caller ID service
-            "com.whatsapp", // If user has WhatsApp as default SMS
-            "com.viber.voip", // Viber calls
-            "com.skype.raider" // Skype calls
+        // Future: Add special handling for system-integrated third-party apps
+        // Example: Apps that provide system-level services but need temporary access
+        // Currently empty - all apps must be explicitly whitelisted by user
+        
+        String[] specialSystemIntegrations = {
+            // Add packages here only if they provide essential system services
+            // that need temporary access (e.g., emergency services, accessibility)
         };
         
-        for (String thirdParty : thirdPartyIntegrations) {
-            if (thirdParty.equals(packageName)) {
+        for (String specialApp : specialSystemIntegrations) {
+            if (specialApp.equals(packageName)) {
                 return true;
             }
         }
         
-        return false;
+        return false; // No automatic allowances - user choice only
     }
 
     private void launchLockScreen() {
