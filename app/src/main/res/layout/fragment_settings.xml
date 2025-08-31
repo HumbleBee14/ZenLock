@@ -170,44 +170,83 @@
 
                 </LinearLayout>
 
-                <!-- Default Apps Toggle -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="12dp">
+                                 <!-- Default Apps Toggle -->
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal"
+                     android:paddingVertical="12dp">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                     <LinearLayout
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:orientation="vertical">
 
-                        <TextView
-                            style="@style/ModernText.Body"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Allow Default Apps"
-                            android:textColor="@color/textPrimary" />
+                         <TextView
+                             style="@style/ModernText.Body"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:text="Allow Default Apps"
+                             android:textColor="@color/textPrimary" />
 
-                        <TextView
-                            style="@style/ModernText.Caption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Phone, SMS, Clock apps"
-                            android:textColor="@color/textSecondary" />
+                         <TextView
+                             style="@style/ModernText.Caption"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:layout_marginTop="2dp"
+                             android:text="Phone, SMS, Clock apps"
+                             android:textColor="@color/textSecondary" />
 
-                    </LinearLayout>
+                     </LinearLayout>
 
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/defaultAppsToggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch" />
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/defaultAppsToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+                         android:theme="@style/AppTheme.Switch" />
 
-                </LinearLayout>
+                 </LinearLayout>
+
+                 <!-- Motivational Quotes Toggle -->
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:gravity="center_vertical"
+                     android:orientation="horizontal"
+                     android:paddingVertical="12dp">
+
+                     <LinearLayout
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:orientation="vertical">
+
+                         <TextView
+                             style="@style/ModernText.Body"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:text="Motivational Quotes"
+                             android:textColor="@color/textPrimary" />
+
+    <TextView
+                             style="@style/ModernText.Caption"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:layout_marginTop="2dp"
+                             android:text="Show inspiring quotes on lock screen"
+                             android:textColor="@color/textSecondary" />
+
+                     </LinearLayout>
+
+                     <androidx.appcompat.widget.SwitchCompat
+                         android:id="@+id/quotesToggle"
+        android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:theme="@style/AppTheme.Switch" />
+
+                 </LinearLayout>
 
             </LinearLayout>
 
@@ -242,7 +281,7 @@
                 android:layout_marginBottom="20dp"/>
 
             <!-- PIN Section -->
-            <LinearLayout
+    <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -257,7 +296,7 @@
                     android:layout_marginBottom="8dp"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
+        android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Set a 4-digit PIN to unlock the focus lock"
                     style="@style/ModernText.Caption"
@@ -266,30 +305,30 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <EditText
-                        android:id="@+id/pinInput"
+        <EditText
+            android:id="@+id/pinInput"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
+            android:layout_height="48dp"
                         android:layout_weight="1"
                         android:hint="Enter 4-digit PIN"
-                        android:inputType="numberPassword"
+            android:inputType="numberPassword"
                         android:maxLength="4"
                         android:background="@drawable/modern_input_background"
                         android:textColor="@color/textPrimary"
                         android:textColorHint="@color/textHint"
                         android:padding="12dp"
-                        android:textSize="16sp"
+            android:textSize="16sp"
                         android:layout_marginEnd="12dp"/>
 
-                    <Button
-                        android:id="@+id/setPinButton"
+        <Button
+            android:id="@+id/setPinButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Set"
+            android:text="Set"
                         style="@style/ModernButton.Secondary"
                         android:textSize="14sp"
                         android:paddingStart="40dp"
@@ -298,7 +337,7 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
+    </LinearLayout>
 
             <!-- Accountability Partner Section -->
             <LinearLayout
@@ -306,17 +345,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
                     android:text="Accountability Partner"
                     style="@style/ModernText.Body"
                     android:textColor="@color/textPrimary"
                     android:layout_marginBottom="8dp"/>
 
                                  <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
                      android:text="Get OTP from trusted contact to unlock"
                      style="@style/ModernText.Caption"
                      android:textColor="@color/textSecondary"

@@ -98,7 +98,7 @@ public class HomeFragment extends Fragment {
     private void updateSelectedTime() {
         selectedHours = hoursPicker.getValue();
         int minuteIndex = minutesPicker.getValue();
-        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50}; // Updated with 5 & 15
+        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50};
         selectedMinutes = minuteValues[minuteIndex];
 
         if (selectedHours == 0 && selectedMinutes == 0) {

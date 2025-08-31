@@ -23,7 +23,7 @@ import com.grepguru.focuslock.WhitelistActivity;
 public class SettingsFragment extends Fragment {
 
     private EditText pinInput;
-    private SwitchCompat superStrictModeToggle, defaultAppsToggle;
+    private SwitchCompat superStrictModeToggle, defaultAppsToggle, quotesToggle;
     private SharedPreferences preferences;
 
     public SettingsFragment() {}
@@ -39,12 +39,14 @@ public class SettingsFragment extends Fragment {
         pinInput = view.findViewById(R.id.pinInput);
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
         defaultAppsToggle = view.findViewById(R.id.defaultAppsToggle);
+        quotesToggle = view.findViewById(R.id.quotesToggle);
 
         // Load existing settings
         pinInput.setText("");
         pinInput.setText(preferences.getString("lock_pin", ""));
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         defaultAppsToggle.setChecked(preferences.getBoolean("allow_default_apps", true));
+        quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
 
         // Set up event listeners
         setupListeners(view);
@@ -71,6 +73,13 @@ public class SettingsFragment extends Fragment {
         defaultAppsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("allow_default_apps", isChecked);
+            editor.apply();
+        });
+
+        // Toggle Motivational Quotes
+        quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("show_quotes", isChecked);
             editor.apply();
         });
 
@@ -131,6 +140,7 @@ public class SettingsFragment extends Fragment {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("super_strict_mode", superStrictModeToggle.isChecked());
         editor.putBoolean("allow_default_apps", defaultAppsToggle.isChecked());
+        editor.putBoolean("show_quotes", quotesToggle.isChecked());
         editor.apply();
 
         Toast.makeText(getActivity(), "Settings Saved!", Toast.LENGTH_SHORT).show();

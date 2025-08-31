@@ -87,7 +87,8 @@ public class LockScreenActivity extends AppCompatActivity {
         //  TextView lockMessage = findViewById(R.id.lockscreenMessage);
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
-        LinearLayout emergencyAppsContainer = findViewById(R.id.emergencyAppsContainer);
+        LinearLayout defaultAppsSection = findViewById(R.id.defaultAppsSection);
+        LinearLayout additionalAppsSection = findViewById(R.id.additionalAppsSection);
 
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
@@ -96,50 +97,112 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
 
-        // Whitelisted Apps
-        RecyclerView whitelistedAppsRecycler = findViewById(R.id.whitelistedAppsRecycler);
-        whitelistedAppsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        // Separate Default and Additional Apps
+        RecyclerView defaultAppsRecycler = findViewById(R.id.defaultAppsRecycler);
+        RecyclerView additionalAppsRecycler = findViewById(R.id.additionalAppsRecycler);
+        android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
+        
+        // Use GridLayoutManager for better organization - 3 apps per row
+        defaultAppsRecycler.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
+        additionalAppsRecycler.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
 
-        // Add Default Apps Explicitly
-        whitelistedApps.addAll(AppUtils.getDefaultApps(this));
-
-        List<AppModel> allowedApps = new ArrayList<>();
-        PackageManager pm = getPackageManager();
+        // Separate default apps and additional apps
+        Set<String> defaultApps = AppUtils.getMainDefaultApps(this);
+        List<String> additionalApps = new ArrayList<>();
+        
         for (String packageName : whitelistedApps) {
+            if (!defaultApps.contains(packageName)) {
+                additionalApps.add(packageName);
+            }
+        }
+
+        // Load default apps
+        List<AppModel> defaultAppModels = new ArrayList<>();
+        PackageManager pm = getPackageManager();
+        for (String packageName : defaultApps) {
             try {
                 Drawable icon = pm.getApplicationIcon(packageName);
                 String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)).toString();
-                allowedApps.add(new AppModel(packageName, appName, true, icon)); // Mark as default
+                defaultAppModels.add(new AppModel(packageName, appName, true, icon));
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
         }
 
-        // Set adapter
-        AllowedAppsAdapter adapter = new AllowedAppsAdapter(this, allowedApps);
-        adapter.setOnAppLaunchListener(() -> {
+        // Load additional apps
+        List<AppModel> additionalAppModels = new ArrayList<>();
+        for (String packageName : additionalApps) {
+            try {
+                Drawable icon = pm.getApplicationIcon(packageName);
+                String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)).toString();
+                additionalAppModels.add(new AppModel(packageName, appName, false, icon));
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Debug logging
+        Log.d("LockScreen", "Default apps count: " + defaultAppModels.size());
+        Log.d("LockScreen", "Additional apps count: " + additionalAppModels.size());
+        Log.d("LockScreen", "Whitelisted apps: " + whitelistedApps.toString());
+
+        // Set adapters
+        AllowedAppsAdapter defaultAdapter = new AllowedAppsAdapter(this, defaultAppModels);
+        AllowedAppsAdapter additionalAdapter = new AllowedAppsAdapter(this, additionalAppModels);
+        
+        defaultAdapter.setOnAppLaunchListener(() -> {
             isLaunchingWhitelistedApp = true;
         });
-        whitelistedAppsRecycler.setAdapter(adapter);
+        additionalAdapter.setOnAppLaunchListener(() -> {
+            isLaunchingWhitelistedApp = true;
+        });
+        
+        defaultAppsRecycler.setAdapter(defaultAdapter);
+        additionalAppsRecycler.setAdapter(additionalAdapter);
+
+        // Handle expand/collapse for additional apps
+        boolean[] isExpanded = {false};
+        
+        // Update additional apps header with count
+        TextView additionalAppsHeader = findViewById(R.id.additionalAppsHeader);
+        if (additionalAppModels.isEmpty()) {
+            additionalAppsHeader.setText("No Additional Apps");
+            expandAppsButton.setVisibility(View.GONE);
+        } else {
+            additionalAppsHeader.setText("Additional Apps (" + additionalAppModels.size() + ")");
+            expandAppsButton.setVisibility(View.VISIBLE);
+            expandAppsButton.setOnClickListener(v -> {
+                isExpanded[0] = !isExpanded[0];
+                additionalAppsRecycler.setVisibility(isExpanded[0] ? View.VISIBLE : View.GONE);
+                
+                // Rotate the expand icon
+                expandAppsButton.animate()
+                    .rotation(isExpanded[0] ? 180 : 0)
+                    .setDuration(200)
+                    .start();
+            });
+        }
 
 
         // -----------------------------------------------------------
         // Setting up Click Listeners
 
-        // Initially Hide PIN Input and Keep Emergency Apps Visible
+        // Initially Hide PIN Input and Keep Apps Visible
         unlockInputsContainer.setVisibility(View.GONE);
-        emergencyAppsContainer.setVisibility(View.VISIBLE);
+        defaultAppsSection.setVisibility(View.VISIBLE);
+        additionalAppsSection.setVisibility(View.VISIBLE);
 
         unlockPromptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Show PIN Input when unlocking and hide emergency buttons
+                // Show PIN Input when unlocking and hide apps
                 unlockInputsContainer.setVisibility(View.VISIBLE);
                 unlockPromptButton.setVisibility(View.GONE);
-                emergencyAppsContainer.setVisibility(View.GONE);
+                defaultAppsSection.setVisibility(View.GONE);
+                additionalAppsSection.setVisibility(View.GONE);
             }
         });
 
@@ -153,7 +216,8 @@ public class LockScreenActivity extends AppCompatActivity {
                     // Hide unlock inputs and show main lock screen
                     unlockInputsContainer.setVisibility(View.GONE);
                     unlockPromptButton.setVisibility(View.VISIBLE);
-                    emergencyAppsContainer.setVisibility(View.VISIBLE);
+                    defaultAppsSection.setVisibility(View.VISIBLE);
+                    additionalAppsSection.setVisibility(View.VISIBLE);
 
                     pinInput.setText("");
                 } else {
@@ -162,6 +226,9 @@ public class LockScreenActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Set up motivational quotes
+        setupMotivationalQuotes();
 
         // Start Countdown Timer
         startCountdownTimer(remainingTimeMillis , timerCountdown);
@@ -215,6 +282,39 @@ public class LockScreenActivity extends AppCompatActivity {
         }
     }
 
+
+    private void setupMotivationalQuotes() {
+        TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
+        
+        // Check if quotes are enabled
+        if (!preferences.getBoolean("show_quotes", true)) {
+            lockscreenMessage.setText("Stay focused, stay productive!");
+            return;
+        }
+
+        // Motivational quotes array
+        String[] quotes = {
+            "The only way to do great work is to love what you do.",
+            "Focus on being productive instead of busy.",
+            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+            "The future depends on what you do today.",
+            "Don't watch the clock; do what it does. Keep going.",
+            "The only limit to our realization of tomorrow is our doubts of today.",
+            "It always seems impossible until it's done.",
+            "The way to get started is to quit talking and begin doing.",
+            "Your time is limited, don't waste it living someone else's life.",
+            "The only person you are destined to become is the person you decide to be.",
+            "Stay focused, stay productive!",
+            "Every moment is a fresh beginning.",
+            "Make today amazing!",
+            "You are capable of amazing things.",
+            "Focus on progress, not perfection."
+        };
+
+        // Select a random quote
+        int randomIndex = (int) (Math.random() * quotes.length);
+        lockscreenMessage.setText(quotes[randomIndex]);
+    }
 
     private void startCountdownTimer(long remainingTimeMillis, TextView timerCountdown) {
         new android.os.CountDownTimer(remainingTimeMillis, 1000) {

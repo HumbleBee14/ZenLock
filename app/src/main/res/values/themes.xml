@@ -45,6 +45,7 @@
         <item name="android:paddingEnd">24dp</item>
         <item name="android:minHeight">48dp</item>
         <item name="android:elevation">4dp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="ModernButton.Secondary" parent="Widget.MaterialComponents.Button">
@@ -58,6 +59,7 @@
         <item name="android:paddingEnd">24dp</item>
         <item name="android:minHeight">48dp</item>
         <item name="android:elevation">4dp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <!-- Modern Text Styles -->
