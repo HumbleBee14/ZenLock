@@ -97,14 +97,13 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
 
-        // Separate Default and Additional Apps
-        RecyclerView defaultAppsRecycler = findViewById(R.id.defaultAppsRecycler);
-        RecyclerView additionalAppsRecycler = findViewById(R.id.additionalAppsRecycler);
+        // Single RecyclerView for all apps (default + additional)
+        RecyclerView appsRecycler = findViewById(R.id.defaultAppsRecycler);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
-        
+
         // Use GridLayoutManager for better organization - 3 apps per row
-        defaultAppsRecycler.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
-        additionalAppsRecycler.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
+        androidx.recyclerview.widget.GridLayoutManager layoutManager = new androidx.recyclerview.widget.GridLayoutManager(this, 3);
+        appsRecycler.setLayoutManager(layoutManager);
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
@@ -149,35 +148,48 @@ public class LockScreenActivity extends AppCompatActivity {
         Log.d("LockScreen", "Additional apps count: " + additionalAppModels.size());
         Log.d("LockScreen", "Whitelisted apps: " + whitelistedApps.toString());
 
-        // Set adapters
-        AllowedAppsAdapter defaultAdapter = new AllowedAppsAdapter(this, defaultAppModels);
-        AllowedAppsAdapter additionalAdapter = new AllowedAppsAdapter(this, additionalAppModels);
-        
-        defaultAdapter.setOnAppLaunchListener(() -> {
+        // Create combined list starting with default apps only
+        List<AppModel> currentAppModels = new ArrayList<>(defaultAppModels);
+
+        // Create single adapter for the RecyclerView
+        AllowedAppsAdapter appsAdapter = new AllowedAppsAdapter(this, currentAppModels);
+        appsAdapter.setOnAppLaunchListener(() -> {
             isLaunchingWhitelistedApp = true;
         });
-        additionalAdapter.setOnAppLaunchListener(() -> {
-            isLaunchingWhitelistedApp = true;
-        });
-        
-        defaultAppsRecycler.setAdapter(defaultAdapter);
-        additionalAppsRecycler.setAdapter(additionalAdapter);
+
+        appsRecycler.setAdapter(appsAdapter);
 
         // Handle expand/collapse for additional apps
         boolean[] isExpanded = {false};
-        
-        // Update additional apps header with count
         TextView additionalAppsHeader = findViewById(R.id.additionalAppsHeader);
+
         if (additionalAppModels.isEmpty()) {
-            additionalAppsHeader.setText("No Additional Apps");
-            expandAppsButton.setVisibility(View.GONE);
+            // Hide entire additional apps section when no apps
+            additionalAppsSection.setVisibility(View.GONE);
         } else {
-            additionalAppsHeader.setText("Additional Apps (" + additionalAppModels.size() + ")");
+            // Show section and set up expand functionality
+            additionalAppsSection.setVisibility(View.VISIBLE);
+            additionalAppsHeader.setText("Additional Apps");
             expandAppsButton.setVisibility(View.VISIBLE);
+
             expandAppsButton.setOnClickListener(v -> {
+                if (!isExpanded[0]) {
+                    // Expand: Add additional apps to the list
+                    currentAppModels.addAll(additionalAppModels);
+                    appsAdapter.notifyDataSetChanged();
+
+                    // Scroll to show the new apps
+                    appsRecycler.post(() -> {
+                        layoutManager.scrollToPosition(currentAppModels.size() - 1);
+                    });
+                } else {
+                    // Collapse: Remove additional apps from the list
+                    currentAppModels.removeAll(additionalAppModels);
+                    appsAdapter.notifyDataSetChanged();
+                }
+
                 isExpanded[0] = !isExpanded[0];
-                additionalAppsRecycler.setVisibility(isExpanded[0] ? View.VISIBLE : View.GONE);
-                
+
                 // Rotate the expand icon
                 expandAppsButton.animate()
                     .rotation(isExpanded[0] ? 180 : 0)
@@ -193,7 +205,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Initially Hide PIN Input and Keep Apps Visible
         unlockInputsContainer.setVisibility(View.GONE);
         defaultAppsSection.setVisibility(View.VISIBLE);
-        additionalAppsSection.setVisibility(View.VISIBLE);
+        // Additional apps section visibility is already handled above based on whether there are apps
 
         unlockPromptButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,7 +214,19 @@ public class LockScreenActivity extends AppCompatActivity {
                 unlockInputsContainer.setVisibility(View.VISIBLE);
                 unlockPromptButton.setVisibility(View.GONE);
                 defaultAppsSection.setVisibility(View.GONE);
-                additionalAppsSection.setVisibility(View.GONE);
+
+                // Hide additional apps section if visible
+                if (additionalAppsSection.getVisibility() == View.VISIBLE) {
+                    additionalAppsSection.setVisibility(View.GONE);
+
+                    // If additional apps were expanded, collapse them
+                    if (isExpanded[0]) {
+                        currentAppModels.removeAll(additionalAppModels);
+                        appsAdapter.notifyDataSetChanged();
+                        isExpanded[0] = false;
+                        expandAppsButton.setRotation(0);
+                    }
+                }
             }
         });
 
@@ -217,7 +241,11 @@ public class LockScreenActivity extends AppCompatActivity {
                     unlockInputsContainer.setVisibility(View.GONE);
                     unlockPromptButton.setVisibility(View.VISIBLE);
                     defaultAppsSection.setVisibility(View.VISIBLE);
-                    additionalAppsSection.setVisibility(View.VISIBLE);
+
+                    // Only show additional apps section if it has apps
+                    if (!additionalAppModels.isEmpty()) {
+                        additionalAppsSection.setVisibility(View.VISIBLE);
+                    }
 
                     pinInput.setText("");
                 } else {

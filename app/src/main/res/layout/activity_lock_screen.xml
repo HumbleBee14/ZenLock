@@ -166,7 +166,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="24dp">
 
-            <!-- Additional Apps Header with Expand Button -->
+                        <!-- Additional Apps Header with Expand Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -176,39 +176,27 @@
                 android:paddingEnd="16dp"
                 android:layout_marginBottom="12dp">
 
-                                 <TextView
-                     android:id="@+id/additionalAppsHeader"
-                     android:layout_width="0dp"
-                     android:layout_height="wrap_content"
-                     android:layout_weight="1"
-                     android:text="Additional Apps"
-                     android:textSize="14sp"
-                     android:textColor="@color/textSecondary"
-                     android:gravity="center"/>
+                <TextView
+                    android:id="@+id/additionalAppsHeader"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Additional Apps"
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary"
+                    android:gravity="center"/>
 
-                                 <ImageView
-                     android:id="@+id/expandAppsButton"
-                     android:layout_width="36dp"
-                     android:layout_height="36dp"
-                     android:src="@drawable/ic_expand_more"
-                     android:background="@drawable/circular_button"
-                     android:padding="8dp"
-                     android:contentDescription="Expand additional apps"
-                     android:alpha="0.8"/>
+                <ImageView
+                    android:id="@+id/expandAppsButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_expand_more"
+                    android:background="@drawable/circular_button"
+                    android:padding="8dp"
+                    android:contentDescription="Expand additional apps"
+                    android:alpha="0.8"/>
 
             </LinearLayout>
-
-            <!-- Additional Apps RecyclerView (Initially Hidden) -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/additionalAppsRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:scrollbars="none"
-                android:clipToPadding="false"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:visibility="gone"/>
 
         </LinearLayout>
 
