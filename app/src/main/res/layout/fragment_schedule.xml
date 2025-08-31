@@ -59,9 +59,10 @@
             android:id="@+id/activeSchedulesCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="-8dp"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="12dp"
             app:cardBackgroundColor="@color/surface"
             app:layout_constraintTop_toBottomOf="@id/createScheduleBtn"
             app:layout_constraintStart_toStartOf="parent"
@@ -71,16 +72,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="4dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Active Schedules"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="16dp" />
 
                 <!-- Schedules RecyclerView with better spacing -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -89,8 +90,8 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     android:clipToPadding="false"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
 
                 <!-- Empty State with better visual appeal -->
                 <LinearLayout
@@ -99,15 +100,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="40dp"
+                    android:padding="36dp"
                     android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="📅"
-                        android:textSize="56sp"
-                        android:layout_marginBottom="20dp" />
+                        android:textSize="52sp"
+                        android:layout_marginBottom="18dp" />
 
                     <TextView
                         android:id="@+id/emptyStateText"
