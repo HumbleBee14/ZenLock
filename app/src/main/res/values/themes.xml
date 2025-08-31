@@ -107,4 +107,19 @@
     </style>
 
     <style name="Theme.FocusLock" parent="Base.Theme.FocusLock" />
+
+    <!-- NumberPicker Style for Schedule Dialog -->
+    <style name="NumberPickerStyle" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="android:colorControlNormal">@color/primary</item>
+    </style>
+
+    <!-- Spinner Style for Schedule Dialog -->
+    <style name="SpinnerStyle" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="android:colorControlNormal">@color/primary</item>
+        <item name="android:popupBackground">@color/surface</item>
+    </style>
 </resources>

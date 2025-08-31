@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✨ Create Schedule"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Schedule Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Schedule Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/nameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter schedule name"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_input_background"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Start Time -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Time"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/startTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="09:00"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary"
+            android:padding="12dp"
+            android:background="@drawable/rounded_input_background"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Focus Duration -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Focus Duration"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/selectedDurationDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set a duration for focus session"
+            android:textSize="16sp"
+            android:textColor="@color/textSecondary"
+            android:gravity="center"
+            android:padding="12dp"
+            android:background="@drawable/rounded_input_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Frequency -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Frequency"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/selectedFrequencyDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Once"
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary"
+            android:padding="12dp"
+            android:background="@drawable/rounded_input_background"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Frequency Selection (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/frequencySelectionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp">
+
+            <RadioGroup
+                android:id="@+id/repeatTypeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/onceRadio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Once"
+                    android:textSize="16sp"
+                    android:textColor="@color/textPrimary"
+                    android:padding="8dp" />
+
+                <RadioButton
+                    android:id="@+id/dailyRadio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Daily"
+                    android:textSize="16sp"
+                    android:textColor="@color/textPrimary"
+                    android:padding="8dp"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/weeklyRadio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Weekly"
+                    android:textSize="16sp"
+                    android:textColor="@color/textPrimary"
+                    android:padding="8dp" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <!-- Weekly Days (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/weeklyDaysLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Days"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="7">
+
+                <CheckBox
+                    android:id="@+id/sundayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="S"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center" />
+
+                <CheckBox
+                    android:id="@+id/mondayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="M"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/tuesdayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="T"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/wednesdayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="W"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/thursdayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="T"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/fridayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="F"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/saturdayCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="S"
+                    android:textSize="12sp"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Pre-Notify Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pre-Notification"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <CheckBox
+                android:id="@+id/preNotifyCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notify me"
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary"
+                android:layout_marginEnd="12dp" />
+
+            <Spinner
+                android:id="@+id/preNotifySpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:background="@drawable/rounded_input_background"
+                android:enabled="false"
+                android:entries="@array/pre_notify_times"
+                android:popupBackground="@color/surface"
+                android:theme="@style/SpinnerStyle" />
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Cancel"
+                android:textSize="16sp"
+                android:background="@drawable/rounded_button_outline"
+                android:textColor="@color/textPrimary"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/createButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Create"
+                android:textSize="16sp"
+                android:background="@drawable/rounded_button"
+                android:textColor="@color/white"
+                android:padding="12dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView> 
