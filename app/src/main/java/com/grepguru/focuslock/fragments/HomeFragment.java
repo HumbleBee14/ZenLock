@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 
 import com.grepguru.focuslock.LockScreenActivity;
 import com.grepguru.focuslock.R;
+import com.grepguru.focuslock.utils.AnalyticsManager;
 
 public class HomeFragment extends Fragment {
 
@@ -29,6 +30,7 @@ public class HomeFragment extends Fragment {
     private TextView selectedTimeDisplay;
     private Button enableLockButton;
     private int selectedHours = 0, selectedMinutes = 0;
+    private AnalyticsManager analyticsManager;
 
     public HomeFragment() {}
 
@@ -45,6 +47,9 @@ public class HomeFragment extends Fragment {
         setupNumberPickers();
         setupPresetButtons(view);
         enableLockButton.setOnClickListener(v -> checkAndStartLockService());
+        
+        // Initialize analytics manager
+        analyticsManager = new AnalyticsManager(requireContext());
 
         return view;
     }
@@ -136,6 +141,9 @@ public class HomeFragment extends Fragment {
         editor.putLong("uptimeAtLock", uptimeAtLock);  // Store uptime to detect restarts (CRITICAL
         editor.putBoolean("wasDeviceRestarted", false);
         editor.apply();
+
+        // Start analytics tracking
+        analyticsManager.startSession(lockDurationMillis);
 
         // Start LockScreenActivity with selected duration
         Intent intent = new Intent(getActivity(), LockScreenActivity.class);

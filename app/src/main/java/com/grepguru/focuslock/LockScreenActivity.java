@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.grepguru.focuslock.model.*;
 import com.grepguru.focuslock.ui.adapter.*;
 import com.grepguru.focuslock.utils.AppUtils;
+import com.grepguru.focuslock.utils.AnalyticsManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,11 +34,13 @@ public class LockScreenActivity extends AppCompatActivity {
     private EditText pinInput;
     private SharedPreferences preferences;
     private boolean isLaunchingWhitelistedApp = false;
+    private AnalyticsManager analyticsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        analyticsManager = new AnalyticsManager(this);
 
         // Detect reboot using system uptime
         long storedUptime = preferences.getLong("uptimeAtLock", -1);
@@ -52,6 +55,11 @@ public class LockScreenActivity extends AppCompatActivity {
             editor.remove("lockEndTime");
             editor.putBoolean("wasDeviceRestarted", false);
             editor.apply();
+
+            // End analytics session if active
+            if (analyticsManager.hasActiveSession()) {
+                analyticsManager.endSession(false); // Interrupted due to restart
+            }
 
             finish();
             return;
@@ -68,6 +76,11 @@ public class LockScreenActivity extends AppCompatActivity {
             editor.putBoolean("isLocked", false);
             editor.remove("lockEndTime");
             editor.apply();
+
+            // End analytics session if active
+            if (analyticsManager.hasActiveSession()) {
+                analyticsManager.endSession(false); // Interrupted due to expired timer
+            }
 
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -285,6 +298,11 @@ public class LockScreenActivity extends AppCompatActivity {
         if (enteredPin.equals(savedPin)) {
             Toast.makeText(this, "Unlocked!", Toast.LENGTH_SHORT).show();
 
+            // End analytics session
+            if (analyticsManager.hasActiveSession()) {
+                analyticsManager.endSession(false); // Interrupted by manual unlock
+            }
+
             // Reset lock state
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("isLocked", false); // Mark as unlocked
@@ -346,6 +364,11 @@ public class LockScreenActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
+                // End analytics session
+                if (analyticsManager.hasActiveSession()) {
+                    analyticsManager.endSession(true); // Completed successfully
+                }
+
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean("isLocked", false);
                 editor.remove("lockEndTime"); // Remove saved lock end time

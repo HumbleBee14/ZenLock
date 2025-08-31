@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.grepguru.focuslock.utils.AppUtils;
+import com.grepguru.focuslock.utils.AnalyticsManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,7 @@ public class AppBlockerService extends AccessibilityService {
     private String lastLoggedPackage = "";
     private long lastLogTime = 0;
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
+    private AnalyticsManager analyticsManager;
     
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -31,6 +33,15 @@ public class AppBlockerService extends AccessibilityService {
             }
             
             boolean isAllowed = isAllowedApp(packageName);
+            
+            // Track analytics
+            if (analyticsManager != null && analyticsManager.hasActiveSession()) {
+                if (isAllowed) {
+                    analyticsManager.recordAppAccess(packageName);
+                } else {
+                    analyticsManager.recordBlockedAttempt(packageName);
+                }
+            }
             
             // Log package events for debugging (with debouncing to prevent spam)
             long currentTime = System.currentTimeMillis();
@@ -97,6 +108,10 @@ public class AppBlockerService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        
+        // Initialize analytics manager
+        analyticsManager = new AnalyticsManager(this);
+        
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
