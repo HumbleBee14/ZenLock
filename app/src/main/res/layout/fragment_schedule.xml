@@ -3,24 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundPrimary">
+    android:background="@color/backgroundPrimary"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="24dp"
         android:paddingTop="32dp">
 
-        <!-- Header with proper spacing -->
+        <!-- Welcome Section -->
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📅 Schedule"
-            android:textSize="24sp"
+            android:text="Schedule"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginBottom="24dp" />
+            android:textColor="@color/textPrimary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create and manage your focus schedules"
+            android:textSize="16sp"
+            android:textColor="@color/textSecondary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp" />
 
         <!-- Create Schedule Button -->
         <Button
@@ -33,31 +44,31 @@
             android:background="@drawable/rounded_button"
             android:textColor="@color/white"
             android:padding="16dp"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp" />
 
         <!-- Active Schedules Section -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
             app:cardBackgroundColor="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Active Schedules"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="16dp" />
 
                 <!-- Schedules RecyclerView -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -98,8 +109,6 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
-
-
 
     </LinearLayout>
 

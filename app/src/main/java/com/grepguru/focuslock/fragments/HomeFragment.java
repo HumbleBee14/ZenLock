@@ -45,7 +45,7 @@ public class HomeFragment extends Fragment {
         enableLockButton = view.findViewById(R.id.enableLockButton);
 
         setupNumberPickers();
-        setupPresetButtons(view);
+        // setupPresetButtons(view);
         enableLockButton.setOnClickListener(v -> checkAndStartLockService());
         
         // Initialize analytics manager
@@ -73,15 +73,15 @@ public class HomeFragment extends Fragment {
         updateSelectedTime();
     }
 
-    private void setupPresetButtons(View view) {
-        Button preset30min = view.findViewById(R.id.preset30min);
-        Button preset1hour = view.findViewById(R.id.preset1hour);
-        Button preset3hour = view.findViewById(R.id.preset3hour);
-
-        preset30min.setOnClickListener(v -> setPresetTime(0, 30));
-        preset1hour.setOnClickListener(v -> setPresetTime(1, 0));
-        preset3hour.setOnClickListener(v -> setPresetTime(3, 0));
-    }
+//    private void setupPresetButtons(View view) {
+//        Button preset30min = view.findViewById(R.id.preset30min);
+//        Button preset1hour = view.findViewById(R.id.preset1hour);
+//        Button preset3hour = view.findViewById(R.id.preset3hour);
+//
+//        preset30min.setOnClickListener(v -> setPresetTime(0, 30));
+//        preset1hour.setOnClickListener(v -> setPresetTime(1, 0));
+//        preset3hour.setOnClickListener(v -> setPresetTime(3, 0));
+//    }
 
     private void setPresetTime(int hours, int minutes) {
         hoursPicker.setValue(hours);

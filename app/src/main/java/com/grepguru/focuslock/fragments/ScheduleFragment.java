@@ -1,7 +1,5 @@
 package com.grepguru.focuslock.fragments;
 
-import android.app.TimePickerDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,22 +19,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.grepguru.focuslock.R;
 import com.grepguru.focuslock.model.ScheduleModel;
 import com.grepguru.focuslock.utils.ScheduleManager;
+import com.grepguru.focuslock.utils.ScheduleActivator;
 import com.grepguru.focuslock.ui.adapter.ScheduleAdapter;
 import com.grepguru.focuslock.CreateScheduleDialog;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
  * Schedule Fragment - Manages focus lock schedules
- * Features: Quick templates, expandable schedule list, create/edit schedules
+ * Features: Create, edit, delete, and view schedules
  */
 public class ScheduleFragment extends Fragment {
     
     private static final String TAG = "ScheduleFragment";
     
     private ScheduleManager scheduleManager;
+    private ScheduleActivator scheduleActivator;
     private RecyclerView schedulesRecyclerView;
     private ScheduleAdapter scheduleAdapter;
     private List<ScheduleModel> schedules;
@@ -55,6 +54,7 @@ public class ScheduleFragment extends Fragment {
         
         // Initialize managers
         scheduleManager = new ScheduleManager(requireContext());
+        scheduleActivator = new ScheduleActivator(requireContext());
         
         // Initialize views
         initializeViews(view);
@@ -78,8 +78,6 @@ public class ScheduleFragment extends Fragment {
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
         emptyStateText = view.findViewById(R.id.emptyStateText);
     }
-    
-
     
     private void setupRecyclerView() {
         schedules = new ArrayList<>();
@@ -110,11 +108,15 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void loadSchedules() {
+        Log.d(TAG, "Loading schedules...");
         schedules.clear();
-        schedules.addAll(scheduleManager.getAllSchedules());
+        List<ScheduleModel> allSchedules = scheduleManager.getAllSchedules();
+        Log.d(TAG, "Found " + allSchedules.size() + " schedules from manager");
+        schedules.addAll(allSchedules);
         scheduleAdapter.notifyDataSetChanged();
         
         updateEmptyState();
+        Log.d(TAG, "Schedules loaded: " + schedules.size());
     }
     
     private void updateEmptyState() {
@@ -128,16 +130,40 @@ public class ScheduleFragment extends Fragment {
         }
     }
     
-
-    
     private void showCreateScheduleDialog() {
         CreateScheduleDialog dialog = new CreateScheduleDialog();
         dialog.setScheduleListener(new CreateScheduleDialog.ScheduleListener() {
             @Override
             public void onScheduleCreated(ScheduleModel schedule) {
-                scheduleManager.updateSchedule(schedule);
+                Log.d(TAG, "Schedule creation callback received for: " + schedule.getName());
+                
+                // Create the schedule using ScheduleManager
+                ScheduleModel newSchedule = scheduleManager.createSchedule(
+                    schedule.getName(),
+                    schedule.getStartHour(),
+                    schedule.getStartMinute(),
+                    schedule.getFocusDurationMinutes(),
+                    schedule.getRepeatType()
+                );
+                
+                Log.d(TAG, "Schedule created with ID: " + newSchedule.getId());
+                
+                // Copy additional properties
+                newSchedule.setRepeatDays(schedule.getRepeatDays());
+                newSchedule.setPreNotifyEnabled(schedule.isPreNotifyEnabled());
+                newSchedule.setPreNotifyMinutes(schedule.getPreNotifyMinutes());
+                
+                // Save the updated schedule
+                scheduleManager.updateSchedule(newSchedule);
+                Log.d(TAG, "Schedule updated and saved");
+                
+                // Reload and display schedules
                 loadSchedules();
-                Toast.makeText(requireContext(), "Schedule created: " + schedule.getName(), Toast.LENGTH_SHORT).show();
+                
+                // Activate the schedule
+                scheduleActivator.scheduleSchedule(newSchedule);
+                
+                Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
             }
         });
         dialog.show(getChildFragmentManager(), "CreateSchedule");
@@ -151,6 +177,10 @@ public class ScheduleFragment extends Fragment {
             public void onScheduleCreated(ScheduleModel updatedSchedule) {
                 scheduleManager.updateSchedule(updatedSchedule);
                 loadSchedules();
+                
+                // Reactivate the updated schedule
+                scheduleActivator.scheduleSchedule(updatedSchedule);
+                
                 Toast.makeText(requireContext(), "Schedule updated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -158,7 +188,9 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void showDeleteConfirmation(ScheduleModel schedule) {
-        // Simple confirmation for now - in production you'd want a proper dialog
+        // Cancel the schedule activation first
+        scheduleActivator.cancelSchedule(schedule);
+        
         scheduleManager.deleteSchedule(schedule.getId());
         loadSchedules();
         Toast.makeText(requireContext(), "Schedule deleted: " + schedule.getName(), Toast.LENGTH_SHORT).show();
