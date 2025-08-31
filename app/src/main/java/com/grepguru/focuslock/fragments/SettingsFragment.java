@@ -80,8 +80,21 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
+        // Partner Contact Configuration
+        Button accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
+        
+        // Enable the button and launch PartnerContactActivity
+        accountabilityPartnerButton.setEnabled(true);
+        accountabilityPartnerButton.setAlpha(1.0f);
+        accountabilityPartnerButton.setText("Configure Partner Contact");
+        
+        accountabilityPartnerButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), com.grepguru.focuslock.PartnerContactActivity.class);
+            startActivity(intent);
+        });
+
         setPinButton.setOnClickListener(v -> {
-            String pin = pinInput.getText().toString();
+            String pin = pinInput.getText().toString().trim();
 
             if (pin.isEmpty()) {
                 // Show confirmation dialog to clear PIN
@@ -98,6 +111,10 @@ public class SettingsFragment extends Fragment {
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .show();
+            } else if (pin.length() < 4) {
+                Toast.makeText(getActivity(), "PIN must be 4 digits", Toast.LENGTH_SHORT).show();
+            } else if (!pin.matches("\\d{4}")) {
+                Toast.makeText(getActivity(), "PIN must contain only numbers", Toast.LENGTH_SHORT).show();
             } else {
                 // Save the PIN
                 SharedPreferences.Editor editor = preferences.edit();

@@ -90,5 +90,11 @@
         <item name="android:textColorPrimary">@color/textPrimary</item>
     </style>
 
+    <!-- Switch Theme -->
+    <style name="AppTheme.Switch" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+    </style>
+
     <style name="Theme.FocusLock" parent="Base.Theme.FocusLock" />
 </resources>

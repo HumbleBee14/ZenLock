@@ -1,181 +1,354 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundPrimary"
+    android:fillViewport="true">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
     tools:context=".fragments.SettingsFragment">
 
-    <!-- Super Strict Mode Toggle -->
+    <!-- Header Section -->
     <TextView
-        android:id="@+id/superStrictModeLabel"
+        android:id="@+id/settingsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enable Super Strict Mode"
-        android:textSize="16sp"
-        android:textColor="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="Settings"
+        style="@style/ModernText.Heading"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="100px"/>
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/superStrictModeToggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBaseline_toBaselineOf="@id/superStrictModeLabel"
-        android:layout_marginEnd="16dp"/>
-
-<!--    android:track="@drawable/track_backgrounds"-->
-<!--    android:thumb="@drawable/thumb_backgrounds"-->
-
-    <!-- Default Apps Allow Toggle -->
-    <TextView
-        android:id="@+id/defaultAppsLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Allow Default Apps (Call, SMS, Alarm)"
-        android:textSize="16sp"
-        android:textColor="@color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/superStrictModeLabel"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"/>
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/defaultAppsToggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBaseline_toBaselineOf="@id/defaultAppsLabel"
-        android:layout_marginEnd="16dp"/>
-
-
-    <!-- Separator Line Above PIN -->
-    <View
-        android:id="@+id/separatorLineOne"
-        android:layout_width="100dp"
-        android:layout_height="1dp"
-        android:background="@color/lightGrey"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="80dp"
-        android:layout_marginEnd="80dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toTopOf="@id/pinLabel" />
-
-    <!-- PIN Label -->
-    <TextView
-        android:id="@+id/pinLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set Screen Lock PIN"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/defaultAppsToggle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <!-- PIN Input + "Set" Button in a Horizontal Layout -->
-    <LinearLayout
-        android:id="@+id/pinInputContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/pinLabel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp">
-
-        <!-- PIN Input -->
-        <EditText
-            android:id="@+id/pinInput"
-            android:layout_width="200dp"
-            android:layout_height="48dp"
-            android:hint="Enter PIN"
-            android:inputType="numberPassword"
-            android:background="@drawable/pin_background"
-            android:textColor="@color/white"
-            android:textColorHint="@color/lightGrey"
-            android:padding="10dp"
-            android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/pinLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/setPinButton"
-            android:layout_margin="10dp"/>
-
-        <Button
-            android:id="@+id/setPinButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="Set"
-            android:textSize="16sp"
-            android:background="@drawable/circular_button"
-            android:textColor="@color/white"
-            android:padding="8dp"
-            app:layout_constraintTop_toTopOf="@id/pinInput"
-            app:layout_constraintBottom_toBottomOf="@id/pinInput"
-            app:layout_constraintStart_toEndOf="@id/pinInput"
-            android:layout_marginStart="16dp"
-            android:layout_margin="10dp"/>
-
-    </LinearLayout>
-
-    <!-- Separator Line Below PIN -->
-    <View
-        android:id="@+id/separatorLineTwo"
-        android:layout_width="80dp"
-        android:layout_height="1dp"
-        android:background="@color/lightGrey"
-        app:layout_constraintTop_toBottomOf="@id/pinInputContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <!-- Whitelist Instruction -->
-    <TextView
-        android:id="@+id/whitelistInstruction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tap to allow apps during lock screen (Max: 3)"
-        android:textSize="14sp"
-        android:textColor="@color/lightGrey"
-        app:layout_constraintTop_toBottomOf="@id/separatorLineTwo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp"/>
 
-    <!-- Whitelist Button -->
-    <Button
-        android:id="@+id/whitelistButton"
+    <TextView
+        android:id="@+id/settingsSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Allowed Apps"
-        android:background="@drawable/rounded_button"
-        android:textColor="@color/white"
-        android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/whitelistInstruction"
+        android:text="Configure your Focus Lock preferences"
+        style="@style/ModernText.Caption"
+        app:layout_constraintTop_toBottomOf="@id/settingsTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="8dp"/>
 
+    <!-- App Management Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/appManagementCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toBottomOf="@id/settingsSubtitle">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
 
+            <!-- App Management Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="App Management"
+                style="@style/ModernText.Subheading"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"/>
+
+            <!-- Whitelist Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Allowed Apps"
+                    style="@style/ModernText.Body"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select apps that can be used during focus sessions (Max: 3 additional)"
+                    style="@style/ModernText.Caption"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/whitelistButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Manage Allowed Apps"
+                    style="@style/ModernButton.Primary"
+                    android:textSize="16sp"
+                    android:padding="16dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Security Settings Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/securityCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toBottomOf="@id/appManagementCard">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Security Header -->
+            <TextView
+                style="@style/ModernText.Subheading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:text="Security Settings" />
+
+            <!-- Mode Toggles -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Auto-Start After Restart -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Auto-Start After Restart"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Automatically enable lock after device restart"
+                            android:textColor="@color/textSecondary" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/superStrictModeToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
+
+                </LinearLayout>
+
+                <!-- Default Apps Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Allow Default Apps"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Phone, SMS, Clock apps"
+                            android:textColor="@color/textSecondary" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/defaultAppsToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Unlock Methods Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/unlockMethodsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toBottomOf="@id/securityCard">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Unlock Methods Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Unlock Methods"
+                style="@style/ModernText.Subheading"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"/>
+
+            <!-- PIN Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Screen Lock PIN"
+                    style="@style/ModernText.Body"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set a 4-digit PIN to unlock the focus lock"
+                    style="@style/ModernText.Caption"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/pinInput"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:hint="Enter 4-digit PIN"
+                        android:inputType="numberPassword"
+                        android:maxLength="4"
+                        android:background="@drawable/modern_input_background"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textHint"
+                        android:padding="12dp"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="12dp"/>
+
+                    <Button
+                        android:id="@+id/setPinButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Set"
+                        style="@style/ModernButton.Secondary"
+                        android:textSize="14sp"
+                        android:paddingStart="40dp"
+                        android:paddingEnd="40dp"
+                        android:minWidth="120dp"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Accountability Partner Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Accountability Partner"
+                    style="@style/ModernText.Body"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginBottom="8dp"/>
+
+                                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Get OTP from trusted contact to unlock"
+                     style="@style/ModernText.Caption"
+                     android:textColor="@color/textSecondary"
+                     android:layout_marginBottom="16dp"/>
+
+                                 <Button
+                     android:id="@+id/accountabilityPartnerButton"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:text="Configure Partner Contact"
+                     style="@style/ModernButton.Secondary"
+                     android:textSize="16sp"
+                     android:padding="16dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Action Buttons -->
     <Button
         android:id="@+id/saveButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Settings"
-        android:background="@drawable/rounded_button"
-        android:textColor="@color/white"
-        android:padding="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginBottom="24dp"/>
+        style="@style/ModernButton.Primary"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/unlockMethodsCard"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
