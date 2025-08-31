@@ -45,20 +45,15 @@ public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.
         holder.appIcon.setImageDrawable(app.getIcon());
         holder.appName.setText(app.getAppName());
 
-        // Launch the app when clicked
         holder.itemView.setOnClickListener(v -> {
-            // Show toast notification for click feedback
-            Toast.makeText(context, "Opening " + app.getAppName(), Toast.LENGTH_SHORT).show();
-            
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
             if (launchIntent != null) {
-                // Notify that we're about to launch an app
                 if (onAppLaunchListener != null) {
                     onAppLaunchListener.onAppLaunching();
                 }
                 context.startActivity(launchIntent);
             } else {
-                Toast.makeText(context, "Cannot open " + app.getAppName() + " - App not found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Cannot open " + app.getAppName(), Toast.LENGTH_SHORT).show();
             }
         });
     }

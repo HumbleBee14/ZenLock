@@ -26,14 +26,11 @@ public class AppBlockerService extends AccessibilityService {
                 return;
             }
             
-            // Log all package events for debugging
+            // Log package events for debugging (essential for troubleshooting)
             Log.d("AppBlockerService", "Event from package: " + packageName);
             
             if (!isAllowedApp(packageName)) {
-                Log.d("AppBlockerService", "BLOCKING app: " + packageName);
                 launchLockScreen();
-            } else {
-                Log.d("AppBlockerService", "ALLOWING app: " + packageName);
             }
         }
     }
@@ -46,7 +43,6 @@ public class AppBlockerService extends AccessibilityService {
         
         // Handle third-party apps that integrate with system functions
         if (isThirdPartySystemIntegration(packageName)) {
-            Log.d("AppBlockerService", "Temporarily allowing third-party system integration: " + packageName);
             // Allow briefly but return to lock screen after a short delay
             android.os.Handler handler = new android.os.Handler();
             handler.postDelayed(() -> {
@@ -64,9 +60,7 @@ public class AppBlockerService extends AccessibilityService {
         Set<String> allAllowedApps = new HashSet<>(whitelistedApps);
         allAllowedApps.addAll(AppUtils.getAllAllowedPackages(this));
         
-        boolean isAllowed = allAllowedApps.contains(packageName);
-        Log.d("AppBlockerService", "Checking app: " + packageName + " - Allowed: " + isAllowed);
-        return isAllowed;
+        return allAllowedApps.contains(packageName);
     }
     
     private boolean isThirdPartySystemIntegration(String packageName) {

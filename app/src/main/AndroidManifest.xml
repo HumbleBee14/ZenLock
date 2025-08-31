@@ -6,6 +6,12 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <queries>
+        <!-- Allow querying all apps with launcher activities (for whitelist selection) -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        
         <!-- Essential system apps -->
         <package android:name="com.android.phone"/>  <!-- Calls -->
         <package android:name="com.google.android.dialer"/>

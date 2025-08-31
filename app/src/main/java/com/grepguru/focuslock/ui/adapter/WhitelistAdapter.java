@@ -16,11 +16,12 @@ import java.util.Set;
 public class WhitelistAdapter extends RecyclerView.Adapter<WhitelistAdapter.ViewHolder> {
     private List<SelectableAppModel> appList;
     private Set<String> selectedApps;
-    private static final int MAX_SELECTION = 3; // Max additional selectable apps
+    private int maxAdditionalApps; // Configurable max additional selectable apps
 
-    public WhitelistAdapter(List<SelectableAppModel> appList, Set<String> selectedApps) {
+    public WhitelistAdapter(List<SelectableAppModel> appList, Set<String> selectedApps, int maxAdditionalApps) {
         this.appList = appList;
         this.selectedApps = selectedApps;
+        this.maxAdditionalApps = maxAdditionalApps;
     }
 
     @NonNull
@@ -36,25 +37,24 @@ public class WhitelistAdapter extends RecyclerView.Adapter<WhitelistAdapter.View
         SelectableAppModel app = appList.get(position);
         holder.appIcon.setImageDrawable(app.getIcon());
         holder.appName.setText(app.getAppName());
-        holder.appCheckBox.setChecked(selectedApps.contains(app.getPackageName()));
-
-        // Disable checkbox for default apps
-        if (app.isDefault()) {
-            holder.appCheckBox.setChecked(true);
-            holder.appCheckBox.setEnabled(false);
-        }
-
+        
+        holder.appCheckBox.setOnCheckedChangeListener(null);
+        
+        boolean isCurrentlySelected = selectedApps.contains(app.getPackageName());
+        holder.appCheckBox.setChecked(isCurrentlySelected);
+        app.setSelected(isCurrentlySelected);
         holder.appCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!app.isDefault()) {
-                if (isChecked && selectedApps.size() >= MAX_SELECTION) {
-                    buttonView.setChecked(false); // Prevent selecting more than allowed
+            if (isChecked && selectedApps.size() >= maxAdditionalApps) {
+                buttonView.setChecked(false); // Prevent selecting more than allowed
+                android.widget.Toast.makeText(buttonView.getContext(), 
+                    "Maximum " + maxAdditionalApps + " additional apps allowed", 
+                    android.widget.Toast.LENGTH_SHORT).show();
+            } else {
+                app.setSelected(isChecked);
+                if (isChecked) {
+                    selectedApps.add(app.getPackageName());
                 } else {
-                    app.setSelected(isChecked);
-                    if (isChecked) {
-                        selectedApps.add(app.getPackageName());
-                    } else {
-                        selectedApps.remove(app.getPackageName());
-                    }
+                    selectedApps.remove(app.getPackageName());
                 }
             }
         });

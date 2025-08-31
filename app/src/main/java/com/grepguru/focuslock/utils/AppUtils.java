@@ -79,6 +79,26 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.android.vending"); // Google Play Store
         addIfInstalled(pm, allAllowed, "com.google.android.gms"); // Google Play Services
         
+        
+        // Keyboard apps (essential for text input)
+        addIfInstalled(pm, allAllowed, "com.google.android.inputmethod.latin"); // Gboard
+        addIfInstalled(pm, allAllowed, "com.android.inputmethod.latin"); // Stock Android Keyboard
+        addIfInstalled(pm, allAllowed, "com.samsung.android.honeyboard"); // Samsung Keyboard
+        addIfInstalled(pm, allAllowed, "com.touchtype.swiftkey"); // SwiftKey
+        addIfInstalled(pm, allAllowed, "com.swiftkey.swiftkeyconfigurator"); // SwiftKey Configurator
+        addIfInstalled(pm, allAllowed, "com.miui.securityinputmethod"); // Xiaomi Keyboard
+        addIfInstalled(pm, allAllowed, "com.sohu.inputmethod.sogou"); // Sogou Keyboard (popular in China)
+        addIfInstalled(pm, allAllowed, "com.baidu.input"); // Baidu Keyboard
+        addIfInstalled(pm, allAllowed, "com.iflytek.inputmethod"); // iFlytek Keyboard
+        addIfInstalled(pm, allAllowed, "com.htc.sense.ime"); // HTC Keyboard
+        addIfInstalled(pm, allAllowed, "com.sonyericsson.textinput.chinese"); // Sony Keyboard
+        addIfInstalled(pm, allAllowed, "com.lge.ime"); // LG Keyboard
+        addIfInstalled(pm, allAllowed, "com.nuance.swype.dtc"); // Swype Keyboard
+        addIfInstalled(pm, allAllowed, "com.fleksy.keyboard"); // Fleksy Keyboard
+        addIfInstalled(pm, allAllowed, "com.anysoftkeyboard.api"); // AnySoftKeyboard
+        addIfInstalled(pm, allAllowed, "org.pocketworkstation.pckeyboard"); // Hacker's Keyboard
+        
+        
         // Essential SMS/MMS system services
         addIfInstalled(pm, allAllowed, "com.android.mms.service");
         addIfInstalled(pm, allAllowed, "com.android.providers.sms");
@@ -133,17 +153,17 @@ public class AppUtils {
         
         // Try system method first
         try {
-            Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-            smsIntent.setData(Uri.parse("sms:"));
+            Intent smsIntent = new Intent(Intent.ACTION_SENDTO);
+            smsIntent.setData(Uri.parse("smsto:"));
             ResolveInfo resolveInfo = pm.resolveActivity(smsIntent, PackageManager.MATCH_DEFAULT_ONLY);
             if (resolveInfo != null && resolveInfo.activityInfo != null) {
                 String smsPackage = resolveInfo.activityInfo.packageName;
-                if (isPackageInstalled(pm, smsPackage)) {
+                if (isPackageInstalled(pm, smsPackage) && !smsPackage.equals("android")) {
                     return smsPackage;
                 }
             }
         } catch (Exception e) {
-            // Continue to fallback
+            // Fallback to hardcoded list
         }
         
         // Fallback: Try main SMS apps (only the primary ones users see)
@@ -160,7 +180,7 @@ public class AppUtils {
         
         for (String pkg : mainSmsApps) {
             if (isPackageInstalled(pm, pkg)) {
-                return pkg; // Return the first found
+                return pkg;
             }
         }
         
