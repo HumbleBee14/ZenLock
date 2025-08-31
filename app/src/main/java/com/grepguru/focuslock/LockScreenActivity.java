@@ -35,6 +35,7 @@ public class LockScreenActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     private boolean isLaunchingWhitelistedApp = false;
     private AnalyticsManager analyticsManager;
+    private boolean isExpanded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,46 +173,52 @@ public class LockScreenActivity extends AppCompatActivity {
 
         appsRecycler.setAdapter(appsAdapter);
 
-        // Handle expand/collapse for additional apps
-        boolean[] isExpanded = {false};
+        // -----------------------------------------------------------
+        // Setting up Apps Section
 
-        if (additionalAppModels.isEmpty()) {
-            // Hide expand button when no additional apps
-            expandButtonContainer.setVisibility(View.GONE);
-        } else {
-            // Show expand button container
-            expandButtonContainer.setVisibility(View.VISIBLE);
+        // Always show the expand button container
+        expandButtonContainer.setVisibility(View.VISIBLE);
 
-            expandAppsButton.setOnClickListener(v -> {
-                if (!isExpanded[0]) {
-                    // Expand: Add additional apps to the list
-                    currentAppModels.addAll(additionalAppModels);
-                    appsAdapter.notifyDataSetChanged();
-
-                    // Scroll to show the new apps after a short delay
-                    appsRecycler.postDelayed(() -> {
-                        layoutManager.scrollToPosition(currentAppModels.size() - 1);
-                    }, 100);
+        // Set up expand button click listener
+        expandAppsButton.setOnClickListener(v -> {
+            if (!isExpanded) {
+                // Expand: Show all apps (default + additional)
+                if (additionalAppModels.isEmpty()) {
+                    // Only default apps exist, just show them
+                    currentAppModels.clear();
+                    currentAppModels.addAll(defaultAppModels);
                 } else {
-                    // Collapse: Remove additional apps from the list
-                    currentAppModels.removeAll(additionalAppModels);
-                    appsAdapter.notifyDataSetChanged();
-
-                    // Scroll back to top
-                    appsRecycler.postDelayed(() -> {
-                        layoutManager.scrollToPosition(0);
-                    }, 100);
+                    // Show both default and additional apps
+                    currentAppModels.clear();
+                    currentAppModels.addAll(defaultAppModels);
+                    currentAppModels.addAll(additionalAppModels);
                 }
+                appsAdapter.notifyDataSetChanged();
+                
+                // Show the RecyclerView
+                appsRecycler.setVisibility(View.VISIBLE);
+                
+                // Scroll to show all apps after a short delay
+                appsRecycler.postDelayed(() -> {
+                    layoutManager.scrollToPosition(currentAppModels.size() - 1);
+                }, 100);
+            } else {
+                // Collapse: Hide all apps
+                currentAppModels.clear();
+                appsAdapter.notifyDataSetChanged();
+                
+                // Hide the RecyclerView
+                appsRecycler.setVisibility(View.GONE);
+            }
 
-                isExpanded[0] = !isExpanded[0];
+            isExpanded = !isExpanded;
 
-                // Rotate the expand icon (180° for expanded, 0° for collapsed)
-                expandAppsButton.animate()
-                    .rotation(isExpanded[0] ? 180 : 0)
-                    .setDuration(300)
-                    .start();
-            });
-        }
+            // Rotate the expand icon (180° for expanded, 0° for collapsed)
+            expandAppsButton.animate()
+                .rotation(isExpanded ? 180 : 0)
+                .setDuration(300)
+                .start();
+        });
 
 
         // -----------------------------------------------------------
@@ -230,10 +237,10 @@ public class LockScreenActivity extends AppCompatActivity {
                 appsSection.setVisibility(View.GONE);
 
                 // If additional apps were expanded, collapse them
-                if (isExpanded[0]) {
+                if (isExpanded) {
                     currentAppModels.removeAll(additionalAppModels);
                     appsAdapter.notifyDataSetChanged();
-                    isExpanded[0] = false;
+                    isExpanded = false;
                     expandAppsButton.setRotation(0);
                 }
             }

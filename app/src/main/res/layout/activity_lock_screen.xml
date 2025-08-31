@@ -59,11 +59,14 @@
             android:layout_height="wrap_content"
             android:text="Unlock"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            style="@style/ModernButton.Primary"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:background="@drawable/glass_button_background"
+            android:textColor="@color/white"
+            android:elevation="8dp"
             app:layout_constraintTop_toBottomOf="@id/lockscreenMessage"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -122,7 +125,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHeight_percent="0.3">
 
-                <!-- Apps Section with Expand Button at Top -->
+        <!-- Apps Section with Always Visible Expand Button -->
         <LinearLayout
             android:id="@+id/appsSection"
             android:layout_width="match_parent"
@@ -132,30 +135,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Expand Button at Top Center (only shown when additional apps exist) -->
+            <!-- Expand Button - Always Visible at Bottom Center -->
             <LinearLayout
                 android:id="@+id/expandButtonContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:visibility="gone">
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
 
                 <ImageView
                     android:id="@+id/expandAppsButton"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:src="@drawable/ic_expand_more"
                     android:background="@drawable/circular_button"
-                    android:padding="12dp"
-                    android:contentDescription="Show more apps"
+                    android:padding="14dp"
+                    android:contentDescription="Show apps"
                     android:alpha="0.9"/>
 
             </LinearLayout>
 
-            <!-- Apps RecyclerView (Scrollable) -->
+            <!-- Apps RecyclerView (Initially Hidden) -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/defaultAppsRecycler"
                 android:layout_width="match_parent"
@@ -167,7 +169,8 @@
                 android:paddingEnd="16dp"
                 android:minHeight="140dp"
                 android:maxHeight="200dp"
-                android:nestedScrollingEnabled="true"/>
+                android:nestedScrollingEnabled="true"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
