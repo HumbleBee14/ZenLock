@@ -14,36 +14,124 @@ import java.util.Set;
 
 public class AppUtils {
 
-    public static Set<String> getDefaultApps(Context context) {
-        Set<String> defaultApps = new HashSet<>();
+    // Get only the main default apps that should be VISIBLE on lock screen
+    public static Set<String> getMainDefaultApps(Context context) {
+        Set<String> mainApps = new HashSet<>();
         PackageManager pm = context.getPackageManager();
 
-        // Find default dialer app using system method
+        // Find and add only ONE main dialer app
+        String mainDialer = findMainDialerApp(context);
+        if (mainDialer != null) {
+            mainApps.add(mainDialer);
+        }
+
+        // Find and add only ONE main SMS app  
+        String mainSms = findMainSmsApp(context);
+        if (mainSms != null) {
+            mainApps.add(mainSms);
+        }
+
+        // Find and add only ONE main clock app
+        String mainClock = findMainClockApp(context);
+        if (mainClock != null) {
+            mainApps.add(mainClock);
+        }
+
+        return mainApps;
+    }
+
+    // Get ALL packages that should be ALLOWED (including system services)
+    public static Set<String> getAllAllowedPackages(Context context) {
+        Set<String> allAllowed = new HashSet<>();
+        
+        // Add main default apps
+        allAllowed.addAll(getMainDefaultApps(context));
+        
+        // Add essential system services that must be allowed but not shown
+        PackageManager pm = context.getPackageManager();
+        
+        // Essential call/telephony system services
+        addIfInstalled(pm, allAllowed, "com.android.server.telecom");
+        addIfInstalled(pm, allAllowed, "com.android.providers.telephony");
+        addIfInstalled(pm, allAllowed, "com.android.phone");
+        
+        // Call UI and in-call activities (the ones that were working before)
+        addIfInstalled(pm, allAllowed, "com.samsung.android.incallui"); // Samsung call screen
+        addIfInstalled(pm, allAllowed, "com.android.incallui"); // Stock call screen
+        addIfInstalled(pm, allAllowed, "com.sec.phone"); // Samsung phone service
+        
+        // System UI and notification handling (for reopening from notifications)
+        addIfInstalled(pm, allAllowed, "com.android.systemui"); // System UI (critical for notifications)
+        addIfInstalled(pm, allAllowed, "android"); // System process
+        addIfInstalled(pm, allAllowed, "system"); // System process alternative
+        
+        // Launcher apps (needed for notification interactions)
+        addIfInstalled(pm, allAllowed, "com.sec.android.app.launcher"); // Samsung Launcher
+        addIfInstalled(pm, allAllowed, "com.google.android.apps.nexuslauncher"); // Pixel Launcher
+        addIfInstalled(pm, allAllowed, "com.android.launcher3"); // Stock Android Launcher
+        addIfInstalled(pm, allAllowed, "com.miui.home"); // Xiaomi Launcher
+        addIfInstalled(pm, allAllowed, "com.oneplus.launcher"); // OnePlus Launcher
+        addIfInstalled(pm, allAllowed, "com.oppo.launcher"); // Oppo Launcher
+        addIfInstalled(pm, allAllowed, "com.vivo.launcher"); // Vivo Launcher
+        addIfInstalled(pm, allAllowed, "com.huawei.android.launcher"); // Huawei Launcher
+        
+        // Google Play Services (needed for some SMS/messaging features)
+        addIfInstalled(pm, allAllowed, "com.android.vending"); // Google Play Store
+        addIfInstalled(pm, allAllowed, "com.google.android.gms"); // Google Play Services
+        
+        // Essential SMS/MMS system services
+        addIfInstalled(pm, allAllowed, "com.android.mms.service");
+        addIfInstalled(pm, allAllowed, "com.android.providers.sms");
+        
+        return allAllowed;
+    }
+
+    // Legacy method - now calls getMainDefaultApps for backward compatibility
+    public static Set<String> getDefaultApps(Context context) {
+        return getMainDefaultApps(context);
+    }
+
+    private static String findMainDialerApp(Context context) {
+        PackageManager pm = context.getPackageManager();
+        
+        // Try system method first
         try {
             TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
             if (telecomManager != null) {
                 String defaultDialer = telecomManager.getDefaultDialerPackage();
                 if (defaultDialer != null && isPackageInstalled(pm, defaultDialer)) {
-                    defaultApps.add(defaultDialer);
+                    return defaultDialer;
                 }
             }
         } catch (Exception e) {
-            // Fallback to hardcoded list if system method fails
+            // Continue to fallback
         }
         
-        // Fallback: Try common dialer apps if system method didn't work
-        if (defaultApps.isEmpty()) {
-            String[] dialerApps = {"com.android.phone", "com.google.android.dialer", "com.samsung.android.dialer", 
-                                   "com.android.dialer", "com.htc.android.phone", "com.sonyericsson.android.phone"};
-            for (String pkg : dialerApps) {
-                if (isPackageInstalled(pm, pkg)) {
-                    defaultApps.add(pkg);
-                    break;
-                }
+        // Fallback: Try main dialer apps (only the primary ones users see)
+        String[] mainDialerApps = {
+            "com.google.android.dialer",    // Google Phone
+            "com.samsung.android.dialer",   // Samsung Phone
+            "com.android.dialer",           // Stock Android
+            "com.miui.contacts",            // Xiaomi Contacts/Dialer
+            "com.oneplus.dialer",           // OnePlus Dialer
+            "com.oppo.dialer",              // Oppo Dialer
+            "com.vivo.dialer",              // Vivo Dialer
+            "com.huawei.contacts"           // Huawei Contacts
+        };
+        
+        for (String pkg : mainDialerApps) {
+            if (isPackageInstalled(pm, pkg)) {
+                return pkg; // Return the first found
             }
         }
-
-        // Find default SMS app using system method
+        
+        return null;
+    }
+    
+    private static String findMainSmsApp(Context context) {
+        PackageManager pm = context.getPackageManager();
+        
+        // Try system method first
         try {
             Intent smsIntent = new Intent(Intent.ACTION_VIEW);
             smsIntent.setData(Uri.parse("sms:"));
@@ -51,44 +139,77 @@ public class AppUtils {
             if (resolveInfo != null && resolveInfo.activityInfo != null) {
                 String smsPackage = resolveInfo.activityInfo.packageName;
                 if (isPackageInstalled(pm, smsPackage)) {
-                    defaultApps.add(smsPackage);
+                    return smsPackage;
                 }
             }
         } catch (Exception e) {
-            // Fallback to hardcoded list
-            String[] smsApps = {"com.android.mms", "com.google.android.apps.messaging", "com.samsung.android.messaging",
-                                "com.android.messaging", "com.htc.android.mms"};
-            for (String pkg : smsApps) {
-                if (isPackageInstalled(pm, pkg)) {
-                    defaultApps.add(pkg);
-                    break;
-                }
+            // Continue to fallback
+        }
+        
+        // Fallback: Try main SMS apps (only the primary ones users see)
+        String[] mainSmsApps = {
+            "com.google.android.apps.messaging", // Google Messages
+            "com.samsung.android.messaging",      // Samsung Messages
+            "com.android.mms",                    // Stock Android
+            "com.miui.mms",                       // Xiaomi Messages
+            "com.oneplus.mms",                    // OnePlus Messages
+            "com.oppo.mms",                       // Oppo Messages
+            "com.vivo.mms",                       // Vivo Messages
+            "com.huawei.mms"                      // Huawei Messages
+        };
+        
+        for (String pkg : mainSmsApps) {
+            if (isPackageInstalled(pm, pkg)) {
+                return pkg; // Return the first found
             }
         }
-
-        // Find clock/alarm app using system method
+        
+        return null;
+    }
+    
+    private static String findMainClockApp(Context context) {
+        PackageManager pm = context.getPackageManager();
+        
+        // Try system method first
         try {
             Intent alarmIntent = new Intent(AlarmClock.ACTION_SET_ALARM);
             List<ResolveInfo> alarmApps = pm.queryIntentActivities(alarmIntent, PackageManager.MATCH_DEFAULT_ONLY);
             if (!alarmApps.isEmpty()) {
                 String clockPackage = alarmApps.get(0).activityInfo.packageName;
                 if (isPackageInstalled(pm, clockPackage)) {
-                    defaultApps.add(clockPackage);
+                    return clockPackage;
                 }
             }
         } catch (Exception e) {
-            // Fallback to hardcoded list
-            String[] clockApps = {"com.android.deskclock", "com.google.android.deskclock", "com.sec.android.app.clockpackage",
-                                  "com.htc.android.worldclock", "com.sonyericsson.organizer"};
-            for (String pkg : clockApps) {
-                if (isPackageInstalled(pm, pkg)) {
-                    defaultApps.add(pkg);
-                    break;
-                }
+            // Continue to fallback
+        }
+        
+        // Fallback: Try main clock apps (only the primary ones users see)
+        String[] mainClockApps = {
+            "com.google.android.deskclock",       // Google Clock
+            "com.sec.android.app.clockpackage",   // Samsung Clock
+            "com.android.deskclock",              // Stock Android
+            "com.miui.clock",                     // Xiaomi Clock
+            "com.oneplus.deskclock",              // OnePlus Clock
+            "com.oppo.alarmclock",                // Oppo Clock
+            "com.vivo.alarmclock",                // Vivo Clock
+            "com.huawei.deskclock"                // Huawei Clock
+        };
+        
+        for (String pkg : mainClockApps) {
+            if (isPackageInstalled(pm, pkg)) {
+                return pkg; // Return the first found
             }
         }
-
-        return defaultApps;
+        
+        return null;
+    }
+    
+    // Helper method to add package if installed
+    private static void addIfInstalled(PackageManager pm, Set<String> defaultApps, String packageName) {
+        if (isPackageInstalled(pm, packageName)) {
+            defaultApps.add(packageName);
+        }
     }
 
 

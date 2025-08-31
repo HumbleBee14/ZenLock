@@ -19,9 +19,21 @@ public class AppBlockerService extends AccessibilityService {
         boolean isLocked = preferences.getBoolean("isLocked", false);
 
         if (isLocked) {
-            String packageName = event.getPackageName().toString();
+            String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "";
+            
+            // Skip if package name is empty or null
+            if (packageName.isEmpty()) {
+                return;
+            }
+            
+            // Log all package events for debugging
+            Log.d("AppBlockerService", "Event from package: " + packageName);
+            
             if (!isAllowedApp(packageName)) {
+                Log.d("AppBlockerService", "BLOCKING app: " + packageName);
                 launchLockScreen();
+            } else {
+                Log.d("AppBlockerService", "ALLOWING app: " + packageName);
             }
         }
     }
@@ -32,16 +44,48 @@ public class AppBlockerService extends AccessibilityService {
             return true;
         }
         
+        // Handle third-party apps that integrate with system functions
+        if (isThirdPartySystemIntegration(packageName)) {
+            Log.d("AppBlockerService", "Temporarily allowing third-party system integration: " + packageName);
+            // Allow briefly but return to lock screen after a short delay
+            android.os.Handler handler = new android.os.Handler();
+            handler.postDelayed(() -> {
+                if (getSharedPreferences("FocusLockPrefs", MODE_PRIVATE).getBoolean("isLocked", false)) {
+                    launchLockScreen();
+                }
+            }, 3000); // 3 second delay
+            return true;
+        }
+        
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
         
-        // Add default apps (phone, SMS, alarm) to the whitelist
+        // Get ALL allowed packages (including system services for in-app activities)
         Set<String> allAllowedApps = new HashSet<>(whitelistedApps);
-        allAllowedApps.addAll(AppUtils.getDefaultApps(this));
+        allAllowedApps.addAll(AppUtils.getAllAllowedPackages(this));
         
         boolean isAllowed = allAllowedApps.contains(packageName);
         Log.d("AppBlockerService", "Checking app: " + packageName + " - Allowed: " + isAllowed);
         return isAllowed;
+    }
+    
+    private boolean isThirdPartySystemIntegration(String packageName) {
+        // Third-party apps that integrate with system functions (calls, SMS)
+        // These should be allowed briefly but not permanently
+        String[] thirdPartyIntegrations = {
+            "com.truecaller", // Caller ID service
+            "com.whatsapp", // If user has WhatsApp as default SMS
+            "com.viber.voip", // Viber calls
+            "com.skype.raider" // Skype calls
+        };
+        
+        for (String thirdParty : thirdPartyIntegrations) {
+            if (thirdParty.equals(packageName)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private void launchLockScreen() {
