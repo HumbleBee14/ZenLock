@@ -253,6 +253,18 @@ public class ScheduleManager {
     }
     
     /**
+     * Check if there are any enabled schedules
+     */
+    public boolean hasEnabledSchedules() {
+        for (ScheduleModel schedule : schedules) {
+            if (schedule.isEnabled()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Export schedules as JSON (for future sync/migration)
      */
     public String exportSchedules() {
