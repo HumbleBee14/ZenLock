@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.grepguru.focuslock.R;
 import com.grepguru.focuslock.model.UnlockMethod;
@@ -211,11 +212,11 @@ public class EnhancedUnlockManager {
         requestOtpButton.setOnClickListener(v -> {
             if (otpManager.requestOTPFromPartner()) {
                 otpStatusText.setText("✓ Unlock code sent successfully!");
-                otpStatusText.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
+                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
                 Toast.makeText(context, "Unlock code sent to your partner", Toast.LENGTH_SHORT).show();
             } else {
                 otpStatusText.setText("✗ Failed to send unlock code");
-                otpStatusText.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             }
         });
         
@@ -250,7 +251,7 @@ public class EnhancedUnlockManager {
             
             if (method == UnlockMethod.ACCOUNTABILITY_PARTNER_OTP) {
                 statusText.setText("Code valid for 1 hour only");
-                statusText.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                statusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
             } else {
                 // For PIN unlock, just hide the status text
                 statusText.setText("");
@@ -327,7 +328,7 @@ public class EnhancedUnlockManager {
             pinStatus.setVisibility(View.GONE); // Hide status when configured
         } else {
             pinStatus.setText("Not configured");
-            pinStatus.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+            pinStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             pinStatus.setVisibility(View.VISIBLE);
         }
         
@@ -336,7 +337,7 @@ public class EnhancedUnlockManager {
             partnerStatus.setVisibility(View.GONE); // Hide status when configured
         } else {
             partnerStatus.setText("Not configured");
-            partnerStatus.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+            partnerStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             partnerStatus.setVisibility(View.VISIBLE);
         }
         
