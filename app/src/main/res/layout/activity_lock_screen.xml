@@ -170,7 +170,52 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="60dp"/>
+            android:layout_marginTop="40dp"/>
+
+        <!-- No Apps Message (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/noAppsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_apps"
+                android:alpha="0.4"
+                app:tint="@color/textSecondary"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No Apps Allowed"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All apps are currently blocked.\nConfigure allowed apps in Settings."
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

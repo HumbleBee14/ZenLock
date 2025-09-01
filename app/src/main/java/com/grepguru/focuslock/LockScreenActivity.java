@@ -117,6 +117,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Single RecyclerView for all apps (default + additional)
         RecyclerView appsRecycler = findViewById(R.id.defaultAppsRecycler);
+        LinearLayout noAppsContainer = findViewById(R.id.noAppsContainer);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
 
         // Use GridLayoutManager for better organization - 3 apps per row
@@ -212,13 +213,26 @@ public class LockScreenActivity extends AppCompatActivity {
                 }
                 appsAdapter.notifyDataSetChanged();
                 
-                // Show the RecyclerView with smooth animation
-                appsRecycler.setVisibility(View.VISIBLE);
-                appsRecycler.setAlpha(0f);
-                appsRecycler.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .start();
+                // Check if there are any apps to show
+                if (currentAppModels.isEmpty()) {
+                    // Show "No Apps Allowed" message
+                    noAppsContainer.setVisibility(View.VISIBLE);
+                    noAppsContainer.setAlpha(0f);
+                    noAppsContainer.animate()
+                        .alpha(1f)
+                        .setDuration(300)
+                        .start();
+                    appsRecycler.setVisibility(View.GONE);
+                } else {
+                    // Show the RecyclerView with smooth animation
+                    appsRecycler.setVisibility(View.VISIBLE);
+                    appsRecycler.setAlpha(0f);
+                    appsRecycler.animate()
+                        .alpha(1f)
+                        .setDuration(300)
+                        .start();
+                    noAppsContainer.setVisibility(View.GONE);
+                }
                 
                 // Animate arrow to bottom of main content container (above the apps)
                 // Get the parent apps container and calculate the exact position
@@ -253,11 +267,17 @@ public class LockScreenActivity extends AppCompatActivity {
                 currentAppModels.clear();
                 appsAdapter.notifyDataSetChanged();
                 
-                // Hide the RecyclerView with smooth animation
+                // Hide both the RecyclerView and noAppsContainer with smooth animation
                 appsRecycler.animate()
                     .alpha(0f)
                     .setDuration(200)
                     .withEndAction(() -> appsRecycler.setVisibility(View.GONE))
+                    .start();
+                
+                noAppsContainer.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> noAppsContainer.setVisibility(View.GONE))
                     .start();
                 
                 // Animate arrow back to bottom position
