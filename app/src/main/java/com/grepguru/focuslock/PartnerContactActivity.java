@@ -88,6 +88,9 @@ public class PartnerContactActivity extends AppCompatActivity {
         
         // Update test button state based on phone input
         updateTestButtonState();
+        
+        // Update save button state based on permissions
+        updateSaveButtonState();
     }
 
     private void setupListeners() {
@@ -99,8 +102,9 @@ public class PartnerContactActivity extends AppCompatActivity {
                 checkSmsPermission();
             }
             
-            // Always update test button state when toggle changes
+            // Always update both button states when toggle changes
             updateTestButtonState();
+            updateSaveButtonState();
         });
 
         // Phone input text watcher to enable/disable test button
@@ -127,8 +131,9 @@ public class PartnerContactActivity extends AppCompatActivity {
     private void updateTestButtonState() {
         boolean smsEnabled = smsToggle.isChecked();
         String phoneText = partnerPhoneInput.getText().toString().trim();
+        boolean hasSmsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
         
-        if (smsEnabled && !phoneText.isEmpty()) {
+        if (smsEnabled && !phoneText.isEmpty() && hasSmsPermission) {
             testOtpButton.setEnabled(true);
             testOtpButton.setAlpha(1.0f);
             testOtpButton.setVisibility(View.VISIBLE);
@@ -137,6 +142,24 @@ public class PartnerContactActivity extends AppCompatActivity {
             testOtpButton.setAlpha(0.5f);
             testOtpButton.setVisibility(smsEnabled ? View.VISIBLE : View.GONE);
         }
+        
+        // Also update save button state
+        updateSaveButtonState();
+    }
+    
+    private void updateSaveButtonState() {
+        boolean smsEnabled = smsToggle.isChecked();
+        boolean hasSmsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+        
+        if (smsEnabled && !hasSmsPermission) {
+            // SMS enabled but no permission - disable save button
+            saveButton.setEnabled(false);
+            saveButton.setAlpha(0.5f);
+        } else {
+            // Either SMS disabled or SMS enabled with permission - enable save button
+            saveButton.setEnabled(true);
+            saveButton.setAlpha(1.0f);
+        }
     }
 
     private void saveConfiguration() {
@@ -144,6 +167,12 @@ public class PartnerContactActivity extends AppCompatActivity {
         String partnerPhone = partnerPhoneInput.getText().toString().trim();
         String countryCode = countryCodeInput.getText().toString().trim();
         String partnerEmail = partnerEmailInput.getText().toString().trim();
+
+        // First check SMS permission if SMS is enabled
+        if (smsEnabled && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "❌ Cannot save SMS configuration without SMS permission. Please grant permission first.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         // Validate SMS configuration
         if (smsEnabled && partnerPhone.isEmpty()) {
@@ -255,8 +284,12 @@ public class PartnerContactActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "SMS permission granted!", Toast.LENGTH_SHORT).show();
                 checkSmsPermission(); // Update UI
+                updateTestButtonState(); // Update button states
+                updateSaveButtonState(); // Update save button state
             } else {
                 Toast.makeText(this, "SMS permission denied. OTP functionality will not work.", Toast.LENGTH_LONG).show();
+                updateTestButtonState(); // Update button states even if denied
+                updateSaveButtonState(); // Update save button state
             }
         }
     }
