@@ -1,8 +1,8 @@
-package com.grepguru.focuslock.utils;
+
+// NOTE: this is just a backup code for references to pacakge names in case needed innfuture. This plays no part in any code, so don't modify this file
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -15,83 +15,58 @@ import java.util.Set;
 
 public class AppUtils {
 
-    // Get only the main default apps that should be VISIBLE on lock screen based on user preferences
+    // Get only the main default apps that should be VISIBLE on lock screen
     public static Set<String> getMainDefaultApps(Context context) {
         Set<String> mainApps = new HashSet<>();
         PackageManager pm = context.getPackageManager();
-        
-        // Check individual preferences for each default app
-        SharedPreferences preferences = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
 
-        // Find and add phone app if enabled by user
-        if (preferences.getBoolean("allow_phone_app", true)) {
-            String mainDialer = findMainDialerApp(context);
-            if (mainDialer != null) {
-                mainApps.add(mainDialer);
-            }
+        // Find and add only ONE main dialer app
+        String mainDialer = findMainDialerApp(context);
+        if (mainDialer != null) {
+            mainApps.add(mainDialer);
         }
 
-        // Find and add SMS app if enabled by user (off by default for accountability)
-        if (preferences.getBoolean("allow_sms_app", false)) {
-            String mainSms = findMainSmsApp(context);
-            if (mainSms != null) {
-                mainApps.add(mainSms);
-            }
+        // Find and add only ONE main SMS app  
+        String mainSms = findMainSmsApp(context);
+        if (mainSms != null) {
+            mainApps.add(mainSms);
         }
 
-        // Find and add clock app if enabled by user
-        if (preferences.getBoolean("allow_clock_app", true)) {
-            String mainClock = findMainClockApp(context);
-            if (mainClock != null) {
-                mainApps.add(mainClock);
-            }
+        // Find and add only ONE main clock app
+        String mainClock = findMainClockApp(context);
+        if (mainClock != null) {
+            mainApps.add(mainClock);
         }
 
         return mainApps;
     }
 
-    // Get ALL packages that should be ALLOWED (including system services) based on user preferences
+    // Get ALL packages that should be ALLOWED (including system services)
     public static Set<String> getAllAllowedPackages(Context context) {
         Set<String> allAllowed = new HashSet<>();
         
-        // Add main default apps (already filtered by user preferences)
+        // Add main default apps
         allAllowed.addAll(getMainDefaultApps(context));
-        
-        // Get user preferences for system services
-        SharedPreferences preferences = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        boolean allowPhoneApp = preferences.getBoolean("allow_phone_app", true);
-        boolean allowSmsApp = preferences.getBoolean("allow_sms_app", false);
         
         // Add essential system services that must be allowed but not shown
         PackageManager pm = context.getPackageManager();
         
-        // Essential call/telephony system services (only if phone app is enabled)
-        if (allowPhoneApp) {
-            addIfInstalled(pm, allAllowed, "com.android.server.telecom");
-            addIfInstalled(pm, allAllowed, "com.android.providers.telephony");
-            addIfInstalled(pm, allAllowed, "com.android.phone");
-            
-            // Call UI and in-call activities (needed for incoming calls)
-            addIfInstalled(pm, allAllowed, "com.samsung.android.incallui"); // Samsung call screen
-            addIfInstalled(pm, allAllowed, "com.android.incallui"); // Stock call screen
-            addIfInstalled(pm, allAllowed, "com.sec.phone"); // Samsung phone service
-        }
+        // Essential call/telephony system services
+        addIfInstalled(pm, allAllowed, "com.android.server.telecom");
+        addIfInstalled(pm, allAllowed, "com.android.providers.telephony");
+        addIfInstalled(pm, allAllowed, "com.android.phone");
         
-        // Essential SMS/MMS system services (only if SMS app is enabled)
-        if (allowSmsApp) {
-            addIfInstalled(pm, allAllowed, "com.android.mms.service");
-            addIfInstalled(pm, allAllowed, "com.android.providers.sms");
-        }
+        // Call UI and in-call activities (the ones that were working before)
+        addIfInstalled(pm, allAllowed, "com.samsung.android.incallui"); // Samsung call screen
+        addIfInstalled(pm, allAllowed, "com.android.incallui"); // Stock call screen
+        addIfInstalled(pm, allAllowed, "com.sec.phone"); // Samsung phone service
         
-        // ALWAYS ALLOWED: Core system services (regardless of user preferences)
-        // These are essential for the device to function properly
-        
-        // System UI and notification handling (critical for notifications and system function)
-        addIfInstalled(pm, allAllowed, "com.android.systemui"); // System UI
+        // System UI and notification handling (for reopening from notifications)
+        addIfInstalled(pm, allAllowed, "com.android.systemui"); // System UI (critical for notifications)
         addIfInstalled(pm, allAllowed, "android"); // System process
         addIfInstalled(pm, allAllowed, "system"); // System process alternative
         
-        // Launcher apps (needed for notification interactions and home button)
+        // Launcher apps (needed for notification interactions)
         addIfInstalled(pm, allAllowed, "com.sec.android.app.launcher"); // Samsung Launcher
         addIfInstalled(pm, allAllowed, "com.google.android.apps.nexuslauncher"); // Pixel Launcher
         addIfInstalled(pm, allAllowed, "com.android.launcher3"); // Stock Android Launcher
@@ -101,18 +76,19 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.vivo.launcher"); // Vivo Launcher
         addIfInstalled(pm, allAllowed, "com.huawei.android.launcher"); // Huawei Launcher
         
-        // Google Play Services (needed for core Android functionality)
+        // Google Play Services (needed for some SMS/messaging features)
         addIfInstalled(pm, allAllowed, "com.android.vending"); // Google Play Store
         addIfInstalled(pm, allAllowed, "com.google.android.gms"); // Google Play Services
         
-        // Keyboard apps (essential for any text input in allowed apps)
+        
+        // Keyboard apps (essential for text input)
         addIfInstalled(pm, allAllowed, "com.google.android.inputmethod.latin"); // Gboard
         addIfInstalled(pm, allAllowed, "com.android.inputmethod.latin"); // Stock Android Keyboard
         addIfInstalled(pm, allAllowed, "com.samsung.android.honeyboard"); // Samsung Keyboard
         addIfInstalled(pm, allAllowed, "com.touchtype.swiftkey"); // SwiftKey
         addIfInstalled(pm, allAllowed, "com.swiftkey.swiftkeyconfigurator"); // SwiftKey Configurator
         addIfInstalled(pm, allAllowed, "com.miui.securityinputmethod"); // Xiaomi Keyboard
-        addIfInstalled(pm, allAllowed, "com.sohu.inputmethod.sogou"); // Sogou Keyboard
+        addIfInstalled(pm, allAllowed, "com.sohu.inputmethod.sogou"); // Sogou Keyboard (popular in China)
         addIfInstalled(pm, allAllowed, "com.baidu.input"); // Baidu Keyboard
         addIfInstalled(pm, allAllowed, "com.iflytek.inputmethod"); // iFlytek Keyboard
         addIfInstalled(pm, allAllowed, "com.htc.sense.ime"); // HTC Keyboard
@@ -123,29 +99,36 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.anysoftkeyboard.api"); // AnySoftKeyboard
         addIfInstalled(pm, allAllowed, "org.pocketworkstation.pckeyboard"); // Hacker's Keyboard
         
-        // Security and biometric authentication (always essential for app security)
+        
+        // Essential SMS/MMS system services
+        addIfInstalled(pm, allAllowed, "com.android.mms.service");
+        addIfInstalled(pm, allAllowed, "com.android.providers.sms");
+        
+        // Security and biometric authentication (essential for app access)
         addIfInstalled(pm, allAllowed, "com.samsung.android.biometrics.app.setting"); // Samsung Biometrics
         addIfInstalled(pm, allAllowed, "com.samsung.android.authfw"); // Samsung Auth Framework
         addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpass"); // Samsung Pass
         addIfInstalled(pm, allAllowed, "com.samsung.android.samsungpassautofill"); // Samsung Pass Autofill
+        // addIfInstalled(pm, allAllowed, "com.android.settings"); // Settings (for security prompts)
+        // Settings access removed - user must explicitly whitelist settings app
         addIfInstalled(pm, allAllowed, "com.google.android.gms.auth.api.credentials"); // Google Auth
         addIfInstalled(pm, allAllowed, "com.android.keyguard"); // Lock screen security
         addIfInstalled(pm, allAllowed, "com.android.credentialmanager"); // Credential Manager
         
-        // Face recognition and biometric services (always essential for security)
+        // Face recognition and biometric services
         addIfInstalled(pm, allAllowed, "com.miui.face"); // Xiaomi Face Recognition
         addIfInstalled(pm, allAllowed, "com.oneplus.faceunlock"); // OnePlus Face Unlock
         addIfInstalled(pm, allAllowed, "com.oppo.facerecognition"); // Oppo Face Recognition
         addIfInstalled(pm, allAllowed, "com.vivo.facerecognition"); // Vivo Face Recognition
         addIfInstalled(pm, allAllowed, "com.huawei.facerecognition"); // Huawei Face Recognition
         
-        // Fingerprint and biometric authentication (always essential for security)
+        // Fingerprint and biometric authentication
         addIfInstalled(pm, allAllowed, "com.android.server.biometrics"); // Biometric Service
         addIfInstalled(pm, allAllowed, "com.fingerprints.serviceext"); // Fingerprint Service
         addIfInstalled(pm, allAllowed, "com.samsung.android.biometrics"); // Samsung Biometrics Core
         addIfInstalled(pm, allAllowed, "com.google.android.apps.authenticator2"); // Google Authenticator
         
-        // Security policies (always essential for system security)
+        // PIN/Password/Pattern security
         addIfInstalled(pm, allAllowed, "com.android.internal.policy"); // Security Policy
         addIfInstalled(pm, allAllowed, "com.android.server.policy"); // Server Policy
         

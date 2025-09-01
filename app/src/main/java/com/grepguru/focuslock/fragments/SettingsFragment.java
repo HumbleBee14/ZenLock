@@ -33,8 +33,12 @@ import com.grepguru.focuslock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
-    private SwitchCompat superStrictModeToggle, defaultAppsToggle, quotesToggle;
+    private SwitchCompat superStrictModeToggle, quotesToggle;
     private SwitchCompat persistentNotificationToggle, autoRestartToggle;
+    
+    // Individual default app toggles
+    private SwitchCompat phoneAppToggle, smsAppToggle, clockAppToggle;
+    
     private RadioGroup securityLevelGroup;
     private RadioButton basicSecurity, enhancedSecurity, maximumSecurity;
     
@@ -42,6 +46,11 @@ public class SettingsFragment extends Fragment {
     private LinearLayout lockProtectionHeader, lockProtectionContent;
     private ImageView lockProtectionExpandIcon;
     private TextView lockProtectionSummary;
+    
+    // Default Apps expandable UI elements
+    private LinearLayout defaultAppsHeader, defaultAppsExpandableContent;
+    private ImageView defaultAppsExpandIcon;
+    
     private SharedPreferences preferences;
     
     // Enhanced unlock UI elements
@@ -62,7 +71,6 @@ public class SettingsFragment extends Fragment {
         preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
 
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
-        defaultAppsToggle = view.findViewById(R.id.defaultAppsToggle);
         quotesToggle = view.findViewById(R.id.quotesToggle);
         
         // Security settings
@@ -79,6 +87,11 @@ public class SettingsFragment extends Fragment {
         lockProtectionExpandIcon = view.findViewById(R.id.lockProtectionExpandIcon);
         lockProtectionSummary = view.findViewById(R.id.lockProtectionSummary);
 
+        // Default Apps expandable UI elements
+        defaultAppsHeader = view.findViewById(R.id.defaultAppsHeader);
+        defaultAppsExpandableContent = view.findViewById(R.id.defaultAppsExpandableContent);
+        defaultAppsExpandIcon = view.findViewById(R.id.defaultAppsExpandIcon);
+
         // Enhanced unlock UI elements
         configurePinButton = view.findViewById(R.id.configurePinButton);
         clearPinButton = view.findViewById(R.id.clearPinButton);
@@ -87,6 +100,11 @@ public class SettingsFragment extends Fragment {
         // Toggle switches for unlock methods
         pinUnlockToggle = view.findViewById(R.id.pinUnlockToggle);
         partnerUnlockToggle = view.findViewById(R.id.partnerUnlockToggle);
+        
+        // Individual default app toggles
+        phoneAppToggle = view.findViewById(R.id.phoneAppToggle);
+        smsAppToggle = view.findViewById(R.id.smsAppToggle);
+        clockAppToggle = view.findViewById(R.id.clockAppToggle);
         
         // Expandable sections
         pinConfigSection = view.findViewById(R.id.pinConfigSection);
@@ -97,8 +115,12 @@ public class SettingsFragment extends Fragment {
 
         // Load existing settings
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
-        defaultAppsToggle.setChecked(preferences.getBoolean("allow_default_apps", true));
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
+        
+        // Load individual default app settings
+        phoneAppToggle.setChecked(preferences.getBoolean("allow_phone_app", true));
+        smsAppToggle.setChecked(preferences.getBoolean("allow_sms_app", false)); // Off by default for accountability
+        clockAppToggle.setChecked(preferences.getBoolean("allow_clock_app", true));
         
         // Load security settings
         persistentNotificationToggle.setChecked(preferences.getBoolean("persistent_notification", true));
@@ -140,17 +162,34 @@ public class SettingsFragment extends Fragment {
             editor.apply();
         });
 
-        // Toggle Default Apps Allowed
-        defaultAppsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("allow_default_apps", isChecked);
-            editor.apply();
-        });
-
         // Toggle Motivational Quotes
         quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("show_quotes", isChecked);
+            editor.apply();
+        });
+        
+        // Individual Default App Toggles
+        phoneAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("allow_phone_app", isChecked);
+            editor.apply();
+        });
+        
+        smsAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("allow_sms_app", isChecked);
+            editor.apply();
+            
+            // Show warning dialog when enabling SMS for accountability bypass concerns
+            if (isChecked) {
+                showSmsWarningDialog();
+            }
+        });
+        
+        clockAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("allow_clock_app", isChecked);
             editor.apply();
         });
         
@@ -296,6 +335,27 @@ public class SettingsFragment extends Fragment {
                 // Expand
                 lockProtectionContent.setVisibility(View.VISIBLE);
                 lockProtectionExpandIcon.animate()
+                    .rotation(180)
+                    .setDuration(200)
+                    .start();
+            }
+        });
+
+        // Default Apps expandable section
+        defaultAppsHeader.setOnClickListener(v -> {
+            boolean isExpanded = defaultAppsExpandableContent.getVisibility() == View.VISIBLE;
+            
+            if (isExpanded) {
+                // Collapse
+                defaultAppsExpandableContent.setVisibility(View.GONE);
+                defaultAppsExpandIcon.animate()
+                    .rotation(0)
+                    .setDuration(200)
+                    .start();
+            } else {
+                // Expand
+                defaultAppsExpandableContent.setVisibility(View.VISIBLE);
+                defaultAppsExpandIcon.animate()
                     .rotation(180)
                     .setDuration(200)
                     .start();
@@ -537,5 +597,20 @@ public class SettingsFragment extends Fragment {
         statusText.setText(message);
         statusText.setTextColor(Color.parseColor("#FF6B6B"));
         statusText.setVisibility(View.VISIBLE);
+    }
+    
+    private void showSmsWarningDialog() {
+        new AlertDialog.Builder(requireContext())
+            .setTitle("SMS Access Warning")
+            .setMessage("⚠️ Enabling SMS access may bypass accountability partner protection!\n\n" +
+                        "When SMS is enabled, you'll be able to see unlock codes sent to your " +
+                        "accountability partner, which defeats the purpose of accountability.\n\n" +
+                        "Consider keeping SMS disabled for maximum accountability.")
+            .setPositiveButton("Keep Enabled", null)
+            .setNegativeButton("Disable SMS", (dialog, which) -> {
+                smsAppToggle.setChecked(false); // This will trigger the listener to save the preference
+            })
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show();
     }
 }
