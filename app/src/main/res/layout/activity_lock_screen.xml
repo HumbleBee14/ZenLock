@@ -17,8 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottomSection"
-        app:layout_constraintHeight_percent="0.7">
+        app:layout_constraintBottom_toTopOf="@id/parentAppsContainer"
+        app:layout_constraintHeight_percent="0.65">
 
         <!-- Timer Countdown -->
         <TextView
@@ -85,20 +85,45 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="24dp">
 
-            <EditText
-                android:id="@+id/pinInput"
-                android:layout_width="280dp"
-                android:layout_height="56dp"
-                android:hint="Enter 4-digit PIN"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textHint"
-                android:inputType="numberPassword"
-                android:maxLength="4"
-                android:background="@drawable/modern_input_background"
-                android:padding="16dp"
-                android:textSize="18sp"
-                android:gravity="center"
-                android:layout_marginBottom="16dp"/>
+            <!-- PIN Input with Eye Toggle -->
+            <LinearLayout
+                android:layout_width="320dp"
+                android:layout_height="64dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/pin_input_background"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:layout_marginBottom="20dp">
+
+                <EditText
+                    android:id="@+id/pinInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Enter 4-digit PIN"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/textHint"
+                    android:inputType="numberPassword"
+                    android:maxLength="4"
+                    android:background="@null"
+                    android:padding="0dp"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:textCursorDrawable="@null"
+                    android:letterSpacing="0.15"/>
+
+                <ImageView
+                    android:id="@+id/pinVisibilityToggle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_eye"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:contentDescription="Toggle PIN visibility"
+                    android:alpha="0.8"/>
+
+            </LinearLayout>
 
             <Button
                 android:id="@+id/unlockButton"
@@ -106,74 +131,72 @@
                 android:layout_height="wrap_content"
                 android:text="Confirm Unlock"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                style="@style/ModernButton.Secondary"/>
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:background="@drawable/glass_button_background"
+                android:textColor="@color/white"
+                android:elevation="8dp"/>
 
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Bottom Section -->
+    <!-- Parent Apps Container with Buffer Space for Arrow -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomSection"
+        android:id="@+id/parentAppsContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/mainContentContainer"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.3">
+        app:layout_constraintHeight_percent="0.35">
 
-        <!-- Apps Section with Always Visible Expand Button -->
-        <LinearLayout
-            android:id="@+id/appsSection"
+        <!-- Apps RecyclerView (Initially Hidden) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/defaultAppsRecycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            android:scrollbars="none"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:minHeight="140dp"
+            android:maxHeight="200dp"
+            android:nestedScrollingEnabled="true"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <!-- Expand Button - Always Visible at Bottom Center -->
-            <LinearLayout
-                android:id="@+id/expandButtonContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
-
-                <ImageView
-                    android:id="@+id/expandAppsButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_expand_more"
-                    android:background="@drawable/circular_button"
-                    android:padding="14dp"
-                    android:contentDescription="Show apps"
-                    android:alpha="0.9"/>
-
-            </LinearLayout>
-
-            <!-- Apps RecyclerView (Initially Hidden) -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/defaultAppsRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:scrollbars="none"
-                android:clipToPadding="false"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:minHeight="140dp"
-                android:maxHeight="200dp"
-                android:nestedScrollingEnabled="true"
-                android:visibility="gone"/>
-
-        </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="60dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Expand Button - Independent, Always Visible at Bottom Center -->
+    <LinearLayout
+        android:id="@+id/expandButtonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/expandAppsButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_expand_more"
+            android:background="@drawable/circular_button"
+            android:padding="12dp"
+            android:contentDescription="Show apps"
+            android:alpha="0.9"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

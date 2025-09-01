@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -101,7 +102,8 @@ public class LockScreenActivity extends AppCompatActivity {
         //  TextView lockMessage = findViewById(R.id.lockscreenMessage);
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
-        LinearLayout appsSection = findViewById(R.id.appsSection);
+        LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
+        ImageView pinVisibilityToggle = findViewById(R.id.pinVisibilityToggle);
 
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
@@ -113,7 +115,6 @@ public class LockScreenActivity extends AppCompatActivity {
         // Single RecyclerView for all apps (default + additional)
         RecyclerView appsRecycler = findViewById(R.id.defaultAppsRecycler);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
-        LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
 
         // Use GridLayoutManager for better organization - 3 apps per row
         androidx.recyclerview.widget.GridLayoutManager layoutManager = new androidx.recyclerview.widget.GridLayoutManager(this, 3);
@@ -179,6 +180,19 @@ public class LockScreenActivity extends AppCompatActivity {
         // Always show the expand button container
         expandButtonContainer.setVisibility(View.VISIBLE);
 
+        // Set up PIN visibility toggle
+        pinVisibilityToggle.setOnClickListener(v -> {
+            if (pinInput.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+                // Show PIN
+                pinInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                pinVisibilityToggle.setImageResource(R.drawable.ic_eye_off);
+            } else {
+                // Hide PIN
+                pinInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                pinVisibilityToggle.setImageResource(R.drawable.ic_eye);
+            }
+        });
+
         // Set up expand button click listener
         expandAppsButton.setOnClickListener(v -> {
             if (!isExpanded) {
@@ -195,8 +209,37 @@ public class LockScreenActivity extends AppCompatActivity {
                 }
                 appsAdapter.notifyDataSetChanged();
                 
-                // Show the RecyclerView
+                // Show the RecyclerView with smooth animation
                 appsRecycler.setVisibility(View.VISIBLE);
+                appsRecycler.setAlpha(0f);
+                appsRecycler.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start();
+                
+                // Animate arrow to bottom of main content container (above the apps)
+                // Get the parent apps container and calculate the exact position
+                View parentAppsContainer = findViewById(R.id.parentAppsContainer);
+                parentAppsContainer.post(() -> {
+                    int[] parentContainerLocation = new int[2];
+                    parentAppsContainer.getLocationInWindow(parentContainerLocation);
+                    int parentContainerTop = parentContainerLocation[1];
+                    
+                    int[] arrowLocation = new int[2];
+                    expandButtonContainer.getLocationInWindow(arrowLocation);
+                    int arrowCurrentY = arrowLocation[1];
+                    
+                    // Move arrow to just above the parent container (with 20dp buffer)
+                    int bufferPixels = (int) (20 * getResources().getDisplayMetrics().density);
+                    int targetY = parentContainerTop - bufferPixels;
+                    int distanceToMove = arrowCurrentY - targetY;
+                    
+                    expandButtonContainer.animate()
+                        .translationY(-distanceToMove)
+                        .setDuration(300)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start();
+                });
                 
                 // Scroll to show all apps after a short delay
                 appsRecycler.postDelayed(() -> {
@@ -207,15 +250,26 @@ public class LockScreenActivity extends AppCompatActivity {
                 currentAppModels.clear();
                 appsAdapter.notifyDataSetChanged();
                 
-                // Hide the RecyclerView
-                appsRecycler.setVisibility(View.GONE);
+                // Hide the RecyclerView with smooth animation
+                appsRecycler.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> appsRecycler.setVisibility(View.GONE))
+                    .start();
+                
+                // Animate arrow back to bottom position
+                expandButtonContainer.animate()
+                    .translationY(0f)
+                    .setDuration(300)
+                    .setInterpolator(new android.view.animation.OvershootInterpolator(0.8f))
+                    .start();
             }
 
             isExpanded = !isExpanded;
 
-            // Rotate the expand icon (180° for expanded, 0° for collapsed)
+            // Rotate the expand icon (0° for expanded pointing down, 180° for collapsed pointing up)
             expandAppsButton.animate()
-                .rotation(isExpanded ? 180 : 0)
+                .rotation(isExpanded ? 0 : 180)
                 .setDuration(300)
                 .start();
         });
@@ -226,7 +280,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Initially Hide PIN Input and Keep Apps Visible
         unlockInputsContainer.setVisibility(View.GONE);
-        appsSection.setVisibility(View.VISIBLE);
+        // appsSection.setVisibility(View.VISIBLE); // This line is removed
 
         unlockPromptButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,14 +288,18 @@ public class LockScreenActivity extends AppCompatActivity {
                 // Show PIN Input when unlocking and hide apps
                 unlockInputsContainer.setVisibility(View.VISIBLE);
                 unlockPromptButton.setVisibility(View.GONE);
-                appsSection.setVisibility(View.GONE);
+                expandButtonContainer.setVisibility(View.GONE);
 
-                // If additional apps were expanded, collapse them
+                // If apps were expanded, collapse them and reset arrow position
                 if (isExpanded) {
-                    currentAppModels.removeAll(additionalAppModels);
+                    currentAppModels.clear();
                     appsAdapter.notifyDataSetChanged();
                     isExpanded = false;
-                    expandAppsButton.setRotation(0);
+                    expandAppsButton.setRotation(180); // Reset to upward position
+                    
+                    // Reset arrow position
+                    expandButtonContainer.setTranslationY(0f);
+                    appsRecycler.setVisibility(View.GONE);
                 }
             }
         });
@@ -256,7 +314,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     // Hide unlock inputs and show main lock screen
                     unlockInputsContainer.setVisibility(View.GONE);
                     unlockPromptButton.setVisibility(View.VISIBLE);
-                    appsSection.setVisibility(View.VISIBLE);
+                    expandButtonContainer.setVisibility(View.VISIBLE);
 
                     pinInput.setText("");
                 } else {
