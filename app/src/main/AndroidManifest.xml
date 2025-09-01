@@ -3,11 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Declare that telephony is used, but not strictly required -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <queries>
         <!-- Allow querying all apps with launcher activities (for whitelist selection) -->
@@ -86,6 +89,22 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- SMS Status Receivers -->
+        <receiver
+            android:name=".utils.OTPManager$SmsSentReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.grepguru.focuslock.SMS_SENT_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".utils.OTPManager$SmsDeliveredReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.grepguru.focuslock.SMS_DELIVERED_ACTION" />
             </intent-filter>
         </receiver>
 
