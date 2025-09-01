@@ -310,7 +310,7 @@ public class EnhancedUnlockManager {
                 
             case ACCOUNTABILITY_PARTNER_OTP:
                 // Simple validation - let backend handle OTP logic
-                if (otpManager.validateOTP(enteredPin)) {
+                if (otpManager.verifyOTP(enteredPin)) {
                     return true;
                 } else {
                     showPinError(pinInput, statusText, "Wrong unlock code! Check again.");

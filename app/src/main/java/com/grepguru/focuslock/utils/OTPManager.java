@@ -237,15 +237,15 @@ public class OTPManager {
         
         boolean startsWithPlus = phoneNumber.trim().startsWith("+");
         // Removes spaces, hyphens, parentheses, dots. Keeps plus if explicitly at start.
-        String cleaned = phoneNumber.replaceAll("[\s\-().]", ""); 
+        String cleaned = phoneNumber.replaceAll("[\\s\\-().]", ""); 
         if (startsWithPlus && !cleaned.startsWith("+")) { // Ensure plus is preserved if originally there
-            cleaned = "+" + cleaned.replaceAll("\+", ""); // Remove other pluses
+            cleaned = "+" + cleaned.replaceAll("\\+", ""); // Remove other pluses
         } else {
-            cleaned = cleaned.replaceAll("\+", ""); // Remove all pluses if not explicitly international
+            cleaned = cleaned.replaceAll("\\+", ""); // Remove all pluses if not explicitly international
         }
 
 
-        if (!cleaned.matches("^\+?\d+$") && !cleaned.matches("^\d+$")) { // Allows optional plus at start, then digits
+        if (!cleaned.matches("^\\+?\\d+$") && !cleaned.matches("^\\d+$")) { // Allows optional plus at start, then digits
              Log.e(TAG, "Phone number contains invalid characters after cleaning: " + cleaned + " (Original: " + phoneNumber + ")");
              return null;
         }
@@ -269,7 +269,7 @@ public class OTPManager {
         }
 
         if (countryCode != null && !countryCode.trim().isEmpty()) {
-            String code = countryCode.trim().replaceAll("[^\d]", "");
+            String code = countryCode.trim().replaceAll("[^\\d]", "");
             if (code.isEmpty() || code.length() > 4) {
                 Log.e(TAG, "Invalid country code format: " + countryCode);
                  // Proceed with cleaned number as local if country code is bad
@@ -305,7 +305,7 @@ public class OTPManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             Log.i(TAG, "Default SMS Subscription ID: " + SmsManager.getDefaultSmsSubscriptionId());
              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Log.i(TAG, "Default Data Subscription ID: " + TelephonyManager.getDefaultDataSubscriptionId());
+                 // Log.i(TAG, "Default Data Subscription ID: " + TelephonyManager.getDefaultDataSubscriptionId());
             }
         }
         Log.i(TAG, "Network Operator: " + tm.getNetworkOperatorName());
