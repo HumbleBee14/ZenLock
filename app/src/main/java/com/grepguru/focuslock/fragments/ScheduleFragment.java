@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,6 +69,15 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void initializeViews(View view) {
+        // Coming soon banner
+        View comingSoonBanner = view.findViewById(R.id.comingSoonBanner);
+        ImageView dismissBanner = view.findViewById(R.id.dismissScheduleBanner);
+        
+        // Handle banner dismissal (but always show it when fragment loads)
+        dismissBanner.setOnClickListener(v -> {
+            comingSoonBanner.setVisibility(View.GONE);
+        });
+
         // Create schedule button
         createScheduleBtn = view.findViewById(R.id.createScheduleBtn);
         

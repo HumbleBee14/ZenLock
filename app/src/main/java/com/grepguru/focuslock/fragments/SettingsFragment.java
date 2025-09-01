@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -113,6 +114,10 @@ public class SettingsFragment extends Fragment {
         // Warning message
         noUnlockMethodsWarning = view.findViewById(R.id.noUnlockMethodsWarning);
 
+        // Feedback and Support Cards
+        View feedbackCard = view.findViewById(R.id.feedbackCard);
+        View supportDeveloperCard = view.findViewById(R.id.supportDeveloperCard);
+
         // Load existing settings
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
@@ -154,6 +159,13 @@ public class SettingsFragment extends Fragment {
 
     private void setupListeners(View view) {
         Button whitelistButton = view.findViewById(R.id.whitelistButton);
+
+        // Feedback and Support Card Listeners
+        View feedbackCard = view.findViewById(R.id.feedbackCard);
+        View supportDeveloperCard = view.findViewById(R.id.supportDeveloperCard);
+
+        feedbackCard.setOnClickListener(v -> openFeedbackEmail());
+        supportDeveloperCard.setOnClickListener(v -> openSupportPage());
 
         // Toggle Super Strict Mode
         superStrictModeToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -612,5 +624,39 @@ public class SettingsFragment extends Fragment {
             })
             .setIcon(android.R.drawable.ic_dialog_alert)
             .show();
+    }
+
+    /**
+     * Opens email app for sending feedback to developer
+     */
+    private void openFeedbackEmail() {
+        try {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            emailIntent.setData(Uri.parse("mailto:developer@focuslock.com")); // Replace with your actual email
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Focus Lock - Feedback & Suggestions");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, 
+                "Hi! I'd like to share some feedback about Focus Lock:\n\n" +
+                "App Version: 1.0\n" +
+                "Android Version: " + android.os.Build.VERSION.RELEASE + "\n" +
+                "Device: " + android.os.Build.MODEL + "\n\n" +
+                "My feedback:\n");
+            
+            startActivity(Intent.createChooser(emailIntent, "Send Feedback"));
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "No email app found. Please send feedback to developer@focuslock.com", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Opens Buy Me a Coffee page in web browser
+     */
+    private void openSupportPage() {
+        try {
+            String supportUrl = "https://buymeacoffee.com/focuslockdev"; // Replace with your actual Buy Me a Coffee link
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supportUrl));
+            startActivity(browserIntent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Unable to open browser. Please visit: buymeacoffee.com/focuslockdev", Toast.LENGTH_LONG).show();
+        }
     }
 }

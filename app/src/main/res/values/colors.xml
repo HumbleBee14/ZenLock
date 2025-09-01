@@ -47,7 +47,8 @@
     <color name="warning">#F59E0B</color>           <!-- Warning states -->
     <color name="error">#EF4444</color>             <!-- Error states -->
     <color name="info">#3B82F6</color>              <!-- Info states -->
-    <color name="warningText">#FEB2B2</color>       <!-- Warning text color -->
+    <color name="warningText">#D97706</color>       <!-- Warning text color -->
+    <color name="warningBackground">#FEF3C7</color> <!-- Warning banner background -->
     
     <!-- Legacy Compatibility (Gradually Remove) -->
     <color name="primaryTeal">@color/primary</color>

@@ -75,6 +75,15 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void initializeViews(View view) {
+        // Coming soon banner
+        View comingSoonBanner = view.findViewById(R.id.comingSoonBanner);
+        ImageView dismissBanner = view.findViewById(R.id.dismissAnalyticsBanner);
+        
+        // Handle banner dismissal (but always show it when fragment loads)
+        dismissBanner.setOnClickListener(v -> {
+            comingSoonBanner.setVisibility(View.GONE);
+        });
+
         // Today's stats
         todaySessions = view.findViewById(R.id.todaySessions);
         todayTime = view.findViewById(R.id.todayTime);
