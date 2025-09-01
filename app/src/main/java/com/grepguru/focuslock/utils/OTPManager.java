@@ -305,7 +305,12 @@ public class OTPManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             Log.i(TAG, "Default SMS Subscription ID: " + SmsManager.getDefaultSmsSubscriptionId());
              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                 // Log.i(TAG, "Default Data Subscription ID: " + TelephonyManager.getDefaultDataSubscriptionId());
+                 try {
+                     // getDefaultDataSubscriptionId() was added in API 24 (Android N)
+                     Log.i(TAG, "Default Data Subscription ID: " + android.telephony.SubscriptionManager.getDefaultDataSubscriptionId());
+                 } catch (Exception e) {
+                     Log.w(TAG, "Could not get default data subscription ID: " + e.getMessage());
+                 }
             }
         }
         Log.i(TAG, "Network Operator: " + tm.getNetworkOperatorName());
