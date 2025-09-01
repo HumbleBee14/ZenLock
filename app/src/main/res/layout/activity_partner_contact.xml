@@ -129,17 +129,74 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <EditText
-                        android:id="@+id/partnerPhoneInput"
+                    <!-- Country Code and Phone Number -->
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:hint="+91 98765 43210"
-                        android:inputType="phone"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <EditText
+                            android:id="@+id/countryCodeInput"
+                            android:layout_width="80dp"
+                            android:layout_height="48dp"
+                            android:hint="+1"
+                            android:inputType="phone"
+                            android:background="@drawable/modern_input_background"
+                            android:textColor="@color/textPrimary"
+                            android:textColorHint="@color/textHint"
+                            android:padding="12dp"
+                            android:textSize="16sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="8dp"/>
+
+                        <EditText
+                            android:id="@+id/partnerPhoneInput"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:hint="9876543210"
+                            android:inputType="phone"
+                            android:background="@drawable/modern_input_background"
+                            android:textColor="@color/textPrimary"
+                            android:textColorHint="@color/textHint"
+                            android:padding="12dp"
+                            android:textSize="16sp"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💡 Example: +1 for US, +44 for UK"
+                        style="@style/ModernText.Caption"
+                        android:textColor="@color/textSecondary"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Permission Warning (moved here to be visible above keyboard) -->
+                    <TextView
+                        android:id="@+id/permissionWarning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️ SMS permission required. Click here to grant permission."
+                        android:textSize="14sp"
+                        android:textColor="@android:color/holo_orange_dark"
                         android:background="@drawable/modern_input_background"
-                        android:textColor="@color/textPrimary"
-                        android:textColorHint="@color/textHint"
                         android:padding="12dp"
-                        android:textSize="16sp"/>
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <!-- Test OTP Button -->
+                    <Button
+                        android:id="@+id/testOtpButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Send Test OTP"
+                        style="@style/ModernButton.Secondary"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone"/>
 
                 </LinearLayout>
 
@@ -153,9 +210,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/backgroundTertiary"
+            app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="8dp"
             app:layout_constraintTop_toBottomOf="@id/smsCard">
 
             <LinearLayout
@@ -178,15 +235,15 @@
                         android:layout_weight="1"
                         android:text="Email Contact"
                         style="@style/ModernText.Subheading"
-                        android:textColor="@color/textTertiary"/>
+                        android:textColor="@color/textPrimary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Coming Soon"
                         style="@style/ModernText.Caption"
-                        android:textColor="@color/textTertiary"
-                        android:background="@drawable/modern_button_secondary"
+                        android:textColor="@color/accent"
+                        android:background="@drawable/modern_input_background"
                         android:padding="8dp"
                         android:textSize="12sp"/>
 
@@ -198,35 +255,34 @@
                     android:layout_height="wrap_content"
                     android:text="Send OTP via email to trusted contact"
                     style="@style/ModernText.Caption"
-                    android:textColor="@color/textTertiary"
+                    android:textColor="@color/textSecondary"
                     android:layout_marginBottom="16dp"/>
 
-                <!-- Email Input (Disabled) -->
+                <!-- Email Input -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:alpha="0.5">
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Partner's Email Address"
                         style="@style/ModernText.Body"
-                        android:textColor="@color/textTertiary"
+                        android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
                     <EditText
+                        android:id="@+id/partnerEmailInput"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:hint="partner@example.com"
                         android:inputType="textEmailAddress"
                         android:background="@drawable/modern_input_background"
-                        android:textColor="@color/textTertiary"
-                        android:textColorHint="@color/textTertiary"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textHint"
                         android:padding="12dp"
-                        android:textSize="16sp"
-                        android:enabled="false"/>
+                        android:textSize="16sp"/>
 
                 </LinearLayout>
 

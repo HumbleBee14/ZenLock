@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/modern_dialog_background">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/unlockMethodTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter PIN"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/unlockMethodDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your PIN to unlock"
+        android:textSize="16sp"
+        android:textColor="@color/textSecondary"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- OTP Request Section (for accountability partner) -->
+    <LinearLayout
+        android:id="@+id/otpRequestSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/requestOtpButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send OTP to Partner"
+            android:textSize="16sp"
+            android:background="@drawable/modern_button_primary"
+            android:textColor="@color/white"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Manual Send Button (Always Available) -->
+        <Button
+            android:id="@+id/sendOtpAgainButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Again"
+            android:textSize="14sp"
+            android:background="@drawable/modern_button_secondary"
+            android:textColor="@color/textSecondary"
+            android:padding="12dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- Status Text (for both PIN and OTP errors) -->
+    <TextView
+        android:id="@+id/otpStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="14sp"
+        android:textColor="@color/textSecondary"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <!-- PIN Input Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/pin_input_background"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:layout_marginBottom="20dp">
+
+        <EditText
+            android:id="@+id/pinInput"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:hint="Enter 4-digit PIN"
+            android:textColor="@color/white"
+            android:textColorHint="@color/textHint"
+            android:inputType="numberPassword"
+            android:maxLength="4"
+            android:background="@null"
+            android:padding="0dp"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:textCursorDrawable="@null"
+            android:letterSpacing="0.15"/>
+
+        <ImageView
+            android:id="@+id/pinVisibilityToggle"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_eye"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:contentDescription="Toggle PIN visibility"
+            android:alpha="0.8"/>
+
+    </LinearLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textSize="16sp"
+            android:background="@drawable/modern_button_secondary"
+            android:textColor="@color/textSecondary"
+            android:padding="16dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Unlock"
+            android:textSize="16sp"
+            android:background="@drawable/modern_button_primary"
+            android:textColor="@color/white"
+            android:padding="16dp"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

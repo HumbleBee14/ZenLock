@@ -37,7 +37,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Today's Stats Card -->
+        <!-- Today's Focus Dashboard Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/todayStatsCard"
             android:layout_width="match_parent"
@@ -54,12 +54,41 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Today's Focus"
-                    style="@style/ModernText.Subheading"
-                    android:layout_marginBottom="16dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_timer"
+                        app:tint="@color/primary"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Today's Focus"
+                        style="@style/ModernText.Subheading"/>
+
+                    <TextView
+                        android:id="@+id/todayTrendIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗️ +15%"
+                        android:textSize="12sp"
+                        android:textColor="@color/success"
+                        android:background="@drawable/modern_card_background"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"/>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -79,7 +108,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="28sp"
+                            android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/primary"
                             android:fontFamily="sans-serif-medium"/>
@@ -90,6 +119,16 @@
                             android:text="Sessions"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
+
+                        <ProgressBar
+                            android:id="@+id/sessionsProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="50dp"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="4dp"
+                            android:progress="0"
+                            android:max="10"
+                            android:progressTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -105,7 +144,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0m"
-                            android:textSize="28sp"
+                            android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/secondary"
                             android:fontFamily="sans-serif-medium"/>
@@ -117,6 +156,16 @@
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
+                        <ProgressBar
+                            android:id="@+id/timeProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="50dp"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="4dp"
+                            android:progress="0"
+                            android:max="480"
+                            android:progressTint="@color/secondary"/>
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -127,11 +176,11 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/todayCompletion"
+                            android:id="@+id/todayFocusScore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textSize="28sp"
+                            android:text="85"
+                            android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/success"
                             android:fontFamily="sans-serif-medium"/>
@@ -139,9 +188,19 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Completion"
+                            android:text="Focus Score"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
+
+                        <ProgressBar
+                            android:id="@+id/focusScoreProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="50dp"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="4dp"
+                            android:progress="85"
+                            android:max="100"
+                            android:progressTint="@color/success"/>
 
                     </LinearLayout>
 
@@ -151,9 +210,9 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- This Week Stats Card -->
+        <!-- Streaks and Achievements Card -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/weekStatsCard"
+            android:id="@+id/streaksCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -168,17 +227,33 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="This Week"
-                    style="@style/ModernText.Subheading"
-                    android:layout_marginBottom="16dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_analytics"
+                        app:tint="@color/success"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Streaks &amp; Achievements"
+                        style="@style/ModernText.Subheading"/>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -188,63 +263,11 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/weekSessions"
+                            android:id="@+id/currentStreak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sessions"
-                            style="@style/ModernText.Caption"
-                            android:textColor="@color/textSecondary"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/weekTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0h"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/secondary"
-                            android:fontFamily="sans-serif-medium"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Time"
-                            style="@style/ModernText.Caption"
-                            android:textColor="@color/textSecondary"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/weekStreak"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
+                            android:text="5"
+                            android:textSize="28sp"
                             android:textStyle="bold"
                             android:textColor="@color/success"
                             android:fontFamily="sans-serif-medium"/>
@@ -252,11 +275,90 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Day Streak"
+                            android:text="Current Streak"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/bestStreak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="12"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary"
+                            android:fontFamily="sans-serif-medium"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Best Streak"
+                            style="@style/ModernText.Caption"
+                            android:textColor="@color/textSecondary"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/weeklyGoal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="75%"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/secondary"
+                            android:fontFamily="sans-serif-medium"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Weekly Goal"
+                            style="@style/ModernText.Caption"
+                            android:textColor="@color/textSecondary"/>
+
+                        <ProgressBar
+                            android:id="@+id/weeklyGoalProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="50dp"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="4dp"
+                            android:progress="75"
+                            android:max="100"
+                            android:progressTint="@color/secondary"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Achievement Level -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Focus Level: Intermediate"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textSecondary"/>
 
                 </LinearLayout>
 
@@ -264,7 +366,378 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Recent Sessions Card -->
+        <!-- Focus Trends Expandable Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/focusTrendsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:layout_constraintTop_toBottomOf="@id/streaksCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <LinearLayout
+                    android:id="@+id/focusTrendsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Screen Time Insights"
+                        style="@style/ModernText.Subheading"/>
+
+                    <ImageView
+                        android:id="@+id/focusTrendsExpandIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/textSecondary"
+                        android:rotation="180"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/focusTrendsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Daily vs Weekly Comparison -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="This Week vs Last Week"
+                            style="@style/ModernText.Body"
+                            android:textColor="@color/textPrimary"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="↗️ +23%"
+                            android:textSize="14sp"
+                            android:textColor="@color/success"
+                            android:background="@drawable/modern_card_background"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"/>
+
+                    </LinearLayout>
+
+                    <!-- Screen Lock Statistics -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Screen Time Saved"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="3.2h"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Today"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="22.5h"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This Week"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Weekly Progress Chart -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Daily Focus Sessions"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Chart Container with reference line -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:background="@drawable/modern_card_background"
+                        android:padding="16dp">
+
+                        <!-- Target reference line (dotted) -->
+                        <View
+                            android:id="@+id/targetReferenceLine"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_centerVertical="true"
+                            android:background="@color/textSecondary"
+                            android:alpha="0.5"/>
+
+                        <!-- Chart bars container -->
+                        <LinearLayout
+                            android:id="@+id/chartBarsContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="80dp"
+                            android:orientation="horizontal"
+                            android:gravity="bottom"
+                            android:layout_centerInParent="true">
+
+                            <!-- Day 1 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="25dp" 
+                                    android:background="@color/warning"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/26"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 2 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="45dp" 
+                                    android:background="@color/success"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/27"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 3 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="30dp" 
+                                    android:background="@color/warning"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/28"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 4 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="55dp" 
+                                    android:background="@color/success"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/29"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 5 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="35dp" 
+                                    android:background="@color/warning"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/30"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 6 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal"
+                                android:layout_marginEnd="4dp">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="60dp" 
+                                    android:background="@color/success"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8/31"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textSecondary"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                            <!-- Day 7 (Today) -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center_horizontal">
+
+                                <View 
+                                    android:layout_width="12dp" 
+                                    android:layout_height="70dp" 
+                                    android:background="@color/success"
+                                    android:layout_marginBottom="4dp"/>
+                                
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="9/01"
+                                    android:textSize="9sp"
+                                    android:textColor="@color/textPrimary"
+                                    android:textStyle="bold"
+                                    android:rotation="-15"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Recent Sessions Expandable Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/recentSessionsCard"
             android:layout_width="match_parent"
@@ -273,7 +746,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp"
-            app:layout_constraintTop_toBottomOf="@id/weekStatsCard">
+            app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -281,28 +754,255 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Recent Sessions"
-                    style="@style/ModernText.Subheading"
-                    android:layout_marginBottom="16dp"/>
-
-                <TextView
-                    android:id="@+id/recentSessionsText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No sessions yet. Start your first focus session!"
-                    style="@style/ModernText.Body"
-                    android:textColor="@color/textSecondary"/>
-
                 <LinearLayout
-                    android:id="@+id/recentSessionsContainer"
+                    android:id="@+id/recentSessionsHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <!-- Recent session items will be added dynamically -->
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Recent Sessions"
+                        style="@style/ModernText.Subheading"/>
+
+                    <ImageView
+                        android:id="@+id/recentSessionsExpandIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/textSecondary"
+                        android:rotation="180"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/recentSessionsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:id="@+id/recentSessionsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No sessions yet. Start your first focus session!"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textSecondary"
+                        android:visibility="gone"/>
+
+                    <LinearLayout
+                        android:id="@+id/recentSessionsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Sample Recent Session Items -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="16dp"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:text="✓"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/success"
+                                android:gravity="center"
+                                android:layout_marginEnd="12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Today, 2:30 PM"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Focus Session"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="end">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="45m"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Completed"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/success"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="16dp"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:text="✗"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/warning"
+                                android:gravity="center"
+                                android:layout_marginEnd="12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Yesterday, 10:15 AM"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Focus Session"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="end">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="32m"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Interrupted"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/warning"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:text="✓"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/success"
+                                android:gravity="center"
+                                android:layout_marginEnd="12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Yesterday, 3:45 PM"
+                                    android:textSize="16sp"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Focus Session"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="end">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1h 20m"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Completed"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/success"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

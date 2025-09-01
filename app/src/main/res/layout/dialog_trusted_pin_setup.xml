@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/backgroundSecondary">
+
+    <!-- Instructions -->
+    <TextView
+        android:id="@+id/instructionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Set your unlock PIN here.\n\nFor better accountability, consider having someone else set this PIN and not telling you what it is."
+        android:textSize="16sp"
+        android:textColor="@color/textPrimary"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- New PIN Input -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter 4-digit PIN"
+        android:textSize="14sp"
+        android:textColor="@color/textSecondary"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/newPinInput"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="••••"
+        android:inputType="numberPassword"
+        android:maxLength="4"
+        android:background="@drawable/modern_input_background"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textHint"
+        android:padding="16dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:letterSpacing="0.3"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Confirm PIN Input -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirm PIN"
+        android:textSize="14sp"
+        android:textColor="@color/textSecondary"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/confirmPinInput"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="••••"
+        android:inputType="numberPassword"
+        android:maxLength="4"
+        android:background="@drawable/modern_input_background"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textHint"
+        android:padding="16dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:letterSpacing="0.3"/>
+
+    <!-- Status Text for validation messages -->
+    <TextView
+        android:id="@+id/pinStatusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="14sp"
+        android:textColor="@color/error"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="@drawable/modern_input_background"
+        android:padding="12dp"/>
+
+    <!-- Security Notice -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔒 This PIN will be stored securely and can be changed anytime in settings."
+        android:textSize="12sp"
+        android:textColor="@color/textTertiary"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/modern_input_background"
+        android:padding="12dp"/>
+
+</LinearLayout>
