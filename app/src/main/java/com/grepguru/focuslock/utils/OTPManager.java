@@ -127,25 +127,15 @@ public class OTPManager {
         String message = "Your FocusLock OTP is: " + otp;
 
         try {
-            SmsManager smsManager;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                 // getSystemService(SmsManager.class) is preferred from API 23
-                smsManager = context.getSystemService(SmsManager.class);
-            } else {
-                smsManager = SmsManager.getDefault();
-            }
-             // For specific subscription ID (more complex, requires READ_PHONE_STATE and user choice usually)
-            // if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
-            //    int defaultSmsSubId = SmsManager.getDefaultSmsSubscriptionId();
-            //    Log.d(TAG, "Default SMS Subscription ID: " + defaultSmsSubId);
-            //    if (defaultSmsSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            //        smsManager = SmsManager.getSmsManagerForSubscriptionId(defaultSmsSubId);
-            //    } else {
-            //        Log.w(TAG, "No default SMS subscription ID found, using SmsManager.getDefault()");
-            //        smsManager = SmsManager.getDefault(); // Fallback
-            //    }
-            // }
+            // Since minSdk is 28 (which is >= Build.VERSION_CODES.M (23)),
+            // we can directly use getSystemService(SmsManager.class)
+            SmsManager smsManager = context.getSystemService(SmsManager.class);
 
+            if (smsManager == null) {
+                Log.e(TAG, "SmsManager not available.");
+                Toast.makeText(context, "❌ SMS service not available on this device.", Toast.LENGTH_LONG).show();
+                return false;
+            }
 
             Intent sentIntent = new Intent(ACTION_SMS_SENT);
             sentIntent.setPackage(context.getPackageName()); // Explicitly target this app's receiver
@@ -177,10 +167,6 @@ public class OTPManager {
                 ArrayList<PendingIntent> sentIntents = new ArrayList<>();
                 ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
                 for (int i = 0; i < parts.size(); i++) {
-                    // Use unique request codes for each part if fine-grained tracking per part is needed
-                    // For simplicity, re-using is okay if generic success/failure for the whole message is enough.
-                    // However, it's better to create new PIs or ensure they are distinct if possible.
-                    // For now, let's use the same PI for all parts for simplicity as the actions are generic.
                     sentIntents.add(sentPI);
                     deliveryIntents.add(deliveredPI);
                 }
@@ -304,14 +290,14 @@ public class OTPManager {
         Log.i(TAG, "SIM State: " + getSimStateString(tm.getSimState()));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             Log.i(TAG, "Default SMS Subscription ID: " + SmsManager.getDefaultSmsSubscriptionId());
-             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                 try {
-                     // getDefaultDataSubscriptionId() was added in API 24 (Android N)
-                     Log.i(TAG, "Default Data Subscription ID: " + android.telephony.SubscriptionManager.getDefaultDataSubscriptionId());
-                 } catch (Exception e) {
-                     Log.w(TAG, "Could not get default data subscription ID: " + e.getMessage());
-                 }
-            }
+            // The following line was causing a compile error and has been commented out.
+            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            //    try {
+            //        Log.i(TAG, "Default Data Subscription ID: " + android.telephony.SubscriptionManager.getDefaultDataSubscriptionId());
+            //    } catch (Exception e) {
+            //        Log.w(TAG, "Could not get default data subscription ID: " + e.getMessage());
+            //    }
+            // }
         }
         Log.i(TAG, "Network Operator: " + tm.getNetworkOperatorName());
         Log.i(TAG, "Network Country ISO: " + tm.getNetworkCountryIso());
