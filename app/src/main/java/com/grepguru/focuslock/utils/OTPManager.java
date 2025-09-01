@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OTPManager {
 
     private static final String TAG = "OTPManager";
-    private static final String PREF_NAME = "OTPManagerPrefs";
+    private static final String PREF_NAME = "FocusLockPrefs";
     private static final String KEY_CURRENT_OTP = "current_otp";
     private static final String KEY_OTP_EXPIRY = "otp_expiry";
     private static final String KEY_OTP_GENERATION_TIME = "otp_generation_time";
@@ -348,6 +348,24 @@ public class OTPManager {
         editor.remove(KEY_OTP_GENERATION_TIME);
         editor.apply();
         Log.d(TAG, "OTP cleared from SharedPreferences.");
+    }
+
+    /**
+     * Checks if SMS notifications are properly configured and enabled
+     * @return true if SMS is enabled and partner phone is configured
+     */
+    public boolean isSmsConfigured() {
+        boolean smsEnabled = preferences.getBoolean("enable_sms_notifications", false);
+        String partnerPhone = preferences.getString("partner_phone", "");
+        return smsEnabled && !partnerPhone.isEmpty();
+    }
+
+    /**
+     * Checks if SMS permission is granted
+     * @return true if SEND_SMS permission is granted
+     */
+    public boolean hasSmsPermission() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**

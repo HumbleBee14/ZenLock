@@ -1,9 +1,11 @@
 package com.grepguru.focuslock.utils;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.CountDownTimer;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.grepguru.focuslock.R;
@@ -199,9 +202,28 @@ public class EnhancedUnlockManager {
                 
                 // Keep it simple - just one button
                 requestOtpButton.setText("Send Unlock Code");
-                requestOtpButton.setEnabled(true);
+                
+                // Check if everything is properly configured
+                boolean hasSmsPermission = otpManager.hasSmsPermission();
+                boolean isPartnerConfigured = otpManager.isSmsConfigured();
+                
+                if (!hasSmsPermission) {
+                    requestOtpButton.setEnabled(false);
+                    requestOtpButton.setText("SMS Permission Required");
+                    otpStatusText.setText("⚠️ SMS permission required to send unlock codes");
+                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
+                } else if (!isPartnerConfigured) {
+                    requestOtpButton.setEnabled(false);
+                    requestOtpButton.setText("Partner Not Configured");
+                    otpStatusText.setText("⚠️ No partner contact configured. Set up in settings.");
+                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
+                } else {
+                    requestOtpButton.setEnabled(true);
+                    otpStatusText.setText("Code valid for 5 minutes only");
+                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+                }
+                
                 sendOtpAgainButton.setVisibility(View.GONE);
-                otpStatusText.setText("Code valid for 1 hour only");
                 otpStatusText.setVisibility(View.VISIBLE);
                 break;
         }
@@ -210,14 +232,46 @@ public class EnhancedUnlockManager {
     private void setupOTPRequest(Button requestOtpButton, Button sendOtpAgainButton, TextView otpStatusText) {
         // Simple send unlock code button
         requestOtpButton.setOnClickListener(v -> {
+            // Check SMS permission first
+            if (!otpManager.hasSmsPermission()) {
+                otpStatusText.setText("✗ SMS permission required to send unlock code");
+                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
+                otpStatusText.setVisibility(View.VISIBLE);
+                
+                // Show permission request if this is an Activity context
+                if (context instanceof Activity) {
+                    showPermissionDialog((Activity) context);
+                }
+                return;
+            }
+            
+            // Check if partner contact is configured
+            if (!otpManager.isSmsConfigured()) {
+                otpStatusText.setText("✗ SMS not enabled or partner not configured. Check settings.");
+                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
+                otpStatusText.setVisibility(View.VISIBLE);
+                return;
+            }
+            
+            // Disable button temporarily to prevent multiple clicks
+            requestOtpButton.setEnabled(false);
+            requestOtpButton.setText("Sending...");
+            otpStatusText.setText("📤 Sending unlock code to partner...");
+            otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+            
+            // Send OTP using the robust method
             if (otpManager.requestOTPFromPartner()) {
                 otpStatusText.setText("✓ Unlock code sent successfully!");
                 otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
                 Toast.makeText(context, "Unlock code sent to your partner", Toast.LENGTH_SHORT).show();
             } else {
-                otpStatusText.setText("✗ Failed to send unlock code");
+                otpStatusText.setText("✗ Failed to send unlock code - check settings");
                 otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             }
+            
+            // Re-enable button
+            requestOtpButton.setEnabled(true);
+            requestOtpButton.setText("Send Unlock Code");
         });
         
         // Hide the send again button - we don't need it
@@ -332,10 +386,17 @@ public class EnhancedUnlockManager {
             pinStatus.setVisibility(View.VISIBLE);
         }
         
-        // Update accountability partner status - only show "Not configured" when not configured
-        if (isAccountabilityPartnerConfigured()) {
-            partnerStatus.setVisibility(View.GONE); // Hide status when configured
-        } else {
+        // Update accountability partner status with detailed checks
+        boolean hasSmsPermission = otpManager.hasSmsPermission();
+        boolean isPartnerConfigured = isAccountabilityPartnerConfigured();
+        
+        if (isPartnerConfigured && hasSmsPermission) {
+            partnerStatus.setVisibility(View.GONE); // Hide status when fully configured
+        } else if (!hasSmsPermission) {
+            partnerStatus.setText("SMS permission required");
+            partnerStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
+            partnerStatus.setVisibility(View.VISIBLE);
+        } else if (!isPartnerConfigured) {
             partnerStatus.setText("Not configured");
             partnerStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
             partnerStatus.setVisibility(View.VISIBLE);
@@ -351,9 +412,7 @@ public class EnhancedUnlockManager {
     }
     
     private boolean isAccountabilityPartnerConfigured() {
-        boolean smsEnabled = preferences.getBoolean("enable_sms_notifications", false);
-        String partnerPhone = preferences.getString("partner_phone", "");
-        return smsEnabled && !partnerPhone.isEmpty();
+        return otpManager.isSmsConfigured();
     }
     
     private void cleanupTimers() {
@@ -361,6 +420,24 @@ public class EnhancedUnlockManager {
             otpTimer.cancel();
             otpTimer = null;
         }
+    }
+    
+    /**
+     * Show permission dialog to user
+     */
+    private void showPermissionDialog(Activity activity) {
+        new AlertDialog.Builder(context)
+            .setTitle("SMS Permission Required")
+            .setMessage("Focus Lock needs SMS permission to send unlock codes to your accountability partner. Would you like to grant this permission?")
+            .setPositiveButton("Grant Permission", (dialog, which) -> {
+                ActivityCompat.requestPermissions(activity, 
+                    new String[]{Manifest.permission.SEND_SMS}, 
+                    1000); // Request code for SMS permission
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> {
+                Toast.makeText(context, "SMS permission is required to send unlock codes", Toast.LENGTH_LONG).show();
+            })
+            .show();
     }
     
     /**
