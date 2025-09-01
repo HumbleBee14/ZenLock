@@ -24,6 +24,7 @@ import com.grepguru.focuslock.model.*;
 import com.grepguru.focuslock.ui.adapter.*;
 import com.grepguru.focuslock.utils.AppUtils;
 import com.grepguru.focuslock.utils.AnalyticsManager;
+import com.grepguru.focuslock.utils.EnhancedUnlockManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,12 +38,14 @@ public class LockScreenActivity extends AppCompatActivity {
     private boolean isLaunchingWhitelistedApp = false;
     private AnalyticsManager analyticsManager;
     private boolean isExpanded = false;
+    private EnhancedUnlockManager unlockManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         analyticsManager = new AnalyticsManager(this);
+        unlockManager = new EnhancedUnlockManager(this);
 
         // Detect reboot using system uptime
         long storedUptime = preferences.getLong("uptimeAtLock", -1);
@@ -282,29 +285,24 @@ public class LockScreenActivity extends AppCompatActivity {
         unlockInputsContainer.setVisibility(View.GONE);
         // appsSection.setVisibility(View.VISIBLE); // This line is removed
 
-        unlockPromptButton.setOnClickListener(new View.OnClickListener() {
+        // Set up enhanced unlock manager
+        unlockManager.setOnUnlockListener(new EnhancedUnlockManager.OnUnlockListener() {
             @Override
-            public void onClick(View v) {
-                // Show PIN Input when unlocking and hide apps
-                unlockInputsContainer.setVisibility(View.VISIBLE);
-                unlockPromptButton.setVisibility(View.GONE);
-                expandButtonContainer.setVisibility(View.GONE);
-
-                // If apps were expanded, collapse them and reset arrow position
-                if (isExpanded) {
-                    currentAppModels.clear();
-                    appsAdapter.notifyDataSetChanged();
-                    isExpanded = false;
-                    expandAppsButton.setRotation(180); // Reset to upward position
-                    
-                    // Reset arrow position
-                    expandButtonContainer.setTranslationY(0f);
-                    appsRecycler.setVisibility(View.GONE);
-                }
+            public void onUnlockSuccess(UnlockMethod method) {
+                handleUnlockSuccess(method);
+            }
+            
+            @Override
+            public void onUnlockCancelled() {
+                // User cancelled unlock, stay in lock screen
+                Toast.makeText(LockScreenActivity.this, "Unlock cancelled", Toast.LENGTH_SHORT).show();
             }
         });
 
-        unlockButton.setOnClickListener(v -> checkPinAndUnlock());
+        unlockPromptButton.setOnClickListener(v -> {
+            // Show enhanced unlock dialog
+            unlockManager.showUnlockDialog();
+        });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -356,32 +354,25 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
 
-    private void checkPinAndUnlock() {
-        String enteredPin = pinInput.getText().toString();
-        String savedPin = preferences.getString("lock_pin", "");
+    private void handleUnlockSuccess(UnlockMethod method) {
+        Toast.makeText(this, "Unlocked via " + method.getDisplayName(), Toast.LENGTH_SHORT).show();
 
-        if (enteredPin.equals(savedPin)) {
-            Toast.makeText(this, "Unlocked!", Toast.LENGTH_SHORT).show();
-
-            // End analytics session
-            if (analyticsManager.hasActiveSession()) {
-                analyticsManager.endSession(false); // Interrupted by manual unlock
-            }
-
-            // Reset lock state
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("isLocked", false); // Mark as unlocked
-            editor.remove("lockEndTime");
-            editor.apply();
-
-            // Return to MainActivity
-            Intent intent = new Intent(LockScreenActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Incorrect PIN!", Toast.LENGTH_SHORT).show();
+        // End analytics session
+        if (analyticsManager.hasActiveSession()) {
+            analyticsManager.endSession(false); // Interrupted by manual unlock
         }
+
+        // Reset lock state
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("isLocked", false); // Mark as unlocked
+        editor.remove("lockEndTime");
+        editor.apply();
+
+        // Return to MainActivity
+        Intent intent = new Intent(LockScreenActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
 
@@ -445,5 +436,12 @@ public class LockScreenActivity extends AppCompatActivity {
         }.start();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (unlockManager != null) {
+            unlockManager.cleanup();
+        }
+    }
 
 }

@@ -4,11 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,11 +28,11 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.grepguru.focuslock.R;
+import com.grepguru.focuslock.model.UnlockMethod;
 import com.grepguru.focuslock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
-    private EditText pinInput;
     private SwitchCompat superStrictModeToggle, defaultAppsToggle, quotesToggle;
     private SwitchCompat persistentNotificationToggle, autoRestartToggle;
     private RadioGroup securityLevelGroup;
@@ -38,6 +43,13 @@ public class SettingsFragment extends Fragment {
     private ImageView lockProtectionExpandIcon;
     private TextView lockProtectionSummary;
     private SharedPreferences preferences;
+    
+    // Enhanced unlock UI elements
+    private Button configurePinButton, clearPinButton;
+    private Button accountabilityPartnerButton;
+    private SwitchCompat pinUnlockToggle, partnerUnlockToggle;
+    private LinearLayout pinConfigSection, partnerConfigSection;
+    private LinearLayout noUnlockMethodsWarning;
 
     public SettingsFragment() {}
 
@@ -49,7 +61,6 @@ public class SettingsFragment extends Fragment {
         // Initialize components
         preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
 
-        pinInput = view.findViewById(R.id.pinInput);
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
         defaultAppsToggle = view.findViewById(R.id.defaultAppsToggle);
         quotesToggle = view.findViewById(R.id.quotesToggle);
@@ -68,9 +79,23 @@ public class SettingsFragment extends Fragment {
         lockProtectionExpandIcon = view.findViewById(R.id.lockProtectionExpandIcon);
         lockProtectionSummary = view.findViewById(R.id.lockProtectionSummary);
 
+        // Enhanced unlock UI elements
+        configurePinButton = view.findViewById(R.id.configurePinButton);
+        clearPinButton = view.findViewById(R.id.clearPinButton);
+        accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
+        
+        // Toggle switches for unlock methods
+        pinUnlockToggle = view.findViewById(R.id.pinUnlockToggle);
+        partnerUnlockToggle = view.findViewById(R.id.partnerUnlockToggle);
+        
+        // Expandable sections
+        pinConfigSection = view.findViewById(R.id.pinConfigSection);
+        partnerConfigSection = view.findViewById(R.id.partnerConfigSection);
+        
+        // Warning message
+        noUnlockMethodsWarning = view.findViewById(R.id.noUnlockMethodsWarning);
+
         // Load existing settings
-        pinInput.setText("");
-        pinInput.setText(preferences.getString("lock_pin", ""));
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         defaultAppsToggle.setChecked(preferences.getBoolean("allow_default_apps", true));
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
@@ -96,6 +121,9 @@ public class SettingsFragment extends Fragment {
                 break;
         }
 
+        // Update PIN button states
+        updateUnlockMethodStates();
+
         // Set up event listeners
         setupListeners(view);
 
@@ -103,12 +131,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupListeners(View view) {
-        Button saveButton = view.findViewById(R.id.saveButton);
-        Button setPinButton = view.findViewById(R.id.setPinButton);
         Button whitelistButton = view.findViewById(R.id.whitelistButton);
-
-        // Save Button Click Listener
-        saveButton.setOnClickListener(v -> saveSettings());
 
         // Toggle Super Strict Mode
         superStrictModeToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -172,69 +195,90 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
+        // PIN Unlock Toggle
+        pinUnlockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                pinConfigSection.setVisibility(View.VISIBLE);
+                // Don't auto-prompt for PIN setup - let user click the button
+            } else {
+                pinConfigSection.setVisibility(View.GONE);
+                // Clear PIN when disabled
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove("unlock_pin");
+                editor.apply();
+                updateUnlockMethodStates();
+            }
+        });
+
+        // Partner Unlock Toggle
+        partnerUnlockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                partnerConfigSection.setVisibility(View.VISIBLE);
+                // Don't auto-open configuration - let user click the button
+            } else {
+                partnerConfigSection.setVisibility(View.GONE);
+                // Clear partner settings when disabled
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove("partner_phone");
+                editor.remove("partner_email");
+                editor.remove("enable_sms_notifications");
+                editor.remove("enable_email_notifications");
+                editor.apply();
+                updateUnlockMethodStates();
+            }
+        });
+
+        // PIN Configuration Listeners
+        configurePinButton.setOnClickListener(v -> showPinSetupDialog());
+        
+        clearPinButton.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.remove("unlock_pin");
+            editor.apply();
+            updateUnlockMethodStates();
+            Toast.makeText(requireContext(), "PIN cleared", Toast.LENGTH_SHORT).show();
+        });
+
         // Partner Contact Configuration
-        Button accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
-        
-        // Enable the button and launch PartnerContactActivity
-        accountabilityPartnerButton.setEnabled(true);
-        accountabilityPartnerButton.setAlpha(1.0f);
-        accountabilityPartnerButton.setText("Configure Partner Contact");
-        
         accountabilityPartnerButton.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), com.grepguru.focuslock.PartnerContactActivity.class);
             startActivity(intent);
         });
-
-        setPinButton.setOnClickListener(v -> {
-            String pin = pinInput.getText().toString().trim();
-
-            if (pin.isEmpty()) {
-                // Show confirmation dialog to clear PIN
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("Clear PIN?")
-                        .setMessage("Are you sure you want to remove the PIN? Lock screen will not require a PIN if cleared!")
-                        .setPositiveButton("Yes, Clear", (dialog, which) -> {
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.remove("lock_pin");
-                            editor.apply();
-
-                            Toast.makeText(getActivity(), "PIN Removed Successfully!", Toast.LENGTH_SHORT).show();
-                            pinInput.setText("");
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .show();
-            } else if (pin.length() < 4) {
-                Toast.makeText(getActivity(), "PIN must be 4 digits", Toast.LENGTH_SHORT).show();
-            } else if (!pin.matches("\\d{4}")) {
-                Toast.makeText(getActivity(), "PIN must contain only numbers", Toast.LENGTH_SHORT).show();
-            } else {
-                // Save the PIN
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("lock_pin", pin);
-                editor.apply();
-
-                Toast.makeText(getActivity(), "PIN Set Successfully!", Toast.LENGTH_SHORT).show();
-                pinInput.setText("");
-            }
-        });
     }
 
-    private void saveSettings() {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("super_strict_mode", superStrictModeToggle.isChecked());
-        editor.putBoolean("allow_default_apps", defaultAppsToggle.isChecked());
-        editor.putBoolean("show_quotes", quotesToggle.isChecked());
-        editor.apply();
-
-        Toast.makeText(getActivity(), "Settings Saved!", Toast.LENGTH_SHORT).show();
-        pinInput.setText("");
-
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragmentContainer, new HomeFragment())
-                .commit();
+    private void updateUnlockMethodStates() {
+        // Check PIN status
+        String existingPin = preferences.getString("unlock_pin", "");
+        boolean pinConfigured = !existingPin.isEmpty();
+        
+        pinUnlockToggle.setChecked(pinConfigured);
+        pinConfigSection.setVisibility(pinConfigured ? View.VISIBLE : View.GONE);
+        
+        if (pinConfigured) {
+            configurePinButton.setText("Change PIN");
+            clearPinButton.setVisibility(View.VISIBLE);
+        } else {
+            configurePinButton.setText("Set PIN");
+            clearPinButton.setVisibility(View.GONE);
+        }
+        
+        // Check Partner status
+        String partnerPhone = preferences.getString("partner_phone", "");
+        boolean partnerConfigured = !partnerPhone.isEmpty();
+        
+        partnerUnlockToggle.setChecked(partnerConfigured);
+        partnerConfigSection.setVisibility(partnerConfigured ? View.VISIBLE : View.GONE);
+        
+        if (partnerConfigured) {
+            accountabilityPartnerButton.setText("Update Contact");
+        } else {
+            accountabilityPartnerButton.setText("Configure Contact");
+        }
+        
+        // Show/hide warning message based on unlock method availability
+        boolean hasAnyUnlockMethod = pinConfigured || partnerConfigured;
+        noUnlockMethodsWarning.setVisibility(hasAnyUnlockMethod ? View.GONE : View.VISIBLE);
     }
-
 
     private void setupExpandableSections() {
         // Lock Protection expandable section
@@ -262,6 +306,236 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        pinInput.setText("");
+        updateUnlockMethodStates();
+    }
+    
+    private void showPinSetupDialog() {
+        String existingPin = preferences.getString("unlock_pin", "");
+        if (!existingPin.isEmpty()) {
+            // PIN already exists, verify current PIN first
+            showCurrentPinVerificationDialog();
+        } else {
+            // No PIN exists, go directly to setup
+            showActualPinDialog();
+        }
+    }
+    
+    private void showCurrentPinVerificationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_pin_input, null);
+        
+        EditText pinInput = dialogView.findViewById(R.id.pinInput);
+        TextView otpStatusText = dialogView.findViewById(R.id.otpStatusText);
+        TextView titleText = dialogView.findViewById(R.id.unlockMethodTitle);
+        TextView instructionText = dialogView.findViewById(R.id.unlockMethodDescription);
+        
+        // Set up for current PIN verification
+        titleText.setText("Verify Current PIN");
+        instructionText.setText("Enter your current PIN to change it");
+        
+        // Hide OTP-specific buttons
+        Button requestOtpButton = dialogView.findViewById(R.id.requestOtpButton);
+        Button sendOtpAgainButton = dialogView.findViewById(R.id.sendOtpAgainButton);
+        if (requestOtpButton != null) requestOtpButton.setVisibility(View.GONE);
+        if (sendOtpAgainButton != null) sendOtpAgainButton.setVisibility(View.GONE);
+        
+        // Setup input watcher for visual feedback
+        setupCurrentPinInputWatcher(pinInput, otpStatusText);
+        
+        builder.setView(dialogView)
+               .setTitle("PIN Verification")
+               .setPositiveButton("Verify", null)
+               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        
+        AlertDialog dialog = builder.create();
+        
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String enteredPin = pinInput.getText().toString().trim();
+                if (validateCurrentPin(enteredPin, pinInput, otpStatusText)) {
+                    dialog.dismiss();
+                    showActualPinDialog(); // Show PIN setup dialog after successful verification
+                }
+            });
+        });
+        
+        dialog.show();
+    }
+    
+    private void showActualPinDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_trusted_pin_setup, null);
+        
+        EditText newPinInput = dialogView.findViewById(R.id.newPinInput);
+        EditText confirmPinInput = dialogView.findViewById(R.id.confirmPinInput);
+        TextView instructionText = dialogView.findViewById(R.id.instructionText);
+        TextView pinStatusText = dialogView.findViewById(R.id.pinStatusText);
+        
+        // Setup input watchers for visual feedback
+        setupPinSetupInputWatcher(newPinInput, confirmPinInput, pinStatusText);
+        
+        // Check if PIN already exists
+        String existingPin = preferences.getString("unlock_pin", "");
+        if (!existingPin.isEmpty()) {
+            instructionText.setText("⚠️ PIN already configured.\n\nTo change it, enter a new PIN twice below.");
+        } else {
+            instructionText.setText("💡 Set your unlock PIN here.\n\n" +
+                                  "💭 Suggestion: You could ask a friend to set this PIN " +
+                                  "for better accountability - that way you won't know what it is!");
+        }
+        
+        builder.setView(dialogView)
+               .setTitle("PIN Setup")
+               .setPositiveButton("Set PIN", null) // Set to null initially
+               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        
+        AlertDialog dialog = builder.create();
+        
+        // Override positive button to validate before closing
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String newPin = newPinInput.getText().toString().trim();
+                String confirmPin = confirmPinInput.getText().toString().trim();
+                
+                if (validatePinSetup(newPin, confirmPin, newPinInput, confirmPinInput, pinStatusText)) {
+                    // Save PIN
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("unlock_pin", newPin);
+                    editor.apply();
+                    
+                    updateUnlockMethodStates();
+                    showPinSetupSuccess(pinStatusText);
+                    
+                    // Close dialog after a brief delay to show success message
+                    pinStatusText.postDelayed(() -> dialog.dismiss(), 1500);
+                }
+            });
+        });
+        
+        dialog.show();
+    }
+    
+    private void setupPinSetupInputWatcher(EditText newPinInput, EditText confirmPinInput, TextView statusText) {
+        TextWatcher inputWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                resetPinSetupInputState(newPinInput, confirmPinInput, statusText);
+            }
+            
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+        
+        newPinInput.addTextChangedListener(inputWatcher);
+        confirmPinInput.addTextChangedListener(inputWatcher);
+    }
+    
+    private void resetPinSetupInputState(EditText newPinInput, EditText confirmPinInput, TextView statusText) {
+        // Reset input field colors to normal
+        ColorStateList normalColor = ColorStateList.valueOf(Color.parseColor("#808080"));
+        newPinInput.setBackgroundTintList(normalColor);
+        confirmPinInput.setBackgroundTintList(normalColor);
+        
+        // Hide status text
+        statusText.setVisibility(View.GONE);
+    }
+    
+    private boolean validatePinSetup(String newPin, String confirmPin, EditText newPinInput, EditText confirmPinInput, TextView statusText) {
+        if (newPin.isEmpty() || confirmPin.isEmpty()) {
+            showPinSetupError("Please fill both PIN fields", newPinInput, confirmPinInput, statusText);
+            return false;
+        }
+        
+        if (newPin.length() != 4 || !newPin.matches("\\d{4}")) {
+            showPinSetupError("PIN must be exactly 4 digits", newPinInput, confirmPinInput, statusText);
+            return false;
+        }
+        
+        if (!newPin.equals(confirmPin)) {
+            showPinSetupError("PINs don't match", newPinInput, confirmPinInput, statusText);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private void showPinSetupError(String message, EditText newPinInput, EditText confirmPinInput, TextView statusText) {
+        // Set input field colors to red
+        ColorStateList errorColor = ColorStateList.valueOf(Color.parseColor("#FF6B6B"));
+        newPinInput.setBackgroundTintList(errorColor);
+        confirmPinInput.setBackgroundTintList(errorColor);
+        
+        // Show error message in status text
+        statusText.setText(message);
+        statusText.setTextColor(Color.parseColor("#FF6B6B"));
+        statusText.setVisibility(View.VISIBLE);
+    }
+    
+    private void showPinSetupSuccess(TextView statusText) {
+        statusText.setText("✅ PIN set successfully!");
+        statusText.setTextColor(Color.parseColor("#4CAF50"));
+        statusText.setVisibility(View.VISIBLE);
+    }
+    
+    private void setupCurrentPinInputWatcher(EditText pinInput, TextView statusText) {
+        TextWatcher inputWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                resetCurrentPinInputState(pinInput, statusText);
+            }
+            
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+        
+        pinInput.addTextChangedListener(inputWatcher);
+    }
+    
+    private void resetCurrentPinInputState(EditText pinInput, TextView statusText) {
+        // Reset input field color to normal
+        ColorStateList normalColor = ColorStateList.valueOf(Color.parseColor("#808080"));
+        pinInput.setBackgroundTintList(normalColor);
+        
+        // Hide status text
+        statusText.setVisibility(View.GONE);
+    }
+    
+    private boolean validateCurrentPin(String enteredPin, EditText pinInput, TextView statusText) {
+        if (enteredPin.isEmpty()) {
+            showCurrentPinError("Please enter your current PIN", pinInput, statusText);
+            return false;
+        }
+        
+        if (enteredPin.length() != 4 || !enteredPin.matches("\\d{4}")) {
+            showCurrentPinError("Please enter a 4-digit PIN", pinInput, statusText);
+            return false;
+        }
+        
+        String currentPin = preferences.getString("unlock_pin", "");
+        if (!currentPin.equals(enteredPin)) {
+            showCurrentPinError("Wrong PIN! Check again.", pinInput, statusText);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private void showCurrentPinError(String message, EditText pinInput, TextView statusText) {
+        // Set input field color to red
+        ColorStateList errorColor = ColorStateList.valueOf(Color.parseColor("#FF6B6B"));
+        pinInput.setBackgroundTintList(errorColor);
+        
+        // Show error message in status text
+        statusText.setText(message);
+        statusText.setTextColor(Color.parseColor("#FF6B6B"));
+        statusText.setVisibility(View.VISIBLE);
     }
 }

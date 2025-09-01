@@ -122,4 +122,14 @@
         <item name="android:colorControlNormal">@color/primary</item>
         <item name="android:popupBackground">@color/surface</item>
     </style>
+
+    <!-- Modern Alert Dialog Style -->
+    <style name="ModernAlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/modern_dialog_background</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+    </style>
 </resources>
