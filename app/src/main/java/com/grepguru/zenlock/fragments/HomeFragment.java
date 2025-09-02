@@ -1,17 +1,25 @@
 package com.grepguru.zenlock.fragments;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +38,18 @@ public class HomeFragment extends Fragment {
     private Button enableLockButton;
     private int selectedHours = 0, selectedMinutes = 0;
     private AnalyticsManager analyticsManager;
+    
+    // Zen Mode Progress Overlay Elements
+    private View zenProgressOverlay;
+    private ProgressBar zenCircularProgress;
+    private TextView zenEmoji, zenProgressMessage, zenProgressSubtitle;
+    
+    // Long Press Animation Variables
+    private Handler longPressHandler = new Handler(Looper.getMainLooper());
+    private Runnable longPressRunnable;
+    private ValueAnimator progressAnimator;
+    private boolean isLongPressing = false;
+    private static final long ZEN_ACTIVATION_DURATION = 3000; // 3 seconds
 
     public HomeFragment() {}
 
@@ -42,10 +62,16 @@ public class HomeFragment extends Fragment {
         minutesPicker = view.findViewById(R.id.minutesPicker);
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
         enableLockButton = view.findViewById(R.id.enableLockButton);
+        
+        // Initialize Zen Progress Overlay
+        zenProgressOverlay = view.findViewById(R.id.zenProgressOverlay);
+        zenCircularProgress = view.findViewById(R.id.zenCircularProgress);
+        zenEmoji = view.findViewById(R.id.zenEmoji);
+        zenProgressMessage = view.findViewById(R.id.zenProgressMessage);
+        zenProgressSubtitle = view.findViewById(R.id.zenProgressSubtitle);
 
         setupNumberPickers();
-        // setupPresetButtons(view);
-        enableLockButton.setOnClickListener(v -> checkAndStartLockService());
+        setupZenLongPressButton();
         
         // Initialize analytics manager
         analyticsManager = new AnalyticsManager(requireContext());
@@ -70,6 +96,135 @@ public class HomeFragment extends Fragment {
         hoursPicker.setValue(0);
         minutesPicker.setValue(1);
         updateSelectedTime();
+    }
+    
+    private void setupZenLongPressButton() {
+        enableLockButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startZenActivation();
+                    return true;
+                    
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    cancelZenActivation();
+                    return true;
+            }
+            return false;
+        });
+        
+        // Disable normal click to prevent conflicts
+        enableLockButton.setClickable(false);
+    }
+    
+    private void startZenActivation() {
+        if (isLongPressing) return;
+        
+        isLongPressing = true;
+        
+        // Show overlay with smooth fade in
+        zenProgressOverlay.setVisibility(View.VISIBLE);
+        zenProgressOverlay.animate()
+                .alpha(1f)
+                .setDuration(200)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+                
+        // Animate emoji with gentle pulse
+        animateZenEmoji();
+        
+        // Start circular progress animation
+        progressAnimator = ValueAnimator.ofInt(0, 100);
+        progressAnimator.setDuration(ZEN_ACTIVATION_DURATION);
+        progressAnimator.setInterpolator(new LinearInterpolator()); // Linear for consistent timing
+        progressAnimator.addUpdateListener(animation -> {
+            int progress = (int) animation.getAnimatedValue();
+            zenCircularProgress.setProgress(progress);
+            
+            // Update message: 1 second preparing, 2 seconds entering zen
+            if (progress < 33) {
+                zenProgressMessage.setText("🌱 Preparing your zen space...");
+            } else {
+                zenProgressMessage.setText("🧘‍♂️ Entering ZEN Mode...");
+            }
+        });
+        progressAnimator.start();
+        
+        // Set timer to trigger zen mode activation
+        longPressRunnable = () -> {
+            if (isLongPressing) {
+                completeZenActivation();
+            }
+        };
+        longPressHandler.postDelayed(longPressRunnable, ZEN_ACTIVATION_DURATION);
+    }
+    
+    private void cancelZenActivation() {
+        if (!isLongPressing) return;
+        
+        isLongPressing = false;
+        
+        // Cancel timers and animations
+        longPressHandler.removeCallbacks(longPressRunnable);
+        if (progressAnimator != null) {
+            progressAnimator.cancel();
+        }
+        
+        // Hide overlay with fade out
+        zenProgressOverlay.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .withEndAction(() -> {
+                    zenProgressOverlay.setVisibility(View.GONE);
+                    zenCircularProgress.setProgress(0);
+                    zenProgressMessage.setText("Entering ZEN Mode...");
+                })
+                .start();
+    }
+    
+    private void completeZenActivation() {
+        isLongPressing = false;
+        
+        // Show completion message
+        zenProgressMessage.setText("🎯 ZEN Mode Activated!");
+        zenProgressSubtitle.setText("Beginning your mindful focus session");
+        
+        // Delay to show completion message, then start lock service
+        longPressHandler.postDelayed(() -> {
+            hideZenOverlay();
+            checkAndStartLockService();
+        }, 500);
+    }
+    
+    private void hideZenOverlay() {
+        zenProgressOverlay.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .withEndAction(() -> {
+                    zenProgressOverlay.setVisibility(View.GONE);
+                    zenCircularProgress.setProgress(0);
+                    zenProgressMessage.setText("Entering ZEN Mode...");
+                    zenProgressSubtitle.setText("Hold to begin your mindful focus session");
+                })
+                .start();
+    }
+    
+    private void animateZenEmoji() {
+        // Gentle pulse animation for the emoji
+        ObjectAnimator pulseAnimator = ObjectAnimator.ofFloat(zenEmoji, "scaleX", 1f, 1.1f, 1f);
+        pulseAnimator.setDuration(1200);
+        pulseAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        pulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        
+        ObjectAnimator pulseAnimatorY = ObjectAnimator.ofFloat(zenEmoji, "scaleY", 1f, 1.1f, 1f);
+        pulseAnimatorY.setDuration(1200);
+        pulseAnimatorY.setRepeatCount(ObjectAnimator.INFINITE);
+        pulseAnimatorY.setInterpolator(new AccelerateDecelerateInterpolator());
+        
+        pulseAnimator.start();
+        pulseAnimatorY.start();
     }
 
 //    private void setupPresetButtons(View view) {

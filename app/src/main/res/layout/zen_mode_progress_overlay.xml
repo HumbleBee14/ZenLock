@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/zenProgressOverlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#B0000000"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="gone"
+    android:alpha="0">
+
+    <!-- Central Zen Progress Container -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
+
+        <!-- Progress Container with Meditation Emoji -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center">
+
+            <!-- Circular Progress Bar -->
+            <ProgressBar
+                android:id="@+id/zenCircularProgress"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:progressDrawable="@drawable/circular_progress_zen"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0" />
+
+            <!-- Meditation Emoji in Center -->
+            <TextView
+                android:id="@+id/zenEmoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="🧘‍♂️"
+                android:textSize="40sp"
+                android:alpha="1.0"
+                android:shadowColor="#FFFFFF"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="8" />
+
+        </FrameLayout>
+
+        <!-- Zen Message -->
+        <TextView
+            android:id="@+id/zenProgressMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Entering ZEN Mode..."
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:alpha="1.0"
+            android:gravity="center"
+            android:shadowColor="#000000"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="4" />
+
+    </LinearLayout>
+
+    <!-- Hold Instruction at Bottom -->
+    <TextView
+        android:id="@+id/zenProgressSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:text="Hold to begin your mindful focus session"
+        android:textColor="@color/textSecondary"
+        android:textSize="16sp"
+        android:alpha="0.9"
+        android:gravity="center"
+        android:padding="16dp" />
+
+</FrameLayout>
