@@ -137,7 +137,7 @@
         android:id="@+id/enableLockButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Focus Session"
+        android:text="Enter Zen Mode"
         style="@style/ModernButton.Primary"
         android:layout_marginTop="32dp"
         android:layout_marginStart="16dp"
