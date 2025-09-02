@@ -24,7 +24,6 @@
         android:elevation="8dp"
         app:itemIconTint="@drawable/navigation_item_selector"
         app:itemTextColor="@drawable/navigation_item_selector"
-        app:itemActiveIndicatorStyle="@style/NavigationActiveIndicator"
         app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
