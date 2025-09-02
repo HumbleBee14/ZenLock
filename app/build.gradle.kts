@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.grepguru.focuslock"
+    namespace = "com.grepguru.zenlock"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.grepguru.focuslock"
+        applicationId = "com.grepguru.zenlock"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

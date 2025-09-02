@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import org.junit.Test;
 

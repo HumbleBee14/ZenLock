@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.fragments;
+package com.grepguru.zenlock.fragments;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +19,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.grepguru.focuslock.LockScreenActivity;
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.utils.AnalyticsManager;
+import com.grepguru.zenlock.LockScreenActivity;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.utils.AnalyticsManager;
 
 public class HomeFragment extends Fragment {
 
@@ -107,7 +106,7 @@ public class HomeFragment extends Fragment {
         selectedMinutes = minuteValues[minuteIndex];
 
         if (selectedHours == 0 && selectedMinutes == 0) {
-            selectedTimeDisplay.setText("Set a time to start Focus Lock");
+            selectedTimeDisplay.setText("Set a time to start ZenLock");
             enableLockButton.setEnabled(false);
             enableLockButton.setAlpha(0.5f);
         } else {
@@ -120,7 +119,7 @@ public class HomeFragment extends Fragment {
     private void checkAndStartLockService() {
         if (!isAccessibilityPermissionGranted()) {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-            Toast.makeText(getActivity(), "Please enable Accessibility for Focus Lock", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
             return;
         }
 

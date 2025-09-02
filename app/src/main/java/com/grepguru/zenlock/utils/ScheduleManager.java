@@ -1,10 +1,10 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.grepguru.focuslock.model.ScheduleModel;
+import com.grepguru.zenlock.model.ScheduleModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

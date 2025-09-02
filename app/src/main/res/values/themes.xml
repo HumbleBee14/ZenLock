@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.FocusLock" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Base.Theme.ZenLock" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Modern Primary Colors -->
         <item name="colorPrimary">@color/primary</item>
@@ -106,7 +106,7 @@
         <item name="android:colorAccent">@color/primary</item>
     </style>
 
-    <style name="Theme.FocusLock" parent="Base.Theme.FocusLock" />
+    <style name="Theme.ZenLock" parent="Base.Theme.ZenLock" />
 
     <!-- NumberPicker Style for Schedule Dialog -->
     <style name="NumberPickerStyle" parent="Theme.AppCompat.Light">

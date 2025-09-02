@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,13 +15,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
-import com.grepguru.focuslock.model.*;
-import com.grepguru.focuslock.ui.adapter.*;
-import com.grepguru.focuslock.utils.AppUtils;
+import com.grepguru.zenlock.model.*;
+import com.grepguru.zenlock.ui.adapter.*;
+import com.grepguru.zenlock.utils.AppUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,7 +118,7 @@ public class WhitelistActivity extends AppCompatActivity {
             String packageName = resolveInfo.activityInfo.packageName;
             
             // Skip default apps (Phone, SMS, Clock) - they don't count toward quota
-            if (isDefaultApp(packageName) || "com.grepguru.focuslock".equals(packageName)) {
+            if (isDefaultApp(packageName) || "com.grepguru.zenlock".equals(packageName)) {
                 continue;
             }
 

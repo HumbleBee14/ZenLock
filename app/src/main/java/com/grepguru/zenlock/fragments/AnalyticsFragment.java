@@ -1,8 +1,6 @@
-package com.grepguru.focuslock.fragments;
+package com.grepguru.zenlock.fragments;
 
 import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,13 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.utils.AnalyticsManager;
-import com.grepguru.focuslock.model.AnalyticsModels;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.utils.AnalyticsManager;
+import com.grepguru.zenlock.model.AnalyticsModels;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AnalyticsFragment extends Fragment {
 

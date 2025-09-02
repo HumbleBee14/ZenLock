@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer glow shadow -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#1A3B82F6"
+                android:centerColor="#0D3B82F6"
+                android:endColor="#003B82F6"
+                android:type="radial"
+                android:gradientRadius="120dp"
+                android:centerX="0.5"
+                android:centerY="0.5"/>
+            <corners android:radius="20dp"/>
+        </shape>
+    </item>
+    
+    <!-- Inner glow -->
+    <item android:top="4dp" android:bottom="4dp" android:left="4dp" android:right="4dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#203B82F6"
+                android:centerColor="#103B82F6"
+                android:endColor="#003B82F6"
+                android:type="radial"
+                android:gradientRadius="80dp"
+                android:centerX="0.5"
+                android:centerY="0.5"/>
+            <corners android:radius="18dp"/>
+        </shape>
+    </item>
+    
+    <!-- Main surface -->
+    <item android:top="8dp" android:bottom="8dp" android:left="8dp" android:right="8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/surface"/>
+            <corners android:radius="16dp"/>
+        </shape>
+    </item>
+</layer-list>

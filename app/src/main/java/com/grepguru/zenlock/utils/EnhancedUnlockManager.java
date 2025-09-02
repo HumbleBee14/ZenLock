@@ -1,11 +1,10 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.CountDownTimer;
@@ -24,8 +23,8 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.model.UnlockMethod;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.model.UnlockMethod;
 
 /**
  * Enhanced unlock manager that handles multiple unlock methods

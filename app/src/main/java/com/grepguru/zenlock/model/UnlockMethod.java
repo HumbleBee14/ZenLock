@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.model;
+package com.grepguru.zenlock.model;
 
 /**
  * Enum representing different unlock methods available in ZenLock

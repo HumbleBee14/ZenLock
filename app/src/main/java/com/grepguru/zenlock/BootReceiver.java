@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.grepguru.focuslock.utils.ScheduleActivator;
+import com.grepguru.zenlock.utils.ScheduleActivator;
 
 public class BootReceiver extends BroadcastReceiver {
     

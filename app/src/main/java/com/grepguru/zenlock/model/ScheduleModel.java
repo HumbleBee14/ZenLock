@@ -1,11 +1,11 @@
-package com.grepguru.focuslock.model;
+package com.grepguru.zenlock.model;
 
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Model class for Focus Lock schedules
+ * Model class for ZenLock schedules
  * Stores schedule configuration including timing, repeat patterns, and notifications
  */
 public class ScheduleModel {

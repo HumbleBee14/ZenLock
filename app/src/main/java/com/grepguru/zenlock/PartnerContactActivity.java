@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.Manifest;
 import android.content.Context;
@@ -22,7 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowCompat;
 
-import com.grepguru.focuslock.utils.OTPManager;
+import com.grepguru.zenlock.utils.OTPManager;
 import java.util.regex.Pattern;
 
 public class PartnerContactActivity extends AppCompatActivity {

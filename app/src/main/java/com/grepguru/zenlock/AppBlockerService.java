@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -7,8 +7,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.grepguru.focuslock.utils.AppUtils;
-import com.grepguru.focuslock.utils.AnalyticsManager;
+import com.grepguru.zenlock.utils.AppUtils;
+import com.grepguru.zenlock.utils.AnalyticsManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -58,8 +58,8 @@ public class AppBlockerService extends AccessibilityService {
     }
 
     private boolean isAllowedApp(String packageName) {
-        // Always allow the Focus Lock app itself
-        if ("com.grepguru.focuslock".equals(packageName)) {
+        // Always allow the ZenLock app itself
+        if ("com.grepguru.zenlock".equals(packageName)) {
             return true;
         }
         

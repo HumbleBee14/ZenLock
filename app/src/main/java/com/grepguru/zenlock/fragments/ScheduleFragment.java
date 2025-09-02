@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.fragments;
+package com.grepguru.zenlock.fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.model.ScheduleModel;
-import com.grepguru.focuslock.utils.ScheduleManager;
-import com.grepguru.focuslock.utils.ScheduleActivator;
-import com.grepguru.focuslock.ui.adapter.ScheduleAdapter;
-import com.grepguru.focuslock.CreateScheduleDialog;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.model.ScheduleModel;
+import com.grepguru.zenlock.utils.ScheduleManager;
+import com.grepguru.zenlock.utils.ScheduleActivator;
+import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
+import com.grepguru.zenlock.CreateScheduleDialog;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,6 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
-import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,9 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.grepguru.focuslock.model.ScheduleModel;
+import com.grepguru.zenlock.model.ScheduleModel;
 
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 

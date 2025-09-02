@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,14 +17,13 @@ import android.widget.ImageView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.grepguru.focuslock.model.*;
-import com.grepguru.focuslock.ui.adapter.*;
-import com.grepguru.focuslock.utils.AppUtils;
-import com.grepguru.focuslock.utils.AnalyticsManager;
-import com.grepguru.focuslock.utils.EnhancedUnlockManager;
+import com.grepguru.zenlock.model.*;
+import com.grepguru.zenlock.ui.adapter.*;
+import com.grepguru.zenlock.utils.AppUtils;
+import com.grepguru.zenlock.utils.AnalyticsManager;
+import com.grepguru.zenlock.utils.EnhancedUnlockManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;

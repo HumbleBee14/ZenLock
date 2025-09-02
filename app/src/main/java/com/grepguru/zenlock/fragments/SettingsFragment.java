@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.fragments;
+package com.grepguru.zenlock.fragments;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,9 +27,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.model.UnlockMethod;
-import com.grepguru.focuslock.WhitelistActivity;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
@@ -292,7 +290,7 @@ public class SettingsFragment extends Fragment {
 
         // Partner Contact Configuration
         accountabilityPartnerButton.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), com.grepguru.focuslock.PartnerContactActivity.class);
+            Intent intent = new Intent(requireActivity(), com.grepguru.zenlock.PartnerContactActivity.class);
             startActivity(intent);
         });
     }

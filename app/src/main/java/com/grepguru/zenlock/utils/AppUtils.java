@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.content.Context;
 import android.content.Intent;

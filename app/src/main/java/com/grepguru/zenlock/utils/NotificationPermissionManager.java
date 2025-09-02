@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.Manifest;
 import android.app.Activity;
@@ -11,7 +11,6 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -79,7 +78,7 @@ public class NotificationPermissionManager {
                                                      ActivityResultLauncher<String> permissionLauncher) {
         new AlertDialog.Builder(activity)
                 .setTitle("Notifications Required")
-                .setMessage("Focus Lock needs notification permission to:\n\n" +
+                .setMessage("ZenLock needs notification permission to:\n\n" +
                            "• Alert you before scheduled focus sessions\n" +
                            "• Notify when focus sessions start\n" +
                            "• Keep you informed about your focus schedule\n\n" +

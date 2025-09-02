@@ -1,6 +1,5 @@
-package com.grepguru.focuslock.model;
+package com.grepguru.zenlock.model;
 
-import java.util.Date;
 import java.util.List;
 
 public class AnalyticsModels {

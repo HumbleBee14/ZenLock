@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.Manifest;
 import android.app.Activity;
@@ -32,8 +32,8 @@ public class OTPManager {
     private static final long OTP_VALIDITY_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
     // Actions for BroadcastReceivers
-    private static final String ACTION_SMS_SENT = "com.grepguru.focuslock.SMS_SENT_ACTION";
-    private static final String ACTION_SMS_DELIVERED = "com.grepguru.focuslock.SMS_DELIVERED_ACTION";
+    private static final String ACTION_SMS_SENT = "com.grepguru.zenlock.SMS_SENT_ACTION";
+    private static final String ACTION_SMS_DELIVERED = "com.grepguru.zenlock.SMS_DELIVERED_ACTION";
 
     private final Context context;
     private final SharedPreferences preferences;

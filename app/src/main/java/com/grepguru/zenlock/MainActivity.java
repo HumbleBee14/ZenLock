@@ -1,4 +1,4 @@
-package com.grepguru.focuslock;
+package com.grepguru.zenlock;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,9 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.grepguru.focuslock.fragments.HomeFragment;
-import com.grepguru.focuslock.fragments.*;
-import com.grepguru.focuslock.utils.NotificationPermissionManager;
+import com.grepguru.zenlock.fragments.HomeFragment;
+import com.grepguru.zenlock.fragments.*;
+import com.grepguru.zenlock.utils.NotificationPermissionManager;
 
 public class MainActivity extends AppCompatActivity {
     

@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.ui.adapter;
+package com.grepguru.zenlock.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +10,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.model.AppModel;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.model.AppModel;
 import java.util.List;
 
 public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.ViewHolder> {

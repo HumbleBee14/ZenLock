@@ -122,7 +122,7 @@
                 android:id="@+id/selectedTimeDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Set a time to start Focus Lock"
+                android:text="Set a time to start ZenLock"
                 style="@style/ModernText.Body"
                 android:layout_gravity="center"
                 android:layout_marginTop="24dp"

@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.model;
+package com.grepguru.zenlock.model;
 
 import android.graphics.drawable.Drawable;
 

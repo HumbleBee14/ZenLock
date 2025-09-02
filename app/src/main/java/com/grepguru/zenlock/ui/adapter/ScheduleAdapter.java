@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.ui.adapter;
+package com.grepguru.zenlock.ui.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.grepguru.focuslock.R;
-import com.grepguru.focuslock.model.ScheduleModel;
+import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.model.ScheduleModel;
 
 import java.util.List;
 

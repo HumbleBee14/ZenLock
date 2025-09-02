@@ -1,10 +1,10 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.grepguru.focuslock.model.AnalyticsModels;
+import com.grepguru.zenlock.model.AnalyticsModels;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

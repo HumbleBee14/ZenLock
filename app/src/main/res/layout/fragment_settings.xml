@@ -29,7 +29,7 @@
         android:id="@+id/settingsSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Configure your Focus Lock preferences"
+        android:text="Configure your ZenLock preferences"
         style="@style/ModernText.Caption"
         app:layout_constraintTop_toBottomOf="@id/settingsTitle"
         app:layout_constraintStart_toStartOf="parent"
@@ -81,7 +81,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Help us improve Focus Lock with your suggestions"
+                        android:text="Help us improve ZenLock with your suggestions"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:alpha="0.9"

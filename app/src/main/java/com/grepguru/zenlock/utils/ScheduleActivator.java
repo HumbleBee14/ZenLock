@@ -1,4 +1,4 @@
-package com.grepguru.focuslock.utils;
+package com.grepguru.zenlock.utils;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.grepguru.focuslock.LockScreenActivity;
-import com.grepguru.focuslock.model.ScheduleModel;
+import com.grepguru.zenlock.LockScreenActivity;
+import com.grepguru.zenlock.model.ScheduleModel;
 
 import java.util.Calendar;
 import java.util.List;
