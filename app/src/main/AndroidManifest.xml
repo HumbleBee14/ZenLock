@@ -97,14 +97,14 @@
             android:name=".utils.OTPManager$SmsSentReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="zenlock.SMS_SENT_ACTION" />
+                <action android:name="com.grepguru.zenlock.SMS_SENT_ACTION" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".utils.OTPManager$SmsDeliveredReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="zenlock.SMS_DELIVERED_ACTION" />
+                <action android:name="com.grepguru.zenlock.SMS_DELIVERED_ACTION" />
             </intent-filter>
         </receiver>
 
