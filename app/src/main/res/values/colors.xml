@@ -22,7 +22,8 @@
     <color name="accentDanger">#EF4444</color>      <!-- Error red -->
     
     <!-- Background Colors (Balanced Dark Theme) -->
-    <color name="backgroundPrimary">#1F2937</color>     <!-- Softer dark background -->
+<!--    <color name="backgroundPrimary">#1F2937</color>     &lt;!&ndash; Softer dark background &ndash;&gt;-->
+    <color name="backgroundPrimary">#111827</color>     <!-- Darker background for better contrast -->
     <color name="backgroundSecondary">#374151</color>   <!-- Card/surface background -->
     <color name="backgroundTertiary">#4B5563</color>    <!-- Elevated surfaces -->
     
