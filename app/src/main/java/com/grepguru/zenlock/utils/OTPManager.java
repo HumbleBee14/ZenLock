@@ -63,7 +63,8 @@ public class OTPManager {
         editor.putLong(KEY_OTP_GENERATION_TIME, generationTime);
         editor.apply();
 
-        Log.d(TAG, "Generated OTP: " + otp + " (Expires at: " + expiryTime + ")");
+        // Debug log removed for security - OTP codes should never be logged
+        // Log.d(TAG, "Generated OTP: " + otp + " (Expires at: " + expiryTime + ")");
         return otp;
     }
 
@@ -89,9 +90,11 @@ public class OTPManager {
 
         boolean isValid = storedOTP.equals(otpToVerify);
         if (isValid) {
-            Log.d(TAG, "OTP verified successfully: " + otpToVerify);
+            // Security: Don't log actual OTP values
+            // Log.d(TAG, "OTP verified successfully: " + otpToVerify);
         } else {
-            Log.w(TAG, "Verification failed: OTP mismatch. Expected: " + storedOTP + ", Got: " + otpToVerify);
+            // Security: Don't log actual OTP values in production
+            // Log.w(TAG, "Verification failed: OTP mismatch. Expected: " + storedOTP + ", Got: " + otpToVerify);
         }
         return isValid;
     }
@@ -124,7 +127,7 @@ public class OTPManager {
             return false;
         }
 
-        String message = "🧘 ZenLock Alert: Your accountability partner needs to unlock their focus session early. If you approve, share this code: " + otp + ". This code expires in 60 minutes!";
+        String message = "ZenLock Alert!\n\nUnlock code: " + otp + "\n\nYour accountability partner wants to end their focus session early. Share this code if you approve. Expires in 60 minutes.";
 
         try {
             // Since minSdk is 28 (which is >= Build.VERSION_CODES.M (23)),
