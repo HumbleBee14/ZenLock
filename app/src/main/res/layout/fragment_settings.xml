@@ -46,21 +46,16 @@
         app:layout_constraintTop_toBottomOf="@id/settingsSubtitle">
 
         <!-- Send Feedback Card -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:id="@+id/feedbackCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="@color/info"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="20dp"
-                android:gravity="center_vertical">
+            android:background="@drawable/feedback_card_gradient"
+            android:elevation="6dp"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -98,28 +93,21 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_send"
-                    android:tint="@color/white"
+                    app:tint="@color/white"
                     android:layout_marginStart="12dp"/>
 
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
         <!-- Support Developer Card -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:id="@+id/supportDeveloperCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/secondary"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="20dp"
-                android:gravity="center_vertical">
+            android:background="@drawable/support_card_gradient"
+            android:elevation="6dp"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -157,12 +145,10 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_share"
-                    android:tint="@color/white"
+                    app:tint="@color/white"
                     android:layout_marginStart="12dp"/>
 
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
     </LinearLayout>
 

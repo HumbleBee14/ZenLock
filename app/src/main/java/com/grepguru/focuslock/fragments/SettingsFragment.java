@@ -631,19 +631,34 @@ public class SettingsFragment extends Fragment {
      */
     private void openFeedbackEmail() {
         try {
+            // Get app version dynamically
+            String appVersion = "Unknown";
+            try {
+                appVersion = requireContext().getPackageManager()
+                    .getPackageInfo(requireContext().getPackageName(), 0).versionName;
+            } catch (Exception versionError) {
+                appVersion = "1.0"; // Fallback if version detection fails
+            }
+            
+            // Use ACTION_SENDTO with mailto: for better email app filtering
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-            emailIntent.setData(Uri.parse("mailto:developer@focuslock.com")); // Replace with your actual email
+            emailIntent.setData(Uri.parse("mailto:")); // Only email apps can handle this
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"idineshy@gmail.com"});
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Focus Lock - Feedback & Suggestions");
             emailIntent.putExtra(Intent.EXTRA_TEXT, 
                 "Hi! I'd like to share some feedback about Focus Lock:\n\n" +
-                "App Version: 1.0\n" +
+                "App Version: " + appVersion + "\n" +
                 "Android Version: " + android.os.Build.VERSION.RELEASE + "\n" +
                 "Device: " + android.os.Build.MODEL + "\n\n" +
                 "My feedback:\n");
             
-            startActivity(Intent.createChooser(emailIntent, "Send Feedback"));
+            if (emailIntent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(emailIntent); // No chooser needed since only email apps will show
+            } else {
+                Toast.makeText(getContext(), "No email app found.", Toast.LENGTH_LONG).show();
+            }
         } catch (Exception e) {
-            Toast.makeText(getContext(), "No email app found. Please send feedback to developer@focuslock.com", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Unable to open email app.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -652,11 +667,11 @@ public class SettingsFragment extends Fragment {
      */
     private void openSupportPage() {
         try {
-            String supportUrl = "https://buymeacoffee.com/focuslockdev"; // Replace with your actual Buy Me a Coffee link
+            String supportUrl = "https://buymeacoffee.com/humblebee";
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supportUrl));
             startActivity(browserIntent);
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Unable to open browser. Please visit: buymeacoffee.com/focuslockdev", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Unable to open browser. Please visit: buymeacoffee.com/humblebee", Toast.LENGTH_LONG).show();
         }
     }
 }
