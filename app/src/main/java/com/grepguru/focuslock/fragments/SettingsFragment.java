@@ -458,7 +458,7 @@ public class SettingsFragment extends Fragment {
         }
         
         builder.setView(dialogView)
-               .setTitle("PIN Setup")
+//               .setTitle("PIN Setup")
                .setPositiveButton("Set PIN", null) // Set to null initially
                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         

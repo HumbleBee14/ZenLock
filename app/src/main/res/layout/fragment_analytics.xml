@@ -98,10 +98,11 @@
             android:id="@+id/todayStatsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="4dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardElevation="12dp"
             app:layout_constraintTop_toBottomOf="@id/comingSoonBanner">
 
             <LinearLayout
@@ -271,10 +272,11 @@
             android:id="@+id/streaksCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="4dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardElevation="12dp"
             app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
 
             <LinearLayout
@@ -427,10 +429,11 @@
             android:id="@+id/focusTrendsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardElevation="12dp"
             app:layout_constraintTop_toBottomOf="@id/streaksCard">
 
             <LinearLayout
@@ -798,10 +801,11 @@
             android:id="@+id/recentSessionsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="32dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardElevation="12dp"
             app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
 
             <LinearLayout

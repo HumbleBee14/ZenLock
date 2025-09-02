@@ -158,9 +158,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginBottom="4dp"
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
         app:layout_constraintTop_toBottomOf="@id/feedbackSupportSection">
 
         <LinearLayout
@@ -225,10 +226,11 @@
         android:id="@+id/lockProtectionCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="4dp"
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
         app:layout_constraintTop_toBottomOf="@id/appManagementCard">
 
         <LinearLayout
@@ -438,10 +440,11 @@
         android:id="@+id/generalSettingsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="4dp"
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
         app:layout_constraintTop_toBottomOf="@id/lockProtectionCard">
 
         <LinearLayout
@@ -778,10 +781,11 @@
         android:id="@+id/unlockMethodsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
         app:layout_constraintTop_toBottomOf="@id/generalSettingsCard">
 
         <LinearLayout
