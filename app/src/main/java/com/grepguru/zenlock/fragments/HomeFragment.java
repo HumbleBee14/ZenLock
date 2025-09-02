@@ -3,6 +3,7 @@ package com.grepguru.zenlock.fragments;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,12 +39,12 @@ public class HomeFragment extends Fragment {
     private Button enableLockButton;
     private int selectedHours = 0, selectedMinutes = 0;
     private AnalyticsManager analyticsManager;
-    
+
     // Zen Mode Progress Overlay Elements
     private View zenProgressOverlay;
     private ProgressBar zenCircularProgress;
     private TextView zenEmoji, zenProgressMessage, zenProgressSubtitle;
-    
+
     // Long Press Animation Variables
     private Handler longPressHandler = new Handler(Looper.getMainLooper());
     private Runnable longPressRunnable;
@@ -62,7 +63,7 @@ public class HomeFragment extends Fragment {
         minutesPicker = view.findViewById(R.id.minutesPicker);
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
         enableLockButton = view.findViewById(R.id.enableLockButton);
-        
+
         // Initialize Zen Progress Overlay
         zenProgressOverlay = view.findViewById(R.id.zenProgressOverlay);
         zenCircularProgress = view.findViewById(R.id.zenCircularProgress);
@@ -72,14 +73,14 @@ public class HomeFragment extends Fragment {
 
         setupNumberPickers();
         setupZenLongPressButton();
-        
+
         // Initialize analytics manager
         analyticsManager = new AnalyticsManager(requireContext());
 
         return view;
     }
 
-    
+
 
     private void setupNumberPickers() {
         hoursPicker.setMinValue(0);
@@ -97,14 +98,14 @@ public class HomeFragment extends Fragment {
         minutesPicker.setValue(1);
         updateSelectedTime();
     }
-    
+
     private void setupZenLongPressButton() {
         enableLockButton.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     startZenActivation();
                     return true;
-                    
+
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     cancelZenActivation();
@@ -112,16 +113,16 @@ public class HomeFragment extends Fragment {
             }
             return false;
         });
-        
+
         // Disable normal click to prevent conflicts
         enableLockButton.setClickable(false);
     }
-    
+
     private void startZenActivation() {
         if (isLongPressing) return;
-        
+
         isLongPressing = true;
-        
+
         // Show overlay with smooth fade in
         zenProgressOverlay.setVisibility(View.VISIBLE);
         zenProgressOverlay.animate()
@@ -129,10 +130,10 @@ public class HomeFragment extends Fragment {
                 .setDuration(200)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .start();
-                
+
         // Animate emoji with gentle pulse
         animateZenEmoji();
-        
+
         // Start circular progress animation
         progressAnimator = ValueAnimator.ofInt(0, 100);
         progressAnimator.setDuration(ZEN_ACTIVATION_DURATION);
@@ -140,7 +141,7 @@ public class HomeFragment extends Fragment {
         progressAnimator.addUpdateListener(animation -> {
             int progress = (int) animation.getAnimatedValue();
             zenCircularProgress.setProgress(progress);
-            
+
             // Update message: 1 second preparing, 2 seconds entering zen
             if (progress < 33) {
                 zenProgressMessage.setText("🌱 Preparing your zen space...");
@@ -149,7 +150,7 @@ public class HomeFragment extends Fragment {
             }
         });
         progressAnimator.start();
-        
+
         // Set timer to trigger zen mode activation
         longPressRunnable = () -> {
             if (isLongPressing) {
@@ -158,18 +159,18 @@ public class HomeFragment extends Fragment {
         };
         longPressHandler.postDelayed(longPressRunnable, ZEN_ACTIVATION_DURATION);
     }
-    
+
     private void cancelZenActivation() {
         if (!isLongPressing) return;
-        
+
         isLongPressing = false;
-        
+
         // Cancel timers and animations
         longPressHandler.removeCallbacks(longPressRunnable);
         if (progressAnimator != null) {
             progressAnimator.cancel();
         }
-        
+
         // Hide overlay with fade out
         zenProgressOverlay.animate()
                 .alpha(0f)
@@ -182,21 +183,21 @@ public class HomeFragment extends Fragment {
                 })
                 .start();
     }
-    
+
     private void completeZenActivation() {
         isLongPressing = false;
-        
+
         // Show completion message
         zenProgressMessage.setText("🎯 ZEN Mode Activated!");
         zenProgressSubtitle.setText("Beginning your mindful focus session");
-        
+
         // Delay to show completion message, then start lock service
         longPressHandler.postDelayed(() -> {
             hideZenOverlay();
             checkAndStartLockService();
         }, 500);
     }
-    
+
     private void hideZenOverlay() {
         zenProgressOverlay.animate()
                 .alpha(0f)
@@ -210,19 +211,19 @@ public class HomeFragment extends Fragment {
                 })
                 .start();
     }
-    
+
     private void animateZenEmoji() {
         // Gentle pulse animation for the emoji
         ObjectAnimator pulseAnimator = ObjectAnimator.ofFloat(zenEmoji, "scaleX", 1f, 1.1f, 1f);
         pulseAnimator.setDuration(1200);
         pulseAnimator.setRepeatCount(ObjectAnimator.INFINITE);
         pulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        
+
         ObjectAnimator pulseAnimatorY = ObjectAnimator.ofFloat(zenEmoji, "scaleY", 1f, 1.1f, 1f);
         pulseAnimatorY.setDuration(1200);
         pulseAnimatorY.setRepeatCount(ObjectAnimator.INFINITE);
         pulseAnimatorY.setInterpolator(new AccelerateDecelerateInterpolator());
-        
+
         pulseAnimator.start();
         pulseAnimatorY.start();
     }
@@ -239,7 +240,7 @@ public class HomeFragment extends Fragment {
 
     private void setPresetTime(int hours, int minutes) {
         hoursPicker.setValue(hours);
-        
+
         // Convert minutes to picker index with new values
         int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50};
         int minuteIndex = 0;
@@ -250,7 +251,7 @@ public class HomeFragment extends Fragment {
             }
         }
         minutesPicker.setValue(minuteIndex);
-        
+
         updateSelectedTime();
     }
 
@@ -273,8 +274,7 @@ public class HomeFragment extends Fragment {
 
     private void checkAndStartLockService() {
         if (!isAccessibilityPermissionGranted()) {
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-            Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
+            showAccessibilityDisclosureDialog();
             return;
         }
 
@@ -303,6 +303,39 @@ public class HomeFragment extends Fragment {
         Intent intent = new Intent(getActivity(), LockScreenActivity.class);
         intent.putExtra("lockDuration", lockDurationMillis);
         startActivity(intent);
+    }
+
+    private void showAccessibilityDisclosureDialog() {
+        // Check if we've already shown this disclosure
+        SharedPreferences prefs = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        boolean hasShownDisclosure = prefs.getBoolean("accessibility_disclosure_shown", false);
+
+        if (!hasShownDisclosure) {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Accessibility Permission Required")
+                    .setMessage("ZenLock needs Accessibility Service permission to lock your screen during focus sessions.\n\n" +
+                            "This permission allows the app to:\n" +
+                            "• Prevent access to your device until the timer ends\n" +
+                            "• Enable complete screen lockdown functionality\n\n" +
+                            "No personal data is collected, stored, or transmitted. All data remains on your device.\n\n" +
+                            "You'll be taken to Android Settings to enable this permission.")
+                    .setPositiveButton("Continue", (dialog, which) -> {
+                        // Mark disclosure as shown
+                        prefs.edit().putBoolean("accessibility_disclosure_shown", true).apply();
+                        // Open accessibility settings
+                        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                        Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        Toast.makeText(getActivity(), "Accessibility permission is required for screen locking", Toast.LENGTH_LONG).show();
+                    })
+                    .setCancelable(false)
+                    .show();
+        } else {
+            // Already shown disclosure before, just open settings
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+            Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private boolean isAccessibilityPermissionGranted() {
