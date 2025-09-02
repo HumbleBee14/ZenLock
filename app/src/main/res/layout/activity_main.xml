@@ -22,6 +22,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/navigation_background"
         android:elevation="8dp"
+        app:itemIconSize="28dp"
         app:itemIconTint="@drawable/navigation_item_selector"
         app:itemTextColor="@drawable/navigation_item_selector"
         app:menu="@menu/bottom_navigation_menu"
