@@ -20,9 +20,11 @@
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/navigationBarColor"
-        app:itemIconTint="@color/bottomNavSelectedItem"
-        app:itemTextColor="@color/bottomNavSelectedItem"
+        android:background="@drawable/navigation_background"
+        android:elevation="8dp"
+        app:itemIconSize="28dp"
+        app:itemIconTint="@drawable/navigation_item_selector"
+        app:itemTextColor="@drawable/navigation_item_selector"
         app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
