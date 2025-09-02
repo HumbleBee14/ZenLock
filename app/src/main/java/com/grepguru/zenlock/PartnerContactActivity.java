@@ -185,7 +185,7 @@ public class PartnerContactActivity extends AppCompatActivity {
 
         // First check SMS permission if SMS is enabled
         if (smsEnabled && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "❌ Cannot save SMS configuration without SMS permission. Please grant permission first.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Cannot save SMS configuration without SMS permission. Please grant permission first.", Toast.LENGTH_LONG).show();
             return;
         }
 
