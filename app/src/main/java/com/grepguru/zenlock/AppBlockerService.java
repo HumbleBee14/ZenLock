@@ -2,6 +2,8 @@ package com.grepguru.zenlock;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.KeyguardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -21,39 +23,60 @@ public class AppBlockerService extends AccessibilityService {
     
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (event == null) {
+            return;
+        }
+
+        // CRITICAL CHECK: If system lock screen (Keyguard) is active, do nothing
+        // This prevents conflicts and infinite loops when the system lock screen is displayed
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            Log.d("AppBlockerService", "System Keyguard is active. AppBlockerService will not interfere.");
+            return;
+        }
+
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         boolean isLocked = preferences.getBoolean("isLocked", false);
 
-        if (isLocked) {
-            String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "";
-            
-            // Skip if package name is empty or null
-            if (packageName.isEmpty()) {
-                return;
+        if (!isLocked) {
+            return; // No focus session active, nothing to block
+        }
+
+        String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "";
+        String className = event.getClassName() != null ? event.getClassName().toString() : "";
+        
+        // Skip if package name is empty or null
+        if (packageName.isEmpty()) {
+            return;
+        }
+
+        // Skip if the event is from our own LockScreenActivity to prevent self-blocking loops
+        if (className.contains("LockScreenActivity") || packageName.equals(getApplicationContext().getPackageName())) {
+            Log.d("AppBlockerService", "Event from our own LockScreenActivity or app. Ignoring.");
+            return;
+        }
+        
+        boolean isAllowed = isAllowedApp(packageName);
+        
+        // Track analytics
+        if (analyticsManager != null && analyticsManager.hasActiveSession()) {
+            if (isAllowed) {
+                analyticsManager.recordAppAccess(packageName);
+            } else {
+                analyticsManager.recordBlockedAttempt(packageName);
             }
-            
-            boolean isAllowed = isAllowedApp(packageName);
-            
-            // Track analytics
-            if (analyticsManager != null && analyticsManager.hasActiveSession()) {
-                if (isAllowed) {
-                    analyticsManager.recordAppAccess(packageName);
-                } else {
-                    analyticsManager.recordBlockedAttempt(packageName);
-                }
-            }
-            
-            // Log package events for debugging (with debouncing to prevent spam)
-            long currentTime = System.currentTimeMillis();
-            if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
-                Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
-                lastLoggedPackage = packageName;
-                lastLogTime = currentTime;
-            }
-            
-            if (!isAllowed) {
-                launchLockScreen();
-            }
+        }
+        
+        // Log package events for debugging (with debouncing to prevent spam)
+        long currentTime = System.currentTimeMillis();
+        if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
+            Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
+            lastLoggedPackage = packageName;
+            lastLogTime = currentTime;
+        }
+        
+        if (!isAllowed) {
+            launchLockScreen();
         }
     }
 
@@ -63,8 +86,27 @@ public class AppBlockerService extends AccessibilityService {
             return true;
         }
         
-        // Future: Handle special system integrations if needed
-        // Currently disabled - all third-party apps must be explicitly whitelisted by user
+        // Allow essential system packages to prevent conflicts
+        String[] essentialSystemPackages = {
+            "com.android.systemui",           // System UI (status bar, navigation, etc.)
+            "com.android.keyguard",           // System lock screen
+            "android",                        // Core Android system
+            "com.android.settings",           // System settings
+            "com.android.phone",              // Phone app (for emergency calls)
+            "com.android.incallui",           // In-call UI
+            "com.android.dialer",             // Dialer app
+            "com.android.emergency",          // Emergency services
+            "com.android.camera2",            // Camera (for emergency photos)
+            "com.android.camera",             // Camera (alternative)
+            "com.google.android.gms",         // Google Play Services
+            "com.google.android.gsf"          // Google Services Framework
+        };
+        
+        for (String systemPackage : essentialSystemPackages) {
+            if (systemPackage.equals(packageName)) {
+                return true;
+            }
+        }
         
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
@@ -96,9 +138,21 @@ public class AppBlockerService extends AccessibilityService {
     }
 
     private void launchLockScreen() {
-        Intent intent = new Intent(this, LockScreenActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        try {
+            // Double-check that system lock screen is not active before launching
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+                Log.d("AppBlockerService", "System Keyguard is active. Not launching LockScreenActivity.");
+                return;
+            }
+
+            Intent intent = new Intent(this, LockScreenActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            Log.d("AppBlockerService", "LockScreenActivity launched to block unauthorized app access.");
+        } catch (Exception e) {
+            Log.e("AppBlockerService", "Failed to launch LockScreenActivity", e);
+        }
     }
 
     @Override

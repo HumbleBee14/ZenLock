@@ -57,6 +57,7 @@ public class FullScreenIntentPermissionManager {
                             Log.d(TAG, "Opened overlay permission settings for full screen intent request.");
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> {
+                            Log.w(TAG, "Full screen intent permission request cancelled by user.");
                             // Optionally, inform the user that automatic lock might not work reliably
                         })
                         .setCancelable(false)

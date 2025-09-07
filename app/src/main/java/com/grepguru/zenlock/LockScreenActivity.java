@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -379,11 +380,25 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
         
+        // Check if system lock screen (Keyguard) is active - if so, don't restart
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on pause.");
+            return;
+        }
+        
         // Only restart if we're not already finishing and this is a legitimate pause
         if (!isFinishing() && !isDestroyed()) {
             // Use a longer delay to prevent rapid restarts
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
+                    // Double-check keyguard state before restarting
+                    KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                    if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
+                        Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                        return;
+                    }
+                    
                     Intent intent = new Intent(this, LockScreenActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -401,11 +416,25 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
         
+        // Check if system lock screen (Keyguard) is active - if so, don't restart
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on stop.");
+            return;
+        }
+        
         // Only restart if we're not already finishing
         if (!isFinishing() && !isDestroyed()) {
             // Use a longer delay to prevent rapid restarts
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
+                    // Double-check keyguard state before restarting
+                    KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                    if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
+                        Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                        return;
+                    }
+                    
                     Intent intent = new Intent(this, LockScreenActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
