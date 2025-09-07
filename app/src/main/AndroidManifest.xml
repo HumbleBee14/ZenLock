@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -73,15 +76,22 @@
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
-        <!-- Accessibility Service for App Blocking -->
-        <service
-            android:name=".AppBlockerService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-        </service>
+                <!-- Accessibility Service for App Blocking -->
+                <service
+                    android:name=".AppBlockerService"
+                    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                    android:exported="false">
+                    <intent-filter>
+                        <action android:name="android.accessibilityservice.AccessibilityService" />
+                    </intent-filter>
+                </service>
+
+                <!-- Lock Screen Service for Background Activity Launch -->
+                <service
+                    android:name=".LockScreenService"
+                    android:enabled="true"
+                    android:exported="false"
+                    android:foregroundServiceType="specialUse" />
 
         <!-- Boot Receiver (Runs on Device Restart) -->
         <receiver

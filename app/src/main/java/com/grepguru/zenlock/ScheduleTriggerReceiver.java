@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 
 import com.grepguru.zenlock.model.ScheduleModel;
@@ -82,20 +83,24 @@ public class ScheduleTriggerReceiver extends BroadcastReceiver {
             return;
         }
         
-        // Start LockScreenActivity
-        Intent lockIntent = new Intent(context, LockScreenActivity.class);
-        lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        lockIntent.putExtra("from_schedule", true);
-        lockIntent.putExtra("schedule_name", scheduleName);
-        lockIntent.putExtra("schedule_id", scheduleId);
-        lockIntent.putExtra("lockDuration", durationMinutes * 60 * 1000L);
+        // Start LockScreenService (Foreground Service) to handle background launch
+        Intent serviceIntent = new Intent(context, LockScreenService.class);
+        serviceIntent.putExtra(LockScreenService.EXTRA_SCHEDULE_NAME, scheduleName);
+        serviceIntent.putExtra(LockScreenService.EXTRA_SCHEDULE_ID, scheduleId);
+        serviceIntent.putExtra(LockScreenService.EXTRA_DURATION_MINUTES, durationMinutes);
         
         try {
-            context.startActivity(lockIntent);
-            Log.d(TAG, "LockScreenActivity launched for scheduled session: " + scheduleName);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
+            Log.d(TAG, "LockScreenService started for scheduled session: " + scheduleName);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to launch LockScreenActivity", e);
-            return;
+            Log.e(TAG, "Failed to start LockScreenService, trying notification launcher", e);
+            
+            // Fallback: use notification-based launcher
+            LockScreenLauncher.launchWithNotification(context, scheduleName, scheduleId, durationMinutes);
         }
         
         // Reschedule for next occurrence (if recurring)
