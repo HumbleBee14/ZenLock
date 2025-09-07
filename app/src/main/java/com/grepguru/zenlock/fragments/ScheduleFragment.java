@@ -69,14 +69,11 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void initializeViews(View view) {
-        // Coming soon banner
+        // Hide coming soon banner since schedule functionality is now complete
         View comingSoonBanner = view.findViewById(R.id.comingSoonBanner);
-        ImageView dismissBanner = view.findViewById(R.id.dismissScheduleBanner);
-        
-        // Handle banner dismissal (but always show it when fragment loads)
-        dismissBanner.setOnClickListener(v -> {
+        if (comingSoonBanner != null) {
             comingSoonBanner.setVisibility(View.GONE);
-        });
+        }
 
         // Create schedule button
         createScheduleBtn = view.findViewById(R.id.createScheduleBtn);
@@ -94,7 +91,23 @@ public class ScheduleFragment extends Fragment {
         scheduleAdapter = new ScheduleAdapter(schedules, new ScheduleAdapter.ScheduleListener() {
             @Override
             public void onToggleSchedule(ScheduleModel schedule) {
+                boolean wasEnabled = schedule.isEnabled();
                 scheduleManager.toggleSchedule(schedule.getId());
+                
+                // Get updated schedule
+                ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
+                if (updatedSchedule != null) {
+                    if (updatedSchedule.isEnabled()) {
+                        // Schedule was enabled, activate it
+                        scheduleActivator.scheduleSchedule(updatedSchedule);
+                        Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Schedule was disabled, cancel it
+                        scheduleActivator.cancelSchedule(updatedSchedule);
+                        Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+                
                 loadSchedules();
             }
             
@@ -156,8 +169,6 @@ public class ScheduleFragment extends Fragment {
                     schedule.getRepeatType()
                 );
                 
-                Log.d(TAG, "Schedule created with ID: " + newSchedule.getId());
-                
                 // Copy additional properties
                 newSchedule.setRepeatDays(schedule.getRepeatDays());
                 newSchedule.setPreNotifyEnabled(schedule.isPreNotifyEnabled());
@@ -165,15 +176,17 @@ public class ScheduleFragment extends Fragment {
                 
                 // Save the updated schedule
                 scheduleManager.updateSchedule(newSchedule);
-                Log.d(TAG, "Schedule updated and saved");
                 
                 // Reload and display schedules
                 loadSchedules();
                 
-                // Activate the schedule
-                scheduleActivator.scheduleSchedule(newSchedule);
-                
-                Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
+                // Activate the schedule if enabled
+                if (newSchedule.isEnabled()) {
+                    scheduleActivator.scheduleSchedule(newSchedule);
+                    Toast.makeText(requireContext(), "Schedule created and activated: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         dialog.show(getChildFragmentManager(), "CreateSchedule");
@@ -188,10 +201,14 @@ public class ScheduleFragment extends Fragment {
                 scheduleManager.updateSchedule(updatedSchedule);
                 loadSchedules();
                 
-                // Reactivate the updated schedule
-                scheduleActivator.scheduleSchedule(updatedSchedule);
-                
-                Toast.makeText(requireContext(), "Schedule updated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                // Reactivate the updated schedule if enabled
+                if (updatedSchedule.isEnabled()) {
+                    scheduleActivator.scheduleSchedule(updatedSchedule);
+                    Toast.makeText(requireContext(), "Schedule updated and activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                } else {
+                    scheduleActivator.cancelSchedule(updatedSchedule);
+                    Toast.makeText(requireContext(), "Schedule updated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         dialog.show(getChildFragmentManager(), "EditSchedule");

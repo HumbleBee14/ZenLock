@@ -6,15 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.grepguru.zenlock.LockScreenActivity;
+import com.grepguru.zenlock.ScheduleTriggerReceiver;
 import com.grepguru.zenlock.model.ScheduleModel;
+import com.grepguru.zenlock.utils.AlarmPermissionManager;
 
 import java.util.Calendar;
 import java.util.List;
 
 /**
- * Simple schedule activator using AlarmManager
- * Handles scheduling focus sessions at specified times
+ * Enhanced ScheduleActivator using AlarmManager with proper focus session integration
+ * Handles scheduling focus sessions at specified times using ScheduleTriggerReceiver
+ * Properly integrates with existing focus session flow and state management
  */
 public class ScheduleActivator {
     
@@ -54,27 +56,37 @@ public class ScheduleActivator {
             // Calculate next trigger time
             Calendar triggerTime = getNextTriggerTime(schedule);
             if (triggerTime == null) {
-                Log.d(TAG, "Schedule " + schedule.getName() + " has no next trigger time");
+                Log.w(TAG, "Schedule " + schedule.getName() + " has no next trigger time");
                 return;
             }
             
-            // Create intent for lock screen
-            Intent intent = new Intent(context, LockScreenActivity.class);
-            intent.putExtra("schedule_id", schedule.getId());
-            intent.putExtra("duration_minutes", schedule.getFocusDurationMinutes());
-            intent.putExtra("from_schedule", true);
-            intent.putExtra("schedule_name", schedule.getName());
+            // Create intent for ScheduleTriggerReceiver
+            Intent intent = new Intent(context, ScheduleTriggerReceiver.class);
+            intent.putExtra(ScheduleTriggerReceiver.EXTRA_SCHEDULE_ID, schedule.getId());
+            intent.putExtra(ScheduleTriggerReceiver.EXTRA_SCHEDULE_NAME, schedule.getName());
+            intent.putExtra(ScheduleTriggerReceiver.EXTRA_DURATION_MINUTES, schedule.getFocusDurationMinutes());
             
-            // Create pending intent
-            PendingIntent pendingIntent = PendingIntent.getActivity(
+            // Create pending intent for BroadcastReceiver
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
                 schedule.getId(),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
             
-            // Set alarm
-            if (alarmManager != null) {
+            // Check permission before setting alarm
+            if (!AlarmPermissionManager.canScheduleExactAlarms(context)) {
+                Log.e(TAG, "Cannot schedule exact alarms - permission not granted");
+                return;
+            }
+            
+            // Set exact alarm
+            if (alarmManager == null) {
+                Log.e(TAG, "AlarmManager is null");
+                return;
+            }
+            
+            try {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerTime.getTimeInMillis(),
@@ -82,8 +94,13 @@ public class ScheduleActivator {
                 );
                 
                 Log.d(TAG, "Scheduled " + schedule.getName() + " for " + 
-                      String.format("%02d:%02d", triggerTime.get(Calendar.HOUR_OF_DAY), 
-                                  triggerTime.get(Calendar.MINUTE)));
+                      String.format("%02d:%02d on %s", 
+                                  triggerTime.get(Calendar.HOUR_OF_DAY), 
+                                  triggerTime.get(Calendar.MINUTE),
+                                  formatDate(triggerTime)));
+            } catch (SecurityException e) {
+                Log.e(TAG, "SecurityException when setting alarm - permission issue", e);
+                return;
             }
             
         } catch (Exception e) {
@@ -96,8 +113,8 @@ public class ScheduleActivator {
      */
     public void cancelSchedule(ScheduleModel schedule) {
         try {
-            Intent intent = new Intent(context, LockScreenActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
+            Intent intent = new Intent(context, ScheduleTriggerReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
                 schedule.getId(),
                 intent,
@@ -127,47 +144,73 @@ public class ScheduleActivator {
         triggerTime.set(Calendar.SECOND, 0);
         triggerTime.set(Calendar.MILLISECOND, 0);
         
-        // If time has passed today, move to next occurrence
-        if (triggerTime.before(now)) {
-            switch (schedule.getRepeatType()) {
-                case ONCE:
-                    // One-time schedule has passed
-                    return null;
-                    
-                case DAILY:
-                    // Move to tomorrow
-                    triggerTime.add(Calendar.DAY_OF_YEAR, 1);
-                    break;
-                    
-                case WEEKLY:
-                    // Find next valid day this week or next week
-                    int currentDay = now.get(Calendar.DAY_OF_WEEK);
-                    int nextDay = findNextValidDay(schedule.getRepeatDays(), currentDay);
-                    
-                    if (nextDay == -1) {
-                        // No valid days this week, move to next week
-                        triggerTime.add(Calendar.WEEK_OF_YEAR, 1);
-                        nextDay = findNextValidDay(schedule.getRepeatDays(), 0);
-                    }
-                    
-                    triggerTime.set(Calendar.DAY_OF_WEEK, nextDay);
-                    break;
-            }
-        }
         
-        return triggerTime;
+        switch (schedule.getRepeatType()) {
+            case ONCE:
+                // For one-time schedules, if time has passed today, return null
+                // But if time is still available today, schedule for today
+                if (triggerTime.before(now)) {
+                    return null;
+                }
+                return triggerTime;
+                
+            case DAILY:
+                // If time has passed today, move to tomorrow
+                if (triggerTime.before(now)) {
+                    triggerTime.add(Calendar.DAY_OF_YEAR, 1);
+                }
+                return triggerTime;
+                
+            case WEEKLY:
+                return getNextWeeklyTriggerTime(schedule, now, triggerTime);
+                
+            default:
+                return null;
+        }
     }
     
     /**
-     * Find the next valid day of the week
+     * Calculate next trigger time for weekly schedules
      */
-    private int findNextValidDay(java.util.Set<Integer> repeatDays, int startDay) {
-        for (int day = startDay + 1; day <= Calendar.SATURDAY; day++) {
-            if (repeatDays.contains(day)) {
-                return day;
+    private Calendar getNextWeeklyTriggerTime(ScheduleModel schedule, Calendar now, Calendar triggerTime) {
+        java.util.Set<Integer> repeatDays = schedule.getRepeatDays();
+        if (repeatDays.isEmpty()) {
+            Log.w(TAG, "Weekly schedule has no repeat days set");
+            return null;
+        }
+        
+        int currentDayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+        
+        // Check if schedule can run today
+        if (repeatDays.contains(currentDayOfWeek) && triggerTime.after(now)) {
+            return triggerTime;
+        }
+        
+        // Find next valid day
+        Calendar nextTrigger = (Calendar) triggerTime.clone();
+        
+        // Check remaining days this week
+        for (int daysToAdd = 1; daysToAdd <= 7; daysToAdd++) {
+            nextTrigger.add(Calendar.DAY_OF_YEAR, 1);
+            int dayOfWeek = nextTrigger.get(Calendar.DAY_OF_WEEK);
+            
+            if (repeatDays.contains(dayOfWeek)) {
+                return nextTrigger;
             }
         }
-        return -1; // No valid day found
+        
+        // Should not reach here, but fallback
+        return null;
+    }
+    
+    /**
+     * Format date for logging
+     */
+    private String formatDate(Calendar calendar) {
+        return String.format("%d/%d/%d", 
+            calendar.get(Calendar.MONTH) + 1,
+            calendar.get(Calendar.DAY_OF_MONTH),
+            calendar.get(Calendar.YEAR));
     }
     
     /**
@@ -176,5 +219,16 @@ public class ScheduleActivator {
     public void rescheduleAllSchedules() {
         Log.d(TAG, "Rescheduling all schedules");
         scheduleAllSchedules();
+    }
+    
+    /**
+     * Cancel all scheduled alarms (useful for cleanup)
+     */
+    public void cancelAllSchedules() {
+        List<ScheduleModel> allSchedules = scheduleManager.getAllSchedules();
+        for (ScheduleModel schedule : allSchedules) {
+            cancelSchedule(schedule);
+        }
+        Log.d(TAG, "Cancelled all scheduled alarms");
     }
 } 

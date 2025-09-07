@@ -141,4 +141,19 @@
         <item name="cornerRadius">16dp</item>
     </style>
 
+    <!-- Material Time Picker Theme - Professional colors that work with dark app -->
+    <style name="MaterialTimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <!-- Use your app's primary color for selections -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/primary</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        
+        <!-- Professional light gray surface - not too bright, not too dark -->
+        <item name="colorSurface">#F5F5F5</item>
+        <item name="colorOnSurface">#212121</item>
+        <item name="colorSurfaceVariant">#F5F5F5</item>
+        <item name="colorOnSurfaceVariant">#424242</item>
+    </style>
+
 </resources>

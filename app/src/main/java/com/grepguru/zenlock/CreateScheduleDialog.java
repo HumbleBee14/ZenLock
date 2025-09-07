@@ -251,22 +251,36 @@ public class CreateScheduleDialog extends DialogFragment {
     }
     
     private void showTimePicker() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-            requireContext(),
-            (view, hourOfDay, minute) -> {
-                selectedHour = hourOfDay;
-                selectedMinute = minute;
-                updateStartTimeDisplay();
-            },
-            selectedHour,
-            selectedMinute,
-            true // 24-hour format
-        );
-        timePickerDialog.show();
+        // Use Material Design Time Picker with proper theme
+        com.google.android.material.timepicker.MaterialTimePicker timePicker = 
+            new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+                .setTimeFormat(com.google.android.material.timepicker.TimeFormat.CLOCK_12H) // AM/PM format
+                .setHour(selectedHour)
+                .setMinute(selectedMinute)
+                .setTitleText("Select Time")
+                .setInputMode(com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_CLOCK) // Start with clock view
+                .setTheme(R.style.MaterialTimePickerTheme) // Apply professional theme
+                .build();
+        
+        timePicker.addOnPositiveButtonClickListener(view -> {
+            selectedHour = timePicker.getHour();
+            selectedMinute = timePicker.getMinute();
+            updateStartTimeDisplay();
+        });
+        
+        timePicker.show(getChildFragmentManager(), "MaterialTimePicker");
     }
     
     private void updateStartTimeDisplay() {
-        startTimeText.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+        // Format time with AM/PM for better user experience
+        String amPm = selectedHour >= 12 ? "PM" : "AM";
+        int displayHour = selectedHour;
+        if (selectedHour == 0) {
+            displayHour = 12; // 12 AM
+        } else if (selectedHour > 12) {
+            displayHour = selectedHour - 12; // 1-11 PM
+        }
+        startTimeText.setText(String.format("%d:%02d %s", displayHour, selectedMinute, amPm));
     }
     
     private void populateForEdit() {

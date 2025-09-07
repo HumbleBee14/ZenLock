@@ -11,6 +11,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.grepguru.zenlock.fragments.HomeFragment;
 import com.grepguru.zenlock.fragments.*;
 import com.grepguru.zenlock.utils.NotificationPermissionManager;
+import com.grepguru.zenlock.utils.ScheduleActivator;
+import com.grepguru.zenlock.utils.AlarmPermissionManager;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -27,6 +29,15 @@ public class MainActivity extends AppCompatActivity {
         
         // Check and request notification permission
         checkNotificationPermission();
+        
+        // Check exact alarm permission for schedules
+        checkExactAlarmPermission();
+        
+        // Clean up any stale session state
+        cleanupStaleSessionState();
+        
+        // Ensure all enabled schedules are activated
+        activateEnabledSchedules();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
@@ -87,6 +98,58 @@ public class MainActivity extends AppCompatActivity {
             NotificationPermissionManager.requestNotificationPermission(this, notificationPermissionLauncher);
         } else {
             Log.d(TAG, "Notification permission already granted");
+        }
+    }
+    
+    /**
+     * Check exact alarm permission for scheduling
+     */
+    private void checkExactAlarmPermission() {
+        if (!AlarmPermissionManager.canScheduleExactAlarms(this)) {
+            Log.d(TAG, "Exact alarm permission not granted, requesting...");
+            AlarmPermissionManager.requestExactAlarmPermission(this);
+        } else {
+            Log.d(TAG, "Exact alarm permission already granted");
+        }
+    }
+    
+    /**
+     * Clean up any stale session state that might prevent new sessions
+     */
+    private void cleanupStaleSessionState() {
+        try {
+            android.content.SharedPreferences prefs = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+            boolean isLocked = prefs.getBoolean("isLocked", false);
+            long lockEndTime = prefs.getLong("lockEndTime", 0);
+            long currentTime = System.currentTimeMillis();
+            
+                    if (isLocked && lockEndTime > 0 && currentTime >= lockEndTime) {
+                        Log.w(TAG, "Found expired session on app start, cleaning up");
+                        android.content.SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("isLocked", false);
+                        editor.remove("lockEndTime");
+                        editor.remove("uptimeAtLock");
+                        editor.remove("wasDeviceRestarted");
+                        editor.remove("current_session_source");
+                        editor.apply();
+                    }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to cleanup stale session state", e);
+        }
+    }
+    
+    /**
+     * Activate all enabled schedules on app start
+     */
+    private void activateEnabledSchedules() {
+        try {
+            Log.d(TAG, "Activating enabled schedules on app start");
+            ScheduleActivator scheduleActivator = new ScheduleActivator(this);
+            
+            scheduleActivator.scheduleAllSchedules();
+            Log.d(TAG, "Schedule activation process completed");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to activate schedules", e);
         }
     }
 }
