@@ -36,7 +36,7 @@ public class SettingsFragment extends Fragment {
     private SwitchCompat persistentNotificationToggle, autoRestartToggle;
     
     // Individual default app toggles
-    private SwitchCompat phoneAppToggle, smsAppToggle, clockAppToggle;
+    private SwitchCompat phoneAppToggle, calendarAppToggle, clockAppToggle;
     
     private RadioGroup securityLevelGroup;
     private RadioButton basicSecurity, enhancedSecurity, maximumSecurity;
@@ -102,7 +102,7 @@ public class SettingsFragment extends Fragment {
         
         // Individual default app toggles
         phoneAppToggle = view.findViewById(R.id.phoneAppToggle);
-        smsAppToggle = view.findViewById(R.id.smsAppToggle);
+        calendarAppToggle = view.findViewById(R.id.calendarAppToggle);
         clockAppToggle = view.findViewById(R.id.clockAppToggle);
         
         // Expandable sections
@@ -122,7 +122,7 @@ public class SettingsFragment extends Fragment {
         
         // Load individual default app settings
         phoneAppToggle.setChecked(preferences.getBoolean("allow_phone_app", true));
-        smsAppToggle.setChecked(preferences.getBoolean("allow_sms_app", false)); // Off by default for accountability
+        calendarAppToggle.setChecked(preferences.getBoolean("allow_calendar_app", true));
         clockAppToggle.setChecked(preferences.getBoolean("allow_clock_app", true));
         
         // Load security settings
@@ -186,15 +186,10 @@ public class SettingsFragment extends Fragment {
             editor.apply();
         });
         
-        smsAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        calendarAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("allow_sms_app", isChecked);
+            editor.putBoolean("allow_calendar_app", isChecked);
             editor.apply();
-            
-            // Show warning dialog when enabling SMS for accountability bypass concerns
-            if (isChecked) {
-                showSmsWarningDialog();
-            }
         });
         
         clockAppToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -609,20 +604,6 @@ public class SettingsFragment extends Fragment {
         statusText.setVisibility(View.VISIBLE);
     }
     
-    private void showSmsWarningDialog() {
-        new AlertDialog.Builder(requireContext())
-            .setTitle("SMS Access Warning")
-            .setMessage("⚠️ Enabling SMS access may bypass accountability partner protection!\n\n" +
-                        "When SMS is enabled, you'll be able to see unlock codes sent to your " +
-                        "accountability partner, which defeats the purpose of accountability.\n\n" +
-                        "Consider keeping SMS disabled for maximum accountability.")
-            .setPositiveButton("Keep Enabled", null)
-            .setNegativeButton("Disable SMS", (dialog, which) -> {
-                smsAppToggle.setChecked(false); // This will trigger the listener to save the preference
-            })
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .show();
-    }
 
     /**
      * Opens email app for sending feedback to developer

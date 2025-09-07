@@ -655,7 +655,7 @@
 
                         </LinearLayout>
 
-                        <!-- SMS App Toggle -->
+                        <!-- Calendar App Toggle -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -666,10 +666,10 @@
                             <ImageView
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                android:src="@drawable/ic_message"
+                                android:src="@drawable/ic_timer"
                                 app:tint="@color/textSecondary"
                                 android:layout_marginEnd="12dp"
-                                android:contentDescription="SMS app" />
+                                android:contentDescription="Calendar app" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -681,42 +681,27 @@
                                     style="@style/ModernText.Body"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="SMS/Messages App"
+                                    android:text="Calendar App"
                                     android:textColor="@color/textPrimary" />
 
                                 <TextView
-                                    android:id="@+id/smsAppDescription"
+                                    android:id="@+id/calendarAppDescription"
                                     style="@style/ModernText.Caption"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="For text messages"
+                                    android:text="For checking schedules and events"
                                     android:textColor="@color/textSecondary" />
 
                             </LinearLayout>
 
                             <androidx.appcompat.widget.SwitchCompat
-                                android:id="@+id/smsAppToggle"
+                                android:id="@+id/calendarAppToggle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:checked="false"
+                                android:checked="true"
                                 android:theme="@style/AppTheme.Switch" />
 
                         </LinearLayout>
-
-                        <!-- SMS Warning Message -->
-                        <TextView
-                            android:id="@+id/smsWarningText"
-                            style="@style/ModernText.Caption"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="32dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@drawable/warning_background"
-                            android:padding="12dp"
-                            android:text="⚠️ Warning: Enabling SMS access may bypass accountability partner unlock since you could see unlock codes sent to them."
-                            android:textColor="@color/warning"
-                            android:visibility="gone" />
 
                         <!-- Clock App Toggle -->
                         <LinearLayout

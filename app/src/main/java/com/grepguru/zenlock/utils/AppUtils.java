@@ -16,6 +16,7 @@ import java.util.Set;
 public class AppUtils {
 
     // Get only the main default apps that should be VISIBLE on lock screen based on user preferences
+    // Default apps: Phone (emergency calls), Clock (alarms), Calendar (schedules/events)
     public static Set<String> getMainDefaultApps(Context context) {
         Set<String> mainApps = new HashSet<>();
         PackageManager pm = context.getPackageManager();
@@ -31,19 +32,19 @@ public class AppUtils {
             }
         }
 
-        // Find and add SMS app if enabled by user (off by default for accountability)
-        if (preferences.getBoolean("allow_sms_app", false)) {
-            String mainSms = findMainSmsApp(context);
-            if (mainSms != null) {
-                mainApps.add(mainSms);
-            }
-        }
-
         // Find and add clock app if enabled by user
         if (preferences.getBoolean("allow_clock_app", true)) {
             String mainClock = findMainClockApp(context);
             if (mainClock != null) {
                 mainApps.add(mainClock);
+            }
+        }
+
+        // Find and add calendar app if enabled by user (replaces SMS for better productivity)
+        if (preferences.getBoolean("allow_calendar_app", true)) {
+            String mainCalendar = findMainCalendarApp(context);
+            if (mainCalendar != null) {
+                mainApps.add(mainCalendar);
             }
         }
 
@@ -60,7 +61,6 @@ public class AppUtils {
         // Get user preferences for system services
         SharedPreferences preferences = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         boolean allowPhoneApp = preferences.getBoolean("allow_phone_app", true);
-        boolean allowSmsApp = preferences.getBoolean("allow_sms_app", false);
         
         // Add essential system services that must be allowed but not shown
         PackageManager pm = context.getPackageManager();
@@ -77,11 +77,6 @@ public class AppUtils {
             addIfInstalled(pm, allAllowed, "com.sec.phone"); // Samsung phone service
         }
         
-        // Essential SMS/MMS system services (only if SMS app is enabled)
-        if (allowSmsApp) {
-            addIfInstalled(pm, allAllowed, "com.android.mms.service");
-            addIfInstalled(pm, allAllowed, "com.android.providers.sms");
-        }
         
         // ALWAYS ALLOWED: Core system services (regardless of user preferences)
         // These are essential for the device to function properly
@@ -194,37 +189,37 @@ public class AppUtils {
         return null;
     }
     
-    private static String findMainSmsApp(Context context) {
+    private static String findMainCalendarApp(Context context) {
         PackageManager pm = context.getPackageManager();
         
         // Try system method first
         try {
-            Intent smsIntent = new Intent(Intent.ACTION_SENDTO);
-            smsIntent.setData(Uri.parse("smsto:"));
-            ResolveInfo resolveInfo = pm.resolveActivity(smsIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            Intent calendarIntent = new Intent(Intent.ACTION_INSERT);
+            calendarIntent.setType("vnd.android.cursor.dir/event");
+            ResolveInfo resolveInfo = pm.resolveActivity(calendarIntent, PackageManager.MATCH_DEFAULT_ONLY);
             if (resolveInfo != null && resolveInfo.activityInfo != null) {
-                String smsPackage = resolveInfo.activityInfo.packageName;
-                if (isPackageInstalled(pm, smsPackage) && !smsPackage.equals("android")) {
-                    return smsPackage;
+                String calendarPackage = resolveInfo.activityInfo.packageName;
+                if (isPackageInstalled(pm, calendarPackage) && !calendarPackage.equals("android")) {
+                    return calendarPackage;
                 }
             }
         } catch (Exception e) {
             // Fallback to hardcoded list
         }
         
-        // Fallback: Try main SMS apps (only the primary ones users see)
-        String[] mainSmsApps = {
-            "com.google.android.apps.messaging", // Google Messages
-            "com.samsung.android.messaging",      // Samsung Messages
-            "com.android.mms",                    // Stock Android
-            "com.miui.mms",                       // Xiaomi Messages
-            "com.oneplus.mms",                    // OnePlus Messages
-            "com.oppo.mms",                       // Oppo Messages
-            "com.vivo.mms",                       // Vivo Messages
-            "com.huawei.mms"                      // Huawei Messages
+        // Fallback: Try main calendar apps (only the primary ones users see)
+        String[] mainCalendarApps = {
+            "com.google.android.calendar",       // Google Calendar
+            "com.samsung.android.calendar",      // Samsung Calendar
+            "com.android.calendar",              // Stock Android
+            "com.miui.calendar",                 // Xiaomi Calendar
+            "com.oneplus.calendar",              // OnePlus Calendar
+            "com.oppo.calendar",                 // Oppo Calendar
+            "com.vivo.calendar",                 // Vivo Calendar
+            "com.huawei.calendar"                // Huawei Calendar
         };
         
-        for (String pkg : mainSmsApps) {
+        for (String pkg : mainCalendarApps) {
             if (isPackageInstalled(pm, pkg)) {
                 return pkg;
             }
