@@ -13,6 +13,8 @@ import com.grepguru.zenlock.fragments.*;
 import com.grepguru.zenlock.utils.NotificationPermissionManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.utils.AlarmPermissionManager;
+import com.grepguru.zenlock.utils.FullScreenIntentPermissionManager;
+import com.grepguru.zenlock.utils.ForegroundServicePermissionManager;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -30,11 +32,17 @@ public class MainActivity extends AppCompatActivity {
         // Check and request notification permission
         checkNotificationPermission();
         
-        // Check exact alarm permission for schedules
-        checkExactAlarmPermission();
-        
-        // Clean up any stale session state
-        cleanupStaleSessionState();
+                // Check exact alarm permission for schedules
+                checkExactAlarmPermission();
+
+                // Check full screen intent permission for automatic lock
+                checkFullScreenIntentPermission();
+
+                // Check foreground service permission for background launch
+                checkForegroundServicePermission();
+
+                // Clean up any stale session state
+                cleanupStaleSessionState();
         
         // Ensure all enabled schedules are activated
         activateEnabledSchedules();
@@ -110,6 +118,33 @@ public class MainActivity extends AppCompatActivity {
             AlarmPermissionManager.requestExactAlarmPermission(this);
         } else {
             Log.d(TAG, "Exact alarm permission already granted");
+        }
+    }
+
+    /**
+     * Check full screen intent permission for automatic lock
+     */
+    private void checkFullScreenIntentPermission() {
+        Log.d(TAG, "Checking full screen intent permission...");
+        Log.d(TAG, "Android API level: " + android.os.Build.VERSION.SDK_INT);
+        
+        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(this)) {
+            Log.d(TAG, "Full screen intent permission not granted, requesting...");
+            FullScreenIntentPermissionManager.requestFullScreenIntentPermission(this);
+        } else {
+            Log.d(TAG, "Full screen intent permission already granted");
+        }
+    }
+
+    /**
+     * Check foreground service permission for background launch
+     */
+    private void checkForegroundServicePermission() {
+        if (!ForegroundServicePermissionManager.canStartForegroundService(this)) {
+            Log.d(TAG, "Foreground service permission not granted, requesting...");
+            ForegroundServicePermissionManager.requestForegroundServicePermission(this);
+        } else {
+            Log.d(TAG, "Foreground service permission already granted");
         }
     }
     

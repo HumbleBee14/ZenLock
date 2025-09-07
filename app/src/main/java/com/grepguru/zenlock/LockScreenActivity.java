@@ -32,6 +32,7 @@ import java.util.Set;
 
 public class LockScreenActivity extends AppCompatActivity {
 
+    private static boolean isLockScreenActive = false;
     private EditText pinInput;
     private SharedPreferences preferences;
     private boolean isLaunchingWhitelistedApp = false;
@@ -42,6 +43,15 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Prevent multiple instances
+        if (isLockScreenActive) {
+            Log.d("LockScreenActivity", "Lock screen already active, finishing duplicate instance");
+            finish();
+            return;
+        }
+        isLockScreenActive = true;
+        
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         analyticsManager = new AnalyticsManager(this);
         unlockManager = new EnhancedUnlockManager(this);
@@ -65,6 +75,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 analyticsManager.endSession(false); // Interrupted due to restart
             }
 
+            isLockScreenActive = false; // Reset flag before finishing
             finish();
             return;
         }
@@ -86,6 +97,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 analyticsManager.endSession(false); // Interrupted due to expired timer
             }
 
+            isLockScreenActive = false; // Reset flag before finishing
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -110,6 +122,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
         if (remainingTimeMillis <= 0) {
+            isLockScreenActive = false; // Reset flag before finishing
             finish();
             return;
         }
@@ -366,10 +379,64 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
         
-        // Restart LockScreenActivity if user tries to minimize
-        Intent intent = new Intent(this, LockScreenActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        // Only restart if we're not already finishing and this is a legitimate pause
+        if (!isFinishing() && !isDestroyed()) {
+            // Use a longer delay to prevent rapid restarts
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    Intent intent = new Intent(this, LockScreenActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            }, 500); // Increased delay to 500ms
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        
+        // If we're launching a whitelisted app, don't restart the lock screen immediately
+        if (isLaunchingWhitelistedApp) {
+            return;
+        }
+        
+        // Only restart if we're not already finishing
+        if (!isFinishing() && !isDestroyed()) {
+            // Use a longer delay to prevent rapid restarts
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    Intent intent = new Intent(this, LockScreenActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            }, 1000); // 1 second delay for onStop
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Remove the automatic restart on resume to prevent loops
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        
+        // Remove automatic restart on focus change to prevent loops
+        // The onPause/onStop methods will handle legitimate cases where user tries to leave
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Always reset the flag when activity is destroyed
+        isLockScreenActive = false;
+        // Cleanup unlock manager
+        if (unlockManager != null) {
+            unlockManager.cleanup();
+        }
     }
 
 
@@ -388,6 +455,7 @@ public class LockScreenActivity extends AppCompatActivity {
         editor.apply();
 
         // Return to MainActivity
+        isLockScreenActive = false; // Reset flag before finishing
         Intent intent = new Intent(LockScreenActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -455,12 +523,5 @@ public class LockScreenActivity extends AppCompatActivity {
         }.start();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (unlockManager != null) {
-            unlockManager.cleanup();
-        }
-    }
 
 }
