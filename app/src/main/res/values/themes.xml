@@ -148,12 +148,12 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/primary</item>
         <item name="colorOnPrimaryContainer">@color/white</item>
-        
-        <!-- Professional light gray surface - not too bright, not too dark -->
-        <item name="colorSurface">#F5F5F5</item>
-        <item name="colorOnSurface">#212121</item>
-        <item name="colorSurfaceVariant">#F5F5F5</item>
-        <item name="colorOnSurfaceVariant">#424242</item>
+
+        <!-- For dark themes -->
+        <item name="colorSurface">@color/time_picker_surface_lavender</item>
+        <item name="colorOnSurface">@color/dark_gray</item>
+        <item name="colorSurfaceVariant">@color/time_picker_surface_lavender</item>
+        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
     </style>
 
 </resources>
