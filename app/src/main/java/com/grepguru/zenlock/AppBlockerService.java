@@ -19,6 +19,9 @@ public class AppBlockerService extends AccessibilityService {
     private String lastLoggedPackage = "";
     private long lastLogTime = 0;
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
+    private String lastForegroundPackage = "";
+    private long lastForegroundCheckTime = 0;
+    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 2000; // Check foreground app every 2 seconds
     private AnalyticsManager analyticsManager;
     
     @Override
@@ -55,6 +58,14 @@ public class AppBlockerService extends AccessibilityService {
             Log.d("AppBlockerService", "Event from our own LockScreenActivity or app. Ignoring.");
             return;
         }
+
+        // Skip if this is the same package we just processed recently (debouncing)
+        long currentTime = System.currentTimeMillis();
+        if (packageName.equals(lastForegroundPackage) && (currentTime - lastForegroundCheckTime) < FOREGROUND_CHECK_DEBOUNCE_MS) {
+            return; // Skip processing the same package too frequently
+        }
+        lastForegroundPackage = packageName;
+        lastForegroundCheckTime = currentTime;
         
         boolean isAllowed = isAllowedApp(packageName);
         
@@ -68,7 +79,6 @@ public class AppBlockerService extends AccessibilityService {
         }
         
         // Log package events for debugging (with debouncing to prevent spam)
-        long currentTime = System.currentTimeMillis();
         if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
             Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
             lastLoggedPackage = packageName;
@@ -77,6 +87,13 @@ public class AppBlockerService extends AccessibilityService {
         
         if (!isAllowed) {
             launchLockScreen();
+        } else {
+            // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting
+            SharedPreferences prefs = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putLong("lastWhitelistedAppTime", System.currentTimeMillis());
+            editor.apply();
+            Log.d("AppBlockerService", "Marked whitelisted app access time: " + packageName);
         }
     }
 

@@ -377,6 +377,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
             isLaunchingWhitelistedApp = false; // Reset the flag
+            Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on pause.");
             return;
         }
         
@@ -384,6 +385,20 @@ public class LockScreenActivity extends AppCompatActivity {
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
             Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on pause.");
+            return;
+        }
+        
+        // Check if AppBlockerService recently allowed a whitelisted app
+        long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
+        long currentTime = System.currentTimeMillis();
+        if (lastWhitelistedAppTime > 0 && (currentTime - lastWhitelistedAppTime) < 5000) { // Within last 5 seconds
+            Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on pause.");
+            return;
+        }
+        
+        // Check if a whitelisted app is currently in the foreground
+        if (isWhitelistedAppInForeground()) {
+            Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on pause.");
             return;
         }
         
@@ -396,6 +411,20 @@ public class LockScreenActivity extends AppCompatActivity {
                     KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
                     if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
                         Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                        return;
+                    }
+                    
+                    // Double-check if AppBlockerService recently allowed a whitelisted app
+                    long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
+                    long currentTime2 = System.currentTimeMillis();
+                    if (lastWhitelistedAppTime2 > 0 && (currentTime2 - lastWhitelistedAppTime2) < 5000) {
+                        Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
+                        return;
+                    }
+                    
+                    // Double-check if whitelisted app is still in foreground
+                    if (isWhitelistedAppInForeground()) {
+                        Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
                         return;
                     }
                     
@@ -413,6 +442,7 @@ public class LockScreenActivity extends AppCompatActivity {
         
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
+            Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on stop.");
             return;
         }
         
@@ -420,6 +450,20 @@ public class LockScreenActivity extends AppCompatActivity {
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
             Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on stop.");
+            return;
+        }
+        
+        // Check if AppBlockerService recently allowed a whitelisted app
+        long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
+        long currentTime = System.currentTimeMillis();
+        if (lastWhitelistedAppTime > 0 && (currentTime - lastWhitelistedAppTime) < 5000) { // Within last 5 seconds
+            Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on stop.");
+            return;
+        }
+        
+        // Check if a whitelisted app is currently in the foreground
+        if (isWhitelistedAppInForeground()) {
+            Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on stop.");
             return;
         }
         
@@ -432,6 +476,20 @@ public class LockScreenActivity extends AppCompatActivity {
                     KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
                     if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
                         Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                        return;
+                    }
+                    
+                    // Double-check if AppBlockerService recently allowed a whitelisted app
+                    long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
+                    long currentTime2 = System.currentTimeMillis();
+                    if (lastWhitelistedAppTime2 > 0 && (currentTime2 - lastWhitelistedAppTime2) < 5000) {
+                        Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
+                        return;
+                    }
+                    
+                    // Double-check if whitelisted app is still in foreground
+                    if (isWhitelistedAppInForeground()) {
+                        Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
                         return;
                     }
                     
@@ -466,6 +524,82 @@ public class LockScreenActivity extends AppCompatActivity {
         if (unlockManager != null) {
             unlockManager.cleanup();
         }
+    }
+
+    /**
+     * Check if a whitelisted app is currently in the foreground
+     * This prevents LockScreenActivity from restarting when user is using allowed apps
+     */
+    private boolean isWhitelistedAppInForeground() {
+        try {
+            // Use ActivityManager to get running processes
+            android.app.ActivityManager activityManager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            if (activityManager != null) {
+                java.util.List<android.app.ActivityManager.RunningAppProcessInfo> runningProcesses = activityManager.getRunningAppProcesses();
+                if (runningProcesses != null) {
+                    for (android.app.ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+                        if (processInfo.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                            String foregroundPackage = processInfo.processName;
+                            
+                            // Check if this is a whitelisted app
+                            if (isAppWhitelisted(foregroundPackage)) {
+                                Log.d("LockScreenActivity", "Whitelisted app detected in foreground: " + foregroundPackage);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("LockScreenActivity", "Error checking foreground app", e);
+        }
+        return false;
+    }
+
+    /**
+     * Check if an app is whitelisted (same logic as AppBlockerService)
+     */
+    private boolean isAppWhitelisted(String packageName) {
+        if (packageName == null || packageName.isEmpty()) {
+            return false;
+        }
+
+        // Always allow the ZenLock app itself
+        if ("com.grepguru.zenlock".equals(packageName)) {
+            return true;
+        }
+        
+        // Allow essential system packages
+        String[] essentialSystemPackages = {
+            "com.android.systemui",           // System UI (status bar, navigation, etc.)
+            "com.android.keyguard",           // System lock screen
+            "android",                        // Core Android system
+            "com.android.settings",           // System settings
+            "com.android.phone",              // Phone app (for emergency calls)
+            "com.android.incallui",           // In-call UI
+            "com.android.dialer",             // Dialer app
+            "com.android.emergency",          // Emergency services
+            "com.android.camera2",            // Camera (for emergency photos)
+            "com.android.camera",             // Camera (alternative)
+            "com.google.android.gms",         // Google Play Services
+            "com.google.android.gsf"          // Google Services Framework
+        };
+        
+        for (String systemPackage : essentialSystemPackages) {
+            if (systemPackage.equals(packageName)) {
+                return true;
+            }
+        }
+        
+        // Check user whitelisted apps
+        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
+        
+        // Get ALL allowed packages (including system services for in-app activities)
+        Set<String> allAllowedApps = new HashSet<>(whitelistedApps);
+        allAllowedApps.addAll(AppUtils.getAllAllowedPackages(this));
+        
+        return allAllowedApps.contains(packageName);
     }
 
 

@@ -50,7 +50,7 @@ public class HomeFragment extends Fragment {
     private Runnable longPressRunnable;
     private ValueAnimator progressAnimator;
     private boolean isLongPressing = false;
-    private static final long ZEN_ACTIVATION_DURATION = 3000; // 3 seconds
+    private static final long ZEN_ACTIVATION_DURATION = 2500; // 2.5 seconds
 
     public HomeFragment() {}
 
@@ -142,7 +142,7 @@ public class HomeFragment extends Fragment {
             int progress = (int) animation.getAnimatedValue();
             zenCircularProgress.setProgress(progress);
 
-            // Update message: 1 second preparing, 2 seconds entering zen
+            // Update message: 1 second preparing, 1.5 seconds entering zen
             if (progress < 33) {
                 zenProgressMessage.setText("🌱 Preparing your zen space...");
             } else {
