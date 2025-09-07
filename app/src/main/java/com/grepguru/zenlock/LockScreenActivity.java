@@ -1,6 +1,5 @@
 package com.grepguru.zenlock;
 
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,6 +24,8 @@ import com.grepguru.zenlock.ui.adapter.*;
 import com.grepguru.zenlock.utils.AppUtils;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.EnhancedUnlockManager;
+import com.grepguru.zenlock.utils.KeyguardUtils;
+import com.grepguru.zenlock.utils.WhitelistManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -382,9 +383,7 @@ public class LockScreenActivity extends AppCompatActivity {
         }
         
         // Check if system lock screen (Keyguard) is active - if so, don't restart
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-            Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on pause.");
+        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on pause.")) {
             return;
         }
         
@@ -408,9 +407,7 @@ public class LockScreenActivity extends AppCompatActivity {
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
                     // Double-check keyguard state before restarting
-                    KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-                    if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
-                        Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                    if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
                         return;
                     }
                     
@@ -447,9 +444,7 @@ public class LockScreenActivity extends AppCompatActivity {
         }
         
         // Check if system lock screen (Keyguard) is active - if so, don't restart
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-            Log.d("LockScreenActivity", "System Keyguard is active. Not restarting on stop.");
+        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on stop.")) {
             return;
         }
         
@@ -473,9 +468,7 @@ public class LockScreenActivity extends AppCompatActivity {
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
                     // Double-check keyguard state before restarting
-                    KeyguardManager keyguardManager2 = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-                    if (keyguardManager2 != null && keyguardManager2.isKeyguardLocked()) {
-                        Log.d("LockScreenActivity", "System Keyguard is active. Canceling restart.");
+                    if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
                         return;
                     }
                     
@@ -542,7 +535,7 @@ public class LockScreenActivity extends AppCompatActivity {
                             String foregroundPackage = processInfo.processName;
                             
                             // Check if this is a whitelisted app
-                            if (isAppWhitelisted(foregroundPackage)) {
+                            if (WhitelistManager.isAppWhitelisted(LockScreenActivity.this, foregroundPackage)) {
                                 Log.d("LockScreenActivity", "Whitelisted app detected in foreground: " + foregroundPackage);
                                 return true;
                             }
@@ -556,51 +549,6 @@ public class LockScreenActivity extends AppCompatActivity {
         return false;
     }
 
-    /**
-     * Check if an app is whitelisted (same logic as AppBlockerService)
-     */
-    private boolean isAppWhitelisted(String packageName) {
-        if (packageName == null || packageName.isEmpty()) {
-            return false;
-        }
-
-        // Always allow the ZenLock app itself
-        if ("com.grepguru.zenlock".equals(packageName)) {
-            return true;
-        }
-        
-        // Allow essential system packages
-        String[] essentialSystemPackages = {
-            "com.android.systemui",           // System UI (status bar, navigation, etc.)
-            "com.android.keyguard",           // System lock screen
-            "android",                        // Core Android system
-            "com.android.settings",           // System settings
-            "com.android.phone",              // Phone app (for emergency calls)
-            "com.android.incallui",           // In-call UI
-            "com.android.dialer",             // Dialer app
-            "com.android.emergency",          // Emergency services
-            "com.android.camera2",            // Camera (for emergency photos)
-            "com.android.camera",             // Camera (alternative)
-            "com.google.android.gms",         // Google Play Services
-            "com.google.android.gsf"          // Google Services Framework
-        };
-        
-        for (String systemPackage : essentialSystemPackages) {
-            if (systemPackage.equals(packageName)) {
-                return true;
-            }
-        }
-        
-        // Check user whitelisted apps
-        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
-        Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
-        
-        // Get ALL allowed packages (including system services for in-app activities)
-        Set<String> allAllowedApps = new HashSet<>(whitelistedApps);
-        allAllowedApps.addAll(AppUtils.getAllAllowedPackages(this));
-        
-        return allAllowedApps.contains(packageName);
-    }
 
 
     private void handleUnlockSuccess(UnlockMethod method) {
