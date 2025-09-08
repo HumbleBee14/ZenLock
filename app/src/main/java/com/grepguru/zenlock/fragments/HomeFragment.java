@@ -121,6 +121,12 @@ public class HomeFragment extends Fragment {
     private void startZenActivation() {
         if (isLongPressing) return;
 
+        // Check accessibility permission first, before starting animation
+        if (!isAccessibilityPermissionGranted()) {
+            showAccessibilityDisclosureDialog();
+            return;
+        }
+
         isLongPressing = true;
 
         // Show overlay with smooth fade in
@@ -273,11 +279,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void checkAndStartLockService() {
-        if (!isAccessibilityPermissionGranted()) {
-            showAccessibilityDisclosureDialog();
-            return;
-        }
-
+        // Accessibility permission already checked at the beginning of animation
         SharedPreferences preferences = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         long lockDurationMillis = (selectedHours * 3600 + selectedMinutes * 60) * 1000;
