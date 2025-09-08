@@ -642,7 +642,7 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Opens Buy Me a Coffee page in web browser
+     * Opens support page in web browser
      */
     private void openSupportPage() {
         try {
