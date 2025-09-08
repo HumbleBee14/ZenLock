@@ -21,12 +21,27 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="16dp"/>
 
+    <!-- Tab Layout -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/appTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/whitelistTitle"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabTextColor="@color/textSecondary"
+        app:tabSelectedTextColor="@color/primaryTeal"
+        app:tabIndicatorColor="@color/primaryTeal"
+        app:tabBackground="@drawable/tab_background"/>
+
     <!-- RecyclerView for App List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/whitelistRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/whitelistTitle"
+        app:layout_constraintTop_toBottomOf="@id/appTabs"
         app:layout_constraintBottom_toTopOf="@id/saveContainer"
         android:layout_margin="8dp"
         android:clipToPadding="false"

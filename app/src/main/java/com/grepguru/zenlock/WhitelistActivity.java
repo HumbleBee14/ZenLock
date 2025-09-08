@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.tabs.TabLayout;
 
 import com.grepguru.zenlock.model.*;
 import com.grepguru.zenlock.ui.adapter.*;
@@ -38,11 +39,18 @@ public class WhitelistActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private Button saveButton;
     private LinearLayout loadingContainer;
+    private TabLayout appTabs;
     
     // Data Collections
-    private List<SelectableAppModel> appList = new ArrayList<>();
-    private Set<String> defaultApps = new HashSet<>(); // Phone, SMS, Clock (excluded from selection)
+    private List<SelectableAppModel> systemApps = new ArrayList<>();
+    private List<SelectableAppModel> userApps = new ArrayList<>();
+    private List<SelectableAppModel> currentAppList = new ArrayList<>(); // Currently displayed list
+    private Set<String> defaultApps = new HashSet<>(); // Phone, Calendar, Clock (excluded from selection)
     private Set<String> selectedApps = new HashSet<>(); // User's additional app selections
+    
+    // Tab constants
+    private static final int TAB_SYSTEM = 0;
+    private static final int TAB_USER = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +60,17 @@ public class WhitelistActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.whitelistRecyclerView);
         saveButton = findViewById(R.id.saveButton);
         loadingContainer = findViewById(R.id.loadingContainer);
+        appTabs = findViewById(R.id.appTabs);
 
         defaultApps = AppUtils.getMainDefaultApps(this);
         loadUserSelections();
 
+        // Setup tabs
+        setupTabs();
+
         // Setup RecyclerView first with empty list
-        WhitelistAdapter adapter = new WhitelistAdapter(appList, selectedApps, MAX_ADDITIONAL_APPS);
+        WhitelistAdapter adapter = new WhitelistAdapter(currentAppList, selectedApps, MAX_ADDITIONAL_APPS);
+        adapter.setOnSelectionChangeListener(this::updateSaveButtonText);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -68,6 +81,41 @@ public class WhitelistActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> {
             saveWhitelist();
         });
+        
+        // Update save button text with selection count
+        updateSaveButtonText();
+    }
+
+    private void setupTabs() {
+        appTabs.addTab(appTabs.newTab().setText("System Apps"));
+        appTabs.addTab(appTabs.newTab().setText("User Apps"));
+        
+        appTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switchTab(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+    
+    private void switchTab(int position) {
+        currentAppList.clear();
+        if (position == TAB_SYSTEM) {
+            currentAppList.addAll(systemApps);
+        } else {
+            currentAppList.addAll(userApps);
+        }
+        
+        WhitelistAdapter adapter = (WhitelistAdapter) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void loadUserSelections() {
@@ -99,7 +147,7 @@ public class WhitelistActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 
                 // Optional: Show completion message
-                Toast.makeText(this, "Loaded " + appList.size() + " apps", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Loaded " + (systemApps.size() + userApps.size()) + " apps", Toast.LENGTH_SHORT).show();
             });
         }).start();
     }
@@ -111,13 +159,14 @@ public class WhitelistActivity extends AppCompatActivity {
 
         List<ResolveInfo> resolvedApps = pm.queryIntentActivities(mainIntent, 0);
         
-        List<SelectableAppModel> userInstalledApps = new ArrayList<>();
-        List<SelectableAppModel> systemInstalledApps = new ArrayList<>();
+        // Clear existing lists
+        userApps.clear();
+        systemApps.clear();
 
         for (ResolveInfo resolveInfo : resolvedApps) {
             String packageName = resolveInfo.activityInfo.packageName;
             
-            // Skip default apps (Phone, SMS, Clock) - they don't count toward quota
+            // Skip default apps (Phone, Calendar, Clock) - they don't count toward quota
             if (isDefaultApp(packageName) || "com.grepguru.zenlock".equals(packageName)) {
                 continue;
             }
@@ -136,13 +185,11 @@ public class WhitelistActivity extends AppCompatActivity {
 
                 SelectableAppModel appModel = new SelectableAppModel(packageName, appName, false, isSelected, icon);
                 
-
-                
                 // Categorize: User-installed vs System apps
                 if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    userInstalledApps.add(appModel);
+                    userApps.add(appModel);
                 } else {
-                    systemInstalledApps.add(appModel);
+                    systemApps.add(appModel);
                 }
                 
             } catch (PackageManager.NameNotFoundException e) {
@@ -150,17 +197,27 @@ public class WhitelistActivity extends AppCompatActivity {
             }
         }
 
+        // Sort both lists alphabetically
         Comparator<SelectableAppModel> alphabetical = (a, b) -> a.getAppName().compareToIgnoreCase(b.getAppName());
-        Collections.sort(userInstalledApps, alphabetical);
-        Collections.sort(systemInstalledApps, alphabetical);
+        Collections.sort(userApps, alphabetical);
+        Collections.sort(systemApps, alphabetical);
 
-        appList.clear();
-        appList.addAll(userInstalledApps);
-        appList.addAll(systemInstalledApps);
+        // Initialize current list with system apps (default tab)
+        currentAppList.clear();
+        currentAppList.addAll(systemApps);
     }
     
     private boolean isDefaultApp(String packageName) {
         return defaultApps.contains(packageName);
+    }
+    
+    private void updateSaveButtonText() {
+        int selectedCount = selectedApps.size();
+        if (selectedCount == 0) {
+            saveButton.setText("Save (No additional apps selected)");
+        } else {
+            saveButton.setText("Save (" + selectedCount + "/" + MAX_ADDITIONAL_APPS + " apps selected)");
+        }
     }
 
 
