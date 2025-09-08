@@ -41,6 +41,8 @@ public class LockScreenActivity extends AppCompatActivity {
     private AnalyticsManager analyticsManager;
     private boolean isExpanded = false;
     private EnhancedUnlockManager unlockManager;
+    private android.os.CountDownTimer countDownTimer;
+    private boolean wasManuallyUnlocked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -513,6 +515,12 @@ public class LockScreenActivity extends AppCompatActivity {
         super.onDestroy();
         // Always reset the flag when activity is destroyed
         isLockScreenActive = false;
+        
+        // Cancel countdown timer to prevent memory leaks
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        
         // Cleanup unlock manager
         if (unlockManager != null) {
             unlockManager.cleanup();
@@ -553,6 +561,14 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private void handleUnlockSuccess(UnlockMethod method) {
         Toast.makeText(this, "Unlocked via " + method.getDisplayName(), Toast.LENGTH_SHORT).show();
+
+        // Mark as manually unlocked to prevent completion toast
+        wasManuallyUnlocked = true;
+
+        // Cancel the countdown timer to prevent it from finishing
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
 
         // End analytics session
         if (analyticsManager.hasActiveSession()) {
@@ -608,7 +624,7 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
     private void startCountdownTimer(long remainingTimeMillis, TextView timerCountdown) {
-        new android.os.CountDownTimer(remainingTimeMillis, 1000) {
+        countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long minutes = (millisUntilFinished / 1000) / 60;
@@ -618,20 +634,24 @@ public class LockScreenActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                // End analytics session
-                if (analyticsManager.hasActiveSession()) {
-                    analyticsManager.endSession(true); // Completed successfully
+                // Only show completion toast if not manually unlocked
+                if (!wasManuallyUnlocked) {
+                    // End analytics session
+                    if (analyticsManager.hasActiveSession()) {
+                        analyticsManager.endSession(true); // Completed successfully
+                    }
+
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("isLocked", false);
+                    editor.remove("lockEndTime"); // Remove saved lock end time
+                    editor.apply();
+
+                    Toast.makeText(LockScreenActivity.this, "Time's up! Focus Mode Ended.", Toast.LENGTH_SHORT).show();
                 }
-
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("isLocked", false);
-                editor.remove("lockEndTime"); // Remove saved lock end time
-                editor.apply();
-
-                Toast.makeText(LockScreenActivity.this, "Time's up! Focus Mode Ended.", Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }.start();
+        };
+        countDownTimer.start();
     }
 
 

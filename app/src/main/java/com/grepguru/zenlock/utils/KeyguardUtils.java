@@ -43,7 +43,7 @@ public class KeyguardUtils {
     public static boolean isKeyguardLockedWithLog(Context context, String logMessage) {
         boolean isLocked = isKeyguardLocked(context);
         if (isLocked && logMessage != null && !logMessage.isEmpty()) {
-            Log.d(TAG, logMessage);
+            // Log.d(TAG, logMessage);
         }
         return isLocked;
     }
