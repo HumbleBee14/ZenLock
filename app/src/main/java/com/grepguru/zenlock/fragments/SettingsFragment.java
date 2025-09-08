@@ -410,9 +410,7 @@ public class SettingsFragment extends Fragment {
         if (!existingPin.isEmpty()) {
             instructionText.setText("⚠️ PIN already configured.\n\nTo change it, enter a new PIN twice below.");
         } else {
-            instructionText.setText("💡 Set your unlock PIN here.\n\n" +
-                                  "💭 Suggestion: You could ask a friend to set this PIN " +
-                                  "for better accountability - that way you won't know what it is!");
+            instructionText.setText("💡 Tip: Consider asking a trusted friend to set this PIN for you to increase accountability.");
         }
         
         builder.setView(dialogView)
