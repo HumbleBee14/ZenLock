@@ -87,8 +87,8 @@ public class WhitelistActivity extends AppCompatActivity {
     }
 
     private void setupTabs() {
-        appTabs.addTab(appTabs.newTab().setText("System Apps"));
-        appTabs.addTab(appTabs.newTab().setText("User Apps"));
+        appTabs.addTab(appTabs.newTab().setText("System"));
+        appTabs.addTab(appTabs.newTab().setText("User"));
         
         appTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -214,9 +214,9 @@ public class WhitelistActivity extends AppCompatActivity {
     private void updateSaveButtonText() {
         int selectedCount = selectedApps.size();
         if (selectedCount == 0) {
-            saveButton.setText("Save (No additional apps selected)");
+            saveButton.setText("Save (0/" + MAX_ADDITIONAL_APPS + ")");
         } else {
-            saveButton.setText("Save (" + selectedCount + "/" + MAX_ADDITIONAL_APPS + " apps selected)");
+            saveButton.setText("Save (" + selectedCount + "/" + MAX_ADDITIONAL_APPS + ")");
         }
     }
 
