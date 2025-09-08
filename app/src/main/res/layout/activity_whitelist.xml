@@ -22,6 +22,74 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="16dp"/>
 
+    <!-- Search Icon (Initially visible) -->
+    <ImageView
+        android:id="@+id/searchIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_search"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="@id/whitelistTitle"
+        app:layout_constraintBottom_toBottomOf="@id/whitelistTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"/>
+
+    <!-- Search Bar (Initially hidden) -->
+    <LinearLayout
+        android:id="@+id/searchBarContainer"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:background="@drawable/search_background_glass"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:visibility="gone"
+        android:alpha="0"
+        app:layout_constraintTop_toTopOf="@id/whitelistTitle"
+        app:layout_constraintBottom_toBottomOf="@id/whitelistTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="16dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_search"
+            android:layout_marginEnd="8dp"/>
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="Search apps..."
+            android:textColor="@android:color/white"
+            android:textColorHint="#80FFFFFF"
+            android:textSize="16sp"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:gravity="center_vertical"
+            android:paddingVertical="2dp"/>
+
+        <ImageView
+            android:id="@+id/searchCloseIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_close_white"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="2dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
     <!-- Tab Layout -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/appTabs"

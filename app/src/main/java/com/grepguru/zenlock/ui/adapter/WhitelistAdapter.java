@@ -33,6 +33,11 @@ public class WhitelistAdapter extends RecyclerView.Adapter<WhitelistAdapter.View
         this.selectionChangeListener = listener;
     }
 
+    public void updateAppList(List<SelectableAppModel> newAppList) {
+        this.appList = newAppList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

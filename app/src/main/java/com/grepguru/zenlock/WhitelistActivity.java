@@ -9,10 +9,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +52,14 @@ public class WhitelistActivity extends AppCompatActivity {
     private Button saveButton;
     private LinearLayout loadingContainer;
     private TabLayout appTabs;
+    private TextView whitelistTitle;
+    
+    // Search Components
+    private ImageView searchIcon;
+    private LinearLayout searchBarContainer;
+    private EditText searchEditText;
+    private ImageView searchCloseIcon;
+    private boolean isSearchVisible = false;
     
     // Selected Apps Bar Components
     private ImageView[] appIcons = new ImageView[4];
@@ -56,6 +70,7 @@ public class WhitelistActivity extends AppCompatActivity {
     private List<SelectableAppModel> systemApps = new ArrayList<>();
     private List<SelectableAppModel> userApps = new ArrayList<>();
     private List<SelectableAppModel> currentAppList = new ArrayList<>(); // Currently displayed list
+    private List<SelectableAppModel> filteredAppList = new ArrayList<>(); // Filtered list for search
     private Set<String> defaultApps = new HashSet<>(); // Phone, Calendar, Clock (excluded from selection)
     private Set<String> selectedApps = new HashSet<>(); // User's additional app selections
     private Map<String, SelectableAppModel> appModelMap = new HashMap<>(); // Quick lookup for app info
@@ -71,6 +86,7 @@ public class WhitelistActivity extends AppCompatActivity {
 
         initializeViews();
         setupSelectedAppsBar();
+        setupSearch();
 
         defaultApps = AppUtils.getMainDefaultApps(this);
         loadUserSelections();
@@ -79,7 +95,7 @@ public class WhitelistActivity extends AppCompatActivity {
         setupTabs();
 
         // Setup RecyclerView first with empty list
-        WhitelistAdapter adapter = new WhitelistAdapter(currentAppList, selectedApps, MAX_ADDITIONAL_APPS);
+        WhitelistAdapter adapter = new WhitelistAdapter(filteredAppList, selectedApps, MAX_ADDITIONAL_APPS);
         adapter.setOnSelectionChangeListener(() -> {
             updateSaveButtonText();
             updateSelectedAppsBar();
@@ -98,11 +114,44 @@ public class WhitelistActivity extends AppCompatActivity {
         updateSelectedAppsBar();
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN && isSearchVisible) {
+            // Check if touch is outside search bar and search field is empty
+            if (searchEditText.getText().toString().trim().isEmpty()) {
+                // Get search bar coordinates
+                int[] searchBarLocation = new int[2];
+                searchBarContainer.getLocationOnScreen(searchBarLocation);
+                
+                float x = ev.getRawX();
+                float y = ev.getRawY();
+                
+                // Check if touch is outside the search bar container
+                if (x < searchBarLocation[0] || 
+                    x > searchBarLocation[0] + searchBarContainer.getWidth() ||
+                    y < searchBarLocation[1] || 
+                    y > searchBarLocation[1] + searchBarContainer.getHeight()) {
+                    
+                    hideSearchBar();
+                    return true; // Consume the event
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     private void initializeViews() {
         recyclerView = findViewById(R.id.whitelistRecyclerView);
         saveButton = findViewById(R.id.saveButton);
         loadingContainer = findViewById(R.id.loadingContainer);
         appTabs = findViewById(R.id.appTabs);
+        whitelistTitle = findViewById(R.id.whitelistTitle);
+        
+        // Search views
+        searchIcon = findViewById(R.id.searchIcon);
+        searchBarContainer = findViewById(R.id.searchBarContainer);
+        searchEditText = findViewById(R.id.searchEditText);
+        searchCloseIcon = findViewById(R.id.searchCloseIcon);
     }
 
     private void setupSelectedAppsBar() {
@@ -144,6 +193,97 @@ public class WhitelistActivity extends AppCompatActivity {
             }
             
             Toast.makeText(this, "App removed from whitelist", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupSearch() {
+        // Search icon click - expand search bar
+        searchIcon.setOnClickListener(v -> showSearchBar());
+        
+        // Close search
+        searchCloseIcon.setOnClickListener(v -> hideSearchBar());
+        
+        // Search text change listener
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterApps(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void showSearchBar() {
+        if (isSearchVisible) return;
+        
+        isSearchVisible = true;
+        searchBarContainer.setVisibility(View.VISIBLE);
+        
+        // Animate search bar expansion and hide title
+        ObjectAnimator.ofFloat(searchIcon, "alpha", 1f, 0f).setDuration(200).start();
+        ObjectAnimator.ofFloat(whitelistTitle, "alpha", 1f, 0f).setDuration(200).start();
+        ObjectAnimator.ofFloat(searchBarContainer, "alpha", 0f, 1f).setDuration(300).start();
+        
+        // Hide search icon and make title invisible (but keep layout space)
+        searchIcon.postDelayed(() -> searchIcon.setVisibility(View.GONE), 200);
+        whitelistTitle.postDelayed(() -> whitelistTitle.setVisibility(View.INVISIBLE), 200);
+        
+        // Focus on search input and show keyboard
+        searchEditText.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    private void hideSearchBar() {
+        if (!isSearchVisible) return;
+        
+        isSearchVisible = false;
+        
+        // Clear search and reset filter
+        searchEditText.setText("");
+        filterApps("");
+        
+        // Hide keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+        
+        // Animate search bar collapse and show title
+        ObjectAnimator.ofFloat(searchBarContainer, "alpha", 1f, 0f).setDuration(200).start();
+        searchIcon.setVisibility(View.VISIBLE);
+        whitelistTitle.setVisibility(View.VISIBLE);
+        ObjectAnimator.ofFloat(searchIcon, "alpha", 0f, 1f).setDuration(300).start();
+        ObjectAnimator.ofFloat(whitelistTitle, "alpha", 0f, 1f).setDuration(300).start();
+        
+        // Hide search bar after animation
+        searchBarContainer.postDelayed(() -> searchBarContainer.setVisibility(View.GONE), 200);
+    }
+
+    private void filterApps(String query) {
+        filteredAppList.clear();
+        
+        if (query.trim().isEmpty()) {
+            // No search - show all apps from current tab
+            filteredAppList.addAll(currentAppList);
+        } else {
+            // Filter apps based on search query
+            String lowerQuery = query.toLowerCase().trim();
+            for (SelectableAppModel app : currentAppList) {
+                if (app.getAppName().toLowerCase().contains(lowerQuery) || 
+                    app.getPackageName().toLowerCase().contains(lowerQuery)) {
+                    filteredAppList.add(app);
+                }
+            }
+        }
+        
+        // Update adapter with filtered list
+        WhitelistAdapter adapter = (WhitelistAdapter) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.updateAppList(filteredAppList);
         }
     }
 
@@ -220,10 +360,9 @@ public class WhitelistActivity extends AppCompatActivity {
             currentAppList.addAll(userApps);
         }
         
-        WhitelistAdapter adapter = (WhitelistAdapter) recyclerView.getAdapter();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
+        // Apply current search filter to new tab
+        String currentQuery = searchEditText.getText().toString();
+        filterApps(currentQuery);
     }
 
     private void loadUserSelections() {
@@ -252,6 +391,10 @@ public class WhitelistActivity extends AppCompatActivity {
                 // Hide loading animation and show app list
                 loadingContainer.setVisibility(android.view.View.GONE);
                 recyclerView.setVisibility(android.view.View.VISIBLE);
+                
+                // Initialize filtered list with current tab
+                filteredAppList.clear();
+                filteredAppList.addAll(currentAppList);
                 adapter.notifyDataSetChanged();
                 
                 // Update selected apps bar after loading
