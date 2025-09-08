@@ -41,7 +41,9 @@
             android:background="@drawable/rounded_input_background"
             android:textColor="@color/textPrimary"
             android:textColorHint="@color/textSecondary"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="20dp"
+            android:inputType="textCapWords"
+            android:capitalize="words" />
 
         <!-- Start Time -->
         <TextView

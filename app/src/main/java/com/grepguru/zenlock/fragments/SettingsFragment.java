@@ -146,6 +146,9 @@ public class SettingsFragment extends Fragment {
                 break;
         }
 
+        // Initialize toggle states based on existing configuration
+        initializeToggleStates();
+        
         // Update PIN button states
         updateUnlockMethodStates();
 
@@ -243,7 +246,8 @@ public class SettingsFragment extends Fragment {
         pinUnlockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 pinConfigSection.setVisibility(View.VISIBLE);
-                // Don't auto-prompt for PIN setup - let user click the button
+                // Update button states when section becomes visible
+                updateUnlockMethodStates();
             } else {
                 pinConfigSection.setVisibility(View.GONE);
                 // Clear PIN when disabled
@@ -290,19 +294,29 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    private void initializeToggleStates() {
+        // Set initial toggle states based on existing configuration
+        String existingPin = preferences.getString("unlock_pin", "");
+        boolean pinConfigured = !existingPin.isEmpty();
+        
+        // Set toggle state based on PIN existence (only on initial load)
+        pinUnlockToggle.setChecked(pinConfigured);
+    }
+
     private void updateUnlockMethodStates() {
         // Check PIN status
         String existingPin = preferences.getString("unlock_pin", "");
         boolean pinConfigured = !existingPin.isEmpty();
         
-        pinUnlockToggle.setChecked(pinConfigured);
-        pinConfigSection.setVisibility(pinConfigured ? View.VISIBLE : View.GONE);
+        // Update section visibility based on toggle state, not PIN existence
+        boolean toggleEnabled = pinUnlockToggle.isChecked();
+        pinConfigSection.setVisibility(toggleEnabled ? View.VISIBLE : View.GONE);
         
         if (pinConfigured) {
-            configurePinButton.setText("Change PIN");
+            configurePinButton.setVisibility(View.GONE);
             clearPinButton.setVisibility(View.VISIBLE);
         } else {
-            configurePinButton.setText("Set PIN");
+            configurePinButton.setVisibility(View.VISIBLE);
             clearPinButton.setVisibility(View.GONE);
         }
         
@@ -375,57 +389,8 @@ public class SettingsFragment extends Fragment {
     }
     
     private void showPinSetupDialog() {
-        String existingPin = preferences.getString("unlock_pin", "");
-        if (!existingPin.isEmpty()) {
-            // PIN already exists, verify current PIN first
-            showCurrentPinVerificationDialog();
-        } else {
-            // No PIN exists, go directly to setup
-            showActualPinDialog();
-        }
-    }
-    
-    private void showCurrentPinVerificationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_pin_input, null);
-        
-        EditText pinInput = dialogView.findViewById(R.id.pinInput);
-        TextView otpStatusText = dialogView.findViewById(R.id.otpStatusText);
-        TextView titleText = dialogView.findViewById(R.id.unlockMethodTitle);
-        TextView instructionText = dialogView.findViewById(R.id.unlockMethodDescription);
-        
-        // Set up for current PIN verification
-        titleText.setText("Verify Current PIN");
-        instructionText.setText("Enter your current PIN to change it");
-        
-        // Hide OTP-specific buttons
-        Button requestOtpButton = dialogView.findViewById(R.id.requestOtpButton);
-        Button sendOtpAgainButton = dialogView.findViewById(R.id.sendOtpAgainButton);
-        if (requestOtpButton != null) requestOtpButton.setVisibility(View.GONE);
-        if (sendOtpAgainButton != null) sendOtpAgainButton.setVisibility(View.GONE);
-        
-        // Setup input watcher for visual feedback
-        setupCurrentPinInputWatcher(pinInput, otpStatusText);
-        
-        builder.setView(dialogView)
-               .setTitle("PIN Verification")
-               .setPositiveButton("Verify", null)
-               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        
-        AlertDialog dialog = builder.create();
-        
-        dialog.setOnShowListener(dialogInterface -> {
-            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            button.setOnClickListener(view -> {
-                String enteredPin = pinInput.getText().toString().trim();
-                if (validateCurrentPin(enteredPin, pinInput, otpStatusText)) {
-                    dialog.dismiss();
-                    showActualPinDialog(); // Show PIN setup dialog after successful verification
-                }
-            });
-        });
-        
-        dialog.show();
+        // Always show PIN setup dialog (user can clear existing PIN first if needed)
+        showActualPinDialog();
     }
     
     private void showActualPinDialog() {
@@ -544,63 +509,6 @@ public class SettingsFragment extends Fragment {
     private void showPinSetupSuccess(TextView statusText) {
         statusText.setText("✅ PIN set successfully!");
         statusText.setTextColor(Color.parseColor("#4CAF50"));
-        statusText.setVisibility(View.VISIBLE);
-    }
-    
-    private void setupCurrentPinInputWatcher(EditText pinInput, TextView statusText) {
-        TextWatcher inputWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                resetCurrentPinInputState(pinInput, statusText);
-            }
-            
-            @Override
-            public void afterTextChanged(Editable s) {}
-        };
-        
-        pinInput.addTextChangedListener(inputWatcher);
-    }
-    
-    private void resetCurrentPinInputState(EditText pinInput, TextView statusText) {
-        // Reset input field color to normal
-        ColorStateList normalColor = ColorStateList.valueOf(Color.parseColor("#808080"));
-        pinInput.setBackgroundTintList(normalColor);
-        
-        // Hide status text
-        statusText.setVisibility(View.GONE);
-    }
-    
-    private boolean validateCurrentPin(String enteredPin, EditText pinInput, TextView statusText) {
-        if (enteredPin.isEmpty()) {
-            showCurrentPinError("Please enter your current PIN", pinInput, statusText);
-            return false;
-        }
-        
-        if (enteredPin.length() != 4 || !enteredPin.matches("\\d{4}")) {
-            showCurrentPinError("Please enter a 4-digit PIN", pinInput, statusText);
-            return false;
-        }
-        
-        String currentPin = preferences.getString("unlock_pin", "");
-        if (!currentPin.equals(enteredPin)) {
-            showCurrentPinError("Wrong PIN! Check again.", pinInput, statusText);
-            return false;
-        }
-        
-        return true;
-    }
-    
-    private void showCurrentPinError(String message, EditText pinInput, TextView statusText) {
-        // Set input field color to red
-        ColorStateList errorColor = ColorStateList.valueOf(Color.parseColor("#FF6B6B"));
-        pinInput.setBackgroundTintList(errorColor);
-        
-        // Show error message in status text
-        statusText.setText(message);
-        statusText.setTextColor(Color.parseColor("#FF6B6B"));
         statusText.setVisibility(View.VISIBLE);
     }
     
