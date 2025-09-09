@@ -137,7 +137,6 @@ public class AnalyticsRepository {
                     date,
                     totalSessions,
                     totalFocusTime,
-                    0L, // Mobile usage will be updated separately
                     completedSessions,
                     interruptedSessions,
                     avgFocusScore,
@@ -153,22 +152,19 @@ public class AnalyticsRepository {
         });
     }
     
+    // Mobile usage update method removed - data is fetched fresh from UsageStatsManager
+    
     /**
-     * Update mobile usage for a date
+     * Get total focus time for a specific period
      */
-    public void updateMobileUsageForDate(String date, long mobileUsageTime) {
-        executor.execute(() -> {
-            try {
-                DailyStatsEntity existingStats = analyticsDao.getDailyStatsSync(date);
-                if (existingStats != null) {
-                    existingStats.totalMobileUsage = mobileUsageTime;
-                    existingStats.updatedAt = System.currentTimeMillis();
-                    analyticsDao.insertDailyStats(existingStats);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error updating mobile usage for " + date, e);
-            }
-        });
+    public long getTotalFocusTimeForPeriod(long startTime, long endTime) {
+        try {
+            Long result = analyticsDao.getTotalFocusTimeForPeriod(startTime, endTime);
+            return result != null ? result : 0L;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting total focus time for period", e);
+            return 0L;
+        }
     }
     
     // =====================================

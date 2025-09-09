@@ -37,61 +37,24 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Coming Soon Banner -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/comingSoonBanner"
+        <!-- Usage Permission Banner (copied from SMS permission banner) -->
+        <TextView
+            android:id="@+id/usagePermissionBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@color/warningBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/analyticsSubtitle">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🚧 Analytics Coming Soon!"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/warningText"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Full analytics will be available in future updates"
-                        android:textSize="14sp"
-                        android:textColor="@color/warningText"
-                        android:layout_marginTop="4dp"/>
-
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/dismissAnalyticsBanner"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
-                    android:layout_marginStart="12dp"
-                    android:contentDescription="Dismiss banner"/>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+            android:visibility="gone"
+            android:text="⚠️ Usage access permission required. Click here to grant permission."
+            android:textSize="14sp"
+            android:textColor="@android:color/holo_orange_dark"
+            android:background="@drawable/modern_input_background"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toBottomOf="@id/analyticsSubtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Today's Focus Dashboard Card -->
         <androidx.cardview.widget.CardView
@@ -100,10 +63,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="4dp"
+            app:layout_constraintTop_toBottomOf="@id/usagePermissionBanner"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/comingSoonBanner">
+            app:cardElevation="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -287,7 +250,7 @@
                             android:id="@+id/todayMobileUsage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4h 30m"
+                            android:text="0m"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@color/textPrimary"/>
@@ -312,7 +275,7 @@
                             android:id="@+id/todayTimeSaved"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1h 30m"
+                            android:text="0m"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@color/success"/>
@@ -402,9 +365,10 @@
                             android:textColor="@color/textPrimary"/>
 
                         <TextView
+                            android:id="@+id/weeklyComparisonText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="↗️ +23%"
+                            android:text="--"
                             android:textSize="14sp"
                             android:textColor="@color/success"
                             android:background="@drawable/modern_card_background"
@@ -445,7 +409,7 @@
                                 android:id="@+id/thisWeekFocusTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="8h 45m"
+                                android:text="0m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/secondary"/>
@@ -473,7 +437,7 @@
                                 android:id="@+id/lastWeekFocusTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="6h 30m"
+                                android:text="0m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/textPrimary"/>
@@ -510,7 +474,7 @@
                                 android:id="@+id/thisWeekMobileUsage"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="28h 30m"
+                                android:text="0m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/textPrimary"/>
@@ -538,7 +502,7 @@
                                 android:id="@+id/lastWeekMobileUsage"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="32h 15m"
+                                android:text="0m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/textPrimary"/>
@@ -563,209 +527,15 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <!-- Chart Container with reference line -->
-                    <RelativeLayout
+                    <!-- Weekly Bar Chart using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/weeklyBarChart"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:background="@drawable/modern_card_background"
-                        android:padding="16dp">
+                        android:layout_height="140dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/modern_card_background"/>
 
-                        <!-- Target reference line (dotted) -->
-                        <View
-                            android:id="@+id/targetReferenceLine"
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_centerVertical="true"
-                            android:background="@color/textSecondary"
-                            android:alpha="0.5"/>
 
-                        <!-- Chart bars container -->
-                        <LinearLayout
-                            android:id="@+id/chartBarsContainer"
-                            android:layout_width="match_parent"
-                            android:layout_height="80dp"
-                            android:orientation="horizontal"
-                            android:gravity="bottom"
-                            android:layout_centerInParent="true">
-
-                            <!-- Day 1 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="25dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/26"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 2 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="45dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/27"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 3 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="30dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/28"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 4 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="55dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/29"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 5 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="35dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/30"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 6 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="60dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/31"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 7 (Today) -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="70dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="9/01"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textPrimary"
-                                    android:textStyle="bold"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                    </RelativeLayout>
 
                 </LinearLayout>
 
@@ -886,7 +656,7 @@
                                 android:id="@+id/thisMonthFocusTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="32h 15m"
+                                android:text="0m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/secondary"/>
@@ -1004,51 +774,13 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <!-- Chart Container for line graph -->
-                    <RelativeLayout
+                    <!-- Monthly Line Chart using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/monthlyLineChart"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:background="@drawable/modern_card_background"
-                        android:padding="16dp">
-
-                        <!-- Monthly line chart -->
-                        <ImageView
-                            android:id="@+id/monthlyChart"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/monthly_trend_line"
-                            android:scaleType="fitXY"
-                            android:contentDescription="Monthly focus trend chart"/>
-
-                        <!-- Chart labels -->
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:layout_alignParentStart="true"
-                            android:text="1"
-                            android:textSize="10sp"
-                            android:textColor="@color/textSecondary"/>
-                        
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:layout_centerHorizontal="true"
-                            android:text="15"
-                            android:textSize="10sp"
-                            android:textColor="@color/textSecondary"/>
-                        
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:layout_alignParentEnd="true"
-                            android:text="30"
-                            android:textSize="10sp"
-                            android:textColor="@color/textSecondary"/>
-
-                    </RelativeLayout>
+                        android:layout_height="140dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/modern_card_background"/>
 
                 </LinearLayout>
 

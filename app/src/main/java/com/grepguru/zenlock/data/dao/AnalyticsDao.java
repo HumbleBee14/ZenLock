@@ -240,4 +240,7 @@ public interface AnalyticsDao {
     
     @Query("SELECT COUNT(DISTINCT date(start_time/1000, 'unixepoch')) FROM sessions")
     int getTotalActiveDays();
+    
+    @Query("SELECT SUM(actual_duration) FROM sessions WHERE start_time >= :startTime AND end_time <= :endTime")
+    Long getTotalFocusTimeForPeriod(long startTime, long endTime);
 }

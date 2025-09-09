@@ -11,6 +11,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Locale;
 public class MobileUsageTracker {
     
     private static final String TAG = "MobileUsageTracker";
+    private static final boolean DEBUG_LOGS = false; // Set to true for debugging
     
     private Context context;
     private UsageStatsManager usageStatsManager;
@@ -66,7 +68,9 @@ public class MobileUsageTracker {
                 mode = deprecatedMode;
             }
             
-            Log.d(TAG, "Usage stats permission mode: " + modeToString(mode));
+            if (DEBUG_LOGS) {
+                Log.d(TAG, "Usage stats permission mode: " + modeToString(mode));
+            }
             return mode == AppOpsManager.MODE_ALLOWED;
             
         } catch (Exception e) {
@@ -107,6 +111,88 @@ public class MobileUsageTracker {
     }
     
     /**
+     * Get this week's mobile usage time
+     */
+    public long getThisWeekMobileUsage() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long weekStart = calendar.getTimeInMillis();
+            long weekEnd = weekStart + (7 * 24 * 60 * 60 * 1000);
+            
+            return getMobileUsageForPeriod(weekStart, weekEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this week's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last week's mobile usage time
+     */
+    public long getLastWeekMobileUsage() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long thisWeekStart = calendar.getTimeInMillis();
+            long lastWeekStart = thisWeekStart - (7 * 24 * 60 * 60 * 1000);
+            long lastWeekEnd = thisWeekStart;
+            
+            return getMobileUsageForPeriod(lastWeekStart, lastWeekEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last week's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get mobile usage for a specific period
+     */
+    private long getMobileUsageForPeriod(long startTime, long endTime) {
+        try {
+            if (!hasUsageStatsPermission()) {
+                return 0;
+            }
+            
+            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usageStatsManager == null) {
+                return 0;
+            }
+            
+            // Get usage stats for the period
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+            
+            if (usageStatsList == null || usageStatsList.isEmpty()) {
+                return 0;
+            }
+            
+            long totalUsage = 0;
+            for (UsageStats usageStats : usageStatsList) {
+                long appUsageTime = usageStats.getTotalTimeInForeground();
+                if (appUsageTime > 60000) { // Only count apps with > 1 minute usage
+                    totalUsage += appUsageTime;
+                }
+            }
+            
+            return totalUsage;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting mobile usage for period", e);
+            return 0;
+        }
+    }
+    
+    /**
      * Get total mobile usage for today in milliseconds
      */
     public long getTodayMobileUsage() {
@@ -125,18 +211,59 @@ public class MobileUsageTracker {
             long startTime = cal.getTimeInMillis();
             long endTime = System.currentTimeMillis();
             
+            // Use INTERVAL_BEST for most recent data (single source to avoid duplicates)
             List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+            
+            if (usageStatsList == null || usageStatsList.isEmpty()) {
+                // Fallback to INTERVAL_DAILY if no data
+                usageStatsList = usageStatsManager.queryUsageStats(
+                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+                if (usageStatsList == null) {
+                    usageStatsList = new ArrayList<>();
+                }
+                Log.d(TAG, "Using INTERVAL_DAILY - found " + usageStatsList.size() + " entries");
+            } else {
+                Log.d(TAG, "Using INTERVAL_BEST - found " + usageStatsList.size() + " entries");
+            }
             
             long totalUsageTime = 0;
+            Log.d(TAG, "=== MOBILE USAGE BREAKDOWN ===");
+            Log.d(TAG, "Time range: " + new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date(startTime)) 
+                    + " to " + new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date(endTime)));
+            
+            // Sort by usage time for better debugging
+            usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
+            
             for (UsageStats usageStats : usageStatsList) {
-                // Exclude our own app from the calculation
-                if (!usageStats.getPackageName().equals(context.getPackageName())) {
-                    totalUsageTime += usageStats.getTotalTimeInForeground();
+                long appUsageTime = usageStats.getTotalTimeInForeground();
+                String packageName = usageStats.getPackageName();
+                
+                // Only include apps with significant usage (> 1 minute) to reduce noise
+                if (appUsageTime > 60000) {
+                    // Log significant usage - only if debug enabled
+                    if (DEBUG_LOGS) {
+                        Log.d(TAG, String.format("App: %s | Usage: %s | First: %s | Last: %s",
+                            packageName,
+                            formatDuration(appUsageTime),
+                            new SimpleDateFormat("HH:mm", Locale.US).format(new Date(usageStats.getFirstTimeStamp())),
+                            new SimpleDateFormat("HH:mm", Locale.US).format(new Date(usageStats.getLastTimeStamp()))
+                        ));
+                    }
+                    
+                    // Exclude our own app from the total calculation
+                    if (!packageName.equals(context.getPackageName())) {
+                        totalUsageTime += appUsageTime;
+                    }
                 }
             }
             
-            Log.d(TAG, "Today's mobile usage: " + formatDuration(totalUsageTime));
+            if (DEBUG_LOGS) {
+                Log.d(TAG, "=== TOTAL MOBILE USAGE ===");
+                Log.d(TAG, "Our calculation: " + formatDuration(totalUsageTime));
+                Log.d(TAG, "Total apps counted: " + usageStatsList.size());
+                Log.d(TAG, "===========================");
+            }
             return totalUsageTime;
             
         } catch (Exception e) {
@@ -304,6 +431,92 @@ public class MobileUsageTracker {
     public String getFormattedTodayUsage() {
         long usage = getTodayMobileUsage();
         return formatDuration(usage);
+    }
+    
+    /**
+     * Get detailed usage breakdown for debugging
+     */
+    public String getDetailedUsageInfo() {
+        if (!hasUsageStatsPermission()) {
+            return "Usage stats permission not granted";
+        }
+        
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            long startTime = cal.getTimeInMillis();
+            long endTime = System.currentTimeMillis();
+            
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+            
+            StringBuilder info = new StringBuilder();
+            info.append("📊 USAGE STATS ANALYSIS\n\n");
+            info.append("Time Range: ").append(new SimpleDateFormat("HH:mm", Locale.US).format(new Date(startTime)))
+                .append(" - ").append(new SimpleDateFormat("HH:mm", Locale.US).format(new Date(endTime))).append("\n\n");
+            
+            // Get top 10 apps by usage
+            usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
+            
+            long totalTime = 0;
+            int count = 0;
+            info.append("TOP APPS TODAY:\n");
+            
+            for (UsageStats stats : usageStatsList) {
+                if (count >= 10) break;
+                if (stats.getTotalTimeInForeground() < 60000) continue; // Skip < 1 minute
+                if (stats.getPackageName().equals(context.getPackageName())) continue; // Skip our app
+                
+                info.append(String.format("%d. %s: %s\n", 
+                    count + 1,
+                    getSimpleAppName(stats.getPackageName()),
+                    formatDuration(stats.getTotalTimeInForeground())
+                ));
+                
+                totalTime += stats.getTotalTimeInForeground();
+                count++;
+            }
+            
+            info.append("\n📱 TOTAL: ").append(formatDuration(totalTime));
+            info.append("\n\n💡 WHY DIFFERENT FROM DIGITAL WELLBEING?\n");
+            info.append("• We count app foreground time only\n");
+            info.append("• Digital Wellbeing includes screen-on time\n");
+            info.append("• Different time boundaries (midnight vs 24h rolling)\n");
+            info.append("• System apps may be counted differently");
+            
+            return info.toString();
+            
+        } catch (Exception e) {
+            return "Error getting usage details: " + e.getMessage();
+        }
+    }
+    
+    private String getSimpleAppName(String packageName) {
+        // Simplify common package names for readability
+        if (packageName.contains("chrome")) return "Chrome";
+        if (packageName.contains("youtube")) return "YouTube";
+        if (packageName.contains("whatsapp")) return "WhatsApp";
+        if (packageName.contains("instagram")) return "Instagram";
+        if (packageName.contains("facebook")) return "Facebook";
+        if (packageName.contains("tiktok")) return "TikTok";
+        if (packageName.contains("telegram")) return "Telegram";
+        if (packageName.contains("spotify")) return "Spotify";
+        if (packageName.contains("netflix")) return "Netflix";
+        if (packageName.contains("gmail")) return "Gmail";
+        if (packageName.contains("maps")) return "Maps";
+        if (packageName.contains("camera")) return "Camera";
+        if (packageName.contains("gallery")) return "Gallery";
+        if (packageName.contains("phone")) return "Phone";
+        if (packageName.contains("contacts")) return "Contacts";
+        if (packageName.contains("settings")) return "Settings";
+        if (packageName.contains("launcher")) return "Home Screen";
+        
+        // Return last part of package name if no match
+        String[] parts = packageName.split("\\.");
+        return parts.length > 0 ? parts[parts.length - 1] : packageName;
     }
     
     /**

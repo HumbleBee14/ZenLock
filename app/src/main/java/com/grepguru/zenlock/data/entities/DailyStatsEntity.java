@@ -24,8 +24,7 @@ public class DailyStatsEntity {
     @ColumnInfo(name = "total_focus_time")
     public long totalFocusTime; // in milliseconds
     
-    @ColumnInfo(name = "total_mobile_usage")
-    public long totalMobileUsage; // in milliseconds (estimated)
+    // Mobile usage is fetched fresh from UsageStatsManager, not stored in database
     
     @ColumnInfo(name = "completed_sessions")
     public int completedSessions;
@@ -51,13 +50,11 @@ public class DailyStatsEntity {
     // Constructor for creating new daily stats
     @Ignore
     public DailyStatsEntity(String date, int totalSessions, long totalFocusTime, 
-                           long totalMobileUsage, int completedSessions, 
-                           int interruptedSessions, float avgFocusScore, 
-                           long totalWhitelistedTime) {
+                           int completedSessions, int interruptedSessions, 
+                           float avgFocusScore, long totalWhitelistedTime) {
         this.date = date;
         this.totalSessions = totalSessions;
         this.totalFocusTime = totalFocusTime;
-        this.totalMobileUsage = totalMobileUsage;
         this.completedSessions = completedSessions;
         this.interruptedSessions = interruptedSessions;
         this.avgFocusScore = avgFocusScore;
@@ -87,21 +84,7 @@ public class DailyStatsEntity {
         }
     }
     
-    public String getFormattedMobileUsage() {
-        long minutes = totalMobileUsage / (60 * 1000);
-        long hours = minutes / 60;
-        minutes = minutes % 60;
-        
-        if (hours > 0) {
-            return String.format("%dh %dm", hours, minutes);
-        } else {
-            return String.format("%dm", minutes);
-        }
-    }
-    
-    public double getTimeSavedPercentage() {
-        return totalMobileUsage > 0 ? (double) totalFocusTime / totalMobileUsage * 100 : 0;
-    }
+    // Mobile usage methods removed - data is fetched fresh from UsageStatsManager
     
     public long getActualLockedTime() {
         return totalFocusTime - totalWhitelistedTime;

@@ -14,6 +14,7 @@ import com.grepguru.zenlock.utils.NotificationPermissionManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.utils.AlarmPermissionManager;
 import com.grepguru.zenlock.utils.FullScreenIntentPermissionManager;
+import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.ForegroundServicePermissionManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
         
         // Ensure all enabled schedules are activated
         activateEnabledSchedules();
+        
+        // Initialize analytics and auto-fetch data
+        initializeAnalytics();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
@@ -185,6 +189,22 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Schedule activation process completed");
         } catch (Exception e) {
             Log.e(TAG, "Failed to activate schedules", e);
+        }
+    }
+    
+    /**
+     * Initialize analytics and auto-fetch data on app start
+     */
+    private void initializeAnalytics() {
+        try {
+            Log.d(TAG, "Initializing analytics on app start");
+            AnalyticsManager analyticsManager = new AnalyticsManager(this);
+            
+            // Auto-fetch mobile usage data if permission is available
+            analyticsManager.updateTodayMobileUsageIfAvailable();
+            Log.d(TAG, "Analytics initialization completed");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize analytics", e);
         }
     }
 }

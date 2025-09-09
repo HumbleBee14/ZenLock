@@ -26,7 +26,7 @@ import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
         WeeklyStatsEntity.class,
         MonthlyStatsEntity.class
     },
-    version = 1,
+    version = 2, // Incremented to force migration after removing mobile usage field
     exportSchema = false
 )
 @TypeConverters({Converters.class})

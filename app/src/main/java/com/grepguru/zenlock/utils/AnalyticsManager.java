@@ -15,8 +15,12 @@ import com.grepguru.zenlock.data.repository.AnalyticsRepository;
 import com.grepguru.zenlock.model.AnalyticsModels;
 import com.grepguru.zenlock.BuildConfig;
 
+import android.app.usage.UsageStatsManager;
+import android.app.usage.UsageStats;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +58,7 @@ public class AnalyticsManager {
         // Restore current session state if exists
         restoreCurrentSessionState();
         
-        // Update today's mobile usage if permission is available
+        // Update today's mobile usage if permission is available (only once per app launch)
         updateTodayMobileUsageIfAvailable();
     }
     
@@ -302,18 +306,82 @@ public class AnalyticsManager {
         return Math.min(100.0, (double) elapsed / currentSessionTarget * 100);
     }
     
-    /**
-     * Update mobile usage time for today
-     */
-    public void updateTodayMobileUsage(long mobileUsageTime) {
-        repository.updateMobileUsageForDate(getCurrentDate(), mobileUsageTime);
-    }
+    // Mobile usage update method removed - data is fetched fresh from UsageStatsManager
     
     /**
      * Get mobile usage tracker instance
      */
     public MobileUsageTracker getMobileUsageTracker() {
         return mobileUsageTracker;
+    }
+    
+    /**
+     * Get this week's total focus time
+     */
+    public long getThisWeekFocusTime() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long weekStart = calendar.getTimeInMillis();
+            long weekEnd = weekStart + (7 * 24 * 60 * 60 * 1000);
+            
+            return repository.getTotalFocusTimeForPeriod(weekStart, weekEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this week's focus time", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last week's total focus time
+     */
+    public long getLastWeekFocusTime() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long thisWeekStart = calendar.getTimeInMillis();
+            long lastWeekStart = thisWeekStart - (7 * 24 * 60 * 60 * 1000);
+            long lastWeekEnd = thisWeekStart;
+            
+            return repository.getTotalFocusTimeForPeriod(lastWeekStart, lastWeekEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last week's focus time", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get this week's mobile usage
+     */
+    public long getThisWeekMobileUsage() {
+        try {
+            return mobileUsageTracker.getThisWeekMobileUsage();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this week's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last week's mobile usage
+     */
+    public long getLastWeekMobileUsage() {
+        try {
+            return mobileUsageTracker.getLastWeekMobileUsage();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last week's mobile usage", e);
+            return 0;
+        }
     }
     
     /**
@@ -332,21 +400,12 @@ public class AnalyticsManager {
     
     /**
      * Update today's mobile usage if permission is available
+     * NOTE: We don't store mobile usage in database - always fetch fresh from UsageStatsManager
      */
     public void updateTodayMobileUsageIfAvailable() {
-        if (hasUsageStatsPermission()) {
-            // Run in background to avoid blocking main thread
-            new Thread(() -> {
-                try {
-                    long mobileUsage = mobileUsageTracker.updateTodayMobileUsage();
-                    if (mobileUsage > 0) {
-                        updateTodayMobileUsage(mobileUsage);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error updating mobile usage", e);
-                }
-            }).start();
-        }
+        // No need to store mobile usage in database - always fetch fresh
+        // This method is kept for compatibility but does nothing
+        Log.d(TAG, "Mobile usage will be fetched fresh from UsageStatsManager when needed");
     }
     
     /**
@@ -357,6 +416,55 @@ public class AnalyticsManager {
             return "Permission needed";
         }
         return mobileUsageTracker.getFormattedTodayUsage();
+    }
+    
+    /**
+     * Get detailed usage breakdown for debugging discrepancies
+     */
+    public String getDetailedUsageBreakdown() {
+        return mobileUsageTracker.getDetailedUsageInfo();
+    }
+    
+    
+    /**
+     * Compare our calculation with different methods
+     */
+    public void debugUsageCalculation() {
+        if (!hasUsageStatsPermission()) {
+            Log.w(TAG, "Cannot debug usage - permission not granted");
+            return;
+        }
+        
+        Log.d(TAG, "=== USAGE CALCULATION DEBUG ===");
+        
+        // Method 1: Our current calculation (INTERVAL_DAILY)
+        long ourCalculation = mobileUsageTracker.getTodayMobileUsage();
+        Log.d(TAG, "Method 1 (INTERVAL_DAILY): " + formatDuration(ourCalculation));
+        
+        // Method 2: Try different interval
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -1);
+            long startTime = cal.getTimeInMillis();
+            long endTime = System.currentTimeMillis();
+            
+            List<UsageStats> weeklyStats = ((UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE))
+                .queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+            
+            long alternativeTotal = 0;
+            for (UsageStats stats : weeklyStats) {
+                if (!stats.getPackageName().equals(context.getPackageName())) {
+                    alternativeTotal += stats.getTotalTimeInForeground();
+                }
+            }
+            
+            Log.d(TAG, "Method 2 (INTERVAL_BEST, 24h): " + formatDuration(alternativeTotal));
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error with alternative calculation", e);
+        }
+        
+        Log.d(TAG, "===============================");
     }
     
     /**
@@ -463,10 +571,12 @@ public class AnalyticsManager {
     
     /**
      * Create sample analytics data for testing (development only)
+     * WARNING: This method should only be called manually for testing
      */
     public void createSampleData() {
         if (!BuildConfig.DEBUG) return; // Only in debug builds
         
+        Log.w(TAG, "⚠️ WARNING: Creating sample analytics data - this should only be used for testing!");
         Log.d(TAG, "Creating sample analytics data...");
         
         // Create a few sample sessions
@@ -504,6 +614,20 @@ public class AnalyticsManager {
         repository.insertSession(session2, new ArrayList<>());
         
         Log.d(TAG, "Sample data created successfully");
+    }
+    
+    /**
+     * Debug method to check for duplicate sessions
+     */
+    public void checkForDuplicates() {
+        // This would check the database for duplicate sessions
+        // For now, just log the current session count
+        Log.d(TAG, "=== SESSION DUPLICATE CHECK ===");
+        Log.d(TAG, "Current session active: " + hasActiveSession());
+        Log.d(TAG, "Session start time: " + currentSessionStart);
+        Log.d(TAG, "Session target: " + formatDuration(currentSessionTarget));
+        Log.d(TAG, "Session source: " + currentSessionSource);
+        Log.d(TAG, "===============================");
     }
     
     /**

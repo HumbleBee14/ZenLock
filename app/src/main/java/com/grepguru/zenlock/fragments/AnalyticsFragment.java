@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import android.util.Log;
 import android.widget.Toast;
 import android.widget.EditText;
+import androidx.appcompat.app.AlertDialog;
 
 public class AnalyticsFragment extends Fragment {
 
@@ -54,6 +55,22 @@ public class AnalyticsFragment extends Fragment {
     private TextView recentSessionsText;
     private LinearLayout recentSessionsContainer;
     private AnalyticsManager analyticsManager;
+    
+    // Usage permission banner
+    private TextView usagePermissionBanner;
+    
+    // Weekly stats UI elements
+    private TextView thisWeekFocusTime;
+    private TextView lastWeekFocusTime;
+    private TextView thisWeekMobileUsage;
+    private TextView lastWeekMobileUsage;
+    private TextView weeklyComparisonText;
+    
+    // Monthly stats UI elements
+    private TextView thisMonthFocusTime;
+    private TextView lastMonthFocusTime;
+    private TextView thisMonthMobileUsage;
+    private TextView lastMonthMobileUsage;
 
     public AnalyticsFragment() {}
 
@@ -75,26 +92,28 @@ public class AnalyticsFragment extends Fragment {
 
         // Setup expandable sections
         setupExpandableSections();
+        
+        // Setup usage permission banner
+        setupUsagePermissionBanner();
 
         // Load and display analytics data
         loadAnalyticsData();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Check permission status when returning from settings (single check)
+        checkUsageStatsPermission();
         
-        // Create sample data for testing (debug only)
-        createSampleDataForTesting();
+        // Check if user granted permission while away
+        checkPermissionStatusOnResume();
+        
+        // Force refresh mobile usage data every time analytics page is opened
+        refreshMobileUsageData();
     }
 
     private void initializeViews(View view) {
-        // Coming soon banner - only show if no usage stats permission
-        View comingSoonBanner = view.findViewById(R.id.comingSoonBanner);
-        ImageView dismissBanner = view.findViewById(R.id.dismissAnalyticsBanner);
-        
-        // Handle banner dismissal
-        dismissBanner.setOnClickListener(v -> {
-            comingSoonBanner.setVisibility(View.GONE);
-        });
-        
-        // Hide banner initially - will be shown if permission needed
-        comingSoonBanner.setVisibility(View.GONE);
 
         // Today's stats
         todaySessions = view.findViewById(R.id.todaySessions);
@@ -128,6 +147,22 @@ public class AnalyticsFragment extends Fragment {
         // Recent sessions content
         recentSessionsText = view.findViewById(R.id.recentSessionsText);
         recentSessionsContainer = view.findViewById(R.id.recentSessionsContainer);
+        
+        // Usage permission banner
+        usagePermissionBanner = view.findViewById(R.id.usagePermissionBanner);
+        
+        // Weekly stats views
+        thisWeekFocusTime = view.findViewById(R.id.thisWeekFocusTime);
+        lastWeekFocusTime = view.findViewById(R.id.lastWeekFocusTime);
+        thisWeekMobileUsage = view.findViewById(R.id.thisWeekMobileUsage);
+        lastWeekMobileUsage = view.findViewById(R.id.lastWeekMobileUsage);
+        weeklyComparisonText = view.findViewById(R.id.weeklyComparisonText);
+        
+        // Monthly stats views
+        thisMonthFocusTime = view.findViewById(R.id.thisMonthFocusTime);
+        lastMonthFocusTime = view.findViewById(R.id.lastMonthFocusTime);
+        thisMonthMobileUsage = view.findViewById(R.id.thisMonthMobileUsage);
+        lastMonthMobileUsage = view.findViewById(R.id.lastMonthMobileUsage);
     }
 
     private void setupExpandableSections() {
@@ -222,6 +257,13 @@ public class AnalyticsFragment extends Fragment {
         rotation.start();
     }
 
+    private void setupUsagePermissionBanner() {
+        usagePermissionBanner.setOnClickListener(v -> {
+            // Request usage stats permission
+            analyticsManager.requestUsageStatsPermission();
+        });
+    }
+    
     private void loadAnalyticsData() {
         // Check usage stats permission first
         checkUsageStatsPermission();
@@ -233,27 +275,14 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void checkUsageStatsPermission() {
-        if (!analyticsManager.hasUsageStatsPermission() && 
-            UsageStatsPermissionManager.shouldShowPermissionRequest(requireContext())) {
-            // Show permission request in coming soon banner
-            showUsageStatsPermissionBanner();
+        // Single permission check to avoid redundant calls
+        boolean hasPermission = analyticsManager.hasUsageStatsPermission();
+        
+        if (usagePermissionBanner != null) {
+            usagePermissionBanner.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
         }
     }
     
-    private void showUsageStatsPermissionBanner() {
-        View comingSoonBanner = getView().findViewById(R.id.comingSoonBanner);
-        if (comingSoonBanner != null) {
-            // Make banner clickable to request permission
-            comingSoonBanner.setOnClickListener(v -> {
-                analyticsManager.requestUsageStatsPermission();
-                Toast.makeText(requireContext(), 
-                    "Please find ZenLock in the list and enable usage access", 
-                    Toast.LENGTH_LONG).show();
-            });
-            
-            comingSoonBanner.setVisibility(View.VISIBLE);
-        }
-    }
     
     private void loadTodayStats() {
         // Observe today's stats with LiveData
@@ -263,22 +292,62 @@ public class AnalyticsFragment extends Fragment {
                 DailyStatsEntity yesterdayStats = analyticsManager.getYesterdayStats();
                 
                 // Update today's stats with real data
-        updateTodayStats(
+                updateTodayStats(
                     todayStats.totalSessions,
                     todayStats.totalFocusTime / (1000 * 60), // Convert to minutes
                     (int) todayStats.avgFocusScore,
                     yesterdayStats
                 );
-            } else {
-                // Show default values if no data
-                updateTodayStats(0, 0, 0, null);
             }
+            // Don't show default values - let the UI show existing data until real data loads
         });
     }
     
     private void loadWeeklyStats() {
-        // Weekly data will be shown in the existing "Weekly Insights" expandable section
-        // For now, keep the existing implementation
+        // Load this week's stats
+        new Thread(() -> {
+            try {
+                // Get this week's focus time from database
+                long thisWeekFocusMs = analyticsManager.getThisWeekFocusTime();
+                
+                // Get this week's mobile usage from UsageStatsManager
+                long thisWeekMobileMs = analyticsManager.getThisWeekMobileUsage();
+                
+                // Get last week's stats for comparison
+                long lastWeekFocusMs = analyticsManager.getLastWeekFocusTime();
+                long lastWeekMobileMs = analyticsManager.getLastWeekMobileUsage();
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        // Update this week's focus time
+                        if (thisWeekFocusTime != null) {
+                            thisWeekFocusTime.setText(formatTime(thisWeekFocusMs / (60 * 1000)));
+                        }
+                        
+                        // Update last week's focus time
+                        if (lastWeekFocusTime != null) {
+                            lastWeekFocusTime.setText(formatTime(lastWeekFocusMs / (60 * 1000)));
+                        }
+                        
+                        // Update this week's mobile usage
+                        if (thisWeekMobileUsage != null) {
+                            thisWeekMobileUsage.setText(formatTime(thisWeekMobileMs / (60 * 1000)));
+                        }
+                        
+                        // Update last week's mobile usage
+                        if (lastWeekMobileUsage != null) {
+                            lastWeekMobileUsage.setText(formatTime(lastWeekMobileMs / (60 * 1000)));
+                        }
+                        
+                        // Update weekly comparison
+                        updateWeeklyComparison(thisWeekFocusMs, lastWeekFocusMs);
+                    });
+                }
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error loading weekly stats", e);
+            }
+        }).start();
     }
     
     private void loadRecentSessions() {
@@ -358,43 +427,74 @@ public class AnalyticsFragment extends Fragment {
         updateMobileUsageDisplay(focusTimeMinutes);
     }
     
-    private void updateMobileUsageDisplay(long focusTimeMinutes) {
-        if (analyticsManager.hasUsageStatsPermission()) {
-            // Get real mobile usage data
-            new Thread(() -> {
-                try {
-                    long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
-                    long focusTimeMs = focusTimeMinutes * 60 * 1000;
-                    
-                    // Update UI on main thread
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            // Update mobile usage
-                            if (todayMobileUsage != null) {
+    private void refreshMobileUsageData() {
+        // Force refresh mobile usage data every time analytics page is opened
+        new Thread(() -> {
+            try {
+                long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
+                Log.d("AnalyticsFragment", "Refreshed mobile usage: " + mobileUsageMs + "ms");
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (todayMobileUsage != null) {
+                            if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
+                            } else {
+                                todayMobileUsage.setText("0m");
                             }
-                            
-                            // Calculate and update time saved in hours
-                            if (todayTimeSaved != null) {
-                                // Time saved = focus time (actual hours focused)
-                                todayTimeSaved.setText(formatTime(focusTimeMinutes));
-                            }
-                        });
-                    }
-                } catch (Exception e) {
-                    Log.e("AnalyticsFragment", "Error updating mobile usage", e);
+                        }
+                    });
                 }
-            }).start();
-        } else {
-            // No permission - show placeholder
-            if (todayMobileUsage != null) {
-                todayMobileUsage.setText("Enable tracking");
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error refreshing mobile usage", e);
             }
-            if (todayTimeSaved != null) {
-                // Show focus time even without mobile usage permission
-                todayTimeSaved.setText(formatTime(focusTimeMinutes));
+        }).start();
+    }
+    
+    private void updateMobileUsageDisplay(long focusTimeMinutes) {
+        // Get real mobile usage data directly from UsageStatsManager (no database storage)
+        new Thread(() -> {
+            try {
+                long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
+                Log.d("AnalyticsFragment", "Mobile usage from tracker: " + mobileUsageMs + "ms");
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        // Update mobile usage
+                        if (todayMobileUsage != null) {
+                            if (mobileUsageMs > 0) {
+                                todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
+                            } else {
+                                todayMobileUsage.setText("0m");
+                            }
+                        }
+                        
+                        // Calculate and update time saved in hours
+                        if (todayTimeSaved != null) {
+                            // Time saved = focus time (actual hours focused)
+                            // If no sessions, show 0
+                            if (focusTimeMinutes > 0) {
+                                todayTimeSaved.setText(formatTime(focusTimeMinutes));
+                            } else {
+                                todayTimeSaved.setText("0m");
+                            }
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error updating mobile usage", e);
+                // Show error state
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (todayMobileUsage != null) {
+                            todayMobileUsage.setText("Error");
+                        }
+                    });
+                }
             }
-        }
+        }).start();
     }
     
     private void updateTrendIndicator(int todaySessions, long todayFocusTime, int todayFocusScore, DailyStatsEntity yesterdayStats) {
@@ -415,23 +515,50 @@ public class AnalyticsFragment extends Fragment {
             changePercentage = 100; // 100% increase from 0
         }
         
-        // Update trend indicator
+        // Update trend indicator with proper color coding
         if (changePercentage > 10) {
+            // Increase in focus time (good) - show in green
             todayTrendIndicator.setText(String.format("↗️ +%.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
+            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
         } else if (changePercentage > -10) {
+            // Similar performance
             todayTrendIndicator.setText("→ Similar");
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-            } else {
+            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
+        } else {
+            // Decrease in focus time (bad) - show in red
             todayTrendIndicator.setText(String.format("↘️ %.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
+            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
         }
     }
 
     
-    private void updateWeeklyComparison(WeeklyStatsEntity thisWeek, WeeklyStatsEntity lastWeek) {
-        // This would update the "This Week vs Last Week" indicator in the insights section
-        // For now, we'll keep the existing mock data until we implement the full insights section
+    private void updateWeeklyComparison(long thisWeekFocusMs, long lastWeekFocusMs) {
+        if (weeklyComparisonText == null) return;
+        
+        if (lastWeekFocusMs == 0) {
+            // No comparison data available
+            weeklyComparisonText.setText("📊 First Week");
+            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.textSecondary));
+            return;
+        }
+        
+        // Calculate percentage change in focus time
+        double changePercentage = ((double) (thisWeekFocusMs - lastWeekFocusMs) / lastWeekFocusMs) * 100;
+        
+        // Update trend indicator with proper color coding
+        if (changePercentage > 10) {
+            // Increase in focus time (good) - show in green
+            weeklyComparisonText.setText(String.format("↗️ +%.0f%%", changePercentage));
+            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.success));
+        } else if (changePercentage > -10) {
+            // Similar performance
+            weeklyComparisonText.setText("→ Similar");
+            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.textSecondary));
+        } else {
+            // Decrease in focus time (bad) - show in red
+            weeklyComparisonText.setText(String.format("↘️ %.0f%%", changePercentage));
+            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.warning));
+        }
     }
     
     private void updateRecentSessionsWithData(List<SessionEntity> sessions) {
@@ -442,8 +569,8 @@ public class AnalyticsFragment extends Fragment {
             recentSessionsContainer.setVisibility(View.VISIBLE);
             recentSessionsContainer.removeAllViews();
             
-            // Add real session data (limit to 3 for UI space)
-            int displayCount = Math.min(sessions.size(), 3);
+            // Add real session data (show all up to 10 sessions)
+            int displayCount = Math.min(sessions.size(), 10);
             for (int i = 0; i < displayCount; i++) {
                 SessionEntity session = sessions.get(i);
                 View sessionView = createRealSessionView(session);
@@ -593,47 +720,20 @@ public class AnalyticsFragment extends Fragment {
         loadAnalyticsData();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Check if user granted permission while away
-        checkPermissionStatusOnResume();
-        
-        // Refresh analytics when returning to the fragment
-        refreshAnalytics();
-    }
     
     private void checkPermissionStatusOnResume() {
         if (analyticsManager.hasUsageStatsPermission()) {
-            // Permission granted! Hide banner and reset permission state
-            View comingSoonBanner = getView().findViewById(R.id.comingSoonBanner);
-            if (comingSoonBanner != null) {
-                comingSoonBanner.setVisibility(View.GONE);
-            }
+            // Permission granted! Reset permission state
             UsageStatsPermissionManager.resetPermissionState(requireContext());
             
-            // Update mobile usage now that we have permission
-            analyticsManager.updateTodayMobileUsageIfAvailable();
+            // Mobile usage will be updated automatically by AnalyticsManager
             
-            Toast.makeText(requireContext(), 
-                "✅ Usage access granted! Screen time tracking enabled.", 
-                Toast.LENGTH_SHORT).show();
         } else if (UsageStatsPermissionManager.shouldShowPermissionRequest(requireContext())) {
             // User came back but didn't grant permission
             UsageStatsPermissionManager.markPermissionDenied(requireContext());
         }
     }
     
-    private void createSampleDataForTesting() {
-        // Only create sample data in debug builds for testing
-        try {
-            analyticsManager.createSampleData();
-            Log.d("AnalyticsFragment", "Sample data created for testing");
-        } catch (Exception e) {
-            Log.e("AnalyticsFragment", "Error creating sample data", e);
-        }
-    }
     
     private View createRealSessionView(SessionEntity session) {
         // Create a session item view using the existing layout pattern
