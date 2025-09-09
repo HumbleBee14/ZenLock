@@ -136,9 +136,9 @@
                         android:id="@+id/todayTrendIndicator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="↗️ +15%"
+                        android:text="📊 vs Yesterday"
                         android:textSize="12sp"
-                        android:textColor="@color/success"
+                        android:textColor="@color/textSecondary"
                         android:background="@drawable/modern_card_background"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
@@ -165,10 +165,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -201,10 +202,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0m"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/secondary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -237,10 +240,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="85"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/success"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -263,55 +267,14 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Streaks and Achievements Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/streaksCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="4dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
+                <!-- Mobile Usage and Time Saved Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_analytics"
-                        app:tint="@color/success"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Streaks &amp; Achievements"
-                        style="@style/ModernText.Subheading"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/modern_card_background"
+                    android:padding="12dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -321,19 +284,18 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/currentStreak"
+                            android:id="@+id/todayMobileUsage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5"
-                            android:textSize="28sp"
+                            android:text="4h 30m"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/success"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/textPrimary"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Current Streak"
+                            android:text="Mobile Usage"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
@@ -347,82 +309,29 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/bestStreak"
+                            android:id="@+id/todayTimeSaved"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="12"
-                            android:textSize="28sp"
+                            android:text="1h 30m"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/success"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Best Streak"
+                            android:text="Time Saved"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
                     </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/weeklyGoal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="75%"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/secondary"
-                            android:fontFamily="sans-serif-medium"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Weekly Goal"
-                            style="@style/ModernText.Caption"
-                            android:textColor="@color/textSecondary"/>
-
-                        <ProgressBar
-                            android:id="@+id/weeklyGoalProgress"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="50dp"
-                            android:layout_height="4dp"
-                            android:layout_marginTop="4dp"
-                            android:progress="75"
-                            android:max="100"
-                            android:progressTint="@color/secondary"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Achievement Level -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Focus Level: Intermediate"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textSecondary"/>
 
                 </LinearLayout>
 
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
 
         <!-- Focus Trends Expandable Card -->
         <androidx.cardview.widget.CardView
@@ -434,7 +343,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
             app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/streaksCard">
+            app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -456,7 +365,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Screen Time Insights"
+                        android:text="Weekly Insights"
                         style="@style/ModernText.Subheading"/>
 
                     <ImageView
@@ -506,15 +415,16 @@
 
                     </LinearLayout>
 
-                    <!-- Screen Lock Statistics -->
+                    <!-- Weekly Focus vs Mobile Usage Statistics -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Screen Time Saved"
+                        android:text="Weekly Focus vs Mobile Usage"
                         style="@style/ModernText.Body"
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
+                    <!-- This Week vs Last Week -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -532,17 +442,18 @@
                             android:layout_marginEnd="8dp">
 
                             <TextView
+                                android:id="@+id/thisWeekFocusTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="3.2h"
+                                android:text="8h 45m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/textPrimary"/>
+                                android:textColor="@color/secondary"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Today"
+                                android:text="This Week Focus"
                                 style="@style/ModernText.Caption"
                                 android:textColor="@color/textSecondary"/>
 
@@ -559,9 +470,10 @@
                             android:layout_marginStart="8dp">
 
                             <TextView
+                                android:id="@+id/lastWeekFocusTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="22.5h"
+                                android:text="6h 30m"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/textPrimary"/>
@@ -569,7 +481,72 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="This Week"
+                                android:text="Last Week Focus"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Weekly Mobile Usage Comparison -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:id="@+id/thisWeekMobileUsage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="28h 30m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This Week Mobile"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp">
+
+                            <TextView
+                                android:id="@+id/lastWeekMobileUsage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="32h 15m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Last Week Mobile"
                                 style="@style/ModernText.Caption"
                                 android:textColor="@color/textSecondary"/>
 
@@ -796,6 +773,289 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- Monthly Insights Expandable Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/monthlyTrendsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="12dp"
+            app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <LinearLayout
+                    android:id="@+id/monthlyTrendsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Monthly Insights"
+                        style="@style/ModernText.Subheading"/>
+
+                    <ImageView
+                        android:id="@+id/monthlyTrendsExpandIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/textSecondary"
+                        android:rotation="180"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/monthlyTrendsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Monthly vs Last Month Comparison -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="This Month vs Last Month"
+                            style="@style/ModernText.Body"
+                            android:textColor="@color/textPrimary"/>
+
+                        <TextView
+                            android:id="@+id/monthlyComparisonIndicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="↗️ +12%"
+                            android:textSize="14sp"
+                            android:textColor="@color/success"
+                            android:background="@drawable/modern_card_background"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"/>
+
+                    </LinearLayout>
+
+                    <!-- Monthly Focus vs Mobile Usage Statistics -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monthly Focus vs Mobile Usage"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- This Month vs Last Month Focus -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:id="@+id/thisMonthFocusTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="32h 15m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/secondary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This Month Focus"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp">
+
+                            <TextView
+                                android:id="@+id/lastMonthFocusTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="28h 45m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Last Month Focus"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Monthly Mobile Usage Comparison -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:id="@+id/thisMonthMobileUsage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="120h 30m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This Month Mobile"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/modern_card_background"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp">
+
+                            <TextView
+                                android:id="@+id/lastMonthMobileUsage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="135h 20m"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Last Month Mobile"
+                                style="@style/ModernText.Caption"
+                                android:textColor="@color/textSecondary"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Monthly Line Chart -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monthly Focus Trend"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Chart Container for line graph -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:background="@drawable/modern_card_background"
+                        android:padding="16dp">
+
+                        <!-- Monthly line chart -->
+                        <ImageView
+                            android:id="@+id/monthlyChart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/monthly_trend_line"
+                            android:scaleType="fitXY"
+                            android:contentDescription="Monthly focus trend chart"/>
+
+                        <!-- Chart labels -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:text="1"
+                            android:textSize="10sp"
+                            android:textColor="@color/textSecondary"/>
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:text="15"
+                            android:textSize="10sp"
+                            android:textColor="@color/textSecondary"/>
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentEnd="true"
+                            android:text="30"
+                            android:textSize="10sp"
+                            android:textColor="@color/textSecondary"/>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <!-- Recent Sessions Expandable Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/recentSessionsCard"
@@ -806,7 +1066,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
             app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
+            app:layout_constraintTop_toBottomOf="@id/monthlyTrendsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"

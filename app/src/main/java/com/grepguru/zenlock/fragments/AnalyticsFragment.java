@@ -28,22 +28,23 @@ import java.util.Locale;
 import java.text.SimpleDateFormat;
 import android.util.Log;
 import android.widget.Toast;
+import android.widget.EditText;
 
 public class AnalyticsFragment extends Fragment {
 
     // Today's stats views
     private TextView todaySessions, todayTime, todayFocusScore;
-    private TextView todayTrendIndicator;
+    private TextView todayTrendIndicator, todayMobileUsage, todayTimeSaved;
     private ProgressBar sessionsProgress, timeProgress, focusScoreProgress;
-
-    // Streaks & achievements views
-    private TextView currentStreak, bestStreak, weeklyGoal;
-    private ProgressBar weeklyGoalProgress;
 
     // Expandable sections
     private LinearLayout focusTrendsHeader, focusTrendsContent;
     private ImageView focusTrendsExpandIcon;
     private boolean isFocusTrendsExpanded = false;
+
+    private LinearLayout monthlyTrendsHeader, monthlyTrendsContent;
+    private ImageView monthlyTrendsExpandIcon;
+    private boolean isMonthlyTrendsExpanded = false;
 
     private LinearLayout recentSessionsHeader, recentSessionsContent;
     private ImageView recentSessionsExpandIcon;
@@ -100,22 +101,24 @@ public class AnalyticsFragment extends Fragment {
         todayTime = view.findViewById(R.id.todayTime);
         todayFocusScore = view.findViewById(R.id.todayFocusScore);
         todayTrendIndicator = view.findViewById(R.id.todayTrendIndicator);
+        todayMobileUsage = view.findViewById(R.id.todayMobileUsage);
+        todayTimeSaved = view.findViewById(R.id.todayTimeSaved);
 
         // Progress bars
         sessionsProgress = view.findViewById(R.id.sessionsProgress);
         timeProgress = view.findViewById(R.id.timeProgress);
         focusScoreProgress = view.findViewById(R.id.focusScoreProgress);
 
-        // Streaks & achievements
-        currentStreak = view.findViewById(R.id.currentStreak);
-        bestStreak = view.findViewById(R.id.bestStreak);
-        weeklyGoal = view.findViewById(R.id.weeklyGoal);
-        weeklyGoalProgress = view.findViewById(R.id.weeklyGoalProgress);
 
         // Focus trends expandable section
         focusTrendsHeader = view.findViewById(R.id.focusTrendsHeader);
         focusTrendsContent = view.findViewById(R.id.focusTrendsContent);
         focusTrendsExpandIcon = view.findViewById(R.id.focusTrendsExpandIcon);
+
+        // Monthly trends expandable section
+        monthlyTrendsHeader = view.findViewById(R.id.monthlyTrendsHeader);
+        monthlyTrendsContent = view.findViewById(R.id.monthlyTrendsContent);
+        monthlyTrendsExpandIcon = view.findViewById(R.id.monthlyTrendsExpandIcon);
 
         // Recent sessions expandable section
         recentSessionsHeader = view.findViewById(R.id.recentSessionsHeader);
@@ -128,8 +131,11 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void setupExpandableSections() {
-        // Focus Trends expandable
+        // Focus Trends expandable (Weekly Insights)
         focusTrendsHeader.setOnClickListener(v -> toggleFocusTrends());
+
+        // Monthly Trends expandable
+        monthlyTrendsHeader.setOnClickListener(v -> toggleMonthlyTrends());
 
         // Recent Sessions expandable
         recentSessionsHeader.setOnClickListener(v -> toggleRecentSessions());
@@ -158,6 +164,33 @@ public class AnalyticsFragment extends Fragment {
         // Rotate icon
         ObjectAnimator rotation = ObjectAnimator.ofFloat(focusTrendsExpandIcon, "rotation",
                 isFocusTrendsExpanded ? 180f : 0f, isFocusTrendsExpanded ? 0f : 180f);
+        rotation.setDuration(300);
+        rotation.start();
+    }
+
+    private void toggleMonthlyTrends() {
+        isMonthlyTrendsExpanded = !isMonthlyTrendsExpanded;
+
+        if (isMonthlyTrendsExpanded) {
+            // Expand
+            monthlyTrendsContent.setVisibility(View.VISIBLE);
+            monthlyTrendsContent.setAlpha(0f);
+            monthlyTrendsContent.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start();
+        } else {
+            // Collapse
+            monthlyTrendsContent.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> monthlyTrendsContent.setVisibility(View.GONE))
+                    .start();
+        }
+
+        // Rotate icon
+        ObjectAnimator rotation = ObjectAnimator.ofFloat(monthlyTrendsExpandIcon, "rotation",
+                isMonthlyTrendsExpanded ? 180f : 0f, isMonthlyTrendsExpanded ? 0f : 180f);
         rotation.setDuration(300);
         rotation.start();
     }
@@ -244,16 +277,8 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void loadWeeklyStats() {
-        // Observe weekly stats with LiveData
-        analyticsManager.getCurrentWeekStats().observe(getViewLifecycleOwner(), weekStats -> {
-            if (weekStats != null) {
-                // Get last week's stats for comparison
-                WeeklyStatsEntity lastWeekStats = analyticsManager.getLastWeekStats();
-                
-                // Update weekly stats with real data
-                updateWeeklyStats(weekStats, lastWeekStats);
-            }
-        });
+        // Weekly data will be shown in the existing "Weekly Insights" expandable section
+        // For now, keep the existing implementation
     }
     
     private void loadRecentSessions() {
@@ -329,16 +354,46 @@ public class AnalyticsFragment extends Fragment {
             updateTrendIndicator(sessions, focusTimeMinutes, focusScore, yesterdayStats);
         }
         
-        // Update mobile usage info if available
-        updateMobileUsageDisplay();
+        // Update mobile usage and time saved
+        updateMobileUsageDisplay(focusTimeMinutes);
     }
     
-    private void updateMobileUsageDisplay() {
-        // This could be used to update a separate mobile usage section
-        // For now, we'll show it in the insights section
+    private void updateMobileUsageDisplay(long focusTimeMinutes) {
         if (analyticsManager.hasUsageStatsPermission()) {
-            String mobileUsage = analyticsManager.getTodayMobileUsageFormatted();
-            Log.d("AnalyticsFragment", "Today's mobile usage: " + mobileUsage);
+            // Get real mobile usage data
+            new Thread(() -> {
+                try {
+                    long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
+                    long focusTimeMs = focusTimeMinutes * 60 * 1000;
+                    
+                    // Update UI on main thread
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            // Update mobile usage
+                            if (todayMobileUsage != null) {
+                                todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
+                            }
+                            
+                            // Calculate and update time saved in hours
+                            if (todayTimeSaved != null) {
+                                // Time saved = focus time (actual hours focused)
+                                todayTimeSaved.setText(formatTime(focusTimeMinutes));
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    Log.e("AnalyticsFragment", "Error updating mobile usage", e);
+                }
+            }).start();
+        } else {
+            // No permission - show placeholder
+            if (todayMobileUsage != null) {
+                todayMobileUsage.setText("Enable tracking");
+            }
+            if (todayTimeSaved != null) {
+                // Show focus time even without mobile usage permission
+                todayTimeSaved.setText(formatTime(focusTimeMinutes));
+            }
         }
     }
     
@@ -373,25 +428,6 @@ public class AnalyticsFragment extends Fragment {
         }
     }
 
-    private void updateWeeklyStats(WeeklyStatsEntity weekStats, WeeklyStatsEntity lastWeekStats) {
-        // Calculate current streak (simplified for now)
-        int currentStreakValue = 1; // This should be calculated based on daily data
-        int bestStreakValue = currentStreakValue;
-        
-        // Calculate weekly goal progress (20 hours = 1200 minutes goal)
-        long weeklyGoalMinutes = 1200;
-        long actualMinutes = weekStats.totalFocusTime / (1000 * 60);
-        int weeklyProgress = (int) Math.min((actualMinutes * 100) / weeklyGoalMinutes, 100);
-        
-        // Update UI
-        if (this.currentStreak != null) this.currentStreak.setText(String.valueOf(currentStreakValue));
-        if (this.bestStreak != null) this.bestStreak.setText(String.valueOf(bestStreakValue));
-        if (this.weeklyGoal != null) this.weeklyGoal.setText(weeklyProgress + "%");
-        if (this.weeklyGoalProgress != null) this.weeklyGoalProgress.setProgress(weeklyProgress);
-        
-        // Update weekly comparison in the insights section
-        updateWeeklyComparison(weekStats, lastWeekStats);
-    }
     
     private void updateWeeklyComparison(WeeklyStatsEntity thisWeek, WeeklyStatsEntity lastWeek) {
         // This would update the "This Week vs Last Week" indicator in the insights section
@@ -433,12 +469,6 @@ public class AnalyticsFragment extends Fragment {
         return null;
     }
 
-    private void updateStreaksAndAchievements(int current, int best, int weeklyProgress) {
-        if (currentStreak != null) currentStreak.setText(String.valueOf(current));
-        if (bestStreak != null) bestStreak.setText(String.valueOf(best));
-        if (weeklyGoal != null) weeklyGoal.setText(weeklyProgress + "%");
-        if (weeklyGoalProgress != null) weeklyGoalProgress.setProgress(weeklyProgress);
-    }
     
     private String formatTime(long minutes) {
         if (minutes < 60) {
