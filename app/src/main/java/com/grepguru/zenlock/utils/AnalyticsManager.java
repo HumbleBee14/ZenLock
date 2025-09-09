@@ -4,220 +4,371 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+
+import com.grepguru.zenlock.data.entities.AppUsageEntity;
+import com.grepguru.zenlock.data.entities.DailyStatsEntity;
+import com.grepguru.zenlock.data.entities.MonthlyStatsEntity;
+import com.grepguru.zenlock.data.entities.SessionEntity;
+import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
+import com.grepguru.zenlock.data.repository.AnalyticsRepository;
 import com.grepguru.zenlock.model.AnalyticsModels;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 
+/**
+ * Enhanced AnalyticsManager using Room database
+ * Provides a clean interface for analytics operations while using SQLite for data persistence
+ */
 public class AnalyticsManager {
     private static final String TAG = "AnalyticsManager";
-    private static final String PREFS_NAME = "AnalyticsPrefs";
     
-    // Session tracking keys
-    private static final String KEY_CURRENT_SESSION_START = "current_session_start";
-    private static final String KEY_CURRENT_SESSION_TARGET = "current_session_target";
-    private static final String KEY_CURRENT_SESSION_APPS = "current_session_apps";
-    private static final String KEY_CURRENT_SESSION_BLOCKED = "current_session_blocked";
-    
-    // Daily stats keys
-    private static final String KEY_DAILY_SESSIONS = "daily_sessions_";
-    private static final String KEY_DAILY_TIME = "daily_time_";
-    private static final String KEY_DAILY_COMPLETED = "daily_completed_";
-    private static final String KEY_DAILY_BLOCKED = "daily_blocked_";
-    
-    // Weekly stats keys
-    private static final String KEY_WEEK_SESSIONS = "week_sessions_";
-    private static final String KEY_WEEK_TIME = "week_time_";
-    private static final String KEY_WEEK_STREAK = "week_streak_";
-    
-    // Session history keys
-    private static final String KEY_SESSION_HISTORY = "session_history_";
-    private static final String KEY_LAST_SESSION_DATE = "last_session_date";
-    private static final String KEY_CURRENT_STREAK = "current_streak";
-    
+    // Repository for database operations
+    private AnalyticsRepository repository;
     private Context context;
-    private SharedPreferences prefs;
+    
+    // Current session tracking (still using SharedPreferences for active session state)
+    private static final String SESSION_PREFS = "CurrentSessionPrefs";
+    private SharedPreferences sessionPrefs;
+    
+    // Current session data
+    private long currentSessionStart;
+    private long currentSessionTarget;
+    private String currentSessionSource;
+    private Map<String, Long> currentSessionAppUsage = new HashMap<>();
     
     public AnalyticsManager(Context context) {
         this.context = context;
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.repository = new AnalyticsRepository(context);
+        this.sessionPrefs = context.getSharedPreferences(SESSION_PREFS, Context.MODE_PRIVATE);
+        
+        // Restore current session state if exists
+        restoreCurrentSessionState();
     }
     
-    // Session Lifecycle Methods
+    // =====================================
+    // SESSION LIFECYCLE METHODS
+    // =====================================
+    
+    /**
+     * Start a new focus session
+     */
     public void startSession(long targetDurationMillis) {
-        long startTime = System.currentTimeMillis();
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(KEY_CURRENT_SESSION_START, startTime);
-        editor.putLong(KEY_CURRENT_SESSION_TARGET, targetDurationMillis);
-        editor.putStringSet(KEY_CURRENT_SESSION_APPS, new HashSet<>());
-        editor.putStringSet(KEY_CURRENT_SESSION_BLOCKED, new HashSet<>());
-        editor.apply();
-        
-        Log.d(TAG, "Session started: " + formatDuration(targetDurationMillis));
+        startSession(targetDurationMillis, "manual");
     }
     
+    /**
+     * Start a new focus session with source
+     */
+    public void startSession(long targetDurationMillis, String source) {
+        currentSessionStart = System.currentTimeMillis();
+        currentSessionTarget = targetDurationMillis;
+        currentSessionSource = source;
+        currentSessionAppUsage.clear();
+        
+        // Save current session state
+        saveCurrentSessionState();
+        
+        Log.d(TAG, "Session started: " + formatDuration(targetDurationMillis) + " from " + source);
+    }
+    
+    /**
+     * Record app usage during current session
+     */
+    public void recordAppUsage(String packageName, long usageTime) {
+        if (currentSessionStart > 0) {
+            String appName = getAppName(packageName);
+            currentSessionAppUsage.put(packageName, 
+                currentSessionAppUsage.getOrDefault(packageName, 0L) + usageTime);
+            
+            // Update session state
+            saveCurrentSessionState();
+            
+            Log.d(TAG, "App usage recorded: " + appName + " (" + formatDuration(usageTime) + ")");
+        }
+    }
+    
+    /**
+     * Record app access (legacy compatibility method)
+     */
     public void recordAppAccess(String packageName) {
-        Set<String> apps = prefs.getStringSet(KEY_CURRENT_SESSION_APPS, new HashSet<>());
-        Set<String> newApps = new HashSet<>(apps);
-        newApps.add(packageName);
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(KEY_CURRENT_SESSION_APPS, newApps);
-        editor.apply();
-        
-        Log.d(TAG, "App accessed: " + packageName);
+        // Default to 1 second of usage time for compatibility
+        recordAppUsage(packageName, 1000);
     }
     
+    /**
+     * Record blocked app attempt
+     */
     public void recordBlockedAttempt(String packageName) {
-        Set<String> blocked = prefs.getStringSet(KEY_CURRENT_SESSION_BLOCKED, new HashSet<>());
-        Set<String> newBlocked = new HashSet<>(blocked);
-        newBlocked.add(packageName);
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(KEY_CURRENT_SESSION_BLOCKED, newBlocked);
-        editor.apply();
-        
+        // For now, just log the blocked attempt
+        // This could be expanded to track blocked attempts separately
         Log.d(TAG, "App blocked: " + packageName);
     }
     
+    /**
+     * End current focus session
+     */
     public void endSession(boolean completed) {
-        long startTime = prefs.getLong(KEY_CURRENT_SESSION_START, 0);
-        long targetDuration = prefs.getLong(KEY_CURRENT_SESSION_TARGET, 0);
-        
-        if (startTime == 0) {
+        if (currentSessionStart == 0) {
             Log.w(TAG, "No active session to end");
             return;
         }
         
         long endTime = System.currentTimeMillis();
-        long actualDuration = endTime - startTime;
+        long actualDuration = endTime - currentSessionStart;
+        int focusScore = calculateFocusScore(actualDuration, currentSessionTarget);
         
-        // Create session object
-        AnalyticsModels.FocusSession session = new AnalyticsModels.FocusSession(startTime, targetDuration);
-        session.setEndTime(endTime);
-        session.setCompleted(completed);
-        session.setActualDuration(actualDuration);
+        // Create session entity
+        SessionEntity session = new SessionEntity(
+            System.currentTimeMillis(), // Use current time as session ID
+            currentSessionStart,
+            endTime,
+            currentSessionTarget,
+            actualDuration,
+            completed,
+            currentSessionSource,
+            focusScore
+        );
         
-        // Get apps data
-        Set<String> apps = prefs.getStringSet(KEY_CURRENT_SESSION_APPS, new HashSet<>());
-        Set<String> blocked = prefs.getStringSet(KEY_CURRENT_SESSION_BLOCKED, new HashSet<>());
-        session.setWhitelistedApps(new ArrayList<>(apps));
-        session.setBlockedAttempts(new ArrayList<>(blocked));
+        // Create app usage entities
+        List<AppUsageEntity> appUsages = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : currentSessionAppUsage.entrySet()) {
+            AppUsageEntity appUsage = new AppUsageEntity(
+                session.sessionId,
+                entry.getKey(),
+                getAppName(entry.getKey()),
+                entry.getValue(),
+                isWhitelisted(entry.getKey())
+            );
+            appUsages.add(appUsage);
+        }
         
-        // Save session data
-        saveSessionData(session);
+        // Save session to database
+        repository.insertSession(session, appUsages);
         
         // Clear current session
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_CURRENT_SESSION_START);
-        editor.remove(KEY_CURRENT_SESSION_TARGET);
-        editor.remove(KEY_CURRENT_SESSION_APPS);
-        editor.remove(KEY_CURRENT_SESSION_BLOCKED);
-        editor.apply();
+        clearCurrentSessionState();
         
         Log.d(TAG, "Session ended: " + (completed ? "COMPLETED" : "INTERRUPTED") + 
               " Duration: " + formatDuration(actualDuration) + 
-              " Target: " + formatDuration(targetDuration));
+              " Target: " + formatDuration(currentSessionTarget) +
+              " Score: " + focusScore);
     }
     
-    // Data Retrieval Methods
+    // =====================================
+    // DATA RETRIEVAL METHODS (NEW ROOM-BASED)
+    // =====================================
+    
+    /**
+     * Get today's statistics (new Room-based method)
+     */
+    public LiveData<DailyStatsEntity> getTodayStatsLive() {
+        return repository.getTodayStats();
+    }
+    
+    /**
+     * Get today's statistics (legacy compatibility method)
+     */
     public AnalyticsModels.DailyStats getTodayStats() {
+        // Legacy compatibility method
+        // Should be replaced with getTodayStatsLive() which returns LiveData
         String today = getCurrentDate();
         AnalyticsModels.DailyStats stats = new AnalyticsModels.DailyStats(today);
         
-        stats.setTotalSessions(prefs.getInt(KEY_DAILY_SESSIONS + today, 0));
-        stats.setTotalFocusTime(prefs.getLong(KEY_DAILY_TIME + today, 0));
-        stats.setCompletedSessions(prefs.getInt(KEY_DAILY_COMPLETED + today, 0));
-        stats.setBlockedAttempts(prefs.getInt(KEY_DAILY_BLOCKED + today, 0));
-        stats.updateAverageDuration();
-        
+        // Note: This is a simplified implementation for backward compatibility
+        // The UI should be updated to use getTodayStatsLive() for real data
         return stats;
     }
     
+    /**
+     * Get yesterday's statistics for comparison
+     */
+    public DailyStatsEntity getYesterdayStats() {
+        return repository.getYesterdayStats();
+    }
+    
+    /**
+     * Get current week statistics
+     */
+    public LiveData<WeeklyStatsEntity> getCurrentWeekStats() {
+        return repository.getCurrentWeekStats();
+    }
+    
+    /**
+     * Get week stats (legacy compatibility method)
+     */
     public AnalyticsModels.PeriodSummary getWeekStats() {
-        String weekKey = getCurrentWeek();
+        // Legacy compatibility method
+        // Should be replaced with getCurrentWeekStats() which returns LiveData
+        String weekKey = getCurrentWeekKey();
         AnalyticsModels.PeriodSummary summary = new AnalyticsModels.PeriodSummary(weekKey);
         
-        summary.setTotalSessions(prefs.getInt(KEY_WEEK_SESSIONS + weekKey, 0));
-        summary.setTotalFocusTime(prefs.getLong(KEY_WEEK_TIME + weekKey, 0));
-        summary.setLongestStreak(getCurrentStreak());
-        
+        // Note: This is a simplified implementation for backward compatibility
         return summary;
     }
     
+    /**
+     * Get last week statistics for comparison
+     */
+    public WeeklyStatsEntity getLastWeekStats() {
+        return repository.getLastWeekStats();
+    }
+    
+    /**
+     * Get current month statistics
+     */
+    public LiveData<MonthlyStatsEntity> getCurrentMonthStats() {
+        return repository.getCurrentMonthStats();
+    }
+    
+    /**
+     * Get last month statistics for comparison
+     */
+    public MonthlyStatsEntity getLastMonthStats() {
+        return repository.getLastMonthStats();
+    }
+    
+    /**
+     * Get recent sessions for display (new Room-based method)
+     */
+    public LiveData<List<SessionEntity>> getRecentSessionsLive(int limit) {
+        return repository.getRecentSessions(limit);
+    }
+    
+    /**
+     * Get recent sessions (legacy compatibility method)
+     */
     public List<AnalyticsModels.FocusSession> getRecentSessions(int limit) {
+        // Legacy compatibility method
+        // Should be replaced with getRecentSessionsLive() which returns LiveData
         List<AnalyticsModels.FocusSession> sessions = new ArrayList<>();
         
-        // Get session history from SharedPreferences
-        String historyKey = KEY_SESSION_HISTORY + getCurrentDate();
-        Set<String> sessionHistory = prefs.getStringSet(historyKey, new HashSet<>());
-        
-        // Convert session history strings back to FocusSession objects
-        for (String sessionData : sessionHistory) {
-            if (sessions.size() >= limit) break;
-            
-            try {
-                String[] parts = sessionData.split("\\|");
-                if (parts.length >= 4) {
-                    long startTime = Long.parseLong(parts[0]);
-                    long duration = Long.parseLong(parts[1]);
-                    boolean completed = Boolean.parseBoolean(parts[2]);
-                    long targetDuration = Long.parseLong(parts[3]);
-                    
-                    AnalyticsModels.FocusSession session = new AnalyticsModels.FocusSession(startTime, targetDuration);
-                    session.setActualDuration(duration);
-                    session.setCompleted(completed);
-                    session.setEndTime(startTime + duration);
-                    
-                    sessions.add(session);
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "Error parsing session data: " + sessionData);
-            }
-        }
-        
-        // Sort by start time (most recent first)
-        sessions.sort((s1, s2) -> Long.compare(s2.getStartTime(), s1.getStartTime()));
-        
+        // Note: This is a simplified implementation for backward compatibility
+        // The UI should be updated to use getRecentSessionsLive() for real data
         return sessions;
     }
     
-    // Private Helper Methods
-    private void saveSessionData(AnalyticsModels.FocusSession session) {
-        String today = getCurrentDate();
-        String weekKey = getCurrentWeek();
+    /**
+     * Get app usage for a specific session
+     */
+    public LiveData<List<AppUsageEntity>> getAppUsageForSession(long sessionId) {
+        return repository.getAppUsageForSession(sessionId);
+    }
+    
+    /**
+     * Get sessions for a specific date
+     */
+    public LiveData<List<SessionEntity>> getSessionsForDate(String date) {
+        return repository.getSessionsForDate(date);
+    }
+    
+    // =====================================
+    // LEGACY COMPATIBILITY METHODS
+    // =====================================
+    
+    
+    // =====================================
+    // UTILITY METHODS
+    // =====================================
+    
+    /**
+     * Check if there's an active session
+     */
+    public boolean hasActiveSession() {
+        return currentSessionStart > 0;
+    }
+    
+    /**
+     * Get current session progress
+     */
+    public double getCurrentSessionProgress() {
+        if (currentSessionStart == 0 || currentSessionTarget == 0) {
+            return 0.0;
+        }
         
-        // Update daily stats
-        int dailySessions = prefs.getInt(KEY_DAILY_SESSIONS + today, 0) + 1;
-        long dailyTime = prefs.getLong(KEY_DAILY_TIME + today, 0) + session.getActualDuration();
-        int dailyCompleted = prefs.getInt(KEY_DAILY_COMPLETED + today, 0) + (session.isCompleted() ? 1 : 0);
-        int dailyBlocked = prefs.getInt(KEY_DAILY_BLOCKED + today, 0) + session.getBlockedAttempts().size();
+        long elapsed = System.currentTimeMillis() - currentSessionStart;
+        return Math.min(100.0, (double) elapsed / currentSessionTarget * 100);
+    }
+    
+    /**
+     * Update mobile usage time for today
+     */
+    public void updateTodayMobileUsage(long mobileUsageTime) {
+        repository.updateMobileUsageForDate(getCurrentDate(), mobileUsageTime);
+    }
+    
+    /**
+     * Update weekly notes
+     */
+    public void updateWeeklyNotes(String notes) {
+        repository.updateWeeklyNotes(getCurrentWeekKey(), notes);
+    }
+    
+    /**
+     * Cleanup old data
+     */
+    public void cleanupOldData() {
+        repository.cleanupOldData();
+    }
+    
+    // =====================================
+    // PRIVATE HELPER METHODS
+    // =====================================
+    
+    private void saveCurrentSessionState() {
+        SharedPreferences.Editor editor = sessionPrefs.edit();
+        editor.putLong("session_start", currentSessionStart);
+        editor.putLong("session_target", currentSessionTarget);
+        editor.putString("session_source", currentSessionSource);
         
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(KEY_DAILY_SESSIONS + today, dailySessions);
-        editor.putLong(KEY_DAILY_TIME + today, dailyTime);
-        editor.putInt(KEY_DAILY_COMPLETED + today, dailyCompleted);
-        editor.putInt(KEY_DAILY_BLOCKED + today, dailyBlocked);
-        
-        // Update weekly stats
-        int weekSessions = prefs.getInt(KEY_WEEK_SESSIONS + weekKey, 0) + 1;
-        long weekTime = prefs.getLong(KEY_WEEK_TIME + weekKey, 0) + session.getActualDuration();
-        editor.putInt(KEY_WEEK_SESSIONS + weekKey, weekSessions);
-        editor.putLong(KEY_WEEK_TIME + weekKey, weekTime);
-        
-        // Update streak
-        updateStreak();
-        
-        // Save session to history
-        saveSessionToHistory(session);
-        
+        // Save app usage as JSON or simple format
+        StringBuilder appUsageStr = new StringBuilder();
+        for (Map.Entry<String, Long> entry : currentSessionAppUsage.entrySet()) {
+            if (appUsageStr.length() > 0) appUsageStr.append(";");
+            appUsageStr.append(entry.getKey()).append(":").append(entry.getValue());
+        }
+        editor.putString("app_usage", appUsageStr.toString());
         editor.apply();
+    }
+    
+    private void restoreCurrentSessionState() {
+        currentSessionStart = sessionPrefs.getLong("session_start", 0);
+        currentSessionTarget = sessionPrefs.getLong("session_target", 0);
+        currentSessionSource = sessionPrefs.getString("session_source", "manual");
+        
+        // Restore app usage
+        String appUsageStr = sessionPrefs.getString("app_usage", "");
+        currentSessionAppUsage.clear();
+        if (!appUsageStr.isEmpty()) {
+            String[] entries = appUsageStr.split(";");
+            for (String entry : entries) {
+                String[] parts = entry.split(":");
+                if (parts.length == 2) {
+                    currentSessionAppUsage.put(parts[0], Long.parseLong(parts[1]));
+                }
+            }
+        }
+    }
+    
+    private void clearCurrentSessionState() {
+        currentSessionStart = 0;
+        currentSessionTarget = 0;
+        currentSessionSource = "";
+        currentSessionAppUsage.clear();
+        
+        // Clear from SharedPreferences
+        sessionPrefs.edit().clear().apply();
+    }
+    
+    private int calculateFocusScore(long actualDuration, long targetDuration) {
+        if (targetDuration == 0) return 0;
+        return (int) Math.min(100, (double) actualDuration / targetDuration * 100);
     }
     
     private String getCurrentDate() {
@@ -225,7 +376,7 @@ public class AnalyticsManager {
         return sdf.format(new Date());
     }
     
-    private String getCurrentWeek() {
+    private String getCurrentWeekKey() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-'W'ww", Locale.US);
         return sdf.format(new Date());
     }
@@ -242,86 +393,24 @@ public class AnalyticsManager {
         }
     }
     
-    private void updateStreak() {
-        String today = getCurrentDate();
-        String lastSessionDate = prefs.getString(KEY_LAST_SESSION_DATE, "");
-        int currentStreak = prefs.getInt(KEY_CURRENT_STREAK, 0);
-        
-        if (lastSessionDate.isEmpty()) {
-            // First session ever
-            currentStreak = 1;
-        } else if (lastSessionDate.equals(today)) {
-            // Multiple sessions today, keep current streak
-        } else {
-            // Check if yesterday
-            try {
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
-                java.util.Date lastDate = sdf.parse(lastSessionDate);
-                java.util.Date todayDate = sdf.parse(today);
-                
-                long diffInMillies = todayDate.getTime() - lastDate.getTime();
-                long diffInDays = diffInMillies / (24 * 60 * 60 * 1000);
-                
-                if (diffInDays == 1) {
-                    // Consecutive day
-                    currentStreak++;
-                } else if (diffInDays > 1) {
-                    // Streak broken
-                    currentStreak = 1;
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "Error calculating streak: " + e.getMessage());
-                currentStreak = 1;
-            }
+    private String getAppName(String packageName) {
+        // Get app name from package name
+        // This should use AppUtils or similar utility
+        return packageName; // Simplified for now
+    }
+    
+    private boolean isWhitelisted(String packageName) {
+        // Check if app is whitelisted
+        // This should use WhitelistManager
+        return false; // Simplified for now
+    }
+    
+    /**
+     * Close analytics manager and cleanup resources
+     */
+    public void close() {
+        if (repository != null) {
+            repository.close();
         }
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_LAST_SESSION_DATE, today);
-        editor.putInt(KEY_CURRENT_STREAK, currentStreak);
-        editor.apply();
     }
-    
-    private int getCurrentStreak() {
-        return prefs.getInt(KEY_CURRENT_STREAK, 0);
-    }
-    
-    private void saveSessionToHistory(AnalyticsModels.FocusSession session) {
-        String today = getCurrentDate();
-        String historyKey = KEY_SESSION_HISTORY + today;
-        
-        Set<String> sessionHistory = prefs.getStringSet(historyKey, new HashSet<>());
-        Set<String> newHistory = new HashSet<>(sessionHistory);
-        
-        // Create session data string: startTime|duration|completed|targetDuration
-        String sessionData = String.format(Locale.US, "%d|%d|%s|%d",
-            session.getStartTime(),
-            session.getActualDuration(),
-            session.isCompleted(),
-            session.getTargetDuration()
-        );
-        
-        newHistory.add(sessionData);
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(historyKey, newHistory);
-        editor.apply();
-    }
-    
-    // Utility method to check if there's an active session
-    public boolean hasActiveSession() {
-        return prefs.getLong(KEY_CURRENT_SESSION_START, 0) > 0;
-    }
-    
-    // Get current session progress
-    public double getCurrentSessionProgress() {
-        long startTime = prefs.getLong(KEY_CURRENT_SESSION_START, 0);
-        long targetDuration = prefs.getLong(KEY_CURRENT_SESSION_TARGET, 0);
-        
-        if (startTime == 0 || targetDuration == 0) {
-            return 0.0;
-        }
-        
-        long elapsed = System.currentTimeMillis() - startTime;
-        return Math.min(100.0, (double) elapsed / targetDuration * 100);
-    }
-} 
+}
