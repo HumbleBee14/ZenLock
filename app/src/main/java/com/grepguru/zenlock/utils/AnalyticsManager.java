@@ -385,6 +385,76 @@ public class AnalyticsManager {
     }
     
     /**
+     * Get this month's total focus time
+     */
+    public long getThisMonthFocusTime() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long monthStart = calendar.getTimeInMillis();
+            long monthEnd = monthStart + (30 * 24 * 60 * 60 * 1000); // Approximate month
+            
+            return repository.getTotalFocusTimeForPeriod(monthStart, monthEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this month's focus time", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last month's total focus time
+     */
+    public long getLastMonthFocusTime() {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            
+            long thisMonthStart = calendar.getTimeInMillis();
+            calendar.add(Calendar.MONTH, -1);
+            long lastMonthStart = calendar.getTimeInMillis();
+            long lastMonthEnd = thisMonthStart;
+            
+            return repository.getTotalFocusTimeForPeriod(lastMonthStart, lastMonthEnd);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last month's focus time", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get this month's mobile usage
+     */
+    public long getThisMonthMobileUsage() {
+        try {
+            return mobileUsageTracker.getThisMonthMobileUsage();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this month's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last month's mobile usage
+     */
+    public long getLastMonthMobileUsage() {
+        try {
+            return mobileUsageTracker.getLastMonthMobileUsage();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last month's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
      * Check if usage stats permission is available
      */
     public boolean hasUsageStatsPermission() {

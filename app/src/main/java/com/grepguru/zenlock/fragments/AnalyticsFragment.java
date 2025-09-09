@@ -62,15 +62,18 @@ public class AnalyticsFragment extends Fragment {
     // Weekly stats UI elements
     private TextView thisWeekFocusTime;
     private TextView lastWeekFocusTime;
-    private TextView thisWeekMobileUsage;
-    private TextView lastWeekMobileUsage;
-    private TextView weeklyComparisonText;
+    private TextView thisWeekPhoneUsage;
+    private TextView lastWeekPhoneUsage;
+    private TextView weeklyFocusChange;
+    private TextView weeklyMobileChange;
     
     // Monthly stats UI elements
     private TextView thisMonthFocusTime;
     private TextView lastMonthFocusTime;
-    private TextView thisMonthMobileUsage;
-    private TextView lastMonthMobileUsage;
+    private TextView thisMonthPhoneUsage;
+    private TextView lastMonthPhoneUsage;
+    private TextView monthlyFocusChange;
+    private TextView monthlyMobileChange;
 
     public AnalyticsFragment() {}
 
@@ -154,15 +157,18 @@ public class AnalyticsFragment extends Fragment {
         // Weekly stats views
         thisWeekFocusTime = view.findViewById(R.id.thisWeekFocusTime);
         lastWeekFocusTime = view.findViewById(R.id.lastWeekFocusTime);
-        thisWeekMobileUsage = view.findViewById(R.id.thisWeekMobileUsage);
-        lastWeekMobileUsage = view.findViewById(R.id.lastWeekMobileUsage);
-        weeklyComparisonText = view.findViewById(R.id.weeklyComparisonText);
+        thisWeekPhoneUsage = view.findViewById(R.id.thisWeekMobileUsage);
+        lastWeekPhoneUsage = view.findViewById(R.id.lastWeekMobileUsage);
+        weeklyFocusChange = view.findViewById(R.id.weeklyFocusChange);
+        weeklyMobileChange = view.findViewById(R.id.weeklyMobileChange);
         
         // Monthly stats views
         thisMonthFocusTime = view.findViewById(R.id.thisMonthFocusTime);
         lastMonthFocusTime = view.findViewById(R.id.lastMonthFocusTime);
-        thisMonthMobileUsage = view.findViewById(R.id.thisMonthMobileUsage);
-        lastMonthMobileUsage = view.findViewById(R.id.lastMonthMobileUsage);
+        thisMonthPhoneUsage = view.findViewById(R.id.thisMonthMobileUsage);
+        lastMonthPhoneUsage = view.findViewById(R.id.lastMonthMobileUsage);
+        monthlyFocusChange = view.findViewById(R.id.monthlyFocusChange);
+        monthlyMobileChange = view.findViewById(R.id.monthlyMobileChange);
     }
 
     private void setupExpandableSections() {
@@ -263,7 +269,7 @@ public class AnalyticsFragment extends Fragment {
             analyticsManager.requestUsageStatsPermission();
         });
     }
-    
+
     private void loadAnalyticsData() {
         // Check usage stats permission first
         checkUsageStatsPermission();
@@ -271,6 +277,7 @@ public class AnalyticsFragment extends Fragment {
         // Load real analytics data using LiveData
         loadTodayStats();
         loadWeeklyStats();
+        loadMonthlyStats();
         loadRecentSessions();
     }
     
@@ -292,7 +299,7 @@ public class AnalyticsFragment extends Fragment {
                 DailyStatsEntity yesterdayStats = analyticsManager.getYesterdayStats();
                 
                 // Update today's stats with real data
-                updateTodayStats(
+        updateTodayStats(
                     todayStats.totalSessions,
                     todayStats.totalFocusTime / (1000 * 60), // Convert to minutes
                     (int) todayStats.avgFocusScore,
@@ -330,22 +337,71 @@ public class AnalyticsFragment extends Fragment {
                             lastWeekFocusTime.setText(formatTime(lastWeekFocusMs / (60 * 1000)));
                         }
                         
-                        // Update this week's mobile usage
-                        if (thisWeekMobileUsage != null) {
-                            thisWeekMobileUsage.setText(formatTime(thisWeekMobileMs / (60 * 1000)));
+                        // Update this week's phone usage
+                        if (thisWeekPhoneUsage != null) {
+                            thisWeekPhoneUsage.setText(formatTime(thisWeekMobileMs / (60 * 1000)));
                         }
                         
-                        // Update last week's mobile usage
-                        if (lastWeekMobileUsage != null) {
-                            lastWeekMobileUsage.setText(formatTime(lastWeekMobileMs / (60 * 1000)));
+                        // Update last week's phone usage
+                        if (lastWeekPhoneUsage != null) {
+                            lastWeekPhoneUsage.setText(formatTime(lastWeekMobileMs / (60 * 1000)));
                         }
                         
-                        // Update weekly comparison
-                        updateWeeklyComparison(thisWeekFocusMs, lastWeekFocusMs);
+                        // Update weekly comparisons
+                        updateWeeklyFocusChange(thisWeekFocusMs, lastWeekFocusMs);
+                        updateWeeklyMobileChange(thisWeekMobileMs, lastWeekMobileMs);
                     });
                 }
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error loading weekly stats", e);
+            }
+        }).start();
+    }
+    
+    private void loadMonthlyStats() {
+        // Load this month's stats
+        new Thread(() -> {
+            try {
+                // Get this month's focus time from database
+                long thisMonthFocusMs = analyticsManager.getThisMonthFocusTime();
+                
+                // Get this month's mobile usage from UsageStatsManager
+                long thisMonthMobileMs = analyticsManager.getThisMonthMobileUsage();
+                
+                // Get last month's stats for comparison
+                long lastMonthFocusMs = analyticsManager.getLastMonthFocusTime();
+                long lastMonthMobileMs = analyticsManager.getLastMonthMobileUsage();
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        // Update this month's focus time
+                        if (thisMonthFocusTime != null) {
+                            thisMonthFocusTime.setText(formatTime(thisMonthFocusMs / (60 * 1000)));
+                        }
+                        
+                        // Update last month's focus time
+                        if (lastMonthFocusTime != null) {
+                            lastMonthFocusTime.setText(formatTime(lastMonthFocusMs / (60 * 1000)));
+                        }
+                        
+                        // Update this month's phone usage
+                        if (thisMonthPhoneUsage != null) {
+                            thisMonthPhoneUsage.setText(formatTime(thisMonthMobileMs / (60 * 1000)));
+                        }
+                        
+                        // Update last month's phone usage
+                        if (lastMonthPhoneUsage != null) {
+                            lastMonthPhoneUsage.setText(formatTime(lastMonthMobileMs / (60 * 1000)));
+                        }
+                        
+                        // Update monthly comparisons
+                        updateMonthlyFocusChange(thisMonthFocusMs, lastMonthFocusMs);
+                        updateMonthlyMobileChange(thisMonthMobileMs, lastMonthMobileMs);
+                    });
+                }
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error loading monthly stats", e);
             }
         }).start();
     }
@@ -519,45 +575,121 @@ public class AnalyticsFragment extends Fragment {
         if (changePercentage > 10) {
             // Increase in focus time (good) - show in green
             todayTrendIndicator.setText(String.format("↗️ +%.0f%%", changePercentage));
-            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
+                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
         } else if (changePercentage > -10) {
             // Similar performance
             todayTrendIndicator.setText("→ Similar");
-            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-        } else {
+                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
+            } else {
             // Decrease in focus time (bad) - show in red
             todayTrendIndicator.setText(String.format("↘️ %.0f%%", changePercentage));
-            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
+                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
         }
     }
 
     
-    private void updateWeeklyComparison(long thisWeekFocusMs, long lastWeekFocusMs) {
-        if (weeklyComparisonText == null) return;
+    
+    private void updateWeeklyFocusChange(long thisWeekFocusMs, long lastWeekFocusMs) {
+        if (weeklyFocusChange == null) return;
         
         if (lastWeekFocusMs == 0) {
-            // No comparison data available
-            weeklyComparisonText.setText("📊 First Week");
-            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.textSecondary));
+            weeklyFocusChange.setText("--");
+            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
             return;
         }
         
-        // Calculate percentage change in focus time
         double changePercentage = ((double) (thisWeekFocusMs - lastWeekFocusMs) / lastWeekFocusMs) * 100;
         
-        // Update trend indicator with proper color coding
-        if (changePercentage > 10) {
+        if (changePercentage > 5) {
             // Increase in focus time (good) - show in green
-            weeklyComparisonText.setText(String.format("↗️ +%.0f%%", changePercentage));
-            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.success));
-        } else if (changePercentage > -10) {
+            weeklyFocusChange.setText(String.format("+%.0f%%", changePercentage));
+            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.success));
+        } else if (changePercentage > -5) {
             // Similar performance
-            weeklyComparisonText.setText("→ Similar");
-            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.textSecondary));
+            weeklyFocusChange.setText("0%");
+            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
         } else {
             // Decrease in focus time (bad) - show in red
-            weeklyComparisonText.setText(String.format("↘️ %.0f%%", changePercentage));
-            weeklyComparisonText.setTextColor(requireContext().getColor(R.color.warning));
+            weeklyFocusChange.setText(String.format("%.0f%%", changePercentage));
+            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.warning));
+        }
+    }
+    
+    private void updateWeeklyMobileChange(long thisWeekMobileMs, long lastWeekMobileMs) {
+        if (weeklyMobileChange == null) return;
+        
+        if (lastWeekMobileMs == 0) {
+            weeklyMobileChange.setText("--");
+            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+            return;
+        }
+        
+        double changePercentage = ((double) (thisWeekMobileMs - lastWeekMobileMs) / lastWeekMobileMs) * 100;
+        
+        if (changePercentage > 5) {
+            // Increase in mobile usage (bad) - show in red
+            weeklyMobileChange.setText(String.format("+%.0f%%", changePercentage));
+            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.warning));
+        } else if (changePercentage > -5) {
+            // Similar performance
+            weeklyMobileChange.setText("0%");
+            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+        } else {
+            // Decrease in mobile usage (good) - show in green
+            weeklyMobileChange.setText(String.format("%.0f%%", changePercentage));
+            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.success));
+        }
+    }
+    
+    private void updateMonthlyFocusChange(long thisMonthFocusMs, long lastMonthFocusMs) {
+        if (monthlyFocusChange == null) return;
+        
+        if (lastMonthFocusMs == 0) {
+            monthlyFocusChange.setText("--");
+            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+            return;
+        }
+        
+        double changePercentage = ((double) (thisMonthFocusMs - lastMonthFocusMs) / lastMonthFocusMs) * 100;
+        
+        if (changePercentage > 5) {
+            // Increase in focus time (good) - show in green
+            monthlyFocusChange.setText(String.format("+%.0f%%", changePercentage));
+            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.success));
+        } else if (changePercentage > -5) {
+            // Similar performance
+            monthlyFocusChange.setText("0%");
+            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+        } else {
+            // Decrease in focus time (bad) - show in red
+            monthlyFocusChange.setText(String.format("%.0f%%", changePercentage));
+            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.warning));
+        }
+    }
+    
+    private void updateMonthlyMobileChange(long thisMonthMobileMs, long lastMonthMobileMs) {
+        if (monthlyMobileChange == null) return;
+        
+        if (lastMonthMobileMs == 0) {
+            monthlyMobileChange.setText("--");
+            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+            return;
+        }
+        
+        double changePercentage = ((double) (thisMonthMobileMs - lastMonthMobileMs) / lastMonthMobileMs) * 100;
+        
+        if (changePercentage > 5) {
+            // Increase in mobile usage (bad) - show in red
+            monthlyMobileChange.setText(String.format("+%.0f%%", changePercentage));
+            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.warning));
+        } else if (changePercentage > -5) {
+            // Similar performance
+            monthlyMobileChange.setText("0%");
+            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+        } else {
+            // Decrease in mobile usage (good) - show in green
+            monthlyMobileChange.setText(String.format("%.0f%%", changePercentage));
+            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.success));
         }
     }
     

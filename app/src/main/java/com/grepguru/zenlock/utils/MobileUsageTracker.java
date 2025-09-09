@@ -156,6 +156,117 @@ public class MobileUsageTracker {
     }
     
     /**
+     * Get this month's mobile usage time
+     */
+    public long getThisMonthMobileUsage() {
+        if (!hasUsageStatsPermission()) {
+            Log.w(TAG, "Usage stats permission not granted");
+            return 0;
+        }
+        
+        try {
+            // Get usage stats for this month
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            long startTime = cal.getTimeInMillis();
+            long endTime = System.currentTimeMillis();
+            
+            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usageStatsManager == null) {
+                return 0;
+            }
+            
+            // Use INTERVAL_BEST for most recent data
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+            
+            if (usageStatsList == null || usageStatsList.isEmpty()) {
+                // Fallback to INTERVAL_DAILY if no data
+                usageStatsList = usageStatsManager.queryUsageStats(
+                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+                if (usageStatsList == null) {
+                    usageStatsList = new ArrayList<>();
+                }
+            }
+            
+            long totalUsageTime = 0;
+            for (UsageStats usageStats : usageStatsList) {
+                long appUsageTime = usageStats.getTotalTimeInForeground();
+                // Only include apps with significant usage (> 1 minute) to reduce noise
+                if (appUsageTime > 60000) {
+                    totalUsageTime += appUsageTime;
+                }
+            }
+            
+            return totalUsageTime;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting this month's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Get last month's mobile usage time
+     */
+    public long getLastMonthMobileUsage() {
+        if (!hasUsageStatsPermission()) {
+            Log.w(TAG, "Usage stats permission not granted");
+            return 0;
+        }
+        
+        try {
+            // Get usage stats for last month
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            long thisMonthStart = cal.getTimeInMillis();
+            
+            cal.add(Calendar.MONTH, -1);
+            long startTime = cal.getTimeInMillis();
+            long endTime = thisMonthStart;
+            
+            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usageStatsManager == null) {
+                return 0;
+            }
+            
+            // Use INTERVAL_BEST for most recent data
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+            
+            if (usageStatsList == null || usageStatsList.isEmpty()) {
+                // Fallback to INTERVAL_DAILY if no data
+                usageStatsList = usageStatsManager.queryUsageStats(
+                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+                if (usageStatsList == null) {
+                    usageStatsList = new ArrayList<>();
+                }
+            }
+            
+            long totalUsageTime = 0;
+            for (UsageStats usageStats : usageStatsList) {
+                long appUsageTime = usageStats.getTotalTimeInForeground();
+                // Only include apps with significant usage (> 1 minute) to reduce noise
+                if (appUsageTime > 60000) {
+                    totalUsageTime += appUsageTime;
+                }
+            }
+            
+            return totalUsageTime;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting last month's mobile usage", e);
+            return 0;
+        }
+    }
+    
+    /**
      * Get mobile usage for a specific period
      */
     private long getMobileUsageForPeriod(long startTime, long endTime) {
