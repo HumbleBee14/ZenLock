@@ -13,6 +13,7 @@ import com.grepguru.zenlock.data.entities.SessionEntity;
 import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
 import com.grepguru.zenlock.data.repository.AnalyticsRepository;
 import com.grepguru.zenlock.model.AnalyticsModels;
+import com.grepguru.zenlock.BuildConfig;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class AnalyticsManager {
     // Repository for database operations
     private AnalyticsRepository repository;
     private Context context;
+    private MobileUsageTracker mobileUsageTracker;
     
     // Current session tracking (still using SharedPreferences for active session state)
     private static final String SESSION_PREFS = "CurrentSessionPrefs";
@@ -47,9 +49,13 @@ public class AnalyticsManager {
         this.context = context;
         this.repository = new AnalyticsRepository(context);
         this.sessionPrefs = context.getSharedPreferences(SESSION_PREFS, Context.MODE_PRIVATE);
+        this.mobileUsageTracker = new MobileUsageTracker(context);
         
         // Restore current session state if exists
         restoreCurrentSessionState();
+        
+        // Update today's mobile usage if permission is available
+        updateTodayMobileUsageIfAvailable();
     }
     
     // =====================================
@@ -304,6 +310,56 @@ public class AnalyticsManager {
     }
     
     /**
+     * Get mobile usage tracker instance
+     */
+    public MobileUsageTracker getMobileUsageTracker() {
+        return mobileUsageTracker;
+    }
+    
+    /**
+     * Check if usage stats permission is available
+     */
+    public boolean hasUsageStatsPermission() {
+        return UsageStatsPermissionManager.hasUsageStatsPermission(context);
+    }
+    
+    /**
+     * Request usage stats permission
+     */
+    public void requestUsageStatsPermission() {
+        UsageStatsPermissionManager.requestUsageStatsPermission(context);
+    }
+    
+    /**
+     * Update today's mobile usage if permission is available
+     */
+    public void updateTodayMobileUsageIfAvailable() {
+        if (hasUsageStatsPermission()) {
+            // Run in background to avoid blocking main thread
+            new Thread(() -> {
+                try {
+                    long mobileUsage = mobileUsageTracker.updateTodayMobileUsage();
+                    if (mobileUsage > 0) {
+                        updateTodayMobileUsage(mobileUsage);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error updating mobile usage", e);
+                }
+            }).start();
+        }
+    }
+    
+    /**
+     * Get today's mobile usage in formatted string
+     */
+    public String getTodayMobileUsageFormatted() {
+        if (!hasUsageStatsPermission()) {
+            return "Permission needed";
+        }
+        return mobileUsageTracker.getFormattedTodayUsage();
+    }
+    
+    /**
      * Update weekly notes
      */
     public void updateWeeklyNotes(String notes) {
@@ -403,6 +459,51 @@ public class AnalyticsManager {
         // Check if app is whitelisted
         // This should use WhitelistManager
         return false; // Simplified for now
+    }
+    
+    /**
+     * Create sample analytics data for testing (development only)
+     */
+    public void createSampleData() {
+        if (!BuildConfig.DEBUG) return; // Only in debug builds
+        
+        Log.d(TAG, "Creating sample analytics data...");
+        
+        // Create a few sample sessions
+        long now = System.currentTimeMillis();
+        
+        // Today's session 1 - Completed
+        SessionEntity session1 = new SessionEntity(
+            now - 1000,
+            now - (3600 * 1000), // 1 hour ago
+            now - (1800 * 1000), // 30 minutes ago
+            3600 * 1000, // 1 hour target
+            1800 * 1000, // 30 minutes actual
+            false, // Not completed (interrupted)
+            "manual",
+            50 // 50% focus score
+        );
+        
+        // Today's session 2 - Completed
+        SessionEntity session2 = new SessionEntity(
+            now - 2000,
+            now - (7200 * 1000), // 2 hours ago
+            now - (3600 * 1000), // 1 hour ago
+            3600 * 1000, // 1 hour target
+            3600 * 1000, // 1 hour actual
+            true, // Completed
+            "schedule:Morning Focus",
+            100 // 100% focus score
+        );
+        
+        // Save sample sessions
+        List<AppUsageEntity> sampleAppUsage = new ArrayList<>();
+        sampleAppUsage.add(new AppUsageEntity(session1.sessionId, "com.android.phone", "Phone", 300000, true));
+        
+        repository.insertSession(session1, sampleAppUsage);
+        repository.insertSession(session2, new ArrayList<>());
+        
+        Log.d(TAG, "Sample data created successfully");
     }
     
     /**
