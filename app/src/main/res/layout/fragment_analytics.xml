@@ -371,7 +371,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:src="@drawable/ic_timer"
-                                android:tint="@color/secondary"
+                                app:tint="@color/secondary"
                                 android:layout_marginEnd="8dp"/>
 
                             <TextView
@@ -475,7 +475,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:src="@drawable/ic_phone"
-                                android:tint="@color/textPrimary"
+                                app:tint="@color/textPrimary"
                                 android:layout_marginEnd="8dp"/>
 
                             <TextView
@@ -659,7 +659,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:src="@drawable/ic_timer"
-                                android:tint="@color/secondary"
+                                app:tint="@color/secondary"
                                 android:layout_marginEnd="8dp"/>
 
                             <TextView
@@ -763,7 +763,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:src="@drawable/ic_phone"
-                                android:tint="@color/textPrimary"
+                                app:tint="@color/textPrimary"
                                 android:layout_marginEnd="8dp"/>
 
                             <TextView
