@@ -120,8 +120,8 @@ public class AnalyticsFragment extends Fragment {
         // Setup usage permission banner
         setupUsagePermissionBanner();
 
-        // Store yesterday's mobile usage data (if not already stored)
-        storeYesterdayMobileUsage();
+        // Pre-populate recent mobile usage data and store yesterday's data
+        prePopulateMobileUsageData();
         
         // Load and display analytics data
         loadAnalyticsData();
@@ -299,13 +299,13 @@ public class AnalyticsFragment extends Fragment {
         });
     }
 
-    private void storeYesterdayMobileUsage() {
-        // Store yesterday's mobile usage data in background
+    private void prePopulateMobileUsageData() {
+        // Pre-populate recent mobile usage data in background
         new Thread(() -> {
             try {
-                dailyMobileUsageManager.storeYesterdayMobileUsage();
+                dailyMobileUsageManager.prePopulateRecentData();
             } catch (Exception e) {
-                Log.e("AnalyticsFragment", "Error storing yesterday's mobile usage", e);
+                Log.e("AnalyticsFragment", "Error pre-populating mobile usage data", e);
             }
         }).start();
     }
@@ -371,7 +371,8 @@ public class AnalyticsFragment extends Fragment {
                     c.add(java.util.Calendar.DAY_OF_YEAR, -i);
                     String ds = AnalyticsManager.formatDate(c.getTimeInMillis());
                     long focusMs = focusByDate.getOrDefault(ds, 0L);
-                    long mobileMs = analyticsManager.getMobileUsageTracker().getMobileUsageForDate(ds);
+                    // Use DailyMobileUsageManager for efficient data retrieval
+                    long mobileMs = dailyMobileUsageManager.getMobileUsageForDate(ds);
                     int x = 7 - i; // 0..7
                     focusEntries.add(new BarEntry(x, msToHoursFloat(focusMs))); // bars in hours
                     mobileEntries.add(new Entry(x, msToHoursFloat(mobileMs)));  // line in hours
@@ -728,7 +729,9 @@ public class AnalyticsFragment extends Fragment {
         // Force refresh mobile usage data every time analytics page is opened
         new Thread(() -> {
             try {
-                long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
+                // Use DailyMobileUsageManager for efficient data retrieval
+                String todayDate = AnalyticsManager.formatDate(System.currentTimeMillis());
+                long mobileUsageMs = dailyMobileUsageManager.getMobileUsageForDate(todayDate);
                 // Log.d("AnalyticsFragment", "Refreshed mobile usage: " + mobileUsageMs + "ms");
                 
                 // Update UI on main thread
@@ -751,10 +754,12 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void updateMobileUsageDisplay(long focusTimeMinutes) {
-        // Get real mobile usage data directly from UsageStatsManager (no database storage)
+        // Get real mobile usage data using DailyMobileUsageManager for efficiency
         new Thread(() -> {
             try {
-                long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
+                // Use DailyMobileUsageManager for efficient data retrieval
+                String todayDate = AnalyticsManager.formatDate(System.currentTimeMillis());
+                long mobileUsageMs = dailyMobileUsageManager.getMobileUsageForDate(todayDate);
                 Log.d("AnalyticsFragment", "Mobile usage from tracker: " + mobileUsageMs + "ms");
                 
                 // Update UI on main thread

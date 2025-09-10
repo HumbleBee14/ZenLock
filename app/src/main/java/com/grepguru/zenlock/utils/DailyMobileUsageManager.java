@@ -43,20 +43,27 @@ public class DailyMobileUsageManager {
     public void storeYesterdayMobileUsage() {
         executor.execute(() -> {
             try {
-                String yesterdayDate = getYesterdayDate();
-                
-                // Get yesterday's mobile usage from UsageStatsManager
-                long mobileUsageMs = mobileUsageTracker.getYesterdayMobileUsage();
-                
-                // Create and store the entity
-                DailyMobileUsageEntity entity = new DailyMobileUsageEntity(yesterdayDate, mobileUsageMs);
-                database.analyticsDao().insertDailyMobileUsage(entity);
+                // Store data for the last 7 days to ensure we have recent data
+                for (int i = 1; i <= 7; i++) {
+                    String date = getDateDaysAgo(i);
+                    
+                    // Check if we already have data for this date
+                    DailyMobileUsageEntity existing = database.analyticsDao().getDailyMobileUsage(date);
+                    if (existing == null) {
+                        // Get mobile usage from UsageStatsManager
+                        long mobileUsageMs = mobileUsageTracker.getMobileUsageForDate(date);
+                        
+                        // Create and store the entity
+                        DailyMobileUsageEntity entity = new DailyMobileUsageEntity(date, mobileUsageMs);
+                        database.analyticsDao().insertDailyMobileUsage(entity);
+                    }
+                }
                 
                 // Maintain FIFO behavior - keep only last 30 days
                 maintainMax30Days();
                 
             } catch (Exception e) {
-                Log.e(TAG, "Error storing yesterday's mobile usage", e);
+                Log.e(TAG, "Error storing mobile usage data", e);
             }
         });
     }
@@ -73,12 +80,38 @@ public class DailyMobileUsageManager {
                 return stored.totalMobileUsage;
             }
             
-            // If not in database, fetch from UsageStatsManager (for recent dates)
-            return mobileUsageTracker.getMobileUsageForDate(date);
+            // Check if this is a recent date (within last 7 days) before calling slow API
+            if (isRecentDate(date)) {
+                // Only fetch from UsageStatsManager for very recent dates (today, yesterday, etc.)
+                return mobileUsageTracker.getMobileUsageForDate(date);
+            } else {
+                // For older dates, return 0 instead of calling slow API
+                // This prevents the context error and makes charts load faster
+                return 0;
+            }
             
         } catch (Exception e) {
             Log.e(TAG, "Error getting mobile usage for date: " + date, e);
             return 0;
+        }
+    }
+    
+    /**
+     * Check if a date is recent (within last 7 days)
+     */
+    private boolean isRecentDate(String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date targetDate = sdf.parse(date);
+            if (targetDate == null) return false;
+            
+            Date now = new Date();
+            long diffInMillis = now.getTime() - targetDate.getTime();
+            long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+            
+            return diffInDays <= 7; // Only consider dates within last 7 days as "recent"
+        } catch (Exception e) {
+            return false;
         }
     }
     
@@ -128,6 +161,16 @@ public class DailyMobileUsageManager {
     private String getYesterdayDate() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -1);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        return sdf.format(cal.getTime());
+    }
+    
+    /**
+     * Get date N days ago in YYYY-MM-DD format
+     */
+    private String getDateDaysAgo(int daysAgo) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -daysAgo);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         return sdf.format(cal.getTime());
     }
@@ -194,6 +237,38 @@ public class DailyMobileUsageManager {
                 logDatabaseStats();
             } catch (Exception e) {
                 Log.e(TAG, "Error during force cleanup", e);
+            }
+        });
+    }
+    
+    /**
+     * Pre-populate database with recent data (last 7 days)
+     * This should be called when the app starts to ensure we have data
+     */
+    public void prePopulateRecentData() {
+        executor.execute(() -> {
+            try {
+                // Store data for the last 7 days to ensure we have recent data
+                for (int i = 1; i <= 7; i++) {
+                    String date = getDateDaysAgo(i);
+                    
+                    // Check if we already have data for this date
+                    DailyMobileUsageEntity existing = database.analyticsDao().getDailyMobileUsage(date);
+                    if (existing == null) {
+                        // Get mobile usage from UsageStatsManager
+                        long mobileUsageMs = mobileUsageTracker.getMobileUsageForDate(date);
+                        
+                        // Create and store the entity
+                        DailyMobileUsageEntity entity = new DailyMobileUsageEntity(date, mobileUsageMs);
+                        database.analyticsDao().insertDailyMobileUsage(entity);
+                    }
+                }
+                
+                // Maintain FIFO behavior - keep only last 30 days
+                maintainMax30Days();
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error pre-populating recent data", e);
             }
         });
     }
