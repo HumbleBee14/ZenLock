@@ -5,17 +5,26 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.Set;
 
 /**
  * MobileUsageTracker - Tracks mobile usage using UsageStatsManager
@@ -32,6 +41,112 @@ public class MobileUsageTracker {
     public MobileUsageTracker(Context context) {
         this.context = context;
         this.usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+    }
+    
+    // ---- Modular utilities for month range + total usage ----
+    public static long[] getMonthTimestamps(int year, int month) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+        // Start of month
+        calendar.set(year, month, 1, 0, 0, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long startTime = calendar.getTimeInMillis();
+
+        // End of month (inclusive)
+        calendar.set(year, month, calendar.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        long endTime = calendar.getTimeInMillis();
+
+        return new long[]{startTime, endTime};
+    }
+
+    public static long getTotalPhoneUsage(Context context, long startTime, long endTime) {
+        long totalTimeInMillis = 0L;
+        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        if (usageStatsManager == null) return 0L;
+
+        // Build exclusion sets
+        Set<String> keyboardPackages = getEnabledKeyboardPackages(context);
+        Set<String> launcherPackages = getLauncherPackages(context);
+        PackageManager pm = context.getPackageManager();
+        String ourPackage = context.getPackageName();
+
+        Map<String, UsageStats> usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime);
+        if (usageStatsMap != null) {
+            for (Map.Entry<String, UsageStats> entry : usageStatsMap.entrySet()) {
+                String packageName = entry.getKey();
+                UsageStats usageStats = entry.getValue();
+                if (usageStats == null || packageName == null) continue;
+
+                // Quick pattern exclusions for overlays/services that inflate totals
+                if (packageName.equals(ourPackage)) continue; // exclude our app
+                if (packageName.startsWith("com.android.systemui")) continue;
+                if (packageName.equals("com.google.android.gms")) continue; // Play Services
+                if (packageName.equals("android")) continue; // framework
+
+                // Exclude keyboards and launchers
+                if (keyboardPackages.contains(packageName)) continue;
+                if (launcherPackages.contains(packageName)) continue;
+
+                // Exclude system and updated system apps
+                try {
+                    ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+                    boolean isSystem = (appInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+                    if (isSystem) continue;
+                } catch (PackageManager.NameNotFoundException ignored) {
+                    continue;
+                }
+
+                totalTimeInMillis += usageStats.getTotalTimeInForeground();
+            }
+        }
+        return totalTimeInMillis;
+    }
+
+    private static Set<String> getEnabledKeyboardPackages(Context context) {
+        Set<String> set = new HashSet<>();
+        try {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                List<InputMethodInfo> list = imm.getEnabledInputMethodList();
+                if (list != null) {
+                    for (InputMethodInfo imi : list) {
+                        if (imi != null && imi.getPackageName() != null) {
+                            set.add(imi.getPackageName());
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        // Common fallbacks
+        set.add("com.google.android.inputmethod.latin");
+        set.add("com.samsung.android.honeyboard");
+        set.add("com.touchtype"); // SwiftKey
+        set.add("com.miui.inputmethod");
+        return set;
+    }
+
+    private static Set<String> getLauncherPackages(Context context) {
+        Set<String> set = new HashSet<>();
+        try {
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            PackageManager pm = context.getPackageManager();
+            List<ResolveInfo> infos = pm.queryIntentActivities(intent, 0);
+            if (infos != null) {
+                for (ResolveInfo ri : infos) {
+                    if (ri != null && ri.activityInfo != null) {
+                        set.add(ri.activityInfo.packageName);
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        // Common launcher fallbacks
+        set.add("com.android.launcher3");
+        set.add("com.google.android.apps.nexuslauncher"); // Pixel Launcher
+        set.add("com.teslacoilsw.launcher"); // Nova
+        set.add("com.mi.android.globallauncher");
+        set.add("com.sec.android.app.launcher"); // Samsung
+        return set;
     }
     
     /**
@@ -165,44 +280,15 @@ public class MobileUsageTracker {
         }
         
         try {
-            // Get usage stats for this month
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long startTime = cal.getTimeInMillis();
-            long endTime = System.currentTimeMillis();
-            
-            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usageStatsManager == null) {
-                return 0;
-            }
-            
-            // Use INTERVAL_BEST for most recent data
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            
-            if (usageStatsList == null || usageStatsList.isEmpty()) {
-                // Fallback to INTERVAL_DAILY if no data
-                usageStatsList = usageStatsManager.queryUsageStats(
-                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-                if (usageStatsList == null) {
-                    usageStatsList = new ArrayList<>();
-                }
-            }
-            
-            long totalUsageTime = 0;
-            for (UsageStats usageStats : usageStatsList) {
-                long appUsageTime = usageStats.getTotalTimeInForeground();
-                // Only include apps with significant usage (> 1 minute) to reduce noise
-                if (appUsageTime > 60000) {
-                    totalUsageTime += appUsageTime;
-                }
-            }
-            
-            return totalUsageTime;
+            // Use modular utilities: start = first day, end = now (so far)
+            Calendar now = Calendar.getInstance();
+            int year = now.get(Calendar.YEAR);
+            int month = now.get(Calendar.MONTH);
+            long[] range = getMonthTimestamps(year, month);
+            long startTime = range[0];
+            long endTime = System.currentTimeMillis(); // so far
+
+            return getTotalPhoneUsage(context, startTime, endTime);
         } catch (Exception e) {
             Log.e(TAG, "Error getting this month's mobile usage", e);
             return 0;
@@ -219,47 +305,16 @@ public class MobileUsageTracker {
         }
         
         try {
-            // Get usage stats for last month
+            // Compute last month year/month, then use modular utilities
             Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long thisMonthStart = cal.getTimeInMillis();
-            
             cal.add(Calendar.MONTH, -1);
-            long startTime = cal.getTimeInMillis();
-            long endTime = thisMonthStart;
-            
-            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usageStatsManager == null) {
-                return 0;
-            }
-            
-            // Use INTERVAL_BEST for most recent data
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            
-            if (usageStatsList == null || usageStatsList.isEmpty()) {
-                // Fallback to INTERVAL_DAILY if no data
-                usageStatsList = usageStatsManager.queryUsageStats(
-                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-                if (usageStatsList == null) {
-                    usageStatsList = new ArrayList<>();
-                }
-            }
-            
-            long totalUsageTime = 0;
-            for (UsageStats usageStats : usageStatsList) {
-                long appUsageTime = usageStats.getTotalTimeInForeground();
-                // Only include apps with significant usage (> 1 minute) to reduce noise
-                if (appUsageTime > 60000) {
-                    totalUsageTime += appUsageTime;
-                }
-            }
-            
-            return totalUsageTime;
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH); // 0-indexed
+            long[] range = getMonthTimestamps(year, month);
+            long startTime = range[0];
+            long endTime = range[1];
+
+            return getTotalPhoneUsage(context, startTime, endTime);
         } catch (Exception e) {
             Log.e(TAG, "Error getting last month's mobile usage", e);
             return 0;
