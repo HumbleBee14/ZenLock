@@ -9,6 +9,7 @@ import androidx.room.TypeConverters;
 
 import com.grepguru.zenlock.data.dao.AnalyticsDao;
 import com.grepguru.zenlock.data.entities.AppUsageEntity;
+import com.grepguru.zenlock.data.entities.DailyMobileUsageEntity;
 import com.grepguru.zenlock.data.entities.DailyStatsEntity;
 import com.grepguru.zenlock.data.entities.MonthlyStatsEntity;
 import com.grepguru.zenlock.data.entities.SessionEntity;
@@ -23,10 +24,11 @@ import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
         SessionEntity.class,
         AppUsageEntity.class,
         DailyStatsEntity.class,
+        DailyMobileUsageEntity.class,
         WeeklyStatsEntity.class,
         MonthlyStatsEntity.class
     },
-    version = 2, // Incremented to force migration after removing mobile usage field
+    version = 3, // Incremented to add DailyMobileUsageEntity
     exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -78,6 +80,7 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_sessions_date ON sessions(date(start_time/1000, 'unixepoch'))");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_app_usage_session_id ON app_usage(session_id)");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_daily_stats_date ON daily_stats(date)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_daily_mobile_usage_date ON daily_mobile_usage(date)");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_weekly_stats_week_key ON weekly_stats(week_key)");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_monthly_stats_month_key ON monthly_stats(month_key)");
         }

@@ -9,6 +9,7 @@ import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.grepguru.zenlock.data.entities.AppUsageEntity;
+import com.grepguru.zenlock.data.entities.DailyMobileUsageEntity;
 import com.grepguru.zenlock.data.entities.DailyStatsEntity;
 import com.grepguru.zenlock.data.entities.MonthlyStatsEntity;
 import com.grepguru.zenlock.data.entities.SessionEntity;
@@ -243,4 +244,52 @@ public interface AnalyticsDao {
     
     @Query("SELECT SUM(actual_duration) FROM sessions WHERE start_time >= :startTime AND end_time <= :endTime")
     Long getTotalFocusTimeForPeriod(long startTime, long endTime);
+    
+    // =====================================
+    // DAILY MOBILE USAGE OPERATIONS
+    // =====================================
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertDailyMobileUsage(DailyMobileUsageEntity dailyMobileUsage);
+    
+    @Update
+    void updateDailyMobileUsage(DailyMobileUsageEntity dailyMobileUsage);
+    
+    @Query("SELECT * FROM daily_mobile_usage WHERE date = :date")
+    DailyMobileUsageEntity getDailyMobileUsage(String date);
+    
+    @Query("SELECT * FROM daily_mobile_usage WHERE date = :date")
+    LiveData<DailyMobileUsageEntity> getDailyMobileUsageLive(String date);
+    
+    @Query("SELECT * FROM daily_mobile_usage ORDER BY date DESC LIMIT :limit")
+    List<DailyMobileUsageEntity> getRecentDailyMobileUsage(int limit);
+    
+    @Query("SELECT * FROM daily_mobile_usage WHERE date >= :startDate AND date <= :endDate ORDER BY date DESC")
+    List<DailyMobileUsageEntity> getDailyMobileUsageRange(String startDate, String endDate);
+    
+    @Query("SELECT * FROM daily_mobile_usage ORDER BY date DESC")
+    List<DailyMobileUsageEntity> getAllDailyMobileUsage();
+    
+    @Query("SELECT COUNT(*) FROM daily_mobile_usage")
+    int getDailyMobileUsageCount();
+    
+    @Query("SELECT MIN(date) FROM daily_mobile_usage")
+    String getOldestDailyMobileUsageDate();
+    
+    @Query("SELECT MAX(date) FROM daily_mobile_usage")
+    String getNewestDailyMobileUsageDate();
+    
+    @Query("DELETE FROM daily_mobile_usage WHERE date = :date")
+    void deleteDailyMobileUsage(String date);
+    
+    @Query("DELETE FROM daily_mobile_usage WHERE date < :cutoffDate")
+    void deleteOldDailyMobileUsage(String cutoffDate);
+    
+    @Query("DELETE FROM daily_mobile_usage")
+    void deleteAllDailyMobileUsage();
+    
+    // FIFO-like behavior: Keep only last 30 days
+    @Transaction
+    @Query("DELETE FROM daily_mobile_usage WHERE date < (SELECT date FROM daily_mobile_usage ORDER BY date DESC LIMIT 1 OFFSET 29)")
+    void maintainMax30DaysMobileUsage();
 }

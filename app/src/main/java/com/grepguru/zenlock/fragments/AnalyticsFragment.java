@@ -22,6 +22,7 @@ import com.grepguru.zenlock.data.entities.DailyStatsEntity;
 import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
 import com.grepguru.zenlock.data.entities.SessionEntity;
 import com.grepguru.zenlock.utils.UsageStatsPermissionManager;
+import com.grepguru.zenlock.utils.DailyMobileUsageManager;
 
 import java.util.List;
 import java.util.Date;
@@ -67,6 +68,7 @@ public class AnalyticsFragment extends Fragment {
     private TextView recentSessionsText;
     private LinearLayout recentSessionsContainer;
     private AnalyticsManager analyticsManager;
+    private DailyMobileUsageManager dailyMobileUsageManager;
     
     // Usage permission banner
     private TextView usagePermissionBanner;
@@ -105,6 +107,9 @@ public class AnalyticsFragment extends Fragment {
 
         // Initialize analytics manager
         analyticsManager = new AnalyticsManager(requireContext());
+        
+        // Initialize daily mobile usage manager
+        dailyMobileUsageManager = new DailyMobileUsageManager(requireContext());
 
         // Initialize UI components
         initializeViews(view);
@@ -115,6 +120,9 @@ public class AnalyticsFragment extends Fragment {
         // Setup usage permission banner
         setupUsagePermissionBanner();
 
+        // Store yesterday's mobile usage data (if not already stored)
+        storeYesterdayMobileUsage();
+        
         // Load and display analytics data
         loadAnalyticsData();
     }
@@ -291,6 +299,17 @@ public class AnalyticsFragment extends Fragment {
         });
     }
 
+    private void storeYesterdayMobileUsage() {
+        // Store yesterday's mobile usage data in background
+        new Thread(() -> {
+            try {
+                dailyMobileUsageManager.storeYesterdayMobileUsage();
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error storing yesterday's mobile usage", e);
+            }
+        }).start();
+    }
+    
     private void loadAnalyticsData() {
         // Check usage stats permission first
         checkUsageStatsPermission();
@@ -377,15 +396,23 @@ public class AnalyticsFragment extends Fragment {
                 combinedData.setData(barData);
                 combinedData.setData(lineData);
 
-                getActivity().runOnUiThread(() -> {
-                    weeklyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-                    weeklyCombinedChart.setData(combinedData);
-                    weeklyCombinedChart.invalidate();
-                });
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (weeklyCombinedChart != null && isAdded()) {
+                            weeklyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+                            weeklyCombinedChart.setData(combinedData);
+                            weeklyCombinedChart.invalidate();
+                        }
+                    });
+                }
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error loading weekly chart", e);
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> weeklyCombinedChart.setNoDataText("No data yet"));
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (weeklyCombinedChart != null && isAdded()) {
+                            weeklyCombinedChart.setNoDataText("No data yet");
+                        }
+                    });
                 }
             }
         }).start();
@@ -418,8 +445,11 @@ public class AnalyticsFragment extends Fragment {
                     c.add(java.util.Calendar.DAY_OF_YEAR, -i);
                     String ds = AnalyticsManager.formatDate(c.getTimeInMillis());
                     long focusMs = focusByDate.getOrDefault(ds, 0L);
-                    long mobileMs = analyticsManager.getMobileUsageTracker().getMobileUsageForDate(ds);
+                    // Use DailyMobileUsageManager for efficient data retrieval
+                    long mobileMs = dailyMobileUsageManager.getMobileUsageForDate(ds);
                     int x = 30 - i; // 0..30
+                    
+                    
                     focusEntries.add(new BarEntry(x, msToHoursFloat(focusMs)));
                     mobileEntries.add(new Entry(x, msToHoursFloat(mobileMs)));
                     labels.add(dayOfMonthLabel(c));
@@ -443,15 +473,23 @@ public class AnalyticsFragment extends Fragment {
                 combinedData.setData(barData);
                 combinedData.setData(lineData);
 
-                getActivity().runOnUiThread(() -> {
-                    monthlyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-                    monthlyCombinedChart.setData(combinedData);
-                    monthlyCombinedChart.invalidate();
-                });
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (monthlyCombinedChart != null && isAdded()) {
+                            monthlyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+                            monthlyCombinedChart.setData(combinedData);
+                            monthlyCombinedChart.invalidate();
+                        }
+                    });
+                }
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error loading monthly chart", e);
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> monthlyCombinedChart.setNoDataText("No data yet"));
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (monthlyCombinedChart != null && isAdded()) {
+                            monthlyCombinedChart.setNoDataText("No data yet");
+                        }
+                    });
                 }
             }
         }).start();
@@ -526,8 +564,9 @@ public class AnalyticsFragment extends Fragment {
                 // }
                 
                 // Update UI on main thread
-                if (getActivity() != null) {
+                if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return; // Double check fragment is still attached
                         // Update this week's focus time
                         if (thisWeekFocusTime != null) {
                             thisWeekFocusTime.setText(formatTime(thisWeekFocusMs / (60 * 1000)));
@@ -574,8 +613,9 @@ public class AnalyticsFragment extends Fragment {
                 long lastMonthMobileMs = analyticsManager.getLastMonthMobileUsage();
                 
                 // Update UI on main thread
-                if (getActivity() != null) {
+                if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return; // Double check fragment is still attached
                         // Update this month's focus time
                         if (thisMonthFocusTime != null) {
                             thisMonthFocusTime.setText(formatTime(thisMonthFocusMs / (60 * 1000)));
@@ -692,8 +732,9 @@ public class AnalyticsFragment extends Fragment {
                 // Log.d("AnalyticsFragment", "Refreshed mobile usage: " + mobileUsageMs + "ms");
                 
                 // Update UI on main thread
-                if (getActivity() != null) {
+                if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return; // Double check fragment is still attached
                         if (todayMobileUsage != null) {
                             if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
@@ -717,8 +758,9 @@ public class AnalyticsFragment extends Fragment {
                 Log.d("AnalyticsFragment", "Mobile usage from tracker: " + mobileUsageMs + "ms");
                 
                 // Update UI on main thread
-                if (getActivity() != null) {
+                if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return; // Double check fragment is still attached
                         // Update mobile usage
                         if (todayMobileUsage != null) {
                             if (mobileUsageMs > 0) {
@@ -743,8 +785,9 @@ public class AnalyticsFragment extends Fragment {
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error updating mobile usage", e);
                 // Show error state
-                if (getActivity() != null) {
+                if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return; // Double check fragment is still attached
                         if (todayMobileUsage != null) {
                             todayMobileUsage.setText("Error");
                         }
@@ -1158,6 +1201,15 @@ public class AnalyticsFragment extends Fragment {
     private boolean isSameDay(Date date1, Date date2) {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
         return fmt.format(date1).equals(fmt.format(date2));
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Cleanup the daily mobile usage manager
+        if (dailyMobileUsageManager != null) {
+            dailyMobileUsageManager.shutdown();
+        }
     }
 
 }

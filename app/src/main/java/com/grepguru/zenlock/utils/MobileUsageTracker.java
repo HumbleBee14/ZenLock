@@ -323,7 +323,7 @@ public class MobileUsageTracker {
      */
     public long getThisMonthMobileUsage() {
         if (!hasUsageStatsPermission()) {
-            Log.w(TAG, "Usage stats permission not granted");
+            // Log.w(TAG, "Usage stats permission not granted");
             return 0;
         }
         
@@ -348,7 +348,7 @@ public class MobileUsageTracker {
      */
     public long getLastMonthMobileUsage() {
         if (!hasUsageStatsPermission()) {
-            Log.w(TAG, "Usage stats permission not granted");
+            // Log.w(TAG, "Usage stats permission not granted");
             return 0;
         }
         
@@ -376,7 +376,7 @@ public class MobileUsageTracker {
      */
     public long getTodayMobileUsage() {
         if (!hasUsageStatsPermission()) {
-            Log.w(TAG, "Usage stats permission not granted");
+            // Log.w(TAG, "Usage stats permission not granted");
             return 0;
         }
         try {
@@ -408,10 +408,10 @@ public class MobileUsageTracker {
     
     /**
      * Get mobile usage for a specific date in milliseconds
+     * This method is used internally by DailyMobileUsageManager for storing data
      */
     public long getMobileUsageForDate(String date) {
         if (!hasUsageStatsPermission()) {
-            Log.w(TAG, "Usage stats permission not granted");
             return 0;
         }
         
@@ -419,13 +419,17 @@ public class MobileUsageTracker {
             // Parse date and set time range
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             Date targetDate = sdf.parse(date);
-            if (targetDate == null) return 0;
+            if (targetDate == null) {
+                return 0;
+            }
 
             Calendar cal = Calendar.getInstance(TimeZone.getDefault());
             cal.setTime(targetDate);
             long[] range = getDayTimestamps(cal);
-            long total = getTotalPhoneUsage(context, range[0], range[1]);
-            if (DEBUG_LOGS) Log.d(TAG, "Mobile usage for " + date + ": " + formatDuration(total));
+            
+            // For historical dates, use queryUsageStats with INTERVAL_DAILY to get actual daily usage
+            // instead of cumulative data from queryAndAggregateUsageStats
+            long total = getDailyUsageFromQueryStats(context, range[0], range[1], date);
             return total;
             
         } catch (Exception e) {
@@ -433,6 +437,44 @@ public class MobileUsageTracker {
             return 0;
         }
     }
+    
+    /**
+     * Get daily usage for historical dates using queryUsageStats with INTERVAL_DAILY
+     * This avoids cumulative data issues with queryAndAggregateUsageStats for historical dates
+     */
+    private long getDailyUsageFromQueryStats(Context context, long startTime, long endTime, String date) {
+        long totalTimeInMillis = 0L;
+        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        if (usageStatsManager == null) return 0L;
+
+        // Build exclusion sets
+        Set<String> keyboardPackages = getEnabledKeyboardPackages(context);
+        Set<String> launcherPackages = getLauncherPackages(context);
+        PackageManager pm = context.getPackageManager();
+        String ourPackage = context.getPackageName();
+
+        // Use queryUsageStats with INTERVAL_DAILY for historical dates to get actual daily usage
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+        
+        if (usageStatsList != null) {
+            for (UsageStats usageStats : usageStatsList) {
+                if (usageStats == null) continue;
+                
+                String packageName = usageStats.getPackageName();
+                long appUsageTime = usageStats.getTotalTimeInForeground();
+                
+                // Apply the same filtering as getTotalPhoneUsage
+                if (shouldExcludePackage(packageName, context, pm, keyboardPackages, launcherPackages, ourPackage)) {
+                    continue;
+                }
+                
+                totalTimeInMillis += appUsageTime;
+            }
+        }
+        return totalTimeInMillis;
+    }
+    
     
     /**
      * Get mobile usage for the current week in milliseconds
