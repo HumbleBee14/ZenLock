@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.grepguru.zenlock.model.*;
 import com.grepguru.zenlock.ui.adapter.*;
+import com.grepguru.zenlock.ui.timer.TimerType;
+import com.grepguru.zenlock.ui.timer.TimerFactory;
 import com.grepguru.zenlock.utils.AppUtils;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.EnhancedUnlockManager;
@@ -45,6 +47,10 @@ public class LockScreenActivity extends AppCompatActivity {
     private boolean wasManuallyUnlocked = false;
     private android.os.Handler autoHideHandler;
     private Runnable autoHideRunnable;
+    
+    // Timer system
+    private TimerType currentTimer;
+    private View timerContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,9 +131,12 @@ public class LockScreenActivity extends AppCompatActivity {
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
         LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
         ImageView pinVisibilityToggle = findViewById(R.id.pinVisibilityToggle);
-
+        
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
+        
+        // Initialize timer system
+        initializeTimer(remainingTimeMillis);
         if (remainingTimeMillis <= 0) {
             isLockScreenActive = false; // Reset flag before finishing
             finish();
@@ -376,7 +385,7 @@ public class LockScreenActivity extends AppCompatActivity {
         setupMotivationalQuotes();
 
         // Start Countdown Timer
-        startCountdownTimer(remainingTimeMillis , timerCountdown);
+        startCountdownTimer(remainingTimeMillis);
     }
 
     /*
@@ -596,6 +605,11 @@ public class LockScreenActivity extends AppCompatActivity {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
         
+        // Cleanup timer
+        if (currentTimer != null) {
+            currentTimer.cleanup();
+        }
+        
         // Cleanup unlock manager
         if (unlockManager != null) {
             unlockManager.cleanup();
@@ -680,7 +694,7 @@ public class LockScreenActivity extends AppCompatActivity {
             "Focus on being productive instead of busy.",
             "Success is not final, failure is not fatal: it is the courage to continue that counts.",
             "The future depends on what you do today.",
-            "Don't watch the clock; do what it does. Keep going.",
+            "Don't watch the clock, do what it does. Keep going.",
             "The only limit to our realization of tomorrow is our doubts of today.",
             "It always seems impossible until it's done.",
             "The way to get started is to quit talking and begin doing.",
@@ -698,21 +712,57 @@ public class LockScreenActivity extends AppCompatActivity {
         lockscreenMessage.setText(quotes[randomIndex]);
     }
 
-    private void startCountdownTimer(long remainingTimeMillis, TextView timerCountdown) {
+    /**
+     * Initialize the timer system based on user preferences
+     */
+    private void initializeTimer(long remainingTimeMs) {
+        // Get timer style from preferences
+        String timerStyle = preferences.getString("timer_style", "digital");
+        
+        // Create timer instance
+        currentTimer = TimerFactory.createTimer(this, timerStyle);
+        
+        // Get timer container and replace the default timer
+        timerContainer = findViewById(R.id.timerContainer);
+        if (timerContainer != null && timerContainer instanceof android.widget.FrameLayout) {
+            android.widget.FrameLayout frameLayout = (android.widget.FrameLayout) timerContainer;
+            frameLayout.removeAllViews();
+            frameLayout.addView(currentTimer.getTimerView());
+            
+            // Adjust container size based on timer type
+            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) frameLayout.getLayoutParams();
+            if ("circular".equals(timerStyle)) {
+                // Circular timer needs more space
+                params.width = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
+                params.height = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
+            } else {
+                // Digital timer needs even less space to reduce gap with quotes
+                params.width = (int) (300 * getResources().getDisplayMetrics().density); // Convert dp to px
+                params.height = (int) (100 * getResources().getDisplayMetrics().density); // Reduced from 120dp to 100dp
+            }
+            frameLayout.setLayoutParams(params);
+        }
+        
+        // Initialize the timer
+        currentTimer.initialize(remainingTimeMs);
+        
+        // Hide quotes for circular timer to save space
+        TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
+        if (lockscreenMessage != null) {
+            if ("circular".equals(timerStyle)) {
+                lockscreenMessage.setVisibility(View.GONE);
+            } else {
+                lockscreenMessage.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+    
+    private void startCountdownTimer(long remainingTimeMillis) {
         countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long totalMinutes = (millisUntilFinished / 1000) / 60;
-                long seconds = (millisUntilFinished / 1000) % 60;
-                
-                if (totalMinutes >= 60) {
-                    // Show hours and minutes (HH:MM format)
-                    long hours = totalMinutes / 60;
-                    long minutes = totalMinutes % 60;
-                    timerCountdown.setText(String.format("%02d:%02d", hours, minutes));
-                } else {
-                    // Show minutes and seconds (MM:SS format)
-                    timerCountdown.setText(String.format("%02d:%02d", totalMinutes, seconds));
+                if (currentTimer != null) {
+                    currentTimer.updateTimer(remainingTimeMillis, millisUntilFinished);
                 }
             }
 
