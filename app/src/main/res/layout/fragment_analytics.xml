@@ -37,61 +37,24 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Coming Soon Banner -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/comingSoonBanner"
+        <!-- Usage Permission Banner (copied from SMS permission banner) -->
+        <TextView
+            android:id="@+id/usagePermissionBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@color/warningBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/analyticsSubtitle">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🚧 Analytics Coming Soon!"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/warningText"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Full analytics will be available in future updates"
-                        android:textSize="14sp"
-                        android:textColor="@color/warningText"
-                        android:layout_marginTop="4dp"/>
-
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/dismissAnalyticsBanner"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
-                    android:layout_marginStart="12dp"
-                    android:contentDescription="Dismiss banner"/>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+            android:visibility="gone"
+            android:text="⚠️ Usage access permission required. Click here to grant permission."
+            android:textSize="14sp"
+            android:textColor="@android:color/holo_orange_dark"
+            android:background="@drawable/modern_input_background"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toBottomOf="@id/analyticsSubtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Today's Focus Dashboard Card -->
         <androidx.cardview.widget.CardView
@@ -100,10 +63,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="4dp"
+            app:layout_constraintTop_toBottomOf="@id/usagePermissionBanner"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
-            app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/comingSoonBanner">
+            app:cardElevation="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -136,9 +99,9 @@
                         android:id="@+id/todayTrendIndicator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="↗️ +15%"
+                        android:text="📊 vs Yesterday"
                         android:textSize="12sp"
-                        android:textColor="@color/success"
+                        android:textColor="@color/textSecondary"
                         android:background="@drawable/modern_card_background"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
@@ -165,10 +128,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -201,10 +165,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0m"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/secondary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -237,10 +203,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="85"
-                            android:textSize="32sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="@color/success"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -263,55 +230,14 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Streaks and Achievements Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/streaksCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="4dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
+                <!-- Mobile Usage and Time Saved Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_analytics"
-                        app:tint="@color/success"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Streaks &amp; Achievements"
-                        style="@style/ModernText.Subheading"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/modern_card_background"
+                    android:padding="12dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -321,19 +247,18 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/currentStreak"
+                            android:id="@+id/todayMobileUsage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5"
-                            android:textSize="28sp"
+                            android:text="0m"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/success"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/textPrimary"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Current Streak"
+                            android:text="Phone Usage"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
@@ -347,76 +272,22 @@
                         android:gravity="center">
 
                         <TextView
-                            android:id="@+id/bestStreak"
+                            android:id="@+id/todayTimeSaved"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="12"
-                            android:textSize="28sp"
+                            android:text="0m"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/success"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Best Streak"
+                            android:text="Time Saved"
                             style="@style/ModernText.Caption"
                             android:textColor="@color/textSecondary"/>
 
                     </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/weeklyGoal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="75%"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/secondary"
-                            android:fontFamily="sans-serif-medium"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Weekly Goal"
-                            style="@style/ModernText.Caption"
-                            android:textColor="@color/textSecondary"/>
-
-                        <ProgressBar
-                            android:id="@+id/weeklyGoalProgress"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="50dp"
-                            android:layout_height="4dp"
-                            android:layout_marginTop="4dp"
-                            android:progress="75"
-                            android:max="100"
-                            android:progressTint="@color/secondary"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Achievement Level -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Focus Level: Intermediate"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textSecondary"/>
 
                 </LinearLayout>
 
@@ -424,7 +295,8 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Focus Trends Expandable Card -->
+
+        <!-- Weekly Insights Trends Expandable Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/focusTrendsCard"
             android:layout_width="match_parent"
@@ -434,7 +306,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
             app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/streaksCard">
+            app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -456,7 +328,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Screen Time Insights"
+                        android:text="Weekly Insights"
                         style="@style/ModernText.Subheading"/>
 
                     <ImageView
@@ -474,104 +346,214 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:layout_marginTop="16dp">
 
                     <!-- Daily vs Weekly Comparison -->
+
+                    <!-- Focus Time Card -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="This Week vs Last Week"
-                            style="@style/ModernText.Body"
-                            android:textColor="@color/textPrimary"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="↗️ +23%"
-                            android:textSize="14sp"
-                            android:textColor="@color/success"
-                            android:background="@drawable/modern_card_background"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingBottom="4dp"/>
-
-                    </LinearLayout>
-
-                    <!-- Screen Lock Statistics -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Screen Time Saved"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textPrimary"
-                        android:layout_marginBottom="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+                        android:orientation="vertical"
+                        android:background="@drawable/modern_card_background"
+                        android:padding="16dp"
+                        android:layout_marginBottom="12dp">
 
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/modern_card_background"
-                            android:padding="12dp"
-                            android:layout_marginEnd="8dp">
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_timer"
+                                app:tint="@color/secondary"
+                                android:layout_marginEnd="8dp"/>
 
                             <TextView
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="3.2h"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
+                                android:layout_weight="1"
+                                android:text="Focus Time"
+                                style="@style/ModernText.Body"
                                 android:textColor="@color/textPrimary"/>
 
                             <TextView
+                                android:id="@+id/weeklyFocusChange"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Today"
-                                style="@style/ModernText.Caption"
-                                android:textColor="@color/textSecondary"/>
+                                android:text="--"
+                                android:textSize="12sp"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/modern_card_background"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"/>
 
                         </LinearLayout>
 
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:background="@drawable/modern_card_background"
-                            android:padding="12dp"
-                            android:layout_marginStart="8dp">
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/thisWeekFocusTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/secondary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Week"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/lastWeekFocusTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Last Week"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Mobile Usage Card -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/modern_card_background"
+                        android:padding="16dp"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_phone"
+                                app:tint="@color/textPrimary"
+                                android:layout_marginEnd="8dp"/>
 
                             <TextView
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="22.5h"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
+                                android:layout_weight="1"
+                                android:text="Phone Usage"
+                                style="@style/ModernText.Body"
                                 android:textColor="@color/textPrimary"/>
 
                             <TextView
+                                android:id="@+id/weeklyMobileChange"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="This Week"
-                                style="@style/ModernText.Caption"
-                                android:textColor="@color/textSecondary"/>
+                                android:text="--"
+                                android:textSize="12sp"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/modern_card_background"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/thisWeekMobileUsage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Week"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/lastWeekMobileUsage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Last Week"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -586,209 +568,299 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <!-- Chart Container with reference line -->
-                    <RelativeLayout
+                    <!-- Weekly Combined Chart (Bars = Focus, Line = Mobile) using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/weeklyCombinedChart"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
+                        android:layout_height="160dp"
+                        android:layout_marginTop="8dp"/>
+
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Monthly Insights Expandable Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/monthlyTrendsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="12dp"
+            app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <LinearLayout
+                    android:id="@+id/monthlyTrendsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Monthly Insights"
+                        style="@style/ModernText.Subheading"/>
+
+                    <ImageView
+                        android:id="@+id/monthlyTrendsExpandIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/textSecondary"
+                        android:rotation="180"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/monthlyTrendsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    android:layout_marginTop="16dp">
+
+                    <!-- Monthly vs Last Month Comparison -->
+
+                    <!-- Focus Time Card -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:background="@drawable/modern_card_background"
-                        android:padding="16dp">
+                        android:padding="16dp"
+                        android:layout_marginBottom="12dp">
 
-                        <!-- Target reference line (dotted) -->
-                        <View
-                            android:id="@+id/targetReferenceLine"
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_centerVertical="true"
-                            android:background="@color/textSecondary"
-                            android:alpha="0.5"/>
-
-                        <!-- Chart bars container -->
                         <LinearLayout
-                            android:id="@+id/chartBarsContainer"
                             android:layout_width="match_parent"
-                            android:layout_height="80dp"
+                            android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:gravity="bottom"
-                            android:layout_centerInParent="true">
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
 
-                            <!-- Day 1 -->
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_timer"
+                                app:tint="@color/secondary"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Focus Time"
+                                style="@style/ModernText.Body"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:id="@+id/monthlyFocusChange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textSize="12sp"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/modern_card_background"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
+                                android:orientation="vertical">
 
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="25dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
                                 <TextView
+                                    android:id="@+id/thisMonthFocusTime"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="8/26"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 2 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="45dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/27"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 3 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="30dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/28"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 4 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="55dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/29"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 5 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="35dp" 
-                                    android:background="@color/warning"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/30"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 6 -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal"
-                                android:layout_marginEnd="4dp">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="60dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="8/31"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textSecondary"
-                                    android:rotation="-15"/>
-
-                            </LinearLayout>
-
-                            <!-- Day 7 (Today) -->
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center_horizontal">
-
-                                <View 
-                                    android:layout_width="12dp" 
-                                    android:layout_height="70dp" 
-                                    android:background="@color/success"
-                                    android:layout_marginBottom="4dp"/>
-                                
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="9/01"
-                                    android:textSize="9sp"
-                                    android:textColor="@color/textPrimary"
+                                    android:text="0m"
+                                    android:textSize="18sp"
                                     android:textStyle="bold"
-                                    android:rotation="-15"/>
+                                    android:textColor="@color/secondary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Month"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/lastMonthFocusTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Last Month"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
 
                             </LinearLayout>
 
                         </LinearLayout>
 
-                    </RelativeLayout>
+                    </LinearLayout>
+
+                    <!-- Mobile Usage Card -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/modern_card_background"
+                        android:padding="16dp"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_phone"
+                                app:tint="@color/textPrimary"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Phone Usage"
+                                style="@style/ModernText.Body"
+                                android:textColor="@color/textPrimary"/>
+
+                            <TextView
+                                android:id="@+id/monthlyMobileChange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textSize="12sp"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/modern_card_background"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/thisMonthMobileUsage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Month"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/lastMonthMobileUsage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0m"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/textPrimary"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Last Month"
+                                    style="@style/ModernText.Caption"
+                                    android:textColor="@color/textSecondary"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Monthly Line Chart -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monthly Focus Trend"
+                        style="@style/ModernText.Body"
+                        android:textColor="@color/textPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Monthly Combined Chart (Bars = Focus, Line = Mobile) using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/monthlyCombinedChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="8dp"/>
 
                 </LinearLayout>
 
@@ -806,7 +878,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="16dp"
             app:cardElevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/focusTrendsCard">
+            app:layout_constraintTop_toBottomOf="@id/monthlyTrendsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"

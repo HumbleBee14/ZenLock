@@ -32,7 +32,7 @@ import com.grepguru.zenlock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
-    private SwitchCompat superStrictModeToggle, quotesToggle;
+    private SwitchCompat superStrictModeToggle, quotesToggle, circularTimerToggle;
     private SwitchCompat persistentNotificationToggle, autoRestartToggle;
     
     // Individual default app toggles
@@ -71,6 +71,7 @@ public class SettingsFragment extends Fragment {
 
         superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
         quotesToggle = view.findViewById(R.id.quotesToggle);
+        circularTimerToggle = view.findViewById(R.id.circularTimerToggle);
         
         // Security settings
         persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
@@ -119,6 +120,7 @@ public class SettingsFragment extends Fragment {
         // Load existing settings
         superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
+        circularTimerToggle.setChecked("circular".equals(preferences.getString("timer_style", "digital")));
         
         // Load individual default app settings
         phoneAppToggle.setChecked(preferences.getBoolean("allow_phone_app", true));
@@ -179,6 +181,13 @@ public class SettingsFragment extends Fragment {
         quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("show_quotes", isChecked);
+            editor.apply();
+        });
+
+        // Toggle Circular Timer
+        circularTimerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("timer_style", isChecked ? "circular" : "digital");
             editor.apply();
         });
         

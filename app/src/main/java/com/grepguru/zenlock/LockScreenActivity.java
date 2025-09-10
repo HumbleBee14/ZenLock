@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.grepguru.zenlock.model.*;
 import com.grepguru.zenlock.ui.adapter.*;
+import com.grepguru.zenlock.ui.timer.TimerType;
+import com.grepguru.zenlock.ui.timer.TimerFactory;
 import com.grepguru.zenlock.utils.AppUtils;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.EnhancedUnlockManager;
@@ -43,6 +45,12 @@ public class LockScreenActivity extends AppCompatActivity {
     private EnhancedUnlockManager unlockManager;
     private android.os.CountDownTimer countDownTimer;
     private boolean wasManuallyUnlocked = false;
+    private android.os.Handler autoHideHandler;
+    private Runnable autoHideRunnable;
+    
+    // Timer system
+    private TimerType currentTimer;
+    private View timerContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,12 +127,16 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView timerCountdown = findViewById(R.id.timerCountdown);
         //  TextView lockMessage = findViewById(R.id.lockscreenMessage);
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
         LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
         ImageView pinVisibilityToggle = findViewById(R.id.pinVisibilityToggle);
-
+        
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
+        
+        // Initialize timer system
+        initializeTimer(remainingTimeMillis);
         if (remainingTimeMillis <= 0) {
             isLockScreenActive = false; // Reset flag before finishing
             finish();
@@ -340,6 +352,17 @@ public class LockScreenActivity extends AppCompatActivity {
             unlockManager.showUnlockDialog();
         });
 
+        // Set up unlock arrow click listener
+        unlockArrow.setOnClickListener(v -> {
+            showUnlockButton();
+        });
+
+        // Set up tap-to-reveal functionality on main content
+        View mainContentContainer = findViewById(R.id.mainContentContainer);
+        mainContentContainer.setOnClickListener(v -> {
+            showUnlockButton();
+        });
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -347,8 +370,8 @@ public class LockScreenActivity extends AppCompatActivity {
                 if (unlockInputsContainer.getVisibility() == View.VISIBLE) {
                     // Hide unlock inputs and show main lock screen
                     unlockInputsContainer.setVisibility(View.GONE);
-                    unlockPromptButton.setVisibility(View.VISIBLE);
                     expandButtonContainer.setVisibility(View.VISIBLE);
+                    hideUnlockButton(); // Hide unlock button and show arrow
 
                     pinInput.setText("");
                 } else {
@@ -362,7 +385,7 @@ public class LockScreenActivity extends AppCompatActivity {
         setupMotivationalQuotes();
 
         // Start Countdown Timer
-        startCountdownTimer(remainingTimeMillis , timerCountdown);
+        startCountdownTimer(remainingTimeMillis);
     }
 
     /*
@@ -510,6 +533,62 @@ public class LockScreenActivity extends AppCompatActivity {
         // The onPause/onStop methods will handle legitimate cases where user tries to leave
     }
 
+    /**
+     * Show unlock button with auto-hide after 5 seconds
+     */
+    private void showUnlockButton() {
+        Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        
+        // Cancel any existing auto-hide timer
+        if (autoHideHandler != null && autoHideRunnable != null) {
+            autoHideHandler.removeCallbacks(autoHideRunnable);
+        }
+        
+        // Show unlock button with animation
+        unlockPromptButton.setVisibility(View.VISIBLE);
+        unlockPromptButton.animate()
+            .alpha(1f)
+            .setDuration(300)
+            .start();
+        
+        // Hide arrow
+        unlockArrow.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction(() -> unlockArrow.setVisibility(View.GONE))
+            .start();
+        
+        // Set up auto-hide after 5 seconds
+        autoHideHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        autoHideRunnable = () -> {
+            hideUnlockButton();
+        };
+        autoHideHandler.postDelayed(autoHideRunnable, 5000); // 5 seconds
+    }
+    
+    /**
+     * Hide unlock button and show arrow
+     */
+    private void hideUnlockButton() {
+        Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        
+        // Hide unlock button with animation
+        unlockPromptButton.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction(() -> unlockPromptButton.setVisibility(View.GONE))
+            .start();
+        
+        // Show arrow
+        unlockArrow.setVisibility(View.VISIBLE);
+        unlockArrow.animate()
+            .alpha(0.6f)
+            .setDuration(300)
+            .start();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -519,6 +598,16 @@ public class LockScreenActivity extends AppCompatActivity {
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
             countDownTimer.cancel();
+        }
+        
+        // Cancel auto-hide timer
+        if (autoHideHandler != null && autoHideRunnable != null) {
+            autoHideHandler.removeCallbacks(autoHideRunnable);
+        }
+        
+        // Cleanup timer
+        if (currentTimer != null) {
+            currentTimer.cleanup();
         }
         
         // Cleanup unlock manager
@@ -605,7 +694,7 @@ public class LockScreenActivity extends AppCompatActivity {
             "Focus on being productive instead of busy.",
             "Success is not final, failure is not fatal: it is the courage to continue that counts.",
             "The future depends on what you do today.",
-            "Don't watch the clock; do what it does. Keep going.",
+            "Don't watch the clock, do what it does. Keep going.",
             "The only limit to our realization of tomorrow is our doubts of today.",
             "It always seems impossible until it's done.",
             "The way to get started is to quit talking and begin doing.",
@@ -623,13 +712,58 @@ public class LockScreenActivity extends AppCompatActivity {
         lockscreenMessage.setText(quotes[randomIndex]);
     }
 
-    private void startCountdownTimer(long remainingTimeMillis, TextView timerCountdown) {
+    /**
+     * Initialize the timer system based on user preferences
+     */
+    private void initializeTimer(long remainingTimeMs) {
+        // Get timer style from preferences
+        String timerStyle = preferences.getString("timer_style", "digital");
+        
+        // Create timer instance
+        currentTimer = TimerFactory.createTimer(this, timerStyle);
+        
+        // Get timer container and replace the default timer
+        timerContainer = findViewById(R.id.timerContainer);
+        if (timerContainer != null && timerContainer instanceof android.widget.FrameLayout) {
+            android.widget.FrameLayout frameLayout = (android.widget.FrameLayout) timerContainer;
+            frameLayout.removeAllViews();
+            frameLayout.addView(currentTimer.getTimerView());
+            
+            // Adjust container size based on timer type
+            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) frameLayout.getLayoutParams();
+            if ("circular".equals(timerStyle)) {
+                // Circular timer needs more space
+                params.width = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
+                params.height = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
+            } else {
+                // Digital timer needs even less space to reduce gap with quotes
+                params.width = (int) (300 * getResources().getDisplayMetrics().density); // Convert dp to px
+                params.height = (int) (100 * getResources().getDisplayMetrics().density); // Reduced from 120dp to 100dp
+            }
+            frameLayout.setLayoutParams(params);
+        }
+        
+        // Initialize the timer
+        currentTimer.initialize(remainingTimeMs);
+        
+        // Hide quotes for circular timer to save space
+        TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
+        if (lockscreenMessage != null) {
+            if ("circular".equals(timerStyle)) {
+                lockscreenMessage.setVisibility(View.GONE);
+            } else {
+                lockscreenMessage.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+    
+    private void startCountdownTimer(long remainingTimeMillis) {
         countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long minutes = (millisUntilFinished / 1000) / 60;
-                long seconds = (millisUntilFinished / 1000) % 60;
-                timerCountdown.setText(String.format("%02d:%02d", minutes, seconds));
+                if (currentTimer != null) {
+                    currentTimer.updateTimer(remainingTimeMillis, millisUntilFinished);
+                }
             }
 
             @Override
