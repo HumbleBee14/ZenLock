@@ -627,9 +627,18 @@ public class LockScreenActivity extends AppCompatActivity {
         countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long minutes = (millisUntilFinished / 1000) / 60;
+                long totalMinutes = (millisUntilFinished / 1000) / 60;
                 long seconds = (millisUntilFinished / 1000) % 60;
-                timerCountdown.setText(String.format("%02d:%02d", minutes, seconds));
+                
+                if (totalMinutes >= 60) {
+                    // Show hours and minutes (HH:MM format)
+                    long hours = totalMinutes / 60;
+                    long minutes = totalMinutes % 60;
+                    timerCountdown.setText(String.format("%02d:%02d", hours, minutes));
+                } else {
+                    // Show minutes and seconds (MM:SS format)
+                    timerCountdown.setText(String.format("%02d:%02d", totalMinutes, seconds));
+                }
             }
 
             @Override
