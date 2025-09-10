@@ -329,17 +329,31 @@ public class AnalyticsFragment extends Fragment {
         chart.setDrawGridBackground(false);
         chart.setDrawBarShadow(false);
         chart.setHighlightFullBarEnabled(false);
+        
+        // Set background color for better text visibility
+        chart.setBackgroundColor(requireContext().getColor(R.color.surface));
+        
         Description d = new Description();
         d.setText("");
         chart.setDescription(d);
         chart.getAxisRight().setEnabled(false);
         chart.getLegend().setEnabled(false);
+        
+        // Configure X-axis for better text visibility
         XAxis x = chart.getXAxis();
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setDrawGridLines(false);
         x.setGranularity(1f);
         x.setLabelCount(Math.min(maxLabels, 8), false);
+        x.setTextColor(requireContext().getColor(R.color.textPrimary));
+        x.setTextSize(12f);
+        
+        // Configure Y-axis for better text visibility
         chart.getAxisLeft().setDrawGridLines(true);
+        chart.getAxisLeft().setTextColor(requireContext().getColor(R.color.textPrimary));
+        chart.getAxisLeft().setTextSize(12f);
+        chart.getAxisLeft().setGridColor(requireContext().getColor(R.color.textSecondary));
+        chart.getAxisLeft().setAxisLineColor(requireContext().getColor(R.color.textSecondary));
     }
 
     private void loadWeeklyChart() {
