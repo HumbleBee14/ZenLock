@@ -166,6 +166,18 @@ public class AnalyticsRepository {
             return 0L;
         }
     }
+
+    /**
+     * Get daily stats between two dates inclusive, synchronously (UI should call from background thread)
+     */
+    public List<DailyStatsEntity> getDailyStatsForDateRangeSync(String startDate, String endDate) {
+        try {
+            return analyticsDao.getDailyStatsForDateRangeSync(startDate, endDate);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting daily stats for date range", e);
+            return java.util.Collections.emptyList();
+        }
+    }
     
     // =====================================
     // WEEKLY STATS OPERATIONS

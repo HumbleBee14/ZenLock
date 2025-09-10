@@ -568,11 +568,11 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <!-- Weekly Bar Chart using MPAndroidChart -->
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/weeklyBarChart"
+                    <!-- Weekly Combined Chart (Bars = Focus, Line = Mobile) using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/weeklyCombinedChart"
                         android:layout_width="match_parent"
-                        android:layout_height="140dp"
+                        android:layout_height="160dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/modern_card_background"/>
 
@@ -856,11 +856,11 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="8dp"/>
 
-                    <!-- Monthly Line Chart using MPAndroidChart -->
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/monthlyLineChart"
+                    <!-- Monthly Combined Chart (Bars = Focus, Line = Mobile) using MPAndroidChart -->
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/monthlyCombinedChart"
                         android:layout_width="match_parent"
-                        android:layout_height="140dp"
+                        android:layout_height="180dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/modern_card_background"/>
 

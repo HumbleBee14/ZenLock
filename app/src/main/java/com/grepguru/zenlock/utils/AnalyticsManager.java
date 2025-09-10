@@ -65,6 +65,16 @@ public class AnalyticsManager {
     // =====================================
     // SESSION LIFECYCLE METHODS
     // =====================================
+
+    // ---- Chart helpers ----
+    public List<DailyStatsEntity> getDailyStatsRangeSync(String startDate, String endDate) {
+        return repository.getDailyStatsForDateRangeSync(startDate, endDate);
+    }
+
+    public static String formatDate(long tsMillis) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        return sdf.format(new Date(tsMillis));
+    }
     
     /**
      * Start a new focus session

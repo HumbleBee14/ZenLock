@@ -31,6 +31,17 @@ import android.util.Log;
 import android.widget.Toast;
 import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 public class AnalyticsFragment extends Fragment {
 
@@ -75,6 +86,10 @@ public class AnalyticsFragment extends Fragment {
     private TextView lastMonthPhoneUsage;
     private TextView monthlyFocusChange;
     private TextView monthlyMobileChange;
+
+    // Charts
+    private CombinedChart weeklyCombinedChart;
+    private CombinedChart monthlyCombinedChart;
 
     public AnalyticsFragment() {}
 
@@ -162,6 +177,7 @@ public class AnalyticsFragment extends Fragment {
         lastWeekPhoneUsage = view.findViewById(R.id.lastWeekMobileUsage);
         weeklyFocusChange = view.findViewById(R.id.weeklyFocusChange);
         weeklyMobileChange = view.findViewById(R.id.weeklyMobileChange);
+    weeklyCombinedChart = view.findViewById(R.id.weeklyCombinedChart);
         
         // Monthly stats views
         thisMonthFocusTime = view.findViewById(R.id.thisMonthFocusTime);
@@ -170,6 +186,10 @@ public class AnalyticsFragment extends Fragment {
         lastMonthPhoneUsage = view.findViewById(R.id.lastMonthMobileUsage);
         monthlyFocusChange = view.findViewById(R.id.monthlyFocusChange);
         monthlyMobileChange = view.findViewById(R.id.monthlyMobileChange);
+    monthlyCombinedChart = view.findViewById(R.id.monthlyCombinedChart);
+
+    setupChart(weeklyCombinedChart, /*maxLabels*/8);
+    setupChart(monthlyCombinedChart, /*maxLabels*/31);
     }
 
     private void setupExpandableSections() {
@@ -279,8 +299,180 @@ public class AnalyticsFragment extends Fragment {
         loadTodayStats();
         loadWeeklyStats();
         loadMonthlyStats();
+        loadWeeklyChart();
+        loadMonthlyChart();
         loadRecentSessions();
     }
+
+    // ---- Charts ----
+    private void setupChart(CombinedChart chart, int maxLabels) {
+        if (chart == null) return;
+        chart.setDrawGridBackground(false);
+        chart.setDrawBarShadow(false);
+        chart.setHighlightFullBarEnabled(false);
+        Description d = new Description();
+        d.setText("");
+        chart.setDescription(d);
+        chart.getAxisRight().setEnabled(false);
+        chart.getLegend().setEnabled(false);
+        XAxis x = chart.getXAxis();
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setDrawGridLines(false);
+        x.setGranularity(1f);
+        x.setLabelCount(Math.min(maxLabels, 8), false);
+        chart.getAxisLeft().setDrawGridLines(true);
+    }
+
+    private void loadWeeklyChart() {
+        if (weeklyCombinedChart == null) return;
+        new Thread(() -> {
+            try {
+                // Rolling window: today (index 0) back to previous 7 days => total 8 points
+                long now = System.currentTimeMillis();
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                String endDate = AnalyticsManager.formatDate(now);
+                cal.add(java.util.Calendar.DAY_OF_YEAR, -7);
+                String startDate = AnalyticsManager.formatDate(cal.getTimeInMillis());
+
+                List<com.grepguru.zenlock.data.entities.DailyStatsEntity> days = analyticsManager.getDailyStatsRangeSync(startDate, endDate);
+                // Build a map date->focusMs for quick lookup
+                java.util.Map<String, Long> focusByDate = new java.util.HashMap<>();
+                for (com.grepguru.zenlock.data.entities.DailyStatsEntity d : days) {
+                    focusByDate.put(d.date, d.totalFocusTime);
+                }
+
+                // Prepare entries (X from 0..7 where 0=today)
+                List<BarEntry> focusEntries = new java.util.ArrayList<>();
+                List<Entry> mobileEntries = new java.util.ArrayList<>();
+                List<String> labels = new java.util.ArrayList<>();
+
+                java.util.Calendar walk = java.util.Calendar.getInstance();
+                for (int i = 7; i >= 0; i--) {
+                    java.util.Calendar c = (java.util.Calendar) walk.clone();
+                    c.add(java.util.Calendar.DAY_OF_YEAR, -i);
+                    String ds = AnalyticsManager.formatDate(c.getTimeInMillis());
+                    long focusMs = focusByDate.getOrDefault(ds, 0L);
+                    long mobileMs = analyticsManager.getMobileUsageTracker().getMobileUsageForDate(ds);
+                    int x = 7 - i; // 0..7
+                    focusEntries.add(new BarEntry(x, msToHoursFloat(focusMs))); // bars in hours
+                    mobileEntries.add(new Entry(x, msToHoursFloat(mobileMs)));  // line in hours
+                    labels.add(shortDayLabel(c));
+                }
+
+                BarDataSet barSet = new BarDataSet(focusEntries, "Focus (h)");
+                barSet.setColor(requireContext().getColor(R.color.secondary)); // orange-like
+                barSet.setDrawValues(false);
+                BarData barData = new BarData(barSet);
+                barData.setBarWidth(0.45f);
+
+                LineDataSet lineSet = new LineDataSet(mobileEntries, "Mobile (h)");
+                lineSet.setColor(requireContext().getColor(R.color.warning));
+                lineSet.setCircleColor(requireContext().getColor(R.color.warning));
+                lineSet.setLineWidth(1.8f);
+                lineSet.setDrawValues(false);
+                lineSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                LineData lineData = new LineData(lineSet);
+
+                CombinedData combinedData = new CombinedData();
+                combinedData.setData(barData);
+                combinedData.setData(lineData);
+
+                getActivity().runOnUiThread(() -> {
+                    weeklyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+                    weeklyCombinedChart.setData(combinedData);
+                    weeklyCombinedChart.invalidate();
+                });
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error loading weekly chart", e);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> weeklyCombinedChart.setNoDataText("No data yet"));
+                }
+            }
+        }).start();
+    }
+
+    private void loadMonthlyChart() {
+        if (monthlyCombinedChart == null) return;
+        new Thread(() -> {
+            try {
+                // Rolling window: today back 30 days => 31 points
+                long now = System.currentTimeMillis();
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                String endDate = AnalyticsManager.formatDate(now);
+                cal.add(java.util.Calendar.DAY_OF_YEAR, -30);
+                String startDate = AnalyticsManager.formatDate(cal.getTimeInMillis());
+
+                List<com.grepguru.zenlock.data.entities.DailyStatsEntity> days = analyticsManager.getDailyStatsRangeSync(startDate, endDate);
+                java.util.Map<String, Long> focusByDate = new java.util.HashMap<>();
+                for (com.grepguru.zenlock.data.entities.DailyStatsEntity d : days) {
+                    focusByDate.put(d.date, d.totalFocusTime);
+                }
+
+                List<BarEntry> focusEntries = new java.util.ArrayList<>();
+                List<Entry> mobileEntries = new java.util.ArrayList<>();
+                List<String> labels = new java.util.ArrayList<>();
+
+                java.util.Calendar walk = java.util.Calendar.getInstance();
+                for (int i = 30; i >= 0; i--) {
+                    java.util.Calendar c = (java.util.Calendar) walk.clone();
+                    c.add(java.util.Calendar.DAY_OF_YEAR, -i);
+                    String ds = AnalyticsManager.formatDate(c.getTimeInMillis());
+                    long focusMs = focusByDate.getOrDefault(ds, 0L);
+                    long mobileMs = analyticsManager.getMobileUsageTracker().getMobileUsageForDate(ds);
+                    int x = 30 - i; // 0..30
+                    focusEntries.add(new BarEntry(x, msToHoursFloat(focusMs)));
+                    mobileEntries.add(new Entry(x, msToHoursFloat(mobileMs)));
+                    labels.add(dayOfMonthLabel(c));
+                }
+
+                BarDataSet barSet = new BarDataSet(focusEntries, "Focus (h)");
+                barSet.setColor(requireContext().getColor(R.color.secondary));
+                barSet.setDrawValues(false);
+                BarData barData = new BarData(barSet);
+                barData.setBarWidth(0.4f);
+
+                LineDataSet lineSet = new LineDataSet(mobileEntries, "Mobile (h)");
+                lineSet.setColor(requireContext().getColor(R.color.warning));
+                lineSet.setCircleColor(requireContext().getColor(R.color.warning));
+                lineSet.setLineWidth(1.6f);
+                lineSet.setDrawValues(false);
+                lineSet.setMode(LineDataSet.Mode.LINEAR);
+                LineData lineData = new LineData(lineSet);
+
+                CombinedData combinedData = new CombinedData();
+                combinedData.setData(barData);
+                combinedData.setData(lineData);
+
+                getActivity().runOnUiThread(() -> {
+                    monthlyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+                    monthlyCombinedChart.setData(combinedData);
+                    monthlyCombinedChart.invalidate();
+                });
+            } catch (Exception e) {
+                Log.e("AnalyticsFragment", "Error loading monthly chart", e);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> monthlyCombinedChart.setNoDataText("No data yet"));
+                }
+            }
+        }).start();
+    }
+
+    private static class IndexAxisValueFormatter extends ValueFormatter {
+        private final List<String> labels;
+        IndexAxisValueFormatter(List<String> labels) { this.labels = labels; }
+        @Override public String getFormattedValue(float value) {
+            int idx = (int) value;
+            return (idx >= 0 && idx < labels.size()) ? labels.get(idx) : "";
+        }
+    }
+
+    private float msToHoursFloat(long ms) { return (float)(ms / 3600000.0); }
+    private String shortDayLabel(java.util.Calendar c) {
+        String[] days = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+        int dow = c.get(java.util.Calendar.DAY_OF_WEEK); // 1..7
+        return days[dow - 1];
+    }
+    private String dayOfMonthLabel(java.util.Calendar c) { return String.valueOf(c.get(java.util.Calendar.DAY_OF_MONTH)); }
     
     private void checkUsageStatsPermission() {
         // Single permission check to avoid redundant calls
