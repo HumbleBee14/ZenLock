@@ -488,7 +488,7 @@ public class AnalyticsFragment extends Fragment {
         new Thread(() -> {
             try {
                 long mobileUsageMs = analyticsManager.getMobileUsageTracker().getTodayMobileUsage();
-                Log.d("AnalyticsFragment", "Refreshed mobile usage: " + mobileUsageMs + "ms");
+                // Log.d("AnalyticsFragment", "Refreshed mobile usage: " + mobileUsageMs + "ms");
                 
                 // Update UI on main thread
                 if (getActivity() != null) {

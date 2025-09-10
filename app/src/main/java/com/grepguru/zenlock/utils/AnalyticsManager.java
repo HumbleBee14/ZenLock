@@ -475,7 +475,7 @@ public class AnalyticsManager {
     public void updateTodayMobileUsageIfAvailable() {
         // No need to store mobile usage in database - always fetch fresh
         // This method is kept for compatibility but does nothing
-        Log.d(TAG, "Mobile usage will be fetched fresh from UsageStatsManager when needed");
+        // Log.d(TAG, "Mobile usage will be fetched fresh from UsageStatsManager when needed");
     }
     
     /**
@@ -492,7 +492,7 @@ public class AnalyticsManager {
      * Get detailed usage breakdown for debugging discrepancies
      */
     public String getDetailedUsageBreakdown() {
-        return mobileUsageTracker.getDetailedUsageInfo();
+    return "Detailed usage debug is disabled in production builds.";
     }
     
     

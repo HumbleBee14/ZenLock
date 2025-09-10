@@ -131,29 +131,38 @@ public class MobileUsageTracker {
                 UsageStats usageStats = entry.getValue();
                 if (usageStats == null || packageName == null) continue;
 
-                // Quick pattern exclusions for overlays/services that inflate totals
-                if (packageName.equals(ourPackage)) continue; // exclude our app
-                if (packageName.startsWith("com.android.systemui")) continue;
-                if (packageName.equals("com.google.android.gms")) continue; // Play Services
-                if (packageName.equals("android")) continue; // framework
-
-                // Exclude keyboards and launchers
-                if (keyboardPackages.contains(packageName)) continue;
-                if (launcherPackages.contains(packageName)) continue;
-
-                // Exclude system and updated system apps
-                try {
-                    ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
-                    boolean isSystem = (appInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
-                    if (isSystem) continue;
-                } catch (PackageManager.NameNotFoundException ignored) {
-                    continue;
-                }
+                if (shouldExcludePackage(packageName, context, pm, keyboardPackages, launcherPackages, ourPackage)) continue;
 
                 totalTimeInMillis += usageStats.getTotalTimeInForeground();
             }
         }
         return totalTimeInMillis;
+    }
+
+    /** Centralized filtering check used across the class. */
+    private static boolean shouldExcludePackage(
+            String packageName,
+            Context context,
+            PackageManager pm,
+            Set<String> keyboardPackages,
+            Set<String> launcherPackages,
+            String ourPackage
+    ) {
+        if (packageName == null) return true;
+        if (packageName.equals(ourPackage)) return true; // exclude our app
+        if (packageName.startsWith("com.android.systemui")) return true;
+        if (packageName.equals("com.google.android.gms")) return true; // Play Services
+        if (packageName.equals("android")) return true; // framework
+        if (keyboardPackages.contains(packageName)) return true;
+        if (launcherPackages.contains(packageName)) return true;
+        try {
+            ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+            boolean isSystem = (appInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+            if (isSystem) return true;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return true;
+        }
+        return false;
     }
 
     private static Set<String> getEnabledKeyboardPackages(Context context) {
@@ -466,30 +475,14 @@ public class MobileUsageTracker {
             List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
 
-            // Apply same filtering as totals
-            Set<String> keyboardPackages = getEnabledKeyboardPackages(context);
-            Set<String> launcherPackages = getLauncherPackages(context);
-            PackageManager pm = context.getPackageManager();
-            String ourPackage = context.getPackageName();
+        // Apply same filtering as totals
+        Set<String> keyboardPackages = getEnabledKeyboardPackages(context);
+        Set<String> launcherPackages = getLauncherPackages(context);
+        PackageManager pm = context.getPackageManager();
+        String ourPackage = context.getPackageName();
 
-            usageStatsList.removeIf(stats -> {
-                if (stats == null) return true;
-                String pkg = stats.getPackageName();
-                if (pkg == null) return true;
-                if (pkg.equals(ourPackage)) return true;
-                if (pkg.startsWith("com.android.systemui")) return true;
-                if (pkg.equals("com.google.android.gms")) return true;
-                if (pkg.equals("android")) return true;
-                if (keyboardPackages.contains(pkg)) return true;
-                if (launcherPackages.contains(pkg)) return true;
-                try {
-                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                    boolean isSystem = (ai.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
-                    return isSystem;
-                } catch (PackageManager.NameNotFoundException e) {
-                    return true;
-                }
-            });
+        usageStatsList.removeIf(stats -> stats == null ||
+            shouldExcludePackage(stats.getPackageName(), context, pm, keyboardPackages, launcherPackages, ourPackage));
 
             // Sort by usage time and return top apps
             usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
@@ -532,91 +525,11 @@ public class MobileUsageTracker {
         return formatDuration(usage);
     }
     
-    /**
-     * Get detailed usage breakdown for debugging
-     */
-    public String getDetailedUsageInfo() {
-        if (!hasUsageStatsPermission()) {
-            return "Usage stats permission not granted";
-        }
-        
-        try {
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long startTime = cal.getTimeInMillis();
-            long endTime = System.currentTimeMillis();
-            
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-            
-            StringBuilder info = new StringBuilder();
-            info.append("📊 USAGE STATS ANALYSIS\n\n");
-            info.append("Time Range: ").append(new SimpleDateFormat("HH:mm", Locale.US).format(new Date(startTime)))
-                .append(" - ").append(new SimpleDateFormat("HH:mm", Locale.US).format(new Date(endTime))).append("\n\n");
-            
-            // Get top 10 apps by usage
-            usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
-            
-            long totalTime = 0;
-            int count = 0;
-            info.append("TOP APPS TODAY:\n");
-            
-            for (UsageStats stats : usageStatsList) {
-                if (count >= 10) break;
-                if (stats.getTotalTimeInForeground() < 60000) continue; // Skip < 1 minute
-                if (stats.getPackageName().equals(context.getPackageName())) continue; // Skip our app
-                
-                info.append(String.format("%d. %s: %s\n", 
-                    count + 1,
-                    getSimpleAppName(stats.getPackageName()),
-                    formatDuration(stats.getTotalTimeInForeground())
-                ));
-                
-                totalTime += stats.getTotalTimeInForeground();
-                count++;
-            }
-            
-            info.append("\n📱 TOTAL: ").append(formatDuration(totalTime));
-            info.append("\n\n💡 WHY DIFFERENT FROM DIGITAL WELLBEING?\n");
-            info.append("• We count app foreground time only\n");
-            info.append("• Digital Wellbeing includes screen-on time\n");
-            info.append("• Different time boundaries (midnight vs 24h rolling)\n");
-            info.append("• System apps may be counted differently");
-            
-            return info.toString();
-            
-        } catch (Exception e) {
-            return "Error getting usage details: " + e.getMessage();
-        }
-    }
+    // Removed detailed debugging report for production
+
+    // Debug-only helpers removed for production build
     
-    private String getSimpleAppName(String packageName) {
-        // Simplify common package names for readability
-        if (packageName.contains("chrome")) return "Chrome";
-        if (packageName.contains("youtube")) return "YouTube";
-        if (packageName.contains("whatsapp")) return "WhatsApp";
-        if (packageName.contains("instagram")) return "Instagram";
-        if (packageName.contains("facebook")) return "Facebook";
-        if (packageName.contains("tiktok")) return "TikTok";
-        if (packageName.contains("telegram")) return "Telegram";
-        if (packageName.contains("spotify")) return "Spotify";
-        if (packageName.contains("netflix")) return "Netflix";
-        if (packageName.contains("gmail")) return "Gmail";
-        if (packageName.contains("maps")) return "Maps";
-        if (packageName.contains("camera")) return "Camera";
-        if (packageName.contains("gallery")) return "Gallery";
-        if (packageName.contains("phone")) return "Phone";
-        if (packageName.contains("contacts")) return "Contacts";
-        if (packageName.contains("settings")) return "Settings";
-        if (packageName.contains("launcher")) return "Home Screen";
-        
-        // Return last part of package name if no match
-        String[] parts = packageName.split("\\.");
-        return parts.length > 0 ? parts[parts.length - 1] : packageName;
-    }
+    // Removed UI name simplifier used only in debug output
     
     /**
      * Calculate usage percentage saved (caller provides focus time)
