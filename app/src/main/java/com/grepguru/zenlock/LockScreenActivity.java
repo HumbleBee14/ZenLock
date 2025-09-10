@@ -43,6 +43,8 @@ public class LockScreenActivity extends AppCompatActivity {
     private EnhancedUnlockManager unlockManager;
     private android.os.CountDownTimer countDownTimer;
     private boolean wasManuallyUnlocked = false;
+    private android.os.Handler autoHideHandler;
+    private Runnable autoHideRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +121,7 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView timerCountdown = findViewById(R.id.timerCountdown);
         //  TextView lockMessage = findViewById(R.id.lockscreenMessage);
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
         LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
         ImageView pinVisibilityToggle = findViewById(R.id.pinVisibilityToggle);
@@ -340,6 +343,17 @@ public class LockScreenActivity extends AppCompatActivity {
             unlockManager.showUnlockDialog();
         });
 
+        // Set up unlock arrow click listener
+        unlockArrow.setOnClickListener(v -> {
+            showUnlockButton();
+        });
+
+        // Set up tap-to-reveal functionality on main content
+        View mainContentContainer = findViewById(R.id.mainContentContainer);
+        mainContentContainer.setOnClickListener(v -> {
+            showUnlockButton();
+        });
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -347,8 +361,8 @@ public class LockScreenActivity extends AppCompatActivity {
                 if (unlockInputsContainer.getVisibility() == View.VISIBLE) {
                     // Hide unlock inputs and show main lock screen
                     unlockInputsContainer.setVisibility(View.GONE);
-                    unlockPromptButton.setVisibility(View.VISIBLE);
                     expandButtonContainer.setVisibility(View.VISIBLE);
+                    hideUnlockButton(); // Hide unlock button and show arrow
 
                     pinInput.setText("");
                 } else {
@@ -510,6 +524,62 @@ public class LockScreenActivity extends AppCompatActivity {
         // The onPause/onStop methods will handle legitimate cases where user tries to leave
     }
 
+    /**
+     * Show unlock button with auto-hide after 5 seconds
+     */
+    private void showUnlockButton() {
+        Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        
+        // Cancel any existing auto-hide timer
+        if (autoHideHandler != null && autoHideRunnable != null) {
+            autoHideHandler.removeCallbacks(autoHideRunnable);
+        }
+        
+        // Show unlock button with animation
+        unlockPromptButton.setVisibility(View.VISIBLE);
+        unlockPromptButton.animate()
+            .alpha(1f)
+            .setDuration(300)
+            .start();
+        
+        // Hide arrow
+        unlockArrow.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction(() -> unlockArrow.setVisibility(View.GONE))
+            .start();
+        
+        // Set up auto-hide after 5 seconds
+        autoHideHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        autoHideRunnable = () -> {
+            hideUnlockButton();
+        };
+        autoHideHandler.postDelayed(autoHideRunnable, 5000); // 5 seconds
+    }
+    
+    /**
+     * Hide unlock button and show arrow
+     */
+    private void hideUnlockButton() {
+        Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
+        ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        
+        // Hide unlock button with animation
+        unlockPromptButton.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction(() -> unlockPromptButton.setVisibility(View.GONE))
+            .start();
+        
+        // Show arrow
+        unlockArrow.setVisibility(View.VISIBLE);
+        unlockArrow.animate()
+            .alpha(0.6f)
+            .setDuration(300)
+            .start();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -519,6 +589,11 @@ public class LockScreenActivity extends AppCompatActivity {
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
             countDownTimer.cancel();
+        }
+        
+        // Cancel auto-hide timer
+        if (autoHideHandler != null && autoHideRunnable != null) {
+            autoHideHandler.removeCallbacks(autoHideRunnable);
         }
         
         // Cleanup unlock manager

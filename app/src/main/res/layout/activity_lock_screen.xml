@@ -52,7 +52,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- Unlock Button -->
+        <!-- Hidden Unlock Arrow -->
+        <ImageView
+            android:id="@+id/unlockArrow"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_expand_more"
+            android:background="@drawable/circular_button_dark"
+            android:padding="6dp"
+            android:contentDescription="Show unlock options"
+            android:alpha="0.6"
+            app:layout_constraintTop_toBottomOf="@id/lockscreenMessage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="32dp"/>
+
+        <!-- Unlock Button (Initially Hidden) -->
         <Button
             android:id="@+id/unlockPromptButton"
             android:layout_width="wrap_content"
@@ -67,10 +82,12 @@
             android:background="@drawable/glass_button_background"
             android:textColor="@color/white"
             android:elevation="8dp"
-            app:layout_constraintTop_toBottomOf="@id/lockscreenMessage"
+            android:visibility="gone"
+            android:alpha="0.0"
+            app:layout_constraintTop_toBottomOf="@id/unlockArrow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="32dp"/>
+            android:layout_marginTop="16dp"/>
 
         <!-- PIN Input (Initially Hidden) -->
         <LinearLayout
@@ -80,7 +97,7 @@
             android:visibility="gone"
             android:orientation="vertical"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/unlockPromptButton"
+            app:layout_constraintTop_toBottomOf="@id/unlockArrow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="24dp">
