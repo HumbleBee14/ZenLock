@@ -43,7 +43,7 @@ public class MobileUsageTracker {
         this.usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
     }
     
-    // ---- Modular utilities for month range + total usage ----
+    // ---- Modular utilities for time ranges + total usage ----
     public static long[] getMonthTimestamps(int year, int month) {
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
         // Start of month
@@ -57,6 +57,60 @@ public class MobileUsageTracker {
         long endTime = calendar.getTimeInMillis();
 
         return new long[]{startTime, endTime};
+    }
+
+    /**
+     * Returns start/end timestamps for the provided calendar's day (local TZ).
+     */
+    public static long[] getDayTimestamps(Calendar day) {
+        Calendar cal = (Calendar) day.clone();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long start = cal.getTimeInMillis();
+
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        long end = cal.getTimeInMillis();
+        return new long[]{start, end};
+    }
+
+    /**
+     * Returns start-of-week (Mon 00:00) and end-of-week (Sun 23:59:59.999) for the week containing 'anyDay'.
+     */
+    public static long[] getWeekTimestamps(Calendar anyDay) {
+        Calendar cal = (Calendar) anyDay.clone();
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long start = cal.getTimeInMillis();
+
+        cal.add(Calendar.DAY_OF_YEAR, 6);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        long end = cal.getTimeInMillis();
+        return new long[]{start, end};
+    }
+
+    /**
+     * Returns start-of-week (Mon 00:00) to now for the current week.
+     */
+    public static long[] getThisWeekSoFarTimestamps() {
+        Calendar now = Calendar.getInstance(TimeZone.getDefault());
+        Calendar start = (Calendar) now.clone();
+        start.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        start.set(Calendar.HOUR_OF_DAY, 0);
+        start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0);
+        start.set(Calendar.MILLISECOND, 0);
+        return new long[]{start.getTimeInMillis(), System.currentTimeMillis()};
     }
 
     public static long getTotalPhoneUsage(Context context, long startTime, long endTime) {
@@ -229,18 +283,10 @@ public class MobileUsageTracker {
      * Get this week's mobile usage time
      */
     public long getThisWeekMobileUsage() {
+        if (!hasUsageStatsPermission()) return 0;
         try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            
-            long weekStart = calendar.getTimeInMillis();
-            long weekEnd = weekStart + (7 * 24 * 60 * 60 * 1000);
-            
-            return getMobileUsageForPeriod(weekStart, weekEnd);
+            long[] range = getThisWeekSoFarTimestamps();
+            return getTotalPhoneUsage(context, range[0], range[1]);
         } catch (Exception e) {
             Log.e(TAG, "Error getting this week's mobile usage", e);
             return 0;
@@ -251,19 +297,12 @@ public class MobileUsageTracker {
      * Get last week's mobile usage time
      */
     public long getLastWeekMobileUsage() {
+        if (!hasUsageStatsPermission()) return 0;
         try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            
-            long thisWeekStart = calendar.getTimeInMillis();
-            long lastWeekStart = thisWeekStart - (7 * 24 * 60 * 60 * 1000);
-            long lastWeekEnd = thisWeekStart;
-            
-            return getMobileUsageForPeriod(lastWeekStart, lastWeekEnd);
+            Calendar anyDayLastWeek = Calendar.getInstance(TimeZone.getDefault());
+            anyDayLastWeek.add(Calendar.WEEK_OF_YEAR, -1);
+            long[] range = getWeekTimestamps(anyDayLastWeek);
+            return getTotalPhoneUsage(context, range[0], range[1]);
         } catch (Exception e) {
             Log.e(TAG, "Error getting last week's mobile usage", e);
             return 0;
@@ -321,43 +360,8 @@ public class MobileUsageTracker {
         }
     }
     
-    /**
-     * Get mobile usage for a specific period
-     */
-    private long getMobileUsageForPeriod(long startTime, long endTime) {
-        try {
-            if (!hasUsageStatsPermission()) {
-                return 0;
-            }
-            
-            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usageStatsManager == null) {
-                return 0;
-            }
-            
-            // Get usage stats for the period
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            
-            if (usageStatsList == null || usageStatsList.isEmpty()) {
-                return 0;
-            }
-            
-            long totalUsage = 0;
-            for (UsageStats usageStats : usageStatsList) {
-                long appUsageTime = usageStats.getTotalTimeInForeground();
-                if (appUsageTime > 60000) { // Only count apps with > 1 minute usage
-                    totalUsage += appUsageTime;
-                }
-            }
-            
-            return totalUsage;
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting mobile usage for period", e);
-            return 0;
-        }
-    }
-    
+    // Legacy getMobileUsageForPeriod() removed in favor of getTotalPhoneUsage() with filtering
+
     /**
      * Get total mobile usage for today in milliseconds
      */
@@ -366,74 +370,29 @@ public class MobileUsageTracker {
             Log.w(TAG, "Usage stats permission not granted");
             return 0;
         }
-        
         try {
-            // Get usage stats for today
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long startTime = cal.getTimeInMillis();
-            long endTime = System.currentTimeMillis();
-            
-            // Use INTERVAL_BEST for most recent data (single source to avoid duplicates)
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            
-            if (usageStatsList == null || usageStatsList.isEmpty()) {
-                // Fallback to INTERVAL_DAILY if no data
-                usageStatsList = usageStatsManager.queryUsageStats(
-                    UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-                if (usageStatsList == null) {
-                    usageStatsList = new ArrayList<>();
-                }
-                Log.d(TAG, "Using INTERVAL_DAILY - found " + usageStatsList.size() + " entries");
-            } else {
-                Log.d(TAG, "Using INTERVAL_BEST - found " + usageStatsList.size() + " entries");
-            }
-            
-            long totalUsageTime = 0;
-            Log.d(TAG, "=== MOBILE USAGE BREAKDOWN ===");
-            Log.d(TAG, "Time range: " + new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date(startTime)) 
-                    + " to " + new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date(endTime)));
-            
-            // Sort by usage time for better debugging
-            usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
-            
-            for (UsageStats usageStats : usageStatsList) {
-                long appUsageTime = usageStats.getTotalTimeInForeground();
-                String packageName = usageStats.getPackageName();
-                
-                // Only include apps with significant usage (> 1 minute) to reduce noise
-                if (appUsageTime > 60000) {
-                    // Log significant usage - only if debug enabled
-                    if (DEBUG_LOGS) {
-                        Log.d(TAG, String.format("App: %s | Usage: %s | First: %s | Last: %s",
-                            packageName,
-                            formatDuration(appUsageTime),
-                            new SimpleDateFormat("HH:mm", Locale.US).format(new Date(usageStats.getFirstTimeStamp())),
-                            new SimpleDateFormat("HH:mm", Locale.US).format(new Date(usageStats.getLastTimeStamp()))
-                        ));
-                    }
-                    
-                    // Exclude our own app from the total calculation
-                    if (!packageName.equals(context.getPackageName())) {
-                        totalUsageTime += appUsageTime;
-                    }
-                }
-            }
-            
-            if (DEBUG_LOGS) {
-                Log.d(TAG, "=== TOTAL MOBILE USAGE ===");
-                Log.d(TAG, "Our calculation: " + formatDuration(totalUsageTime));
-                Log.d(TAG, "Total apps counted: " + usageStatsList.size());
-                Log.d(TAG, "===========================");
-            }
-            return totalUsageTime;
-            
+            Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+            long start = getDayTimestamps(cal)[0];
+            long end = System.currentTimeMillis();
+            return getTotalPhoneUsage(context, start, end);
         } catch (Exception e) {
             Log.e(TAG, "Error getting today's mobile usage", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Get yesterday's total mobile usage in milliseconds
+     */
+    public long getYesterdayMobileUsage() {
+        if (!hasUsageStatsPermission()) return 0;
+        try {
+            Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+            cal.add(Calendar.DAY_OF_YEAR, -1);
+            long[] range = getDayTimestamps(cal);
+            return getTotalPhoneUsage(context, range[0], range[1]);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting yesterday's mobile usage", e);
             return 0;
         }
     }
@@ -452,31 +411,13 @@ public class MobileUsageTracker {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             Date targetDate = sdf.parse(date);
             if (targetDate == null) return 0;
-            
-            Calendar cal = Calendar.getInstance();
+
+            Calendar cal = Calendar.getInstance(TimeZone.getDefault());
             cal.setTime(targetDate);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long startTime = cal.getTimeInMillis();
-            
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            long endTime = cal.getTimeInMillis();
-            
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-            
-            long totalUsageTime = 0;
-            for (UsageStats usageStats : usageStatsList) {
-                // Exclude our own app from the calculation
-                if (!usageStats.getPackageName().equals(context.getPackageName())) {
-                    totalUsageTime += usageStats.getTotalTimeInForeground();
-                }
-            }
-            
-            Log.d(TAG, "Mobile usage for " + date + ": " + formatDuration(totalUsageTime));
-            return totalUsageTime;
+            long[] range = getDayTimestamps(cal);
+            long total = getTotalPhoneUsage(context, range[0], range[1]);
+            if (DEBUG_LOGS) Log.d(TAG, "Mobile usage for " + date + ": " + formatDuration(total));
+            return total;
             
         } catch (Exception e) {
             Log.e(TAG, "Error getting mobile usage for date: " + date, e);
@@ -488,37 +429,7 @@ public class MobileUsageTracker {
      * Get mobile usage for the current week in milliseconds
      */
     public long getCurrentWeekMobileUsage() {
-        if (!hasUsageStatsPermission()) {
-            return 0;
-        }
-        
-        try {
-            // Get start of current week (Monday)
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long startTime = cal.getTimeInMillis();
-            long endTime = System.currentTimeMillis();
-            
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_WEEKLY, startTime, endTime);
-            
-            long totalUsageTime = 0;
-            for (UsageStats usageStats : usageStatsList) {
-                if (!usageStats.getPackageName().equals(context.getPackageName())) {
-                    totalUsageTime += usageStats.getTotalTimeInForeground();
-                }
-            }
-            
-            return totalUsageTime;
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting current week mobile usage", e);
-            return 0;
-        }
+    return getThisWeekMobileUsage();
     }
     
     /**
@@ -554,13 +465,35 @@ public class MobileUsageTracker {
             
             List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(
                 UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-            
+
+            // Apply same filtering as totals
+            Set<String> keyboardPackages = getEnabledKeyboardPackages(context);
+            Set<String> launcherPackages = getLauncherPackages(context);
+            PackageManager pm = context.getPackageManager();
+            String ourPackage = context.getPackageName();
+
+            usageStatsList.removeIf(stats -> {
+                if (stats == null) return true;
+                String pkg = stats.getPackageName();
+                if (pkg == null) return true;
+                if (pkg.equals(ourPackage)) return true;
+                if (pkg.startsWith("com.android.systemui")) return true;
+                if (pkg.equals("com.google.android.gms")) return true;
+                if (pkg.equals("android")) return true;
+                if (keyboardPackages.contains(pkg)) return true;
+                if (launcherPackages.contains(pkg)) return true;
+                try {
+                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                    boolean isSystem = (ai.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+                    return isSystem;
+                } catch (PackageManager.NameNotFoundException e) {
+                    return true;
+                }
+            });
+
             // Sort by usage time and return top apps
             usageStatsList.sort((a, b) -> Long.compare(b.getTotalTimeInForeground(), a.getTotalTimeInForeground()));
-            
-            // Remove our own app and return top apps
-            usageStatsList.removeIf(stats -> stats.getPackageName().equals(context.getPackageName()));
-            
+
             return usageStatsList.subList(0, Math.min(limit, usageStatsList.size()));
             
         } catch (Exception e) {
