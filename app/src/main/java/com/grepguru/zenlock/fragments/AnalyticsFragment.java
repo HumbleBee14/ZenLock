@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.BuildConfig;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.model.AnalyticsModels;
 import com.grepguru.zenlock.data.entities.DailyStatsEntity;
@@ -323,6 +324,14 @@ public class AnalyticsFragment extends Fragment {
                 // Get last week's stats for comparison
                 long lastWeekFocusMs = analyticsManager.getLastWeekFocusTime();
                 long lastWeekMobileMs = analyticsManager.getLastWeekMobileUsage();
+
+                // Consolidated debug log so we can verify values even if UI views are null
+                // if (BuildConfig.DEBUG) {
+                //     Log.d("AnalyticsFragment", "Weekly values -> thisWeekFocusMs=" + thisWeekFocusMs
+                //             + ", lastWeekFocusMs=" + lastWeekFocusMs
+                //             + ", thisWeekMobileMs=" + thisWeekMobileMs
+                //             + ", lastWeekMobileMs=" + lastWeekMobileMs);
+                // }
                 
                 // Update UI on main thread
                 if (getActivity() != null) {
@@ -590,106 +599,94 @@ public class AnalyticsFragment extends Fragment {
     
     
     private void updateWeeklyFocusChange(long thisWeekFocusMs, long lastWeekFocusMs) {
+        // Log before the null-guard so we always see debug output
+        int daysThisWeek = getDaysElapsedThisWeek();
+        int daysLastWeek = 7;
+        Double changePercentage = computeNormalizedChange(thisWeekFocusMs, daysThisWeek, lastWeekFocusMs, daysLastWeek);
+        // if (BuildConfig.DEBUG) {
+        //     Log.d("AnalyticsFragment", "This week total focus ms: " + thisWeekFocusMs);
+        //     Log.d("AnalyticsFragment", "Days elapsed this week: " + daysThisWeek);
+        //     Log.d("AnalyticsFragment", "Last week total focus ms: " + lastWeekFocusMs);
+        //     Log.d("AnalyticsFragment", "Days last week: " + daysLastWeek);
+        //     Log.d("AnalyticsFragment", "This week focus hours: " + (thisWeekFocusMs / (1000 * 60 * 60)));
+        //     Log.d("AnalyticsFragment", "Last week focus hours: " + (lastWeekFocusMs / (1000 * 60 * 60)));
+        // }
+        
         if (weeklyFocusChange == null) return;
-        
-        if (lastWeekFocusMs == 0) {
-            weeklyFocusChange.setText("--");
-            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-            return;
-        }
-        
-        double changePercentage = ((double) (thisWeekFocusMs - lastWeekFocusMs) / lastWeekFocusMs) * 100;
-        
-        if (changePercentage > 5) {
-            // Increase in focus time (good) - show in green
-            weeklyFocusChange.setText(String.format("+%.0f%%", changePercentage));
-            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.success));
-        } else if (changePercentage > -5) {
-            // Similar performance
-            weeklyFocusChange.setText("0%");
-            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-        } else {
-            // Decrease in focus time (bad) - show in red
-            weeklyFocusChange.setText(String.format("%.0f%%", changePercentage));
-            weeklyFocusChange.setTextColor(requireContext().getColor(R.color.warning));
-        }
+        applyChangeLabel(weeklyFocusChange, changePercentage, /*higherIsGood=*/true);
     }
     
     private void updateWeeklyMobileChange(long thisWeekMobileMs, long lastWeekMobileMs) {
         if (weeklyMobileChange == null) return;
-        
-        if (lastWeekMobileMs == 0) {
-            weeklyMobileChange.setText("--");
-            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-            return;
-        }
-        
-        double changePercentage = ((double) (thisWeekMobileMs - lastWeekMobileMs) / lastWeekMobileMs) * 100;
-        
-        if (changePercentage > 5) {
-            // Increase in mobile usage (bad) - show in red
-            weeklyMobileChange.setText(String.format("+%.0f%%", changePercentage));
-            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.warning));
-        } else if (changePercentage > -5) {
-            // Similar performance
-            weeklyMobileChange.setText("0%");
-            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-        } else {
-            // Decrease in mobile usage (good) - show in green
-            weeklyMobileChange.setText(String.format("%.0f%%", changePercentage));
-            weeklyMobileChange.setTextColor(requireContext().getColor(R.color.success));
-        }
+    int daysThisWeek = getDaysElapsedThisWeek();
+    int daysLastWeek = 7;
+    Double changePercentage = computeNormalizedChange(thisWeekMobileMs, daysThisWeek, lastWeekMobileMs, daysLastWeek);
+    applyChangeLabel(weeklyMobileChange, changePercentage, /*higherIsGood=*/false);
     }
     
     private void updateMonthlyFocusChange(long thisMonthFocusMs, long lastMonthFocusMs) {
         if (monthlyFocusChange == null) return;
-        
-        if (lastMonthFocusMs == 0) {
-            monthlyFocusChange.setText("--");
-            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-            return;
-        }
-        
-        double changePercentage = ((double) (thisMonthFocusMs - lastMonthFocusMs) / lastMonthFocusMs) * 100;
-        
-        if (changePercentage > 5) {
-            // Increase in focus time (good) - show in green
-            monthlyFocusChange.setText(String.format("+%.0f%%", changePercentage));
-            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.success));
-        } else if (changePercentage > -5) {
-            // Similar performance
-            monthlyFocusChange.setText("0%");
-            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.textSecondary));
-        } else {
-            // Decrease in focus time (bad) - show in red
-            monthlyFocusChange.setText(String.format("%.0f%%", changePercentage));
-            monthlyFocusChange.setTextColor(requireContext().getColor(R.color.warning));
-        }
+        int daysElapsedThisMonth = getDaysElapsedThisMonth();
+        int daysInLastMonth = getDaysInLastMonth();
+        Double changePercentage = computeNormalizedChange(thisMonthFocusMs, daysElapsedThisMonth, lastMonthFocusMs, daysInLastMonth);
+        applyChangeLabel(monthlyFocusChange, changePercentage, /*higherIsGood=*/true);
     }
     
     private void updateMonthlyMobileChange(long thisMonthMobileMs, long lastMonthMobileMs) {
         if (monthlyMobileChange == null) return;
-        
-        if (lastMonthMobileMs == 0) {
-            monthlyMobileChange.setText("--");
-            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+        int daysElapsedThisMonth = getDaysElapsedThisMonth();
+        int daysInLastMonth = getDaysInLastMonth();
+        Double changePercentage = computeNormalizedChange(thisMonthMobileMs, daysElapsedThisMonth, lastMonthMobileMs, daysInLastMonth);
+        applyChangeLabel(monthlyMobileChange, changePercentage, /*higherIsGood=*/false);
+    }
+
+    // ---- Helpers for normalized comparisons ----
+    private int getDaysElapsedThisWeek() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int dow = cal.get(java.util.Calendar.DAY_OF_WEEK); // Sun=1..Sat=7
+        // Convert to Monday-based index: Mon=1..Sun=7
+        int daysFromMon = ((dow - java.util.Calendar.MONDAY + 7) % 7);
+        return daysFromMon + 1; // inclusive of today
+    }
+
+    private int getDaysElapsedThisMonth() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        return cal.get(java.util.Calendar.DAY_OF_MONTH); // 1..31 (inclusive to today)
+    }
+
+    private int getDaysInLastMonth() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.add(java.util.Calendar.MONTH, -1);
+        return cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH);
+    }
+
+    private Double computeNormalizedChange(long currentTotalMs, int currentDays, long previousTotalMs, int previousDays) {
+        if (previousDays <= 0) return null;
+        double prevAvg = previousDays > 0 ? (previousTotalMs / (double) previousDays) : 0d;
+        if (prevAvg == 0d) return null; // show "--" when no baseline
+        double currAvg = currentDays > 0 ? (currentTotalMs / (double) currentDays) : 0d;
+        return ((currAvg - prevAvg) / prevAvg) * 100.0;
+    }
+
+    private void applyChangeLabel(TextView label, Double changePct, boolean higherIsGood) {
+        if (changePct == null) {
+            label.setText("--");
+            label.setTextColor(requireContext().getColor(R.color.textSecondary));
             return;
         }
-        
-        double changePercentage = ((double) (thisMonthMobileMs - lastMonthMobileMs) / lastMonthMobileMs) * 100;
-        
-        if (changePercentage > 5) {
-            // Increase in mobile usage (bad) - show in red
-            monthlyMobileChange.setText(String.format("+%.0f%%", changePercentage));
-            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.warning));
-        } else if (changePercentage > -5) {
-            // Similar performance
-            monthlyMobileChange.setText("0%");
-            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.textSecondary));
+        double cp = changePct;
+        // Round to nearest whole percent for UI
+        String text = String.format(Locale.getDefault(), (cp >= 0 ? "+%.0f%%" : "%.0f%%"), cp);
+        label.setText(text);
+
+        // Thresholds similar to previous logic
+        if (cp > 5) {
+            label.setTextColor(requireContext().getColor(higherIsGood ? R.color.success : R.color.warning));
+        } else if (cp < -5) {
+            label.setTextColor(requireContext().getColor(higherIsGood ? R.color.warning : R.color.success));
         } else {
-            // Decrease in mobile usage (good) - show in green
-            monthlyMobileChange.setText(String.format("%.0f%%", changePercentage));
-            monthlyMobileChange.setTextColor(requireContext().getColor(R.color.success));
+            label.setText("0%");
+            label.setTextColor(requireContext().getColor(R.color.textSecondary));
         }
     }
     

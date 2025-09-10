@@ -52,7 +52,7 @@ public class UsageStatsPermissionManager {
             }
             
             boolean hasPermission = mode == AppOpsManager.MODE_ALLOWED;
-            Log.d(TAG, "Usage stats permission status: " + hasPermission);
+            // Log.d(TAG, "Usage stats permission status: " + hasPermission);
             return hasPermission;
             
         } catch (Exception e) {
