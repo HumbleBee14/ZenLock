@@ -296,7 +296,7 @@
         </androidx.cardview.widget.CardView>
 
 
-        <!-- Focus Trends Expandable Card -->
+        <!-- Weekly Insights Trends Expandable Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/focusTrendsCard"
             android:layout_width="match_parent"
@@ -346,7 +346,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:layout_marginTop="16dp">
 
                     <!-- Daily vs Weekly Comparison -->
@@ -634,7 +634,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:layout_marginTop="16dp">
 
                     <!-- Monthly vs Last Month Comparison -->
