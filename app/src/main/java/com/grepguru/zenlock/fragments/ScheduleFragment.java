@@ -103,13 +103,6 @@ public class ScheduleFragment extends Fragment {
                 ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
                 if (updatedSchedule != null) {
                     if (updatedSchedule.isEnabled()) {
-                        // Check permissions before enabling schedule
-                        if (!checkSchedulePermissions()) {
-                            // Revert the toggle if permissions not granted
-                            scheduleManager.toggleSchedule(schedule.getId());
-                            loadSchedules();
-                            return;
-                        }
                         // Schedule was enabled, activate it
                         scheduleActivator.scheduleSchedule(updatedSchedule);
                         Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
@@ -166,6 +159,11 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void showCreateScheduleDialog() {
+        // Check permissions before allowing schedule creation
+        if (!checkSchedulePermissions()) {
+            return; // Don't show dialog if permissions not granted
+        }
+        
         CreateScheduleDialog dialog = new CreateScheduleDialog();
         dialog.setScheduleListener(new CreateScheduleDialog.ScheduleListener() {
             @Override
@@ -241,26 +239,10 @@ public class ScheduleFragment extends Fragment {
         loadSchedules(); // Refresh when returning to fragment
     }
 
-    /**
-     * Check full screen intent permission for automatic lock
-     */
-    private void checkFullScreenIntentPermission() {
-        Log.d(TAG, "Checking full screen intent permission...");
-        Log.d(TAG, "Android API level: " + android.os.Build.VERSION.SDK_INT);
-
-        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(this)) {
-            Log.d(TAG, "Full screen intent permission not granted, requesting...");
-            FullScreenIntentPermissionManager.requestFullScreenIntentPermission(this);
-        } else {
-            Log.d(TAG, "Full screen intent permission already granted");
-        }
-    }
-
-
     private boolean checkSchedulePermissions() {
         // Check overlay permission (Display over other apps)
         if (!Settings.canDrawOverlays(requireContext())) {
-            showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to show the lock screen when scheduled.");
+            showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to display the lock screen over other apps during scheduled focus sessions.");
             return false;
         }
         
@@ -268,9 +250,15 @@ public class ScheduleFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             android.app.AlarmManager alarmManager = (android.app.AlarmManager) requireContext().getSystemService(android.content.Context.ALARM_SERVICE);
             if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                showSchedulePermissionBanner("Exact alarms", "ZenLock needs this permission to schedule precise focus sessions.");
+                showSchedulePermissionBanner("Exact alarms", "ZenLock needs this permission to ensure your focus sessions begin at the scheduled time.");
                 return false;
             }
+        }
+        
+        // Check full screen intent permission
+        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(requireContext())) {
+            showSchedulePermissionBanner("Full screen notifications", "ZenLock needs this permission to launch the lock screen from scheduled notifications.");
+            return false;
         }
         
         return true;
@@ -286,7 +274,13 @@ public class ScheduleFragment extends Fragment {
                         intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
                         startActivity(intent);
                     } else if (permissionName.contains("Exact alarms")) {
+                        // Open exact alarm permission settings
                         Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
+                        startActivity(intent);
+                    } else if (permissionName.contains("Full screen notifications")) {
+                        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
                         startActivity(intent);
                     }
                 })

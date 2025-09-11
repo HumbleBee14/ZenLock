@@ -54,8 +54,7 @@ public class AlarmPermissionManager {
     private static void showExactAlarmPermissionDialog(AppCompatActivity activity) {
         new AlertDialog.Builder(activity)
                 .setTitle("Schedule Permission Required")
-                .setMessage("ZenLock needs permission to schedule exact alarms for your focus sessions.\n\n" +
-                           "This allows the app to start your scheduled focus sessions at precisely the right time.\n\n" +
+                .setMessage("ZenLock needs this permission to ensure your focus sessions begin at the scheduled time.\n\n" +
                            "You'll be taken to Android Settings to grant this permission.")
                 .setPositiveButton("Grant Permission", (dialog, which) -> {
                     openExactAlarmSettings(activity);
@@ -73,10 +72,11 @@ public class AlarmPermissionManager {
     private static void openExactAlarmSettings(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             try {
+                // Open exact alarm permission settings
                 Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
                 context.startActivity(intent);
-                Log.d(TAG, "Opened exact alarm settings");
+                Log.d(TAG, "Opened exact alarm permission settings");
             } catch (Exception e) {
                 Log.e(TAG, "Failed to open exact alarm settings", e);
                 Toast.makeText(context, "Please enable exact alarm permission in Settings > Apps > ZenLock > Permissions", Toast.LENGTH_LONG).show();
