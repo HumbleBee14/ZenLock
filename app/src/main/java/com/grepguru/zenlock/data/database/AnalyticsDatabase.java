@@ -13,6 +13,8 @@ import com.grepguru.zenlock.data.entities.DailyMobileUsageEntity;
 import com.grepguru.zenlock.data.entities.DailyStatsEntity;
 import com.grepguru.zenlock.data.entities.MonthlyStatsEntity;
 import com.grepguru.zenlock.data.entities.SessionEntity;
+import com.grepguru.zenlock.data.entities.ScheduleEntity;
+import com.grepguru.zenlock.data.dao.ScheduleDao;
 import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
 
 /**
@@ -26,9 +28,10 @@ import com.grepguru.zenlock.data.entities.WeeklyStatsEntity;
         DailyStatsEntity.class,
         DailyMobileUsageEntity.class,
         WeeklyStatsEntity.class,
-        MonthlyStatsEntity.class
+        MonthlyStatsEntity.class,
+        ScheduleEntity.class
     },
-    version = 3, // Incremented to add DailyMobileUsageEntity
+    version = 4, // Incremented to add ScheduleEntity
     exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -37,6 +40,7 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "zenlock_analytics_database";
     
     public abstract AnalyticsDao analyticsDao();
+    public abstract ScheduleDao scheduleDao();
     
     private static volatile AnalyticsDatabase INSTANCE;
     
@@ -83,6 +87,7 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_daily_mobile_usage_date ON daily_mobile_usage(date)");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_weekly_stats_week_key ON weekly_stats(week_key)");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_monthly_stats_month_key ON monthly_stats(month_key)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_schedules_enabled ON schedules(enabled)");
         }
         
         @Override
