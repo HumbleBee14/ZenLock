@@ -218,7 +218,7 @@ public class EnhancedUnlockManager {
                     otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
                 } else {
                     requestOtpButton.setEnabled(true);
-                    otpStatusText.setText("Code valid for 5 minutes only");
+                    otpStatusText.setText("Code valid for 1 hour only");
                     otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
                 }
                 

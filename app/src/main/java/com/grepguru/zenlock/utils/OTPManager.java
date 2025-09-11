@@ -469,7 +469,7 @@ public class OTPManager {
                 switch (getResultCode()) {
                     case Activity.RESULT_OK:
                         Log.d(TAG, "SmsSentReceiver: SMS sent successfully.");
-                        Toast.makeText(context, "✅ OTP SMS sent.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Unlock Code sent.", Toast.LENGTH_SHORT).show();
                         break;
                     case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                         Log.e(TAG, "SmsSentReceiver: Generic failure.");

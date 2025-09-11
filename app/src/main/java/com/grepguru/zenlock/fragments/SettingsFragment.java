@@ -443,10 +443,12 @@ public class SettingsFragment extends Fragment {
                     editor.apply();
                     
                     updateUnlockMethodStates();
-                    showPinSetupSuccess(pinStatusText);
                     
-                    // Close dialog after a brief delay to show success message
-                    pinStatusText.postDelayed(() -> dialog.dismiss(), 1500);
+                    // Close current dialog immediately
+                    dialog.dismiss();
+                    
+                    // Show success dialog
+                    showPinSetupSuccessDialog();
                 }
             });
         });
@@ -513,10 +515,16 @@ public class SettingsFragment extends Fragment {
         statusText.setVisibility(View.VISIBLE);
     }
     
-    private void showPinSetupSuccess(TextView statusText) {
-        statusText.setText("✅ PIN set successfully!");
-        statusText.setTextColor(Color.parseColor("#4CAF50"));
-        statusText.setVisibility(View.VISIBLE);
+    private void showPinSetupSuccessDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_pin_success, null);
+        
+        builder.setView(dialogView)
+               .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+               .setCancelable(false);
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
     
 

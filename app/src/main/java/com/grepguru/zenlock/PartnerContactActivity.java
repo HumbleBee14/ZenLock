@@ -140,7 +140,15 @@ public class PartnerContactActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveConfiguration());
         
         // Test OTP Button Listener
-        testOtpButton.setOnClickListener(v -> testOTPFunctionality());
+        testOtpButton.setOnClickListener(v -> {
+            // Always check permission first, if not granted, request it
+            if (!checkSmsPermission()) {
+                requestSmsPermission();
+            } else {
+                // Permission is granted, proceed with normal OTP functionality
+                testOTPFunctionality();
+            }
+        });
     }
     
     private void updateTestButtonState() {
@@ -151,10 +159,18 @@ public class PartnerContactActivity extends AppCompatActivity {
         if (smsEnabled && !phoneText.isEmpty() && hasSmsPermission) {
             testOtpButton.setEnabled(true);
             testOtpButton.setAlpha(1.0f);
+            testOtpButton.setText("Send Test OTP");
+            testOtpButton.setVisibility(View.VISIBLE);
+        } else if (smsEnabled && !hasSmsPermission) {
+            // Keep button enabled but with different text for permission request
+            testOtpButton.setEnabled(true);
+            testOtpButton.setAlpha(0.7f);
+            testOtpButton.setText("Grant SMS Permission");
             testOtpButton.setVisibility(View.VISIBLE);
         } else {
             testOtpButton.setEnabled(false);
             testOtpButton.setAlpha(0.5f);
+            testOtpButton.setText("Send Test OTP");
             testOtpButton.setVisibility(smsEnabled ? View.VISIBLE : View.GONE);
         }
         
