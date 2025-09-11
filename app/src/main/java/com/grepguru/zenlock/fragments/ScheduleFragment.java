@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.model.ScheduleModel;
-import com.grepguru.zenlock.utils.FullScreenIntentPermissionManager;
 import com.grepguru.zenlock.utils.ScheduleManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
@@ -255,12 +254,6 @@ public class ScheduleFragment extends Fragment {
             }
         }
         
-        // Check full screen intent permission
-        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(requireContext())) {
-            showSchedulePermissionBanner("Full screen notifications", "ZenLock needs this permission to launch the lock screen from scheduled notifications.");
-            return false;
-        }
-        
         return true;
     }
     
@@ -277,10 +270,6 @@ public class ScheduleFragment extends Fragment {
                         // Open exact alarm permission settings
                         Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                         intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
-                        startActivity(intent);
-                    } else if (permissionName.contains("Full screen notifications")) {
-                        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
                         startActivity(intent);
                     }
                 })
