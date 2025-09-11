@@ -50,7 +50,7 @@ public class HomeFragment extends Fragment {
     private Runnable longPressRunnable;
     private ValueAnimator progressAnimator;
     private boolean isLongPressing = false;
-    private static final long ZEN_ACTIVATION_DURATION = 2500; // 2.5 seconds
+    private static final long ZEN_ACTIVATION_DURATION = 2250; // 2.2 seconds
 
     public HomeFragment() {}
 
