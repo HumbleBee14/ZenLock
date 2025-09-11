@@ -115,12 +115,15 @@ public class ScheduleTriggerReceiver extends BroadcastReceiver {
             SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
             
             long lockDurationMillis = durationMinutes * 60 * 1000L;
-            long lockEndTime = System.currentTimeMillis() + lockDurationMillis;
+            long lockStartTime = System.currentTimeMillis();
+            long lockEndTime = lockStartTime + lockDurationMillis;
             long uptimeAtLock = android.os.SystemClock.elapsedRealtime();
             
             SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("isLocked", true);
+            editor.putLong("lockStartTime", lockStartTime);
             editor.putLong("lockEndTime", lockEndTime);
+            editor.putLong("lockTargetDuration", lockDurationMillis);
             editor.putLong("uptimeAtLock", uptimeAtLock);  // Critical for restart detection
             editor.putBoolean("wasDeviceRestarted", false);
             editor.putString("current_session_source", "schedule:" + scheduleName);

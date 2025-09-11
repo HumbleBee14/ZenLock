@@ -135,8 +135,20 @@ public class LockScreenActivity extends AppCompatActivity {
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
         
-        // Initialize timer system
-        initializeTimer(remainingTimeMillis);
+        // Determine target duration to preserve progress across reinstates
+        long targetDuration = preferences.getLong("lockTargetDuration", 0);
+        if (targetDuration <= 0) {
+            long lockStartTime = preferences.getLong("lockStartTime", 0);
+            if (lockStartTime > 0 && lockEndTime > lockStartTime) {
+                targetDuration = lockEndTime - lockStartTime;
+            } else {
+                // Fallback to current remaining time (old installs)
+                targetDuration = remainingTimeMillis;
+            }
+        }
+        
+        // Initialize timer system with total target duration
+        initializeTimer(targetDuration);
         if (remainingTimeMillis <= 0) {
             isLockScreenActive = false; // Reset flag before finishing
             finish();
@@ -385,7 +397,7 @@ public class LockScreenActivity extends AppCompatActivity {
         setupMotivationalQuotes();
 
         // Start Countdown Timer
-        startCountdownTimer(remainingTimeMillis);
+        startCountdownTimer(targetDuration, remainingTimeMillis);
     }
 
     /*
@@ -715,7 +727,7 @@ public class LockScreenActivity extends AppCompatActivity {
     /**
      * Initialize the timer system based on user preferences
      */
-    private void initializeTimer(long remainingTimeMs) {
+    private void initializeTimer(long totalTimeMs) {
         // Get timer style from preferences
         String timerStyle = preferences.getString("timer_style", "digital");
         
@@ -743,8 +755,8 @@ public class LockScreenActivity extends AppCompatActivity {
             frameLayout.setLayoutParams(params);
         }
         
-        // Initialize the timer
-        currentTimer.initialize(remainingTimeMs);
+        // Initialize the timer using total duration so progress reflects overall session
+        currentTimer.initialize(totalTimeMs);
         
         // Hide quotes for circular timer to save space
         TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
@@ -757,12 +769,12 @@ public class LockScreenActivity extends AppCompatActivity {
         }
     }
     
-    private void startCountdownTimer(long remainingTimeMillis) {
+    private void startCountdownTimer(long totalTimeMs, long remainingTimeMillis) {
         countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 if (currentTimer != null) {
-                    currentTimer.updateTimer(remainingTimeMillis, millisUntilFinished);
+                    currentTimer.updateTimer(totalTimeMs, millisUntilFinished);
                 }
             }
 

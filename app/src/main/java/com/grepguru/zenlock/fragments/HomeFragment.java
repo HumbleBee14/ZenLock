@@ -295,11 +295,14 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        long lockEndTime = System.currentTimeMillis() + lockDurationMillis;
+        long lockStartTime = System.currentTimeMillis();
+        long lockEndTime = lockStartTime + lockDurationMillis;
         long uptimeAtLock = android.os.SystemClock.elapsedRealtime();
 
         editor.putBoolean("isLocked", true);
+        editor.putLong("lockStartTime", lockStartTime);
         editor.putLong("lockEndTime", lockEndTime);
+        editor.putLong("lockTargetDuration", lockDurationMillis);
         editor.putLong("uptimeAtLock", uptimeAtLock);  // Store uptime to detect restarts (CRITICAL
         editor.putBoolean("wasDeviceRestarted", false);
         editor.apply();
