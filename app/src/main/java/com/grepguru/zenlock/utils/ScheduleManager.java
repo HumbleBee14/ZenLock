@@ -90,35 +90,49 @@ public class ScheduleManager {
     /** Create a new schedule */
     public ScheduleModel createSchedule(String name, int startHour, int startMinute,
                                         int focusDurationMinutes, ScheduleModel.RepeatType repeatType) {
-        ScheduleModel schedule = new ScheduleModel();
-        schedule.setName(name);
-        schedule.setStartHour(startHour);
-        schedule.setStartMinute(startMinute);
-        schedule.setFocusDurationMinutes(focusDurationMinutes);
-        schedule.setRepeatType(repeatType);
-        
-        if (repeatType == ScheduleModel.RepeatType.WEEKLY) {
-            schedule.getRepeatDays().add(Calendar.MONDAY);
-            schedule.getRepeatDays().add(Calendar.TUESDAY);
-            schedule.getRepeatDays().add(Calendar.WEDNESDAY);
-            schedule.getRepeatDays().add(Calendar.THURSDAY);
-            schedule.getRepeatDays().add(Calendar.FRIDAY);
+        try {
+            Log.d(TAG, "Creating schedule: " + name);
+            ScheduleModel schedule = new ScheduleModel();
+            schedule.setName(name);
+            schedule.setStartHour(startHour);
+            schedule.setStartMinute(startMinute);
+            schedule.setFocusDurationMinutes(focusDurationMinutes);
+            schedule.setRepeatType(repeatType);
+            
+            if (repeatType == ScheduleModel.RepeatType.WEEKLY) {
+                schedule.getRepeatDays().add(Calendar.MONDAY);
+                schedule.getRepeatDays().add(Calendar.TUESDAY);
+                schedule.getRepeatDays().add(Calendar.WEDNESDAY);
+                schedule.getRepeatDays().add(Calendar.THURSDAY);
+                schedule.getRepeatDays().add(Calendar.FRIDAY);
+            }
+            
+            ScheduleEntity entity = toEntity(schedule);
+            entity.id = 0; // autogen
+            Log.d(TAG, "Inserting entity: " + entity.name + " (repeatDays=" + entity.repeatDaysCsv + ")");
+            long rowId = scheduleDao.insert(entity);
+            schedule.setId((int) rowId);
+            Log.d(TAG, "Created schedule: " + name + " (id=" + rowId + ")");
+            return schedule;
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating schedule: " + name, e);
+            throw e;
         }
-        
-        ScheduleEntity entity = toEntity(schedule);
-        entity.id = 0; // autogen
-        long rowId = scheduleDao.insert(entity);
-        schedule.setId((int) rowId);
-        Log.d(TAG, "Created schedule: " + name + " (id=" + rowId + ")");
-        return schedule;
     }
     
     /** Update an existing schedule */
     public boolean updateSchedule(ScheduleModel schedule) {
-        ScheduleEntity e = toEntity(schedule);
-        int rows = scheduleDao.update(e);
-        Log.d(TAG, "Updated schedule: " + schedule.getName() + " rows=" + rows);
-        return rows > 0;
+        try {
+            Log.d(TAG, "Updating schedule: " + schedule.getName() + " (id=" + schedule.getId() + ")");
+            ScheduleEntity e = toEntity(schedule);
+            Log.d(TAG, "Entity to update: " + e.name + " (repeatDays=" + e.repeatDaysCsv + ")");
+            int rows = scheduleDao.update(e);
+            Log.d(TAG, "Updated schedule: " + schedule.getName() + " rows=" + rows);
+            return rows > 0;
+        } catch (Exception ex) {
+            Log.e(TAG, "Error updating schedule: " + schedule.getName(), ex);
+            return false;
+        }
     }
     
     /** Delete a schedule */
@@ -130,10 +144,23 @@ public class ScheduleManager {
     
     /** Get all schedules */
     public List<ScheduleModel> getAllSchedules() {
-        List<ScheduleEntity> entities = scheduleDao.getAll();
-        List<ScheduleModel> out = new ArrayList<>();
-        for (ScheduleEntity e : entities) out.add(toModel(e));
-        return out;
+        try {
+            Log.d(TAG, "Getting all schedules from database...");
+            List<ScheduleEntity> entities = scheduleDao.getAll();
+            Log.d(TAG, "Found " + entities.size() + " entities in database");
+            
+            List<ScheduleModel> out = new ArrayList<>();
+            for (ScheduleEntity e : entities) {
+                Log.d(TAG, "Entity: id=" + e.id + ", name=" + e.name + ", enabled=" + e.enabled);
+                ScheduleModel model = toModel(e);
+                out.add(model);
+            }
+            Log.d(TAG, "Converted to " + out.size() + " models");
+            return out;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting all schedules", e);
+            return new ArrayList<>();
+        }
     }
     
     /** Get enabled schedules only */

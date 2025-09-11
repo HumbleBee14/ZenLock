@@ -41,6 +41,33 @@
 -renamesourcefileattribute SourceFile
 
 # ============================================================================
+# ROOM DATABASE: Keep Room classes and entities
+# ============================================================================
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keep @androidx.room.Dao class *
+-keep class com.grepguru.zenlock.data.entities.** { *; }
+-keep class com.grepguru.zenlock.data.dao.** { *; }
+-keep class com.grepguru.zenlock.data.database.** { *; }
+
+# Keep Room TypeConverters
+-keep class * extends androidx.room.TypeConverter
+-keepclassmembers class * {
+    @androidx.room.TypeConverter *;
+}
+
+# Keep Room generated classes
+-keep class * extends androidx.room.RoomDatabase$Callback
+-keep class * extends androidx.room.RoomDatabase$Migration
+
+# ============================================================================
+# SCHEDULE MODEL: Keep schedule-related classes
+# ============================================================================
+-keep class com.grepguru.zenlock.model.ScheduleModel { *; }
+-keep class com.grepguru.zenlock.model.ScheduleModel$RepeatType { *; }
+-keep class com.grepguru.zenlock.utils.ScheduleManager { *; }
+
+# ============================================================================
 # PERFORMANCE: Additional optimizations
 # ============================================================================
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*

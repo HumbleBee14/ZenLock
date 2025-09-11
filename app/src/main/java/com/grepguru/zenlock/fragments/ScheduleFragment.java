@@ -136,14 +136,25 @@ public class ScheduleFragment extends Fragment {
     
     private void loadSchedules() {
         Log.d(TAG, "Loading schedules...");
-        schedules.clear();
-        List<ScheduleModel> allSchedules = scheduleManager.getAllSchedules();
-        Log.d(TAG, "Found " + allSchedules.size() + " schedules from manager");
-        schedules.addAll(allSchedules);
-        scheduleAdapter.notifyDataSetChanged();
-        
-        updateEmptyState();
-        Log.d(TAG, "Schedules loaded: " + schedules.size());
+        try {
+            schedules.clear();
+            List<ScheduleModel> allSchedules = scheduleManager.getAllSchedules();
+            Log.d(TAG, "Found " + allSchedules.size() + " schedules from manager");
+            
+            // Debug: Log each schedule
+            for (ScheduleModel schedule : allSchedules) {
+                Log.d(TAG, "Schedule: " + schedule.getName() + " (id=" + schedule.getId() + ", enabled=" + schedule.isEnabled() + ")");
+            }
+            
+            schedules.addAll(allSchedules);
+            scheduleAdapter.notifyDataSetChanged();
+            
+            updateEmptyState();
+            Log.d(TAG, "Schedules loaded: " + schedules.size());
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading schedules", e);
+            Toast.makeText(requireContext(), "Error loading schedules: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
     
     private void updateEmptyState() {
