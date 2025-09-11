@@ -36,9 +36,6 @@ public class MainActivity extends AppCompatActivity {
                 // Check exact alarm permission for schedules
                 checkExactAlarmPermission();
 
-                // Check full screen intent permission for automatic lock
-                checkFullScreenIntentPermission();
-
                 // Check foreground service permission for background launch
                 checkForegroundServicePermission();
 
@@ -122,21 +119,6 @@ public class MainActivity extends AppCompatActivity {
             AlarmPermissionManager.requestExactAlarmPermission(this);
         } else {
             Log.d(TAG, "Exact alarm permission already granted");
-        }
-    }
-
-    /**
-     * Check full screen intent permission for automatic lock
-     */
-    private void checkFullScreenIntentPermission() {
-        Log.d(TAG, "Checking full screen intent permission...");
-        Log.d(TAG, "Android API level: " + android.os.Build.VERSION.SDK_INT);
-        
-        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(this)) {
-            Log.d(TAG, "Full screen intent permission not granted, requesting...");
-            FullScreenIntentPermissionManager.requestFullScreenIntentPermission(this);
-        } else {
-            Log.d(TAG, "Full screen intent permission already granted");
         }
     }
 

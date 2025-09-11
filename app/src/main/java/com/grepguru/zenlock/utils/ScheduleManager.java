@@ -20,7 +20,7 @@ import java.util.List;
 public class ScheduleManager {
     
     private static final String TAG = "ScheduleManager";
-    private static final String PREFS_NAME = "FocusLockSchedules";
+    private static final String PREFS_NAME = "FocusLockPrefs";
     private static final String KEY_SCHEDULES = "schedules";
     private static final String KEY_NEXT_SCHEDULE_ID = "next_schedule_id";
     

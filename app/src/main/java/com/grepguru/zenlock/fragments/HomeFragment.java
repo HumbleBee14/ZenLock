@@ -279,6 +279,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void checkAndStartLockService() {
+        // Check if we have permission to display over other apps
+        if (!Settings.canDrawOverlays(getActivity())) {
+            showOverlayPermissionBanner();
+            return;
+        }
+        
         // Accessibility permission already checked at the beginning of animation
         SharedPreferences preferences = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -305,6 +311,19 @@ public class HomeFragment extends Fragment {
         Intent intent = new Intent(getActivity(), LockScreenActivity.class);
         intent.putExtra("lockDuration", lockDurationMillis);
         startActivity(intent);
+    }
+    
+    private void showOverlayPermissionBanner() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Permission Required")
+                .setMessage("ZenLock needs 'Display over other apps' permission to show the lock screen.\n\nThis allows the app to block access to other apps during focus sessions.")
+                .setPositiveButton("Grant Permission", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                    intent.setData(android.net.Uri.fromParts("package", getActivity().getPackageName(), null));
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void showAccessibilityDisclosureDialog() {

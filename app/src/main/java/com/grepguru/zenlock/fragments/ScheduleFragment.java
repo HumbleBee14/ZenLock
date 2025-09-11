@@ -1,6 +1,10 @@
 package com.grepguru.zenlock.fragments;
 
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.model.ScheduleModel;
+import com.grepguru.zenlock.utils.FullScreenIntentPermissionManager;
 import com.grepguru.zenlock.utils.ScheduleManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
@@ -98,6 +103,13 @@ public class ScheduleFragment extends Fragment {
                 ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
                 if (updatedSchedule != null) {
                     if (updatedSchedule.isEnabled()) {
+                        // Check permissions before enabling schedule
+                        if (!checkSchedulePermissions()) {
+                            // Revert the toggle if permissions not granted
+                            scheduleManager.toggleSchedule(schedule.getId());
+                            loadSchedules();
+                            return;
+                        }
                         // Schedule was enabled, activate it
                         scheduleActivator.scheduleSchedule(updatedSchedule);
                         Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
@@ -227,5 +239,58 @@ public class ScheduleFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadSchedules(); // Refresh when returning to fragment
+    }
+
+    /**
+     * Check full screen intent permission for automatic lock
+     */
+    private void checkFullScreenIntentPermission() {
+        Log.d(TAG, "Checking full screen intent permission...");
+        Log.d(TAG, "Android API level: " + android.os.Build.VERSION.SDK_INT);
+
+        if (!FullScreenIntentPermissionManager.canUseFullScreenIntent(this)) {
+            Log.d(TAG, "Full screen intent permission not granted, requesting...");
+            FullScreenIntentPermissionManager.requestFullScreenIntentPermission(this);
+        } else {
+            Log.d(TAG, "Full screen intent permission already granted");
+        }
+    }
+
+
+    private boolean checkSchedulePermissions() {
+        // Check overlay permission (Display over other apps)
+        if (!Settings.canDrawOverlays(requireContext())) {
+            showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to show the lock screen when scheduled.");
+            return false;
+        }
+        
+        // Check exact alarm permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            android.app.AlarmManager alarmManager = (android.app.AlarmManager) requireContext().getSystemService(android.content.Context.ALARM_SERVICE);
+            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                showSchedulePermissionBanner("Exact alarms", "ZenLock needs this permission to schedule precise focus sessions.");
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private void showSchedulePermissionBanner(String permissionName, String reason) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Permission Required for Schedules")
+                .setMessage(permissionName + " permission is required for scheduled focus sessions.\n\n" + reason)
+                .setPositiveButton("Grant Permission", (dialog, which) -> {
+                    if (permissionName.contains("Display over other apps")) {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
+                        startActivity(intent);
+                    } else if (permissionName.contains("Exact alarms")) {
+                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }
