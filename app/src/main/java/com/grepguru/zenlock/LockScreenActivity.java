@@ -764,7 +764,9 @@ public class LockScreenActivity extends AppCompatActivity {
             if ("circular".equals(timerStyle)) {
                 lockscreenMessage.setVisibility(View.GONE);
             } else {
-                lockscreenMessage.setVisibility(View.VISIBLE);
+                // Digital timer: check if quotes are enabled
+                boolean quotesEnabled = preferences.getBoolean("show_quotes", true);
+                lockscreenMessage.setVisibility(quotesEnabled ? View.VISIBLE : View.GONE);
             }
         }
     }
