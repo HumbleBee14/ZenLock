@@ -26,14 +26,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        Log.d(TAG, "=== MainActivity onCreate START ===");
+        Log.d(TAG, "Intent that started this activity: " + getIntent().toString());
+
         // Check if essential permissions are granted - if not, show onboarding
-        if (!PermissionsOnboardingActivity.areEssentialPermissionsGranted(this)) {
+        Log.d(TAG, "About to check essential permissions...");
+        boolean permissionsGranted = PermissionsOnboardingActivity.areEssentialPermissionsGranted(this);
+        Log.d(TAG, "Essential permissions check result: " + permissionsGranted);
+
+        if (!permissionsGranted) {
+            Log.d(TAG, "Permissions not granted, redirecting to onboarding");
             // Redirect to permissions onboarding
             startActivity(new Intent(this, PermissionsOnboardingActivity.class));
             finish();
             return;
         }
         
+        Log.d(TAG, "All permissions granted, continuing to main app");
         setContentView(R.layout.activity_main);
         
         // Setup permission launcher

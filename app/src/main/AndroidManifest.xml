@@ -50,9 +50,9 @@
         tools:targetApi="31">
 
 
-        <!-- Permissions Onboarding Activity (First Launch) -->
+        <!-- Main Activity (App Launch) -->
         <activity
-            android:name=".PermissionsOnboardingActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ZenLock">
             <intent-filter>
@@ -61,9 +61,9 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Activity (App Launch) -->
+        <!-- Permissions Onboarding Activity (First Launch) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".PermissionsOnboardingActivity"
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
