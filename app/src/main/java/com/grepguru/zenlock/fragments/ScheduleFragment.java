@@ -250,6 +250,12 @@ public class ScheduleFragment extends Fragment {
     }
 
     private boolean checkSchedulePermissions() {
+        // Check accessibility permission first (most critical)
+        if (!isAccessibilityPermissionGranted()) {
+            showSchedulePermissionBanner("Accessibility Service", "ZenLock needs Accessibility Service permission to enforce screen locking during focus sessions. Without this, users can bypass the lock screen.");
+            return false;
+        }
+        
         // Check overlay permission (Display over other apps)
         if (!Settings.canDrawOverlays(requireContext())) {
             showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to display the lock screen over other apps during scheduled focus sessions.");
@@ -268,12 +274,28 @@ public class ScheduleFragment extends Fragment {
         return true;
     }
     
+    private boolean isAccessibilityPermissionGranted() {
+        android.view.accessibility.AccessibilityManager am = (android.view.accessibility.AccessibilityManager) requireContext().getSystemService(android.content.Context.ACCESSIBILITY_SERVICE);
+        if (am != null) {
+            for (android.accessibilityservice.AccessibilityServiceInfo service : am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
+                if (service.getId().contains(requireContext().getPackageName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     private void showSchedulePermissionBanner(String permissionName, String reason) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Permission Required for Schedules")
                 .setMessage(permissionName + " permission is required for scheduled focus sessions.\n\n" + reason)
                 .setPositiveButton("Grant Permission", (dialog, which) -> {
-                    if (permissionName.contains("Display over other apps")) {
+                    if (permissionName.contains("Accessibility Service")) {
+                        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                        startActivity(intent);
+                        Toast.makeText(requireContext(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
+                    } else if (permissionName.contains("Display over other apps")) {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                         intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
                         startActivity(intent);

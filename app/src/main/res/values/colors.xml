@@ -45,11 +45,15 @@
     
     <!-- Status Colors -->
     <color name="success">#10B981</color>           <!-- Success states -->
+    <color name="success_dark">#059669</color>      <!-- Darker success for borders -->
     <color name="warning">#F59E0B</color>           <!-- Warning states -->
     <color name="error">#EF4444</color>             <!-- Error states -->
     <color name="info">#3B82F6</color>              <!-- Info states -->
     <color name="warningText">#D97706</color>       <!-- Warning text color -->
     <color name="warningBackground">#FEF3C7</color> <!-- Warning banner background -->
+    
+    <!-- Card Background -->
+    <color name="card_background">#1E293B</color>   <!-- Card backgrounds for permissions -->
     
     <!-- Legacy Compatibility (Gradually Remove) -->
     <color name="primaryTeal">@color/primary</color>

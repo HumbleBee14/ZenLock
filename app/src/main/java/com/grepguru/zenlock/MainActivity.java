@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,6 +25,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Check if permissions onboarding is completed
+        if (!PermissionsOnboardingActivity.isOnboardingCompleted(this)) {
+            // Redirect to permissions onboarding
+            startActivity(new Intent(this, PermissionsOnboardingActivity.class));
+            finish();
+            return;
+        }
+        
+        // Check if essential permissions are still granted (user might have revoked them)
+        if (!PermissionsOnboardingActivity.areEssentialPermissionsGranted(this)) {
+            // Redirect to permissions onboarding
+            startActivity(new Intent(this, PermissionsOnboardingActivity.class));
+            finish();
+            return;
+        }
+        
         setContentView(R.layout.activity_main);
         
         // Setup permission launcher
