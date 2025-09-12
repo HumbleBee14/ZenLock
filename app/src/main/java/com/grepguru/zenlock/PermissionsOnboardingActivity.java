@@ -1,7 +1,6 @@
 package com.grepguru.zenlock;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -13,8 +12,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.grepguru.zenlock.utils.AlarmPermissionManager;
-
 /**
  * Permissions Onboarding Activity
  * Professional screen to request essential permissions for new users
@@ -23,9 +20,7 @@ import com.grepguru.zenlock.utils.AlarmPermissionManager;
 public class PermissionsOnboardingActivity extends AppCompatActivity {
     
     private static final String TAG = "PermissionsOnboarding";
-    private static final String PREFS_NAME = "FocusLockPrefs";
-    private static final String KEY_PERMISSIONS_COMPLETED = "permissions_onboarding_completed";
-    
+
     private Button accessibilityButton;
     private Button overlayButton;
     private Button usageButton;
@@ -51,6 +46,15 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updatePermissionStates();
+
+        // Auto-navigate to main app if all essential permissions are granted
+        if (areEssentialPermissionsGranted(this)) {
+            Log.d(TAG, "All essential permissions granted, navigating to main app");
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
     }
     
     private void initializeViews() {
@@ -175,25 +179,13 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     }
     
     private void completeOnboarding() {
-        // Mark onboarding as completed
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_PERMISSIONS_COMPLETED, true).apply();
-        
-        Log.d(TAG, "Permissions onboarding completed");
-        
+        Log.d(TAG, "Navigating to main app");
+
         // Navigate to main activity
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
-    }
-    
-    /**
-     * Check if permissions onboarding has been completed
-     */
-    public static boolean isOnboardingCompleted(android.content.Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        return prefs.getBoolean(KEY_PERMISSIONS_COMPLETED, false);
     }
     
     /**

@@ -26,15 +26,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Check if permissions onboarding is completed
-        if (!PermissionsOnboardingActivity.isOnboardingCompleted(this)) {
-            // Redirect to permissions onboarding
-            startActivity(new Intent(this, PermissionsOnboardingActivity.class));
-            finish();
-            return;
-        }
-        
-        // Check if essential permissions are still granted (user might have revoked them)
+        // Check if essential permissions are granted - if not, show onboarding
         if (!PermissionsOnboardingActivity.areEssentialPermissionsGranted(this)) {
             // Redirect to permissions onboarding
             startActivity(new Intent(this, PermissionsOnboardingActivity.class));
