@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -120,11 +119,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         boolean essentialGranted = accessibilityGranted && overlayGranted && 
                                  (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted);
         continueButton.setEnabled(essentialGranted);
-        
-        Log.d(TAG, "Permissions - Accessibility: " + accessibilityGranted + 
-                   ", Overlay: " + overlayGranted + 
-                   ", Usage: " + usageGranted +
-                   ", Alarm: " + alarmGranted);
     }
     
     private void updatePermissionCard(CardView card, Button button, boolean granted, 
@@ -146,20 +140,14 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         android.view.accessibility.AccessibilityManager am = 
             (android.view.accessibility.AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         if (am != null) {
-            Log.d(TAG, "Instance method: Checking accessibility services...");
             java.util.List<android.accessibilityservice.AccessibilityServiceInfo> enabledServices =
                 am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-            Log.d(TAG, "Instance method: Found " + enabledServices.size() + " enabled services");
-
             for (android.accessibilityservice.AccessibilityServiceInfo service : enabledServices) {
                 String serviceId = service.getId();
-                Log.d(TAG, "Instance method: Found service: " + serviceId);
                 if (serviceId.contains(getPackageName())) {
-                    Log.d(TAG, "Instance method: Found our service: " + serviceId);
                     return true;
                 }
             }
-            Log.d(TAG, "Instance method: Our package " + getPackageName() + " not found");
         }
         return false;
     }
@@ -179,8 +167,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     }
     
     private void completeOnboarding() {
-        Log.d(TAG, "Navigating to main app");
-
         // Navigate to main activity
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -193,43 +179,25 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
      */
     public static boolean areEssentialPermissionsGranted(android.content.Context context) {
         try {
-            Log.d("PermissionsCheck", "=== STARTING PERMISSION CHECK ===");
-
             // Check accessibility - use same logic as instance method
             boolean accessibilityGranted = false;
             android.view.accessibility.AccessibilityManager am =
                 (android.view.accessibility.AccessibilityManager) context.getSystemService(ACCESSIBILITY_SERVICE);
             if (am != null) {
                 String packageName = context.getPackageName();
-                Log.d("PermissionsCheck", "Our package name: " + packageName);
-                Log.d("PermissionsCheck", "Accessibility Manager available, checking enabled services...");
                 java.util.List<android.accessibilityservice.AccessibilityServiceInfo> enabledServices =
                     am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-                Log.d("PermissionsCheck", "Found " + enabledServices.size() + " enabled accessibility services");
-
                 for (android.accessibilityservice.AccessibilityServiceInfo service : enabledServices) {
                     String serviceId = service.getId();
-                    Log.d("PermissionsCheck", "Found accessibility service: " + serviceId);
-
-                    // Check if this service belongs to our app (handle debug package names)
                     if (serviceId.startsWith(packageName + "/") ||
                         serviceId.contains("com.grepguru.zenlock.AppBlockerService")) {
-                        Log.d("PermissionsCheck", "✓ Found our accessibility service: " + serviceId);
                         accessibilityGranted = true;
                         break;
                     }
                 }
-                if (!accessibilityGranted) {
-                    Log.d("PermissionsCheck", "✗ Our package name: " + packageName + " not found in any enabled service");
-                }
-            } else {
-                Log.e("PermissionsCheck", "✗ AccessibilityManager is null!");
             }
-
             // Check overlay
             boolean overlayGranted = Settings.canDrawOverlays(context);
-            Log.d("PermissionsCheck", "Overlay permission: " + (overlayGranted ? "✓ GRANTED" : "✗ DENIED"));
-
             // Check alarm (API 31+)
             boolean alarmGranted = true;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -237,27 +205,13 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
                     (android.app.AlarmManager) context.getSystemService(ALARM_SERVICE);
                 if (alarmManager != null) {
                     alarmGranted = alarmManager.canScheduleExactAlarms();
-                    Log.d("PermissionsCheck", "Exact alarm permission (API " + Build.VERSION.SDK_INT + "): " + (alarmGranted ? "✓ GRANTED" : "✗ DENIED"));
                 } else {
-                    Log.e("PermissionsCheck", "✗ AlarmManager is null!");
                     alarmGranted = false;
                 }
-            } else {
-                Log.d("PermissionsCheck", "Exact alarm permission not required for API " + Build.VERSION.SDK_INT);
             }
-
             // Final result
-            boolean result = accessibilityGranted && overlayGranted && alarmGranted;
-            Log.d("PermissionsCheck", "=== FINAL RESULT ===");
-            Log.d("PermissionsCheck", "Accessibility: " + (accessibilityGranted ? "✓" : "✗"));
-            Log.d("PermissionsCheck", "Overlay: " + (overlayGranted ? "✓" : "✗"));
-            Log.d("PermissionsCheck", "Alarm: " + (alarmGranted ? "✓" : "✗"));
-            Log.d("PermissionsCheck", "Overall result: " + (result ? "✓ ALL GRANTED" : "✗ MISSING PERMISSIONS"));
-            Log.d("PermissionsCheck", "=== END PERMISSION CHECK ===");
-
-            return result;
+            return accessibilityGranted && overlayGranted && alarmGranted;
         } catch (Exception e) {
-            Log.e("PermissionsCheck", "❌ EXCEPTION in permission check: " + e.getMessage(), e);
             return false; // If there's an error, assume permissions are not granted
         }
     }
