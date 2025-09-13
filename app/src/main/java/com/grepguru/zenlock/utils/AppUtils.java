@@ -152,7 +152,7 @@ public class AppUtils {
         return getMainDefaultApps(context);
     }
 
-    private static String findMainDialerApp(Context context) {
+    public static String findMainDialerApp(Context context) {
         PackageManager pm = context.getPackageManager();
         
         // Try system method first
@@ -189,7 +189,7 @@ public class AppUtils {
         return null;
     }
     
-    private static String findMainCalendarApp(Context context) {
+    public static String findMainCalendarApp(Context context) {
         PackageManager pm = context.getPackageManager();
         
         // Try system method first
@@ -228,7 +228,7 @@ public class AppUtils {
         return null;
     }
     
-    private static String findMainClockApp(Context context) {
+    public static String findMainClockApp(Context context) {
         PackageManager pm = context.getPackageManager();
         
         // Try system method first

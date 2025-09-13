@@ -74,7 +74,9 @@ public class WhitelistActivity extends AppCompatActivity {
     private Set<String> defaultApps = new HashSet<>(); // Phone, Calendar, Clock (excluded from selection)
     private Set<String> selectedApps = new HashSet<>(); // User's additional app selections
     private Map<String, SelectableAppModel> appModelMap = new HashMap<>(); // Quick lookup for app info
-    
+    // Set of device default app package names (Phone, Calendar, Clock) - always excluded from quota
+    private Set<String> deviceDefaultAppPackages = new HashSet<>();
+
     // Tab constants
     private static final int TAB_SYSTEM = 0;
     private static final int TAB_USER = 1;
@@ -88,7 +90,16 @@ public class WhitelistActivity extends AppCompatActivity {
         setupSelectedAppsBar();
         setupSearch();
 
-        defaultApps = AppUtils.getMainDefaultApps(this);
+        // Build set of device default app package names (regardless of toggle state)
+        deviceDefaultAppPackages.clear();
+        String phonePkg = AppUtils.findMainDialerApp(this);
+        String calendarPkg = AppUtils.findMainCalendarApp(this);
+        String clockPkg = AppUtils.findMainClockApp(this);
+        if (phonePkg != null) deviceDefaultAppPackages.add(phonePkg);
+        if (calendarPkg != null) deviceDefaultAppPackages.add(calendarPkg);
+        if (clockPkg != null) deviceDefaultAppPackages.add(clockPkg);
+
+        defaultApps = AppUtils.getMainDefaultApps(this); // This is still used for lock screen logic
         loadUserSelections();
 
         // Setup tabs
@@ -369,9 +380,9 @@ public class WhitelistActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         Set<String> savedWhitelist = preferences.getStringSet("whitelisted_apps", new HashSet<>());
         
-        // Filter out default apps from saved selections - they don't count toward quota
+        // Filter out device default apps from saved selections - they don't count toward quota
         for (String packageName : savedWhitelist) {
-            if (!defaultApps.contains(packageName)) {
+            if (!deviceDefaultAppPackages.contains(packageName)) {
                 selectedApps.add(packageName);
             }
         }
@@ -464,7 +475,7 @@ public class WhitelistActivity extends AppCompatActivity {
     }
     
     private boolean isDefaultApp(String packageName) {
-        return defaultApps.contains(packageName);
+        return deviceDefaultAppPackages.contains(packageName);
     }
     
     private void updateSaveButtonText() {
