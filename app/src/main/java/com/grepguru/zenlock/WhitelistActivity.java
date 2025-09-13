@@ -45,7 +45,7 @@ import java.util.Set;
 public class WhitelistActivity extends AppCompatActivity {
 
     // Configuration - Easy to modify
-    private static final int MAX_ADDITIONAL_APPS = 3;
+    private static final int MAX_ADDITIONAL_APPS = 4;
     
     // UI Components
     private RecyclerView recyclerView;
@@ -316,10 +316,10 @@ public class WhitelistActivity extends AppCompatActivity {
             appSlots[i].setClickable(false); // Make non-clickable when empty
         }
         
-        // Fill slots with selected apps (max 3 even though we have 4 slots)
+        // Fill slots with selected apps (max 4 apps using all 4 slots)
         int slotIndex = 0;
         for (String packageName : selectedApps) {
-            if (slotIndex >= 4) break; // Safety check (though should be max 3)
+            if (slotIndex >= 4) break; // Safety check (max 4 apps)
             
             SelectableAppModel appModel = appModelMap.get(packageName);
             if (appModel != null) {
