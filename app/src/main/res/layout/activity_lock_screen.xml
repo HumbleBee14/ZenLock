@@ -190,7 +190,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:minHeight="140dp"
-            android:maxHeight="220dp"
+            android:maxHeight="280dp"
             android:nestedScrollingEnabled="true"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"

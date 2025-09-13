@@ -298,9 +298,9 @@ public class LockScreenActivity extends AppCompatActivity {
                         .start();
                 });
                 
-                // Scroll to show all apps after a short delay
+                // Scroll to show all apps from the beginning after a short delay
                 appsRecycler.postDelayed(() -> {
-                    layoutManager.scrollToPosition(currentAppModels.size() - 1);
+                    layoutManager.scrollToPosition(0);
                 }, 100);
             } else {
                 // Collapse: Hide all apps
