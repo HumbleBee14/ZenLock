@@ -507,7 +507,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
-            }, 500); // Increased delay to 500ms
+            }, 150); // Increased delay to 150ms
         }
     }
 
@@ -568,7 +568,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
-            }, 1000); // 1 second delay for onStop
+            }, 100); // 0.1 second delay for onStop
         }
     }
 

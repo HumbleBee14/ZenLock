@@ -57,6 +57,14 @@ public class AppBlockerService extends AccessibilityService {
             // Log.d("AppBlockerService", "Event from our own LockScreenActivity or app. Ignoring.");
             return;
         }
+        
+        // IMMEDIATE BLOCK: Block launcher classes that bypass the lock
+        if (isLauncherBypassClass(className)) {
+            Log.d("AppBlockerService", "🚫 BLOCKING LAUNCHER BYPASS: " + packageName + " | Class: " + className);
+            // Immediately launch lock screen without any delay
+            launchLockScreen();
+            return;
+        }
 
         // Skip if this is the same package we just processed recently (debouncing)
         long currentTime = System.currentTimeMillis();
@@ -80,11 +88,17 @@ public class AppBlockerService extends AccessibilityService {
             }
         }
         
-        // Log package events for debugging (with debouncing to prevent spam)
+        // Log EVERY package event for debugging (with debouncing to prevent spam)
         if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
-            Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
+            Log.d("AppBlockerService", "🔍 CURRENT APP: " + packageName + " | Class: " + className + " | Allowed: " + isAllowed);
             lastLoggedPackage = packageName;
             lastLogTime = currentTime;
+        }
+        
+        // Also log touch events specifically
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED || 
+            event.getEventType() == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+            Log.d("AppBlockerService", "👆 TOUCH EVENT on: " + packageName + " | Type: " + getEventTypeName(event.getEventType()));
         }
         
         if (!isAllowed) {
@@ -141,6 +155,46 @@ public class AppBlockerService extends AccessibilityService {
     public void onInterrupt() {
     }
 
+    private boolean isLauncherBypassClass(String className) {
+        // Block specific launcher classes that can bypass the lock
+        String[] bypassClasses = {
+            "com.android.quickstep.RecentsActivity",        // Recent Activity button
+            "com.sec.android.app.launcher.Launcher",        // Samsung Home launcher
+            "com.android.launcher3.Launcher",               // AOSP Launcher3
+            "com.google.android.launcher.GEL",              // Google Now Launcher
+            "com.miui.home.launcher.Launcher",              // MIUI Launcher
+            "com.oneplus.launcher.Launcher",                // OnePlus Launcher
+            "com.huawei.android.launcher.Launcher",         // Huawei Launcher
+            "com.oppo.launcher.Launcher",                   // OPPO Launcher
+            "com.vivo.launcher.Launcher",                   // Vivo Launcher
+            "com.samsung.android.launcher.Launcher",        // Samsung Launcher
+            "com.android.quickstep.views.RecentsView",      // Recent Activity view
+            "com.android.systemui.recents.RecentsActivity"  // SystemUI Recent Activity
+        };
+        
+        for (String bypassClass : bypassClasses) {
+            if (className.contains(bypassClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getEventTypeName(int eventType) {
+        switch (eventType) {
+            case AccessibilityEvent.TYPE_VIEW_CLICKED:
+                return "CLICK";
+            case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
+                return "LONG_CLICK";
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                return "WINDOW_CHANGE";
+            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+                return "FOCUS";
+            default:
+                return "OTHER(" + eventType + ")";
+        }
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -149,7 +203,10 @@ public class AppBlockerService extends AccessibilityService {
         analyticsManager = new AnalyticsManager(this);
         
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | 
+                         AccessibilityEvent.TYPE_VIEW_CLICKED | 
+                         AccessibilityEvent.TYPE_VIEW_LONG_CLICKED |
+                         AccessibilityEvent.TYPE_VIEW_FOCUSED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.notificationTimeout = 100;
         setServiceInfo(info);
