@@ -580,6 +580,13 @@ public class LockScreenActivity extends AppCompatActivity {
         if (am != null) {
             am.moveTaskToFront(getTaskId(), 0);
         }
+
+        // If lock screen lost focus, restart it instantly
+        if (!isLockScreenActive) {
+            Intent intent = new Intent(this, LockScreenActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
     }
 
     @Override

@@ -22,7 +22,7 @@ public class AppBlockerService extends AccessibilityService {
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
     private String lastForegroundPackage = "";
     private long lastForegroundCheckTime = 0;
-    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 2000; // Check foreground app every 2 seconds
+    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 100; // Reduced debounce for instant response
     private AnalyticsManager analyticsManager;
     
     @Override
@@ -61,7 +61,10 @@ public class AppBlockerService extends AccessibilityService {
         // Skip if this is the same package we just processed recently (debouncing)
         long currentTime = System.currentTimeMillis();
         if (packageName.equals(lastForegroundPackage) && (currentTime - lastForegroundCheckTime) < FOREGROUND_CHECK_DEBOUNCE_MS) {
-            return; // Skip processing the same package too frequently
+            // Only skip if the package is the same and not the launcher (so launcher is always processed)
+            if (!AppUtils.isLauncherPackage(this, packageName)) {
+                return; // Skip processing the same package too frequently
+            }
         }
         lastForegroundPackage = packageName;
         lastForegroundCheckTime = currentTime;
@@ -85,6 +88,8 @@ public class AppBlockerService extends AccessibilityService {
         }
         
         if (!isAllowed) {
+            // Aggressively show overlay and lock screen
+            OverlayLockService.showOverlay(this); // Ensure overlay is shown instantly
             launchLockScreen();
         } else {
             // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting

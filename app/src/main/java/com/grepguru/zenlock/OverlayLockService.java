@@ -62,5 +62,14 @@ public class OverlayLockService extends Service {
             .setSmallIcon(R.drawable.ic_lock);
         return builder.build();
     }
-}
 
+    // Static helper to (re)show the overlay from anywhere
+    public static void showOverlay(Context context) {
+        Intent intent = new Intent(context, OverlayLockService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
+}
