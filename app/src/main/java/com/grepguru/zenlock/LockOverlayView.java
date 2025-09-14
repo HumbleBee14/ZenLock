@@ -10,6 +10,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+@SuppressWarnings("deprecation")
 public class LockOverlayView extends FrameLayout {
     private final WindowManager.LayoutParams params;
 
@@ -34,15 +35,26 @@ public class LockOverlayView extends FrameLayout {
         int overlayType = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY :
                 WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        
+        int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        
+        // Use modern fullscreen flag for API 30+ or legacy flag for older versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+ (Android 11+): Use modern fullscreen flag
+            flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
+        } else {
+            // API 29 and below: Use deprecated flag for backward compatibility
+            flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        }
+        
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 overlayType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_FULLSCREEN |
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                flags,
                 android.graphics.PixelFormat.TRANSLUCENT
         );
         params.gravity = Gravity.TOP | Gravity.START;

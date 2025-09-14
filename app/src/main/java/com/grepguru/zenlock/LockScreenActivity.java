@@ -707,7 +707,6 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private void handleUnlockSuccess(UnlockMethod method) {
         // Vibrate for feedback if enabled
-        Log.d("LockScreenActivity", "Triggering vibration on unlock success.");
         VibrationUtils.vibrate(this, 50);
         Toast.makeText(this, "Unlocked via " + method.getDisplayName(), Toast.LENGTH_SHORT).show();
 
