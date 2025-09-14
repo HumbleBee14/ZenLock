@@ -2,6 +2,7 @@ package com.grepguru.zenlock;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -37,8 +38,21 @@ public class PartnerContactActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     private OTPManager otpManager;
 
+    private boolean isLockActive(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        return prefs.getBoolean("isLocked", false);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (isLockActive(this)) {
+            Intent lockIntent = new Intent(this, LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(lockIntent);
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         
         // Enable edge-to-edge display
@@ -75,6 +89,20 @@ public class PartnerContactActivity extends AppCompatActivity {
         
         // Check and request SMS permission
         checkSmsPermission();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Enforce lock: if locked, redirect to lock screen and prevent access
+        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        boolean isLocked = preferences.getBoolean("isLocked", false);
+        if (isLocked) {
+            Intent lockIntent = new Intent(this, com.grepguru.zenlock.LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(lockIntent);
+            finish();
+        }
     }
 
     private void loadSettings() {

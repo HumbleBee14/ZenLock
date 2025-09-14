@@ -468,45 +468,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Auto-Start After Restart -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="12dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/ModernText.Body"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Auto-Start After Restart"
-                            android:textColor="@color/textPrimary" />
-
-                        <TextView
-                            style="@style/ModernText.Caption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Automatically enable lock after device restart"
-                            android:textColor="@color/textSecondary" />
-
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/superStrictModeToggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch" />
-
-                </LinearLayout>
-
                 <!-- Motivational Quotes Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -579,6 +540,45 @@
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/circularTimerToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
+
+                </LinearLayout>
+
+                <!-- Vibration Feedback Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Vibration Feedback"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Vibrate on unlock and important actions"
+                            android:textColor="@color/textSecondary" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/vibrationToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:theme="@style/AppTheme.Switch" />

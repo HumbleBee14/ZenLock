@@ -1,10 +1,12 @@
 package com.grepguru.zenlock;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.EnhancedUnlockManager;
 import com.grepguru.zenlock.utils.KeyguardUtils;
 import com.grepguru.zenlock.utils.WhitelistManager;
+import com.grepguru.zenlock.VibrationUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -54,8 +57,21 @@ public class LockScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (android.os.Build.VERSION.SDK_INT >= 27) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+            // Dismiss keyguard if needed (API 26+)
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                android.app.KeyguardManager keyguardManager = (android.app.KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                if (keyguardManager != null) {
+                    keyguardManager.requestDismissKeyguard(this, null);
+                }
+            }
+        } else if (getWindow() != null) {
+            // Only use non-deprecated flag for older versions
+            getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         super.onCreate(savedInstanceState);
-        
         // Prevent multiple instances
         if (isLockScreenActive) {
             Log.d("LockScreenActivity", "Lock screen already active, finishing duplicate instance");
@@ -63,6 +79,14 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
         isLockScreenActive = true;
+
+        // Start overlay lock service
+        Intent overlayIntent = new Intent(this, OverlayLockService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(overlayIntent);
+        } else {
+            startService(overlayIntent);
+        }
         
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         analyticsManager = new AnalyticsManager(this);
@@ -74,22 +98,47 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Check if the device restarted using uptime OR if the wasDeviceRestarted flag is set
         boolean wasRestarted = preferences.getBoolean("wasDeviceRestarted", false);
+        boolean autoRestartPref = preferences.getBoolean("auto_restart", false);
 
-        if (storedUptime > currentUptime || wasRestarted) {
+        // If uptime indicates a clock anomaly (stored uptime > current), treat as stale and clear lock
+        if (storedUptime > currentUptime) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("isLocked", false);
             editor.remove("lockEndTime");
             editor.putBoolean("wasDeviceRestarted", false);
             editor.apply();
 
-            // End analytics session if active
             if (analyticsManager.hasActiveSession()) {
-                analyticsManager.endSession(false); // Interrupted due to restart
+                analyticsManager.endSession(false);
             }
 
-            isLockScreenActive = false; // Reset flag before finishing
+            isLockScreenActive = false;
             finish();
             return;
+        }
+
+        // If the device restarted and the user did NOT opt into auto-restart protection, clear the lock
+        if (wasRestarted && !autoRestartPref) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("isLocked", false);
+            editor.remove("lockEndTime");
+            editor.putBoolean("wasDeviceRestarted", false);
+            editor.apply();
+
+            if (analyticsManager.hasActiveSession()) {
+                analyticsManager.endSession(false);
+            }
+
+            isLockScreenActive = false;
+            finish();
+            return;
+        }
+
+        // If the device restarted and auto-restart is enabled, proceed to show lock (do not clear).
+        if (wasRestarted && autoRestartPref) {
+            // Clear the restart marker so subsequent launches don't treat it as a new restart
+            preferences.edit().putBoolean("wasDeviceRestarted", false).apply();
+            // Continue — lock remains active and will be enforced below
         }
 
         // Normal behaviour if the device is not restarted
@@ -400,14 +449,6 @@ public class LockScreenActivity extends AppCompatActivity {
         startCountdownTimer(targetDuration, remainingTimeMillis);
     }
 
-    /*
-    @Override
-    public void onBackPressed() {
-        // Disable back button
-        Toast.makeText(this, "Cannot exit Focus Mode!", Toast.LENGTH_SHORT).show();
-    }
-    */
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -534,13 +575,17 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Remove the automatic restart on resume to prevent loops
+        // Always bring lock screen to front if not already
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (am != null) {
+            am.moveTaskToFront(getTaskId(), 0);
+        }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        
+
         // Remove automatic restart on focus change to prevent loops
         // The onPause/onStop methods will handle legitimate cases where user tries to leave
     }
@@ -551,26 +596,26 @@ public class LockScreenActivity extends AppCompatActivity {
     private void showUnlockButton() {
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
-        
+
         // Cancel any existing auto-hide timer
         if (autoHideHandler != null && autoHideRunnable != null) {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
-        
+
         // Show unlock button with animation
         unlockPromptButton.setVisibility(View.VISIBLE);
         unlockPromptButton.animate()
             .alpha(1f)
             .setDuration(300)
             .start();
-        
+
         // Hide arrow
         unlockArrow.animate()
             .alpha(0f)
             .setDuration(200)
             .withEndAction(() -> unlockArrow.setVisibility(View.GONE))
             .start();
-        
+
         // Set up auto-hide after 5 seconds
         autoHideHandler = new android.os.Handler(android.os.Looper.getMainLooper());
         autoHideRunnable = () -> {
@@ -578,21 +623,21 @@ public class LockScreenActivity extends AppCompatActivity {
         };
         autoHideHandler.postDelayed(autoHideRunnable, 5000); // 5 seconds
     }
-    
+
     /**
      * Hide unlock button and show arrow
      */
     private void hideUnlockButton() {
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
-        
+
         // Hide unlock button with animation
         unlockPromptButton.animate()
             .alpha(0f)
             .setDuration(200)
             .withEndAction(() -> unlockPromptButton.setVisibility(View.GONE))
             .start();
-        
+
         // Show arrow
         unlockArrow.setVisibility(View.VISIBLE);
         unlockArrow.animate()
@@ -606,22 +651,22 @@ public class LockScreenActivity extends AppCompatActivity {
         super.onDestroy();
         // Always reset the flag when activity is destroyed
         isLockScreenActive = false;
-        
+
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
-        
+
         // Cancel auto-hide timer
         if (autoHideHandler != null && autoHideRunnable != null) {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
-        
+
         // Cleanup timer
         if (currentTimer != null) {
             currentTimer.cleanup();
         }
-        
+
         // Cleanup unlock manager
         if (unlockManager != null) {
             unlockManager.cleanup();
@@ -642,7 +687,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     for (android.app.ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
                         if (processInfo.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                             String foregroundPackage = processInfo.processName;
-                            
+
                             // Check if this is a whitelisted app
                             if (WhitelistManager.isAppWhitelisted(LockScreenActivity.this, foregroundPackage)) {
                                 Log.d("LockScreenActivity", "Whitelisted app detected in foreground: " + foregroundPackage);
@@ -661,6 +706,9 @@ public class LockScreenActivity extends AppCompatActivity {
 
 
     private void handleUnlockSuccess(UnlockMethod method) {
+        // Vibrate for feedback if enabled
+        Log.d("LockScreenActivity", "Triggering vibration on unlock success.");
+        VibrationUtils.vibrate(this, 50);
         Toast.makeText(this, "Unlocked via " + method.getDisplayName(), Toast.LENGTH_SHORT).show();
 
         // Mark as manually unlocked to prevent completion toast
@@ -693,7 +741,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private void setupMotivationalQuotes() {
         TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
-        
+
         // Check if quotes are enabled
         if (!preferences.getBoolean("show_quotes", true)) {
             lockscreenMessage.setText("Stay focused, stay productive!");
@@ -730,17 +778,17 @@ public class LockScreenActivity extends AppCompatActivity {
     private void initializeTimer(long totalTimeMs) {
         // Get timer style from preferences
         String timerStyle = preferences.getString("timer_style", "digital");
-        
+
         // Create timer instance
         currentTimer = TimerFactory.createTimer(this, timerStyle);
-        
+
         // Get timer container and replace the default timer
         timerContainer = findViewById(R.id.timerContainer);
         if (timerContainer != null && timerContainer instanceof android.widget.FrameLayout) {
             android.widget.FrameLayout frameLayout = (android.widget.FrameLayout) timerContainer;
             frameLayout.removeAllViews();
             frameLayout.addView(currentTimer.getTimerView());
-            
+
             // Adjust container size based on timer type
             androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) frameLayout.getLayoutParams();
             if ("circular".equals(timerStyle)) {
@@ -754,10 +802,10 @@ public class LockScreenActivity extends AppCompatActivity {
             }
             frameLayout.setLayoutParams(params);
         }
-        
+
         // Initialize the timer using total duration so progress reflects overall session
         currentTimer.initialize(totalTimeMs);
-        
+
         // Hide quotes for circular timer to save space
         TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
         if (lockscreenMessage != null) {
@@ -770,7 +818,7 @@ public class LockScreenActivity extends AppCompatActivity {
             }
         }
     }
-    
+
     private void startCountdownTimer(long totalTimeMs, long remainingTimeMillis) {
         countDownTimer = new android.os.CountDownTimer(remainingTimeMillis, 1000) {
             @Override
@@ -794,12 +842,23 @@ public class LockScreenActivity extends AppCompatActivity {
                     editor.remove("lockEndTime"); // Remove saved lock end time
                     editor.apply();
 
+                    // Vibrate on timer completion
+                    VibrationUtils.vibrate(LockScreenActivity.this, 500); // 500ms vibration
+
                     Toast.makeText(LockScreenActivity.this, "Time's up! Focus Mode Ended.", Toast.LENGTH_SHORT).show();
                 }
                 finish();
             }
         };
         countDownTimer.start();
+    }
+
+    private void finishLockScreen() {
+        // Call this when lock ends (unlock, timer expires, etc.)
+        isLockScreenActive = false;
+        // Stop overlay lock service
+        stopService(new Intent(this, OverlayLockService.class));
+        finish();
     }
 
 

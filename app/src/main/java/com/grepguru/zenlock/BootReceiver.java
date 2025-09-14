@@ -27,6 +27,27 @@ public class BootReceiver extends BroadcastReceiver {
             
             // Reschedule all enabled schedules
             rescheduleAllSchedules(context);
+
+            // Enforce lock overlay and lock screen if session is active and user enabled auto-restart
+            SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+            boolean isLocked = prefs.getBoolean("isLocked", false);
+            boolean autoRestart = prefs.getBoolean("auto_restart", false);
+            Log.d(TAG, "Auto-restart preference: " + autoRestart);
+            Log.d(TAG, "Lock state: " + isLocked);
+            if (isLocked && autoRestart) {
+                // Start overlay lock service
+                Intent overlayIntent = new Intent(context, OverlayLockService.class);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    context.startForegroundService(overlayIntent);
+                } else {
+                    context.startService(overlayIntent);
+                }
+                // Bring up lock screen activity
+                Intent lockIntent = new Intent(context, LockScreenActivity.class);
+                lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                context.startActivity(lockIntent);
+                Log.d(TAG, "Lock session active after boot: started overlay and lock screen");
+            }
         }
     }
     

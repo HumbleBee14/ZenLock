@@ -1,6 +1,9 @@
 package com.grepguru.zenlock.fragments;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -130,6 +133,17 @@ public class AnalyticsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Enforce lock: if locked, redirect to lock screen and prevent access
+        SharedPreferences preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        boolean isLocked = preferences.getBoolean("isLocked", false);
+        if (isLocked) {
+            Intent lockIntent = new Intent(requireContext(), com.grepguru.zenlock.LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(lockIntent);
+            requireActivity().finish();
+            return;
+        }
+
         // Check permission status when returning from settings (single check)
         checkUsageStatsPermission();
         

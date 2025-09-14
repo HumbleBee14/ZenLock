@@ -1,6 +1,7 @@
 package com.grepguru.zenlock;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
@@ -205,6 +206,20 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Analytics initialization completed");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize analytics", e);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Enforce lock: if locked, redirect to lock screen and prevent access
+        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        boolean isLocked = preferences.getBoolean("isLocked", false);
+        if (isLocked) {
+            Intent lockIntent = new Intent(this, com.grepguru.zenlock.LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(lockIntent);
+            finish();
         }
     }
 }

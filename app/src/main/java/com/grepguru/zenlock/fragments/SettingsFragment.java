@@ -32,9 +32,9 @@ import com.grepguru.zenlock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
-    private SwitchCompat superStrictModeToggle, quotesToggle, circularTimerToggle;
-    private SwitchCompat persistentNotificationToggle, autoRestartToggle;
-    
+    private SwitchCompat autoRestartToggle, vibrationToggle;
+    private SwitchCompat quotesToggle, circularTimerToggle, persistentNotificationToggle;
+
     // Individual default app toggles
     private SwitchCompat phoneAppToggle, calendarAppToggle, clockAppToggle;
     
@@ -69,13 +69,15 @@ public class SettingsFragment extends Fragment {
         // Initialize components
         preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
 
-        superStrictModeToggle = view.findViewById(R.id.superStrictModeToggle);
-        quotesToggle = view.findViewById(R.id.quotesToggle);
-        circularTimerToggle = view.findViewById(R.id.circularTimerToggle);
-        
-        // Security settings
-        persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
         autoRestartToggle = view.findViewById(R.id.autoRestartToggle);
+        autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", false));
+        autoRestartToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("auto_restart", isChecked);
+            editor.apply();
+        });
+
+        // Security settings
         securityLevelGroup = view.findViewById(R.id.securityLevelGroup);
         basicSecurity = view.findViewById(R.id.basicSecurity);
         enhancedSecurity = view.findViewById(R.id.enhancedSecurity);
@@ -118,8 +120,10 @@ public class SettingsFragment extends Fragment {
         View supportDeveloperCard = view.findViewById(R.id.supportDeveloperCard);
 
         // Load existing settings
-        superStrictModeToggle.setChecked(preferences.getBoolean("super_strict_mode", false));
+        autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
+        quotesToggle = view.findViewById(R.id.quotesToggle);
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
+        circularTimerToggle = view.findViewById(R.id.circularTimerToggle);
         circularTimerToggle.setChecked("circular".equals(preferences.getString("timer_style", "digital")));
         
         // Load individual default app settings
@@ -128,6 +132,7 @@ public class SettingsFragment extends Fragment {
         clockAppToggle.setChecked(preferences.getBoolean("allow_clock_app", true));
         
         // Load security settings
+        persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
         persistentNotificationToggle.setChecked(preferences.getBoolean("persistent_notification", true));
         autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
         
@@ -157,6 +162,13 @@ public class SettingsFragment extends Fragment {
         // Set up event listeners
         setupListeners(view);
 
+        // Vibration toggle setup (now in General Settings)
+        vibrationToggle = view.findViewById(R.id.vibrationToggle);
+        vibrationToggle.setChecked(com.grepguru.zenlock.VibrationUtils.isVibrationEnabled(requireContext()));
+        vibrationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            com.grepguru.zenlock.VibrationUtils.setVibrationEnabled(requireContext(), isChecked);
+        });
+
         return view;
     }
 
@@ -170,12 +182,6 @@ public class SettingsFragment extends Fragment {
         feedbackCard.setOnClickListener(v -> openFeedbackEmail());
         supportDeveloperCard.setOnClickListener(v -> openSupportPage());
 
-        // Toggle Super Strict Mode
-        superStrictModeToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("super_strict_mode", isChecked);
-            editor.apply();
-        });
 
         // Toggle Motivational Quotes
         quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -216,13 +222,7 @@ public class SettingsFragment extends Fragment {
             editor.putBoolean("persistent_notification", isChecked);
             editor.apply();
         });
-        
-        autoRestartToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("auto_restart", isChecked);
-            editor.apply();
-        });
-        
+
         // Security level selection
         securityLevelGroup.setOnCheckedChangeListener((group, checkedId) -> {
             int securityLevel = 1; // Default to enhanced
@@ -394,6 +394,16 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Enforce lock: if locked, redirect to lock screen and prevent access
+        SharedPreferences preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        boolean isLocked = preferences.getBoolean("isLocked", false);
+        if (isLocked) {
+            Intent lockIntent = new Intent(requireContext(), com.grepguru.zenlock.LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(lockIntent);
+            requireActivity().finish();
+            return;
+        }
         updateUnlockMethodStates();
     }
     
