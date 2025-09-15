@@ -77,7 +77,21 @@ public class AppBlockerService extends AccessibilityService {
         lastForegroundPackage = packageName;
         lastForegroundCheckTime = currentTime;
         
-        boolean isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);
+        // FIRST: Check if this is a launcher package (skip whitelist check for these)
+        boolean isLauncherPackage = isLauncherPackage(packageName);
+        
+        // SECOND: Check if this is a specific launcher/recent activity class that should be blocked
+        boolean isLauncherBypass = isLauncherBypassClass(className);
+        
+        // THIRD: Determine if allowed
+        boolean isAllowed;
+        if (isLauncherPackage) {
+            // For launcher packages, only block specific classes (like Launcher, RecentsActivity)
+            isAllowed = !isLauncherBypass;
+        } else {
+            // For non-launcher packages, check whitelist
+            isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);
+        }
         
         // Track analytics
         if (analyticsManager != null && analyticsManager.hasActiveSession()) {
@@ -90,7 +104,7 @@ public class AppBlockerService extends AccessibilityService {
         
         // Log EVERY package event for debugging (with debouncing to prevent spam)
         if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
-            Log.d("AppBlockerService", "🔍 CURRENT APP: " + packageName + " | Class: " + className + " | Allowed: " + isAllowed);
+            Log.d("AppBlockerService", "🔍 CURRENT APP: " + packageName + " | Class: " + className + " | Allowed: " + isAllowed + (isLauncherBypass ? " (Launcher Bypass Blocked)" : ""));
             lastLoggedPackage = packageName;
             lastLogTime = currentTime;
         }
@@ -155,28 +169,62 @@ public class AppBlockerService extends AccessibilityService {
     public void onInterrupt() {
     }
 
+    private boolean isLauncherPackage(String packageName) {
+        // Check if this is a launcher package (skip whitelist check for these)
+        String[] launcherPackages = {
+            "com.sec.android.app.launcher",           // Samsung Launcher
+            "com.android.launcher3",                  // AOSP Launcher3
+            "com.google.android.launcher",            // Google Now Launcher
+            "com.miui.home.launcher",                 // MIUI Launcher
+            "com.oneplus.launcher",                   // OnePlus Launcher
+            "com.huawei.android.launcher",            // Huawei Launcher
+            "com.oppo.launcher",                      // OPPO Launcher
+            "com.vivo.launcher",                      // Vivo Launcher
+            "com.samsung.android.launcher",           // Samsung Launcher
+            "com.nova.launcher",                      // Nova Launcher
+            "com.microsoft.launcher",                 // Microsoft Launcher
+            "com.anddoes.launcher",                   // ADW Launcher
+            "com.teslacoilsw.launcher",               // Nova Launcher (alternative)
+            "com.go.launcher",                        // GO Launcher
+            "com.apex.launcher",                      // Apex Launcher
+            "com.lx.launcher8",                       // Launcher 8
+            "com.htc.launcher",                       // HTC Launcher
+            "com.sony.launcher",                      // Sony Launcher
+            "com.lge.launcher2",                      // LG Launcher
+            "com.motorola.launcher"                   // Motorola Launcher
+        };
+        
+        for (String launcherPackage : launcherPackages) {
+            if (packageName.equals(launcherPackage)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isLauncherBypassClass(String className) {
-        // Block specific launcher classes that can bypass the lock
-        String[] bypassClasses = {
+        // Block launcher classes that can bypass the lock
+        // Block any class containing "Launcher" keyword (covers custom launchers)
+        // Block specific recent activity classes
+        
+        // Block any class containing "Launcher" (covers all launchers)
+        if (className.toLowerCase().contains("launcher")) {
+            return true;
+        }
+        
+        // Block specific recent activity classes
+        String[] recentActivityClasses = {
             "com.android.quickstep.RecentsActivity",        // Recent Activity button
-            "com.sec.android.app.launcher.Launcher",        // Samsung Home launcher
-            "com.android.launcher3.Launcher",               // AOSP Launcher3
-            "com.google.android.launcher.GEL",              // Google Now Launcher
-            "com.miui.home.launcher.Launcher",              // MIUI Launcher
-            "com.oneplus.launcher.Launcher",                // OnePlus Launcher
-            "com.huawei.android.launcher.Launcher",         // Huawei Launcher
-            "com.oppo.launcher.Launcher",                   // OPPO Launcher
-            "com.vivo.launcher.Launcher",                   // Vivo Launcher
-            "com.samsung.android.launcher.Launcher",        // Samsung Launcher
             "com.android.quickstep.views.RecentsView",      // Recent Activity view
             "com.android.systemui.recents.RecentsActivity"  // SystemUI Recent Activity
         };
         
-        for (String bypassClass : bypassClasses) {
-            if (className.contains(bypassClass)) {
+        for (String recentClass : recentActivityClasses) {
+            if (className.equals(recentClass)) {
                 return true;
             }
         }
+        
         return false;
     }
 
