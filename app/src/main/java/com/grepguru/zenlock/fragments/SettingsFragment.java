@@ -70,7 +70,6 @@ public class SettingsFragment extends Fragment {
         preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
 
         autoRestartToggle = view.findViewById(R.id.autoRestartToggle);
-        autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", false));
         autoRestartToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("auto_restart", isChecked);
@@ -120,7 +119,6 @@ public class SettingsFragment extends Fragment {
         View supportDeveloperCard = view.findViewById(R.id.supportDeveloperCard);
 
         // Load existing settings
-        autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
         quotesToggle = view.findViewById(R.id.quotesToggle);
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
         circularTimerToggle = view.findViewById(R.id.circularTimerToggle);
@@ -134,6 +132,8 @@ public class SettingsFragment extends Fragment {
         // Load security settings
         persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
         persistentNotificationToggle.setChecked(preferences.getBoolean("persistent_notification", true));
+        
+        // Load auto-restart setting
         autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
         
         // Load security level
