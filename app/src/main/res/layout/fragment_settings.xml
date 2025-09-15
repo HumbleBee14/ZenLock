@@ -525,7 +525,7 @@
                             style="@style/ModernText.Body"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lock Screen Timer Style"
+                            android:text="Focus Session Timer"
                             android:textColor="@color/textPrimary" />
 
                         <TextView
@@ -533,7 +533,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Show circular progress ring around timer during focus sessions"
+                            android:text="Display remaining focus time as circular progress ring"
                             android:textColor="@color/textSecondary" />
 
                     </LinearLayout>

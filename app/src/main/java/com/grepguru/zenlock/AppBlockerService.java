@@ -74,6 +74,7 @@ public class AppBlockerService extends AccessibilityService {
                 return; // Skip processing the same package too frequently
             }
         }
+        // -----------------------------------
         lastForegroundPackage = packageName;
         lastForegroundCheckTime = currentTime;
         
@@ -216,7 +217,8 @@ public class AppBlockerService extends AccessibilityService {
         String[] recentActivityClasses = {
             "com.android.quickstep.RecentsActivity",        // Recent Activity button
             "com.android.quickstep.views.RecentsView",      // Recent Activity view
-            "com.android.systemui.recents.RecentsActivity"  // SystemUI Recent Activity
+            "com.android.systemui.recents.RecentsActivity",  // SystemUI Recent Activity
+            "com.android.systemui.recents.RecentsActivityLegacy"
         };
         
         for (String recentClass : recentActivityClasses) {
