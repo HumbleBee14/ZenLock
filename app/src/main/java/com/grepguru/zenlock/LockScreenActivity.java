@@ -75,7 +75,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Prevent multiple instances
         if (isLockScreenActive) {
             Log.d("LockScreenActivity", "Lock screen already active, finishing duplicate instance");
-            finish();
+            finishLockScreen();
             return;
         }
         isLockScreenActive = true;
@@ -112,8 +112,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 analyticsManager.endSession(false);
             }
 
-            isLockScreenActive = false;
-            finish();
+            finishLockScreen();
             return;
         }
 
@@ -129,8 +128,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 analyticsManager.endSession(false);
             }
 
-            isLockScreenActive = false;
-            finish();
+            finishLockScreen();
             return;
         }
 
@@ -158,11 +156,12 @@ public class LockScreenActivity extends AppCompatActivity {
                 analyticsManager.endSession(false); // Interrupted due to expired timer
             }
 
+            // Return to MainActivity
             isLockScreenActive = false; // Reset flag before finishing
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish();
+            finishLockScreen();
             return;
         }
 
@@ -200,7 +199,7 @@ public class LockScreenActivity extends AppCompatActivity {
         initializeTimer(targetDuration);
         if (remainingTimeMillis <= 0) {
             isLockScreenActive = false; // Reset flag before finishing
-            finish();
+            finishLockScreen();
             return;
         }
 
@@ -659,6 +658,9 @@ public class LockScreenActivity extends AppCompatActivity {
         // Always reset the flag when activity is destroyed
         isLockScreenActive = false;
 
+        // Stop overlay lock service to prevent resource leak
+        stopService(new Intent(this, OverlayLockService.class));
+
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -741,7 +743,7 @@ public class LockScreenActivity extends AppCompatActivity {
         Intent intent = new Intent(LockScreenActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish();
+        finishLockScreen();
     }
 
 
@@ -853,7 +855,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
                     Toast.makeText(LockScreenActivity.this, "Time's up! Focus Mode Ended.", Toast.LENGTH_SHORT).show();
                 }
-                finish();
+                finishLockScreen();
             }
         };
         countDownTimer.start();
