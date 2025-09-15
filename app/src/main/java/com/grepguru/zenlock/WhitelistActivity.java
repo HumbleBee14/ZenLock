@@ -81,8 +81,21 @@ public class WhitelistActivity extends AppCompatActivity {
     private static final int TAB_SYSTEM = 0;
     private static final int TAB_USER = 1;
 
+    private boolean isLockActive(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        return prefs.getBoolean("isLocked", false);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (isLockActive(this)) {
+            Intent lockIntent = new Intent(this, LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(lockIntent);
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whitelist);
 
@@ -123,6 +136,20 @@ public class WhitelistActivity extends AppCompatActivity {
         // Update UI
         updateSaveButtonText();
         updateSelectedAppsBar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Enforce lock: if locked, redirect to lock screen and prevent access
+        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        boolean isLocked = preferences.getBoolean("isLocked", false);
+        if (isLocked) {
+            Intent lockIntent = new Intent(this, com.grepguru.zenlock.LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(lockIntent);
+            finish();
+        }
     }
 
     @Override

@@ -22,7 +22,7 @@ public class AppBlockerService extends AccessibilityService {
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
     private String lastForegroundPackage = "";
     private long lastForegroundCheckTime = 0;
-    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 2000; // Check foreground app every 2 seconds
+    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 100; // Reduced debounce for instant response
     private AnalyticsManager analyticsManager;
     
     @Override
@@ -57,16 +57,42 @@ public class AppBlockerService extends AccessibilityService {
             // Log.d("AppBlockerService", "Event from our own LockScreenActivity or app. Ignoring.");
             return;
         }
+        
+        // IMMEDIATE BLOCK: Block launcher classes that bypass the lock
+        if (isLauncherBypassClass(className)) {
+            Log.d("AppBlockerService", "🚫 BLOCKING LAUNCHER BYPASS: " + packageName + " | Class: " + className);
+            // Immediately launch lock screen without any delay
+            launchLockScreen();
+            return;
+        }
 
         // Skip if this is the same package we just processed recently (debouncing)
         long currentTime = System.currentTimeMillis();
         if (packageName.equals(lastForegroundPackage) && (currentTime - lastForegroundCheckTime) < FOREGROUND_CHECK_DEBOUNCE_MS) {
-            return; // Skip processing the same package too frequently
+            // Only skip if the package is the same and not the launcher (so launcher is always processed)
+            if (!AppUtils.isLauncherPackage(this, packageName)) {
+                return; // Skip processing the same package too frequently
+            }
         }
+        // -----------------------------------
         lastForegroundPackage = packageName;
         lastForegroundCheckTime = currentTime;
         
-        boolean isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);
+        // FIRST: Check if this is a launcher package (skip whitelist check for these)
+        boolean isLauncherPackage = isLauncherPackage(packageName);
+        
+        // SECOND: Check if this is a specific launcher/recent activity class that should be blocked
+        boolean isLauncherBypass = isLauncherBypassClass(className);
+        
+        // THIRD: Determine if allowed
+        boolean isAllowed;
+        if (isLauncherPackage) {
+            // For launcher packages, only block specific classes (like Launcher, RecentsActivity)
+            isAllowed = !isLauncherBypass;
+        } else {
+            // For non-launcher packages, check whitelist
+            isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);
+        }
         
         // Track analytics
         if (analyticsManager != null && analyticsManager.hasActiveSession()) {
@@ -77,14 +103,22 @@ public class AppBlockerService extends AccessibilityService {
             }
         }
         
-        // Log package events for debugging (with debouncing to prevent spam)
+        // Log EVERY package event for debugging (with debouncing to prevent spam)
         if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
-            Log.d("AppBlockerService", "Event from package: " + packageName + " - Allowed: " + isAllowed);
+            Log.d("AppBlockerService", "🔍 CURRENT APP: " + packageName + " | Class: " + className + " | Allowed: " + isAllowed + (isLauncherBypass ? " (Launcher Bypass Blocked)" : ""));
             lastLoggedPackage = packageName;
             lastLogTime = currentTime;
         }
         
+        // Also log touch events specifically
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED || 
+            event.getEventType() == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+            Log.d("AppBlockerService", "👆 TOUCH EVENT on: " + packageName + " | Type: " + getEventTypeName(event.getEventType()));
+        }
+        
         if (!isAllowed) {
+            // Aggressively show overlay and lock screen
+            OverlayLockService.showOverlay(this); // Ensure overlay is shown instantly
             launchLockScreen();
         } else {
             // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting
@@ -136,6 +170,81 @@ public class AppBlockerService extends AccessibilityService {
     public void onInterrupt() {
     }
 
+    private boolean isLauncherPackage(String packageName) {
+        // Check if this is a launcher package (skip whitelist check for these)
+        String[] launcherPackages = {
+            "com.sec.android.app.launcher",           // Samsung Launcher
+            "com.android.launcher3",                  // AOSP Launcher3
+            "com.google.android.launcher",            // Google Now Launcher
+            "com.miui.home.launcher",                 // MIUI Launcher
+            "com.oneplus.launcher",                   // OnePlus Launcher
+            "com.huawei.android.launcher",            // Huawei Launcher
+            "com.oppo.launcher",                      // OPPO Launcher
+            "com.vivo.launcher",                      // Vivo Launcher
+            "com.samsung.android.launcher",           // Samsung Launcher
+            "com.nova.launcher",                      // Nova Launcher
+            "com.microsoft.launcher",                 // Microsoft Launcher
+            "com.anddoes.launcher",                   // ADW Launcher
+            "com.teslacoilsw.launcher",               // Nova Launcher (alternative)
+            "com.go.launcher",                        // GO Launcher
+            "com.apex.launcher",                      // Apex Launcher
+            "com.lx.launcher8",                       // Launcher 8
+            "com.htc.launcher",                       // HTC Launcher
+            "com.sony.launcher",                      // Sony Launcher
+            "com.lge.launcher2",                      // LG Launcher
+            "com.motorola.launcher"                   // Motorola Launcher
+        };
+        
+        for (String launcherPackage : launcherPackages) {
+            if (packageName.equals(launcherPackage)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isLauncherBypassClass(String className) {
+        // Block launcher classes that can bypass the lock
+        // Block any class containing "Launcher" keyword (covers custom launchers)
+        // Block specific recent activity classes
+        
+        // Block any class containing "Launcher" (covers all launchers)
+        if (className.toLowerCase().contains("launcher")) {
+            return true;
+        }
+        
+        // Block specific recent activity classes
+        String[] recentActivityClasses = {
+            "com.android.quickstep.RecentsActivity",        // Recent Activity button
+            "com.android.quickstep.views.RecentsView",      // Recent Activity view
+            "com.android.systemui.recents.RecentsActivity",  // SystemUI Recent Activity
+            "com.android.systemui.recents.RecentsActivityLegacy"
+        };
+        
+        for (String recentClass : recentActivityClasses) {
+            if (className.equals(recentClass)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private String getEventTypeName(int eventType) {
+        switch (eventType) {
+            case AccessibilityEvent.TYPE_VIEW_CLICKED:
+                return "CLICK";
+            case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
+                return "LONG_CLICK";
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                return "WINDOW_CHANGE";
+            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+                return "FOCUS";
+            default:
+                return "OTHER(" + eventType + ")";
+        }
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -144,7 +253,10 @@ public class AppBlockerService extends AccessibilityService {
         analyticsManager = new AnalyticsManager(this);
         
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | 
+                         AccessibilityEvent.TYPE_VIEW_CLICKED | 
+                         AccessibilityEvent.TYPE_VIEW_LONG_CLICKED |
+                         AccessibilityEvent.TYPE_VIEW_FOCUSED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.notificationTimeout = 100;
         setServiceInfo(info);

@@ -266,6 +266,21 @@ public class AppUtils {
         return null;
     }
     
+    // Returns true if the given package is a launcher (home screen) app
+    public static boolean isLauncherPackage(Context context, String packageName) {
+        if (packageName == null || packageName.isEmpty()) return false;
+        PackageManager pm = context.getPackageManager();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent, 0);
+        for (ResolveInfo info : resolveInfos) {
+            if (info.activityInfo != null && info.activityInfo.packageName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Helper method to add package if installed
     private static void addIfInstalled(PackageManager pm, Set<String> defaultApps, String packageName) {
         if (isPackageInstalled(pm, packageName)) {
