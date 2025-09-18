@@ -349,9 +349,9 @@ public class SettingsFragment extends Fragment {
         partnerConfigSection.setVisibility(partnerConfigured ? View.VISIBLE : View.GONE);
         
         if (partnerConfigured) {
-            accountabilityPartnerButton.setText("Update Contact");
+            accountabilityPartnerButton.setText("Update");
         } else {
-            accountabilityPartnerButton.setText("Configure Contact");
+            accountabilityPartnerButton.setText("Configure");
         }
         
         // Show/hide warning message based on unlock method availability

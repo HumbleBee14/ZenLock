@@ -604,6 +604,9 @@ public class LockScreenActivity extends AppCompatActivity {
             am.moveTaskToFront(getTaskId(), 0);
         }
 
+        // Ensure persistent notification is always visible
+        createPersistentNotificationIfEnabled();
+
         // If lock screen lost focus, restart it instantly
         if (!isLockScreenActive) {
             Intent intent = new Intent(this, LockScreenActivity.class);
@@ -870,8 +873,6 @@ public class LockScreenActivity extends AppCompatActivity {
                 if (currentTimer != null) {
                     currentTimer.updateTimer(totalTimeMs, millisUntilFinished);
                 }
-                // Update persistent notification with current time
-                updatePersistentNotification();
             }
 
             @Override
@@ -988,6 +989,9 @@ public class LockScreenActivity extends AppCompatActivity {
         
         // Update the timer display immediately
         updateTimerDisplay(remainingTimeMillis);
+        
+        // Update persistent notification with new end time
+        updatePersistentNotification();
     }
 
     /**
@@ -1073,20 +1077,15 @@ public class LockScreenActivity extends AppCompatActivity {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         
-        // Get remaining time for display
+        // Get end time for display
         long lockEndTime = preferences.getLong("lockEndTime", 0);
-        long currentTime = System.currentTimeMillis();
-        long remainingTimeMillis = Math.max(0, lockEndTime - currentTime);
-        
-        int remainingMinutes = (int) (remainingTimeMillis / (1000 * 60));
-        int remainingSeconds = (int) ((remainingTimeMillis % (1000 * 60)) / 1000);
-        
-        String timeText = String.format("%02d:%02d", remainingMinutes, remainingSeconds);
+        java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        String endTimeText = timeFormat.format(new java.util.Date(lockEndTime));
         
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_lock)
-            .setContentTitle("Focus Session Active")
-            .setContentText("Time remaining: " + timeText)
+            .setContentTitle("ZenLock Active")
+            .setContentText("Ends at " + endTimeText)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(false)
@@ -1094,11 +1093,13 @@ public class LockScreenActivity extends AppCompatActivity {
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSilent(true)
+            .setShowWhen(false)
+            .setLocalOnly(true)
             .build();
     }
     
     /**
-     * Update persistent notification with current time
+     * Update persistent notification with current end time
      */
     private void updatePersistentNotification() {
         boolean persistentNotificationEnabled = preferences.getBoolean("persistent_notification", true);
@@ -1109,6 +1110,7 @@ public class LockScreenActivity extends AppCompatActivity {
         try {
             Notification notification = createPersistentNotification();
             notificationManager.notify(NOTIFICATION_ID, notification);
+            Log.d("LockScreenActivity", "Persistent notification updated");
         } catch (Exception e) {
             Log.e("LockScreenActivity", "Failed to update persistent notification", e);
         }

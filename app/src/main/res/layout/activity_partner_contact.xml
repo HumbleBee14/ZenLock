@@ -192,11 +192,14 @@
                     <!-- Test OTP Button -->
                     <Button
                         android:id="@+id/testOtpButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
                         android:text="Send Test OTP"
                         style="@style/ModernButton.Secondary"
                         android:layout_marginTop="12dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_gravity="center_horizontal"
                         android:visibility="gone"/>
 
                 </LinearLayout>
@@ -295,11 +298,12 @@
         <Button
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Save"
             style="@style/ModernButton.Primary"
             android:layout_marginTop="32dp"
-            android:padding="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
             app:layout_constraintTop_toBottomOf="@id/emailCard"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
