@@ -1,6 +1,10 @@
 package com.grepguru.zenlock;
 
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +22,7 @@ import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.app.AlertDialog;
+import androidx.core.app.NotificationCompat;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,6 +61,11 @@ public class LockScreenActivity extends AppCompatActivity {
     // Timer system
     private TimerType currentTimer;
     private View timerContainer;
+    
+    // Persistent notification
+    private static final String CHANNEL_ID = "zenlock_persistent_lock";
+    private static final int NOTIFICATION_ID = 1001;
+    private NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -457,6 +467,9 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Start Countdown Timer
         startCountdownTimer(targetDuration, remainingTimeMillis);
+        
+        // Create persistent notification if enabled
+        createPersistentNotificationIfEnabled();
     }
 
     @Override
@@ -620,17 +633,21 @@ public class LockScreenActivity extends AppCompatActivity {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
 
-        // Show unlock and extend button container with animation
+        // Show unlock and extend button container with smooth slide-up animation
         unlockExtendButtonContainer.setVisibility(View.VISIBLE);
+        unlockExtendButtonContainer.setTranslationY(50f); // Start slightly below
+        unlockExtendButtonContainer.setAlpha(0f);
         unlockExtendButtonContainer.animate()
-            .alpha(1f)
+            .translationY(0f) // Slide up to final position
+            .alpha(1f) // Fade in
             .setDuration(300)
+            .setInterpolator(new android.view.animation.DecelerateInterpolator())
             .start();
 
-        // Hide arrow
+        // Hide arrow with fade out
         unlockArrow.animate()
             .alpha(0f)
-            .setDuration(200)
+            .setDuration(400)
             .withEndAction(() -> unlockArrow.setVisibility(View.GONE))
             .start();
 
@@ -650,15 +667,21 @@ public class LockScreenActivity extends AppCompatActivity {
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
         LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
 
-        // Hide unlock and extend button container with animation
+        // Hide unlock and extend button container with smooth slide-down animation
         unlockExtendButtonContainer.animate()
-            .alpha(0f)
-            .setDuration(200)
-            .withEndAction(() -> unlockExtendButtonContainer.setVisibility(View.GONE))
+            .translationY(50f) // Slide down slightly
+            .alpha(0f) // Fade out
+            .setDuration(300)
+            .setInterpolator(new android.view.animation.AccelerateInterpolator())
+            .withEndAction(() -> {
+                unlockExtendButtonContainer.setVisibility(View.GONE);
+                unlockExtendButtonContainer.setTranslationY(0f); // Reset position for next time
+            })
             .start();
 
-        // Show arrow
+        // Show arrow with fade in
         unlockArrow.setVisibility(View.VISIBLE);
+        unlockArrow.setAlpha(0f);
         unlockArrow.animate()
             .alpha(0.6f)
             .setDuration(300)
@@ -847,6 +870,8 @@ public class LockScreenActivity extends AppCompatActivity {
                 if (currentTimer != null) {
                     currentTimer.updateTimer(totalTimeMs, millisUntilFinished);
                 }
+                // Update persistent notification with current time
+                updatePersistentNotification();
             }
 
             @Override
@@ -877,6 +902,10 @@ public class LockScreenActivity extends AppCompatActivity {
     private void finishLockScreen() {
         // Call this when lock ends (unlock, timer expires, etc.)
         isLockScreenActive = false;
+        
+        // Remove persistent notification
+        removePersistentNotification();
+        
         // Stop overlay lock service
         stopService(new Intent(this, OverlayLockService.class));
         finish();
@@ -978,6 +1007,120 @@ public class LockScreenActivity extends AppCompatActivity {
                 timeText = String.format("%02d:%02d", minutes, seconds);
             }
             timerCountdown.setText(timeText);
+        }
+    }
+    
+    /**
+     * Create persistent notification if enabled in settings
+     */
+    private void createPersistentNotificationIfEnabled() {
+        boolean persistentNotificationEnabled = preferences.getBoolean("persistent_notification", true);
+        if (!persistentNotificationEnabled) {
+            return;
+        }
+        
+        try {
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager == null) {
+                Log.e("LockScreenActivity", "NotificationManager is null");
+                return;
+            }
+            
+            // Create notification channel for Android 8.0+
+            createNotificationChannel();
+            
+            // Create and show notification
+            Notification notification = createPersistentNotification();
+            notificationManager.notify(NOTIFICATION_ID, notification);
+            Log.d("LockScreenActivity", "Persistent notification created");
+            
+        } catch (Exception e) {
+            Log.e("LockScreenActivity", "Failed to create persistent notification", e);
+        }
+    }
+    
+    /**
+     * Create notification channel for Android 8.0+
+     */
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                "ZenLock Focus Session",
+                NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Persistent notification when focus session is active");
+            channel.enableLights(false);
+            channel.enableVibration(false);
+            channel.setShowBadge(false);
+            channel.setSound(null, null);
+            
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+    
+    /**
+     * Create persistent notification
+     */
+    private Notification createPersistentNotification() {
+        // Create intent to open the app
+        Intent intent = new Intent(this, LockScreenActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this, 
+            NOTIFICATION_ID, 
+            intent, 
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        
+        // Get remaining time for display
+        long lockEndTime = preferences.getLong("lockEndTime", 0);
+        long currentTime = System.currentTimeMillis();
+        long remainingTimeMillis = Math.max(0, lockEndTime - currentTime);
+        
+        int remainingMinutes = (int) (remainingTimeMillis / (1000 * 60));
+        int remainingSeconds = (int) ((remainingTimeMillis % (1000 * 60)) / 1000);
+        
+        String timeText = String.format("%02d:%02d", remainingMinutes, remainingSeconds);
+        
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_lock)
+            .setContentTitle("Focus Session Active")
+            .setContentText("Time remaining: " + timeText)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setContentIntent(pendingIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setSilent(true)
+            .build();
+    }
+    
+    /**
+     * Update persistent notification with current time
+     */
+    private void updatePersistentNotification() {
+        boolean persistentNotificationEnabled = preferences.getBoolean("persistent_notification", true);
+        if (!persistentNotificationEnabled || notificationManager == null) {
+            return;
+        }
+        
+        try {
+            Notification notification = createPersistentNotification();
+            notificationManager.notify(NOTIFICATION_ID, notification);
+        } catch (Exception e) {
+            Log.e("LockScreenActivity", "Failed to update persistent notification", e);
+        }
+    }
+    
+    /**
+     * Remove persistent notification
+     */
+    private void removePersistentNotification() {
+        if (notificationManager != null) {
+            notificationManager.cancel(NOTIFICATION_ID);
+            Log.d("LockScreenActivity", "Persistent notification removed");
         }
     }
 
