@@ -883,12 +883,14 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
     /**
-     * Show dialog to select extension time using the existing duration picker design
+     * Show dialog to select extension time with consistent dark theme design
      */
     private void showExtendDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_duration_picker, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_extend_time_picker, null);
         NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
+        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
+        Button extendButton = dialogView.findViewById(R.id.extendButton);
         
         // Configure hours picker (0-5 hours for extension)
         hoursPicker.setMinValue(0);
@@ -902,27 +904,36 @@ public class LockScreenActivity extends AppCompatActivity {
         minutesPicker.setDisplayedValues(minuteValues);
         minutesPicker.setValue(0);
         
-        new AlertDialog.Builder(this)
-            .setTitle("Extend Focus Session")
-            .setMessage("Select additional time to extend your current focus session")
+        // Create custom dialog with dark theme
+        AlertDialog dialog = new AlertDialog.Builder(this)
             .setView(dialogView)
-            .setPositiveButton("Extend", (dialog, which) -> {
-                int hours = hoursPicker.getValue();
-                int minutes = Integer.parseInt(minuteValues[minutesPicker.getValue()]);
-                long extraMillis = (hours * 3600 + minutes * 60) * 1000;
-                
-                if (extraMillis > 0) {
-                    extendLockDuration(extraMillis);
-                    String timeText = "";
-                    if (hours > 0) timeText += hours + "h ";
-                    if (minutes > 0) timeText += minutes + "m";
-                    Toast.makeText(this, "Focus session extended by " + timeText, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Please select a valid extension time", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
+            .setCancelable(true)
+            .create();
+        
+        // Set custom background to match app theme
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        
+        // Set up button listeners
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        
+        extendButton.setOnClickListener(v -> {
+            int hours = hoursPicker.getValue();
+            int minutes = Integer.parseInt(minuteValues[minutesPicker.getValue()]);
+            long extraMillis = (hours * 3600 + minutes * 60) * 1000;
+            
+            if (extraMillis > 0) {
+                extendLockDuration(extraMillis);
+                String timeText = "";
+                if (hours > 0) timeText += hours + "h ";
+                if (minutes > 0) timeText += minutes + "m";
+                Toast.makeText(this, "Focus session extended by " + timeText, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Please select a valid extension time", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        dialog.show();
     }
 
     /**

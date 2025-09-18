@@ -177,7 +177,7 @@ public class CreateScheduleDialog extends DialogFragment {
         // Apply custom theme to dialog
         dialog.setOnShowListener(dialogInterface -> {
             dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(requireContext().getColor(R.color.primary));
-            dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(requireContext().getColor(R.color.textSecondary));
+            dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(requireContext().getColor(R.color.black));
         });
         
         dialog.show();
