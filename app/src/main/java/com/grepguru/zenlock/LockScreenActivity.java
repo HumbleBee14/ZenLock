@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.app.AlertDialog;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -179,6 +181,10 @@ public class LockScreenActivity extends AppCompatActivity {
         LinearLayout unlockInputsContainer = findViewById(R.id.unlockInputsContainer);
         LinearLayout expandButtonContainer = findViewById(R.id.expandButtonContainer);
         ImageView pinVisibilityToggle = findViewById(R.id.pinVisibilityToggle);
+        
+        // Initialize extend lock functionality
+        Button extendLockButton = findViewById(R.id.extendLockButton);
+        LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
         
         // Start countdown timer with remaining time
         long remainingTimeMillis = lockEndTime - currentTime;
@@ -423,6 +429,11 @@ public class LockScreenActivity extends AppCompatActivity {
             showUnlockButton();
         });
 
+        // Set up extend button click listener
+        extendLockButton.setOnClickListener(v -> {
+            showExtendDialog();
+        });
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -602,15 +613,16 @@ public class LockScreenActivity extends AppCompatActivity {
     private void showUnlockButton() {
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
 
         // Cancel any existing auto-hide timer
         if (autoHideHandler != null && autoHideRunnable != null) {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
 
-        // Show unlock button with animation
-        unlockPromptButton.setVisibility(View.VISIBLE);
-        unlockPromptButton.animate()
+        // Show unlock and extend button container with animation
+        unlockExtendButtonContainer.setVisibility(View.VISIBLE);
+        unlockExtendButtonContainer.animate()
             .alpha(1f)
             .setDuration(300)
             .start();
@@ -636,12 +648,13 @@ public class LockScreenActivity extends AppCompatActivity {
     private void hideUnlockButton() {
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
+        LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
 
-        // Hide unlock button with animation
-        unlockPromptButton.animate()
+        // Hide unlock and extend button container with animation
+        unlockExtendButtonContainer.animate()
             .alpha(0f)
             .setDuration(200)
-            .withEndAction(() -> unlockPromptButton.setVisibility(View.GONE))
+            .withEndAction(() -> unlockExtendButtonContainer.setVisibility(View.GONE))
             .start();
 
         // Show arrow
@@ -867,6 +880,94 @@ public class LockScreenActivity extends AppCompatActivity {
         // Stop overlay lock service
         stopService(new Intent(this, OverlayLockService.class));
         finish();
+    }
+
+    /**
+     * Show dialog to select extension time using the existing duration picker design
+     */
+    private void showExtendDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_duration_picker, null);
+        NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
+        NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
+        
+        // Configure hours picker (0-5 hours for extension)
+        hoursPicker.setMinValue(0);
+        hoursPicker.setMaxValue(5);
+        hoursPicker.setValue(0);
+        
+        // Configure minutes picker with predefined values (same as schedule creation)
+        minutesPicker.setMinValue(0);
+        minutesPicker.setMaxValue(8);
+        String[] minuteValues = {"0", "1", "5", "10", "15", "20", "30", "40", "50"};
+        minutesPicker.setDisplayedValues(minuteValues);
+        minutesPicker.setValue(0);
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Extend Focus Session")
+            .setMessage("Select additional time to extend your current focus session")
+            .setView(dialogView)
+            .setPositiveButton("Extend", (dialog, which) -> {
+                int hours = hoursPicker.getValue();
+                int minutes = Integer.parseInt(minuteValues[minutesPicker.getValue()]);
+                long extraMillis = (hours * 3600 + minutes * 60) * 1000;
+                
+                if (extraMillis > 0) {
+                    extendLockDuration(extraMillis);
+                    String timeText = "";
+                    if (hours > 0) timeText += hours + "h ";
+                    if (minutes > 0) timeText += minutes + "m";
+                    Toast.makeText(this, "Focus session extended by " + timeText, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Please select a valid extension time", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    /**
+     * Extend the current lock duration
+     */
+    private void extendLockDuration(long extraMillis) {
+        long lockEndTime = preferences.getLong("lockEndTime", 0);
+        long newEndTime = lockEndTime + extraMillis;
+        preferences.edit().putLong("lockEndTime", newEndTime).apply();
+        
+        long lockStartTime = preferences.getLong("lockStartTime", 0);
+        long targetDuration = preferences.getLong("lockTargetDuration", 0) + extraMillis;
+        preferences.edit().putLong("lockTargetDuration", targetDuration).apply();
+        
+        long currentTime = System.currentTimeMillis();
+        long remainingTimeMillis = newEndTime - currentTime;
+        
+        // Restart timer with new duration
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        startCountdownTimer(targetDuration, remainingTimeMillis);
+        
+        // Update the timer display immediately
+        updateTimerDisplay(remainingTimeMillis);
+    }
+
+    /**
+     * Update timer display with new remaining time
+     */
+    private void updateTimerDisplay(long remainingTimeMillis) {
+        TextView timerCountdown = findViewById(R.id.timerCountdown);
+        if (timerCountdown != null) {
+            long hours = remainingTimeMillis / (1000 * 60 * 60);
+            long minutes = (remainingTimeMillis % (1000 * 60 * 60)) / (1000 * 60);
+            long seconds = (remainingTimeMillis % (1000 * 60)) / 1000;
+            
+            String timeText;
+            if (hours > 0) {
+                timeText = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                timeText = String.format("%02d:%02d", minutes, seconds);
+            }
+            timerCountdown.setText(timeText);
+        }
     }
 
 
