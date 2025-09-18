@@ -388,6 +388,46 @@
 
                     </LinearLayout>
 
+                    <!-- Allow Launcher/Home Screen during Lock Toggle -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/ModernText.Body"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Allow Launcher/Home Screen during Lock"
+                                android:textColor="@color/textPrimary" />
+
+                            <TextView
+                                style="@style/ModernText.Caption"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Allow access to home screen while locked (not recommended)"
+                                android:textColor="@color/textSecondary" />
+
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/allowLauncherToggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/AppTheme.Switch" />
+
+                    </LinearLayout>
+
+                    
                     <!-- Auto-Restart Toggle -->
                     <LinearLayout
                         android:layout_width="match_parent"

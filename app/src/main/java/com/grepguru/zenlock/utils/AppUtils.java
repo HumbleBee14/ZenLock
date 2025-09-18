@@ -126,6 +126,14 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.google.android.gms.auth.api.credentials"); // Google Auth
         addIfInstalled(pm, allAllowed, "com.android.keyguard"); // Lock screen security
         addIfInstalled(pm, allAllowed, "com.android.credentialmanager"); // Credential Manager
+        addIfInstalled(pm, allAllowed, "com.miui.securitycenter"); // Xiaomi Security Center
+        addIfInstalled(pm, allAllowed, "com.miui.face"); // Xiaomi Face/Biometrics
+        addIfInstalled(pm, allAllowed, "com.oneplus.faceunlock"); // OnePlus Face Unlock
+        addIfInstalled(pm, allAllowed, "com.oppo.faceunlock"); // Oppo Face Unlock
+        addIfInstalled(pm, allAllowed, "com.vivo.faceunlock"); // Vivo Face Unlock
+        addIfInstalled(pm, allAllowed, "com.huawei.hwid"); // Huawei ID/Biometrics
+        addIfInstalled(pm, allAllowed, "com.huawei.facerecognition"); // Huawei Face Recognition
+//        addIfInstalled(pm, allAllowed, "com.android.settings"); // System Security Settings - DO NOT ALLOW!!
         
         // Face recognition and biometric services (always essential for security)
         addIfInstalled(pm, allAllowed, "com.miui.face"); // Xiaomi Face Recognition

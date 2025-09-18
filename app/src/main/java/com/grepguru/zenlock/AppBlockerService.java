@@ -39,6 +39,7 @@ public class AppBlockerService extends AccessibilityService {
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         boolean isLocked = preferences.getBoolean("isLocked", false);
+        boolean allowLauncherDuringLock = preferences.getBoolean("allow_launcher_during_lock", false);
 
         if (!isLocked) {
             return; // No focus session active, nothing to block
@@ -54,16 +55,15 @@ public class AppBlockerService extends AccessibilityService {
 
         // Skip if the event is from our own LockScreenActivity to prevent self-blocking loops
         if (className.contains("LockScreenActivity") || packageName.equals(getApplicationContext().getPackageName())) {
-            // Log.d("AppBlockerService", "Event from our own LockScreenActivity or app. Ignoring.");
             return;
         }
-        
         // IMMEDIATE BLOCK: Block launcher classes that bypass the lock
         if (isLauncherBypassClass(className)) {
-            Log.d("AppBlockerService", "🚫 BLOCKING LAUNCHER BYPASS: " + packageName + " | Class: " + className);
-            // Immediately launch lock screen without any delay
-            launchLockScreen();
-            return;
+            if (!allowLauncherDuringLock) {
+                Log.d("AppBlockerService", "🚫 BLOCKING LAUNCHER BYPASS: " + packageName + " | Class: " + className);
+                launchLockScreen();
+                return;
+            } // else: allow launcher bypass if user enabled
         }
 
         // Skip if this is the same package we just processed recently (debouncing)
@@ -80,15 +80,13 @@ public class AppBlockerService extends AccessibilityService {
         
         // FIRST: Check if this is a launcher package (skip whitelist check for these)
         boolean isLauncherPackage = isLauncherPackage(packageName);
-        
         // SECOND: Check if this is a specific launcher/recent activity class that should be blocked
         boolean isLauncherBypass = isLauncherBypassClass(className);
-        
         // THIRD: Determine if allowed
         boolean isAllowed;
         if (isLauncherPackage) {
             // For launcher packages, only block specific classes (like Launcher, RecentsActivity)
-            isAllowed = !isLauncherBypass;
+            isAllowed = allowLauncherDuringLock || !isLauncherBypass;
         } else {
             // For non-launcher packages, check whitelist
             isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);

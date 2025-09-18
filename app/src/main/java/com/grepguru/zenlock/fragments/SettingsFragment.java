@@ -59,6 +59,9 @@ public class SettingsFragment extends Fragment {
     private LinearLayout pinConfigSection, partnerConfigSection;
     private LinearLayout noUnlockMethodsWarning;
 
+    // Allow Launcher/Home Screen during Lock toggle
+    private SwitchCompat allowLauncherToggle;
+
     public SettingsFragment() {}
 
     @Nullable
@@ -167,6 +170,15 @@ public class SettingsFragment extends Fragment {
         vibrationToggle.setChecked(com.grepguru.zenlock.VibrationUtils.isVibrationEnabled(requireContext()));
         vibrationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             com.grepguru.zenlock.VibrationUtils.setVibrationEnabled(requireContext(), isChecked);
+        });
+
+        // Allow Launcher/Home Screen during Lock toggle
+        allowLauncherToggle = view.findViewById(R.id.allowLauncherToggle);
+        allowLauncherToggle.setChecked(preferences.getBoolean("allow_launcher_during_lock", false));
+        allowLauncherToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("allow_launcher_during_lock", isChecked);
+            editor.apply();
         });
 
         return view;
