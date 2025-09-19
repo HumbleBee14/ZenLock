@@ -349,44 +349,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Notification Toggle -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingVertical="12dp">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                style="@style/ModernText.Body"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Lock Notifications"
-                                android:textColor="@color/textPrimary" />
-
-                            <TextView
-                                style="@style/ModernText.Caption"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Show persistent notification when lock is active"
-                                android:textColor="@color/textSecondary" />
-
-                        </LinearLayout>
-
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/persistentNotificationToggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:theme="@style/AppTheme.Switch" />
-
-                    </LinearLayout>
 
                     <!-- Allow Launcher/Home Screen during Lock Toggle -->
                     <LinearLayout
@@ -428,13 +390,16 @@
                     </LinearLayout>
 
                     
-                    <!-- Auto-Restart Toggle -->
+                    <!-- Auto-Restart Toggle (Critical Setting) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/critical_toggle_background"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingVertical="12dp">
+                        android:padding="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -447,14 +412,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Auto-Restart Protection"
-                                android:textColor="@color/textPrimary" />
+                                android:textColor="@color/textPrimary"
+                                android:textStyle="bold" />
 
                             <TextView
                                 style="@style/ModernText.Caption"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Automatically restart lock if app is killed"
+                                android:layout_marginTop="4dp"
+                                android:text="Automatically restart lock after phone reboot"
                                 android:textColor="@color/textSecondary" />
 
                         </LinearLayout>
@@ -565,7 +531,7 @@
                             style="@style/ModernText.Body"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Focus Session Timer"
+                            android:text="Circular Timer Display"
                             android:textColor="@color/textPrimary" />
 
                         <TextView
@@ -573,13 +539,52 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Display remaining focus time as circular progress ring"
+                            android:text="Show circular progress ring instead of digital timer on lock screen"
                             android:textColor="@color/textSecondary" />
 
                     </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/circularTimerToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/AppTheme.Switch" />
+
+                </LinearLayout>
+
+                <!-- Lock Notifications Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/ModernText.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lock Notifications"
+                            android:textColor="@color/textPrimary" />
+
+                        <TextView
+                            style="@style/ModernText.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Show persistent notification when lock is active"
+                            android:textColor="@color/textSecondary" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/persistentNotificationToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:theme="@style/AppTheme.Switch" />

@@ -28,13 +28,20 @@ public class BootReceiver extends BroadcastReceiver {
             // Reschedule all enabled schedules
             rescheduleAllSchedules(context);
 
-            // Enforce lock overlay and lock screen if session is active and user enabled auto-restart
+            // Check if there was an active lock session before restart
             SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
             boolean isLocked = prefs.getBoolean("isLocked", false);
             boolean autoRestart = prefs.getBoolean("auto_restart", false);
+            long lockEndTime = prefs.getLong("lockEndTime", 0);
+            long currentTime = System.currentTimeMillis();
+            
             Log.d(TAG, "Auto-restart preference: " + autoRestart);
             Log.d(TAG, "Lock state: " + isLocked);
-            if (isLocked && autoRestart) {
+            Log.d(TAG, "Lock end time: " + lockEndTime + ", Current time: " + currentTime);
+            Log.d(TAG, "Time remaining: " + (lockEndTime - currentTime) + "ms");
+            
+            // Only restart lock if it was active, auto-restart is enabled, and time hasn't expired
+            if (isLocked && autoRestart && lockEndTime > currentTime) {
                 // Start overlay lock service
                 Intent overlayIntent = new Intent(context, OverlayLockService.class);
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -47,6 +54,22 @@ public class BootReceiver extends BroadcastReceiver {
                 lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 context.startActivity(lockIntent);
                 Log.d(TAG, "Lock session active after boot: started overlay and lock screen");
+            } else if (isLocked && !autoRestart) {
+                // Clear lock if auto-restart is disabled
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("isLocked", false);
+                editor.remove("lockEndTime");
+                editor.putBoolean("wasDeviceRestarted", false);
+                editor.apply();
+                Log.d(TAG, "Auto-restart disabled, cleared lock state");
+            } else if (isLocked && lockEndTime <= currentTime) {
+                // Lock expired during restart, clear it
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("isLocked", false);
+                editor.remove("lockEndTime");
+                editor.putBoolean("wasDeviceRestarted", false);
+                editor.apply();
+                Log.d(TAG, "Lock expired during restart, cleared lock state");
             }
         }
     }

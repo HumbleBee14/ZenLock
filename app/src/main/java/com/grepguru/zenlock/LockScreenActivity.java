@@ -112,43 +112,27 @@ public class LockScreenActivity extends AppCompatActivity {
         boolean wasRestarted = preferences.getBoolean("wasDeviceRestarted", false);
         boolean autoRestartPref = preferences.getBoolean("auto_restart", false);
 
-        // If uptime indicates a clock anomaly (stored uptime > current), treat as stale and clear lock
-        if (storedUptime > currentUptime) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("isLocked", false);
-            editor.remove("lockEndTime");
-            editor.putBoolean("wasDeviceRestarted", false);
-            editor.apply();
+        // If device was restarted (stored uptime > current uptime OR wasDeviceRestarted flag is set)
+        if (storedUptime > currentUptime || wasRestarted) {
+            if (!autoRestartPref) {
+                // User disabled auto-restart, clear the lock
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("isLocked", false);
+                editor.remove("lockEndTime");
+                editor.putBoolean("wasDeviceRestarted", false);
+                editor.apply();
 
-            if (analyticsManager.hasActiveSession()) {
-                analyticsManager.endSession(false);
+                if (analyticsManager.hasActiveSession()) {
+                    analyticsManager.endSession(false);
+                }
+
+                finishLockScreen();
+                return;
+            } else {
+                // Auto-restart is enabled, clear the restart flag and continue with lock
+                preferences.edit().putBoolean("wasDeviceRestarted", false).apply();
+                // Continue — lock remains active and will be enforced below
             }
-
-            finishLockScreen();
-            return;
-        }
-
-        // If the device restarted and the user did NOT opt into auto-restart protection, clear the lock
-        if (wasRestarted && !autoRestartPref) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("isLocked", false);
-            editor.remove("lockEndTime");
-            editor.putBoolean("wasDeviceRestarted", false);
-            editor.apply();
-
-            if (analyticsManager.hasActiveSession()) {
-                analyticsManager.endSession(false);
-            }
-
-            finishLockScreen();
-            return;
-        }
-
-        // If the device restarted and auto-restart is enabled, proceed to show lock (do not clear).
-        if (wasRestarted && autoRestartPref) {
-            // Clear the restart marker so subsequent launches don't treat it as a new restart
-            preferences.edit().putBoolean("wasDeviceRestarted", false).apply();
-            // Continue — lock remains active and will be enforced below
         }
 
         // Normal behaviour if the device is not restarted
