@@ -41,6 +41,9 @@ public class ScheduleTriggerReceiver extends BroadcastReceiver {
         
         Log.d(TAG, "Starting scheduled focus session: " + scheduleName + " (" + durationMinutes + " minutes)");
         
+        // Clear any pre-notification for this schedule
+        clearPreNotification(context, scheduleId);
+        
         // Check if there's already an active session
         SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         boolean isCurrentlyLocked = prefs.getBoolean("isLocked", false);
@@ -145,6 +148,25 @@ public class ScheduleTriggerReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Log.e(TAG, "Failed to setup focus session state", e);
             return false;
+        }
+    }
+    
+    /**
+     * Clear pre-notification for a specific schedule
+     */
+    private void clearPreNotification(Context context, int scheduleId) {
+        try {
+            android.app.NotificationManager notificationManager = 
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            
+            if (notificationManager != null) {
+                // Clear pre-notification using the same ID used in PreNotificationReceiver
+                int preNotificationId = 2000 + scheduleId; // Base ID + schedule ID
+                notificationManager.cancel(preNotificationId);
+                Log.d(TAG, "Cleared pre-notification for schedule ID: " + scheduleId);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to clear pre-notification for schedule ID: " + scheduleId, e);
         }
     }
     

@@ -891,10 +891,13 @@ public class LockScreenActivity extends AppCompatActivity {
         // Remove persistent notification
         removePersistentNotification();
         
+        // Clear any pre-notifications for this session
+        clearPreNotificationsForCurrentSession();
+        
         // Stop overlay lock service
         stopService(new Intent(this, OverlayLockService.class));
-        finish();
-    }
+                finish();
+            }
 
     /**
      * Show dialog to select extension time with consistent dark theme design
@@ -1107,6 +1110,32 @@ public class LockScreenActivity extends AppCompatActivity {
         if (notificationManager != null) {
             notificationManager.cancel(NOTIFICATION_ID);
             Log.d("LockScreenActivity", "Persistent notification removed");
+        }
+    }
+    
+    /**
+     * Clear pre-notifications for the current session
+     */
+    private void clearPreNotificationsForCurrentSession() {
+        try {
+            // Get current session source to identify which schedule triggered this session
+            String sessionSource = preferences.getString("current_session_source", "");
+            if (sessionSource.startsWith("schedule:")) {
+                // Extract schedule ID from session source (format: "schedule:ScheduleName")
+                // For now, we'll clear all pre-notifications since we don't store schedule ID in session source
+                // This is a simple approach that clears all pre-notifications when any scheduled session ends
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    // Clear all pre-notifications (they use IDs 2000+)
+                    // This is safe because pre-notifications should be cleared anyway when session starts
+                    for (int i = 2000; i < 3000; i++) { // Clear a reasonable range of pre-notification IDs
+                        notificationManager.cancel(i);
+                    }
+                    Log.d("LockScreenActivity", "Cleared all pre-notifications for scheduled session");
+                }
+            }
+        } catch (Exception e) {
+            Log.e("LockScreenActivity", "Failed to clear pre-notifications", e);
         }
     }
 

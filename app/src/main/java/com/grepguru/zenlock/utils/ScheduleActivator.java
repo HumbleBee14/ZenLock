@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.grepguru.zenlock.ScheduleTriggerReceiver;
+import com.grepguru.zenlock.PreNotificationReceiver;
 import com.grepguru.zenlock.model.ScheduleModel;
 import com.grepguru.zenlock.utils.AlarmPermissionManager;
 
@@ -60,6 +61,35 @@ public class ScheduleActivator {
                 return;
             }
             
+            // Check permission before setting alarms
+            if (!AlarmPermissionManager.canScheduleExactAlarms(context)) {
+                Log.e(TAG, "Cannot schedule exact alarms - permission not granted");
+                return;
+            }
+            
+            if (alarmManager == null) {
+                Log.e(TAG, "AlarmManager is null");
+                return;
+            }
+            
+            // Schedule main trigger
+            scheduleMainTrigger(schedule, triggerTime);
+            
+            // Schedule pre-notification if enabled
+            if (schedule.isPreNotifyEnabled() && schedule.getPreNotifyMinutes() > 0) {
+                schedulePreNotification(schedule, triggerTime);
+            }
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to schedule " + schedule.getName(), e);
+        }
+    }
+    
+    /**
+     * Schedule the main focus session trigger
+     */
+    private void scheduleMainTrigger(ScheduleModel schedule, Calendar triggerTime) {
+        try {
             // Create intent for ScheduleTriggerReceiver
             Intent intent = new Intent(context, ScheduleTriggerReceiver.class);
             intent.putExtra(ScheduleTriggerReceiver.EXTRA_SCHEDULE_ID, schedule.getId());
@@ -74,37 +104,70 @@ public class ScheduleActivator {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
             
-            // Check permission before setting alarm
-            if (!AlarmPermissionManager.canScheduleExactAlarms(context)) {
-                Log.e(TAG, "Cannot schedule exact alarms - permission not granted");
-                return;
-            }
-            
             // Set exact alarm
-            if (alarmManager == null) {
-                Log.e(TAG, "AlarmManager is null");
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTime.getTimeInMillis(),
+                pendingIntent
+            );
+            
+            Log.d(TAG, "Scheduled " + schedule.getName() + " for " + 
+                  String.format("%02d:%02d on %s", 
+                              triggerTime.get(Calendar.HOUR_OF_DAY), 
+                              triggerTime.get(Calendar.MINUTE),
+                              formatDate(triggerTime)));
+                              
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException when setting main trigger - permission issue", e);
+        }
+    }
+    
+    /**
+     * Schedule pre-notification for the schedule
+     */
+    private void schedulePreNotification(ScheduleModel schedule, Calendar triggerTime) {
+        try {
+            // Calculate pre-notification time
+            Calendar preNotifyTime = (Calendar) triggerTime.clone();
+            preNotifyTime.add(Calendar.MINUTE, -schedule.getPreNotifyMinutes());
+            
+            // Don't schedule if pre-notification time has already passed
+            if (preNotifyTime.before(Calendar.getInstance())) {
+                Log.d(TAG, "Pre-notification time has passed for " + schedule.getName() + ", skipping");
                 return;
             }
             
-            try {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerTime.getTimeInMillis(),
-                    pendingIntent
-                );
-                
-                Log.d(TAG, "Scheduled " + schedule.getName() + " for " + 
-                      String.format("%02d:%02d on %s", 
-                                  triggerTime.get(Calendar.HOUR_OF_DAY), 
-                                  triggerTime.get(Calendar.MINUTE),
-                                  formatDate(triggerTime)));
-            } catch (SecurityException e) {
-                Log.e(TAG, "SecurityException when setting alarm - permission issue", e);
-                return;
-            }
+            // Create intent for PreNotificationReceiver
+            Intent preNotifyIntent = new Intent(context, PreNotificationReceiver.class);
+            preNotifyIntent.putExtra("schedule_id", schedule.getId());
+            preNotifyIntent.putExtra("schedule_name", schedule.getName());
+            preNotifyIntent.putExtra("duration_minutes", schedule.getFocusDurationMinutes());
+            preNotifyIntent.putExtra("pre_notify_minutes", schedule.getPreNotifyMinutes());
             
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to schedule " + schedule.getName(), e);
+            // Create pending intent for pre-notification (use negative ID to avoid conflicts)
+            PendingIntent preNotifyPendingIntent = PendingIntent.getBroadcast(
+                context,
+                -schedule.getId(), // Negative ID to avoid conflicts with main trigger
+                preNotifyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            
+            // Set exact alarm for pre-notification
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                preNotifyTime.getTimeInMillis(),
+                preNotifyPendingIntent
+            );
+            
+            Log.d(TAG, "Scheduled pre-notification for " + schedule.getName() + " at " + 
+                  String.format("%02d:%02d on %s", 
+                              preNotifyTime.get(Calendar.HOUR_OF_DAY), 
+                              preNotifyTime.get(Calendar.MINUTE),
+                              formatDate(preNotifyTime)) + 
+                  " (" + schedule.getPreNotifyMinutes() + " minutes before)");
+                              
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException when setting pre-notification - permission issue", e);
         }
     }
     
@@ -113,6 +176,7 @@ public class ScheduleActivator {
      */
     public void cancelSchedule(ScheduleModel schedule) {
         try {
+            // Cancel main trigger
             Intent intent = new Intent(context, ScheduleTriggerReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
@@ -123,7 +187,21 @@ public class ScheduleActivator {
             
             if (alarmManager != null) {
                 alarmManager.cancel(pendingIntent);
-                Log.d(TAG, "Cancelled schedule: " + schedule.getName());
+                Log.d(TAG, "Cancelled main trigger for: " + schedule.getName());
+            }
+            
+            // Cancel pre-notification if it exists
+            Intent preNotifyIntent = new Intent(context, PreNotificationReceiver.class);
+            PendingIntent preNotifyPendingIntent = PendingIntent.getBroadcast(
+                context,
+                -schedule.getId(), // Negative ID to match the one used in scheduling
+                preNotifyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            
+            if (alarmManager != null) {
+                alarmManager.cancel(preNotifyPendingIntent);
+                Log.d(TAG, "Cancelled pre-notification for: " + schedule.getName());
             }
             
         } catch (Exception e) {

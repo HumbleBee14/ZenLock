@@ -122,6 +122,12 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Pre-Notification Receiver -->
+        <receiver
+            android:name=".PreNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <!-- SMS Status Receivers -->
         <receiver
             android:name=".utils.OTPManager$SmsSentReceiver"
