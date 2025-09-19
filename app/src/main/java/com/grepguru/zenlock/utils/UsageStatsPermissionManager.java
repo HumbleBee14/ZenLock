@@ -34,8 +34,8 @@ public class UsageStatsPermissionManager {
             
             int mode;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // For Android 10 (API 29) and above, use unsafeCheckOpNoThrow
-                mode = appOpsManager.unsafeCheckOpNoThrow(
+                // For Android 10 (API 29) and above, use checkOpNoThrow
+                mode = appOpsManager.checkOpNoThrow(
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
                     Process.myUid(),
                     context.getPackageName()
