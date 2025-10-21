@@ -25,6 +25,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private Button usageButton;
     private Button alarmButton;
     private Button continueButton;
+    private Button exitButton; // New exit button
     
     private CardView accessibilityCard;
     private CardView overlayCard;
@@ -54,6 +55,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         usageButton = findViewById(R.id.usageButton);
         alarmButton = findViewById(R.id.alarmButton);
         continueButton = findViewById(R.id.continueButton);
+        exitButton = findViewById(R.id.exitButton); // Initialize exit button
         
         accessibilityCard = findViewById(R.id.accessibilityCard);
         overlayCard = findViewById(R.id.overlayCard);
@@ -67,6 +69,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         usageButton.setOnClickListener(v -> requestUsagePermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
         continueButton.setOnClickListener(v -> completeOnboarding());
+        exitButton.setOnClickListener(v -> finish()); // Set click listener for exit
     }
     
     private void requestAccessibilityPermission() {
