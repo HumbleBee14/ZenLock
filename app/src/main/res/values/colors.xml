@@ -5,21 +5,21 @@
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
 
-    <!-- Vibrant Focus App Color Palette -->
-    <!-- Primary Colors (Energizing Blue) -->
-    <color name="primary">#2563EB</color>           <!-- Vibrant blue - Main brand color -->
-    <color name="primaryDark">#1D4ED8</color>       <!-- Rich blue for depth -->
+    <!-- Professional Dark Theme Color Palette -->
+    <!-- Primary Colors (Professional Blue) -->
+    <color name="primary">#3B82F6</color>           <!-- Professional blue - Main brand color -->
+    <color name="primaryDark">#1E40AF</color>       <!-- Deep blue for depth -->
     <color name="primaryLight">#60A5FA</color>      <!-- Light blue for highlights -->
     
-    <!-- Secondary Colors (Focus Orange) -->
-    <color name="secondary">#F97316</color>         <!-- Energizing orange for accents -->
-    <color name="secondaryDark">#EA580C</color>     <!-- Dark orange for contrast -->
-    <color name="secondaryLight">#FB923C</color>    <!-- Light orange for subtle elements -->
+    <!-- Secondary Colors (Professional Gray) -->
+    <color name="secondary">#6B7280</color>         <!-- Professional gray for accents -->
+    <color name="secondaryDark">#4B5563</color>     <!-- Dark gray for contrast -->
+    <color name="secondaryLight">#9CA3AF</color>    <!-- Light gray for subtle elements -->
     
-    <!-- Accent Colors (Success & Focus) -->
+    <!-- Accent Colors (Professional Status) -->
     <color name="accent">#10B981</color>            <!-- Success green -->
     <color name="accentWarning">#F59E0B</color>     <!-- Warning amber -->
-    <color name="accentDanger">#EF4444</color>      <!-- Error red -->
+    <color name="accentDanger">#DC2626</color>      <!-- Professional error red -->
     
     <!-- Background Colors (Balanced Dark Theme) -->
 <!--    <color name="backgroundPrimary">#1F2937</color>     &lt;!&ndash; Softer dark background &ndash;&gt;-->
@@ -47,7 +47,7 @@
     <color name="success">#10B981</color>           <!-- Success states -->
     <color name="success_dark">#059669</color>      <!-- Darker success for borders -->
     <color name="warning">#F59E0B</color>           <!-- Warning states -->
-    <color name="error">#EF4444</color>             <!-- Error states -->
+    <color name="error">#DC2626</color>             <!-- Professional error states -->
     <color name="info">#3B82F6</color>              <!-- Info states -->
     <color name="warningText">#D97706</color>       <!-- Warning text color -->
     <color name="warningBackground">#FEF3C7</color> <!-- Warning banner background -->
