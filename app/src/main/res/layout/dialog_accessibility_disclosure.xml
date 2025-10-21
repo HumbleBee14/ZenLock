@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:background="@color/backgroundPrimary">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/disclosureTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Accessibility Service Consent"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Icon -->
+    <ImageView
+        android:id="@+id/disclosureIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_accessibility_new"
+        android:contentDescription="Accessibility Service"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/disclosureTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Main disclosure text -->
+    <TextView
+        android:id="@+id/disclosureText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="ZenLock requires Accessibility Service permission to:\n\n• Lock your screen during focus sessions\n• Block distracting apps when needed\n• Provide focus assistance features\n\nThis permission allows ZenLock to help you stay focused by temporarily restricting access to distracting applications. No personal data is collected or shared.\n\nBy granting this permission, you consent to ZenLock using the Accessibility Service solely for these focus assistance features."
+        android:textSize="14sp"
+        android:textColor="@color/textPrimary"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintTop_toBottomOf="@id/disclosureIcon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Privacy notice -->
+    <TextView
+        android:id="@+id/privacyNotice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Privacy: ZenLock does not collect, store, or share any personal data. The Accessibility Service is used only for screen locking and app blocking features."
+        android:textSize="12sp"
+        android:textColor="@color/textSecondary"
+        android:background="@drawable/rounded_background_secondary"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintTop_toBottomOf="@id/disclosureText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/privacyNotice"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/declineButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Decline"
+            android:textColor="@color/textPrimary"
+            app:strokeColor="@color/textSecondary" />
+
+        <Button
+            android:id="@+id/agreeButton"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="I Agree"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

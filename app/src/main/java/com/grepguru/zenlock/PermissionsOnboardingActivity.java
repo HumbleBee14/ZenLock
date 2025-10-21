@@ -1,9 +1,11 @@
 package com.grepguru.zenlock;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -31,6 +33,10 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private CardView overlayCard;
     private CardView usageCard;
     private CardView alarmCard;
+    
+    // Accessibility consent tracking
+    private boolean hasShownAccessibilityDisclosure = false;
+    private boolean userConsentedToAccessibility = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +70,43 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     }
     
     private void setupClickListeners() {
-        accessibilityButton.setOnClickListener(v -> requestAccessibilityPermission());
+        accessibilityButton.setOnClickListener(v -> showAccessibilityDisclosure());
         overlayButton.setOnClickListener(v -> requestOverlayPermission());
         usageButton.setOnClickListener(v -> requestUsagePermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
         continueButton.setOnClickListener(v -> completeOnboarding());
         exitButton.setOnClickListener(v -> finish()); // Set click listener for exit
+    }
+    
+    private void showAccessibilityDisclosure() {
+        // Show disclosure dialog first
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_accessibility_disclosure, null);
+        
+        Button agreeButton = dialogView.findViewById(R.id.agreeButton);
+        Button declineButton = dialogView.findViewById(R.id.declineButton);
+        
+        AlertDialog dialog = builder.setView(dialogView).create();
+        
+        agreeButton.setOnClickListener(v -> {
+            userConsentedToAccessibility = true;
+            hasShownAccessibilityDisclosure = true;
+            dialog.dismiss();
+            requestAccessibilityPermission();
+        });
+        
+        declineButton.setOnClickListener(v -> {
+            userConsentedToAccessibility = false;
+            hasShownAccessibilityDisclosure = true;
+            dialog.dismiss();
+            Toast.makeText(this, "Accessibility permission is required for ZenLock to function properly", Toast.LENGTH_LONG).show();
+        });
+        
+        // Prevent dismissing by tapping outside or back button
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
     
     private void requestAccessibilityPermission() {
@@ -106,7 +143,15 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         boolean usageGranted = isUsagePermissionGranted();
         boolean alarmGranted = isAlarmPermissionGranted();
         
-        updatePermissionCard(accessibilityCard, accessibilityButton, accessibilityGranted, "Granted", "Grant");
+        // Update accessibility card based on consent and permission status
+        if (hasShownAccessibilityDisclosure && !userConsentedToAccessibility) {
+            // User declined consent - show declined state
+            updatePermissionCard(accessibilityCard, accessibilityButton, false, "Declined", "Grant");
+            accessibilityButton.setBackgroundResource(R.drawable.button_error);
+        } else {
+            updatePermissionCard(accessibilityCard, accessibilityButton, accessibilityGranted, "Granted", "Grant");
+        }
+        
         updatePermissionCard(overlayCard, overlayButton, overlayGranted, "Granted", "Grant");
         updatePermissionCard(usageCard, usageButton, usageGranted, "Granted", "Grant");
         
@@ -119,8 +164,10 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         }
         
         // Enable continue button only if essential permissions are granted (Usage Access is optional)
+        // AND user has consented to accessibility (if they declined, they can't continue)
         boolean essentialGranted = accessibilityGranted && overlayGranted && 
-                                 (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted);
+                                 (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted) &&
+                                 (hasShownAccessibilityDisclosure ? userConsentedToAccessibility : true);
         continueButton.setEnabled(essentialGranted);
     }
     
