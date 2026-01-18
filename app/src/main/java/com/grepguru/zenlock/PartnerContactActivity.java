@@ -1,6 +1,7 @@
 package com.grepguru.zenlock;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +31,10 @@ import java.util.regex.Pattern;
 public class PartnerContactActivity extends AppCompatActivity {
 
     private static final int SMS_PERMISSION_REQUEST_CODE = 100;
+    
+    // SMS consent tracking
+    private boolean hasShownSmsDisclosure = false;
+    private boolean userConsentedToSms = false;
     
     private SwitchCompat smsToggle;
     private LinearLayout smsInputContainer;
@@ -330,9 +336,41 @@ public class PartnerContactActivity extends AppCompatActivity {
     }
     
     private void requestSmsPermission() {
-        ActivityCompat.requestPermissions(this, 
-            new String[]{Manifest.permission.SEND_SMS}, 
-            SMS_PERMISSION_REQUEST_CODE);
+        // Always show disclosure dialog before requesting permission
+        showSmsDisclosure();
+    }
+    
+    private void showSmsDisclosure() {
+        // Show disclosure dialog first
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_sms_disclosure, null);
+        
+        Button agreeButton = dialogView.findViewById(R.id.agreeButton);
+        Button declineButton = dialogView.findViewById(R.id.declineButton);
+        
+        AlertDialog dialog = builder.setView(dialogView).create();
+        
+        agreeButton.setOnClickListener(v -> {
+            userConsentedToSms = true;
+            hasShownSmsDisclosure = true;
+            dialog.dismiss();
+            // Now request the actual permission
+            ActivityCompat.requestPermissions(this, 
+                new String[]{Manifest.permission.SEND_SMS}, 
+                SMS_PERMISSION_REQUEST_CODE);
+        });
+        
+        declineButton.setOnClickListener(v -> {
+            userConsentedToSms = false;
+            hasShownSmsDisclosure = true;
+            dialog.dismiss();
+            Toast.makeText(this, "SMS permission declined. You can enable it later in settings.", Toast.LENGTH_LONG).show();
+            // Disable SMS toggle since user declined
+            smsToggle.setChecked(false);
+        });
+        
+        dialog.show();
     }
     
     @Override
