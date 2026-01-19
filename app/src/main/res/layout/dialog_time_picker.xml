@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/surface"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Focus Duration"
+        android:textSize="20sp"
+        android:textColor="@color/textPrimary"
+        android:fontFamily="sans-serif-medium"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Pickers Container -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="center">
+
+        <!-- Hours Section -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginEnd="40dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hours"
+                android:textSize="13sp"
+                android:textColor="@color/textSecondary"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="12dp"/>
+
+            <NumberPicker
+                android:id="@+id/dialogHoursPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="180dp"
+                android:theme="@style/NumberPickerDarkTheme"/>
+
+        </LinearLayout>
+
+        <!-- Minutes Section -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Minutes"
+                android:textSize="13sp"
+                android:textColor="@color/textSecondary"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="12dp"/>
+
+            <NumberPicker
+                android:id="@+id/dialogMinutesPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="180dp"
+                android:theme="@style/NumberPickerDarkTheme"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

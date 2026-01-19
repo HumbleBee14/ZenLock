@@ -123,14 +123,51 @@
         <item name="android:popupBackground">@color/surface</item>
     </style>
 
-    <!-- Modern Alert Dialog Style -->
+    <!-- Modern Alert Dialog Style with Dark Theme -->
     <style name="ModernAlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/modern_dialog_background</item>
+        <!-- Background colors -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="colorSurface">@color/surface</item>
+        
+        <!-- Text colors -->
         <item name="android:textColorPrimary">@color/textPrimary</item>
         <item name="android:textColorSecondary">@color/textSecondary</item>
-        <item name="android:colorBackground">@color/surface</item>
+        <item name="colorOnSurface">@color/textPrimary</item>
+        
+        <!-- Button colors -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        
+        <!-- Button bar background -->
+        <item name="android:buttonBarStyle">@style/DarkButtonBar</item>
+    </style>
+
+    <!-- Dark Button Bar Style -->
+    <style name="DarkButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:background">@color/backgroundSecondary</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+    </style>
+
+    <!-- Positive Button Style (Set button) -->
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="rippleColor">@color/primaryLight</item>
+    </style>
+
+    <!-- Negative Button Style (Cancel button) -->
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/textSecondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="rippleColor">@color/textTertiary</item>
     </style>
 
     <!-- Navigation Active Indicator Style -->
@@ -139,6 +176,16 @@
         <item name="android:height">32dp</item>
         <item name="android:color">@color/primary</item>
         <item name="cornerRadius">16dp</item>
+    </style>
+
+    <!-- NumberPicker Dark Theme for Dialogs -->
+    <style name="NumberPickerDarkTheme" parent="Theme.AppCompat.DayNight">
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+        <item name="android:colorControlHighlight">@color/primaryLight</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
     <!-- Material Time Picker Theme - Professional colors that work with dark app -->

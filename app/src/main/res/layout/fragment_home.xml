@@ -56,24 +56,136 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
 
-            <!-- Timer Selection Header -->
-            <TextView
+            <!-- Clickable Time Display -->
+            <LinearLayout
+                android:id="@+id/timeDisplayContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Duration"
-                style="@style/ModernText.Subheading"
-                android:layout_gravity="center"/>
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp">
 
-            <!-- Timer Pickers Container -->
+                <TextView
+                    android:id="@+id/selectedTimeDisplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:30"
+                    android:textSize="64sp"
+                    android:textColor="@color/textPrimary"
+                    android:fontFamily="sans-serif-light"
+                    android:letterSpacing="-0.02"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="hours : minutes"
+                    android:textSize="11sp"
+                    android:textColor="@color/textTertiary"
+                    android:fontFamily="sans-serif"
+                    android:letterSpacing="0.05"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Time Controls with +/- buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/decreaseTimeButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="−"
+                    android:textSize="24sp"
+                    android:textColor="@color/textPrimary"
+                    app:cornerRadius="24dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:backgroundTint="@color/backgroundSecondary"
+                    app:rippleColor="@color/primaryLight"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginEnd="12dp"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset15min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+15m"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp"
+                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipStrokeColor="@color/border"
+                    app:chipStrokeWidth="1dp"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_marginEnd="4dp"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset30min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+30m"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp"
+                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipStrokeColor="@color/border"
+                    app:chipStrokeWidth="1dp"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_marginEnd="4dp"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset60min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+1h"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp"
+                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipStrokeColor="@color/border"
+                    app:chipStrokeWidth="1dp"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_marginEnd="4dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/increaseTimeButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="+"
+                    android:textSize="20sp"
+                    android:textColor="@color/textPrimary"
+                    app:cornerRadius="24dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:backgroundTint="@color/backgroundSecondary"
+                    app:rippleColor="@color/primaryLight"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginStart="12dp"/>
+
+            </LinearLayout>
+
+            <!-- Hidden NumberPickers for backward compatibility -->
             <LinearLayout
                 android:id="@+id/timerSelectionContainer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:orientation="horizontal"
-                android:layout_gravity="center"
-                android:layout_marginTop="24dp">
+                android:visibility="gone">
 
                 <!-- Hours Section -->
                 <LinearLayout
@@ -122,32 +234,47 @@
 
             </LinearLayout>
 
-            <!-- Selected Time Display -->
-            <TextView
-                android:id="@+id/selectedTimeDisplay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Set a time to start ZenLock"
-                style="@style/ModernText.Body"
-                android:layout_gravity="center"
-                android:layout_marginTop="24dp"
-                android:textAlignment="center"/>
+
 
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Action Button -->
-    <Button
+    <!-- Glassmorphic Action Button -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/enableLockButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enter Zen Mode"
-        style="@style/ModernButton.Primary"
+        android:layout_height="64dp"
+        android:text="START FOCUS SESSION"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.08"
+        android:background="@drawable/glassmorphic_button"
+        android:elevation="8dp"
+        app:icon="@drawable/ic_lock"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white"
+        app:iconSize="24dp"
+        app:iconPadding="12dp"
+        app:rippleColor="#40FFFFFF"
         android:layout_marginTop="32dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintTop_toBottomOf="@id/timerCard"/>
+
+    <!-- Subtle hint text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hold to activate"
+        android:textSize="12sp"
+        android:textColor="@color/textTertiary"
+        android:fontFamily="sans-serif"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/enableLockButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 <!--    &lt;!&ndash; Quick Timer Presets &ndash;&gt;-->
 <!--    <TextView-->

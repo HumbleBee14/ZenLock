@@ -3,20 +3,12 @@
     android:color="@color/primaryLight">
     <item>
         <shape android:shape="rectangle">
-            <!-- Fully rounded corners -->
-            <corners android:radius="50dp"/>
-            <!-- Button color -->
-            <solid android:color="@color/primary"/>
-            <!-- Border for definition -->
-            <stroke
-                android:width="1dp"
-                android:color="@color/primaryDark"/>
-            <!-- Padding for better appearance -->
-            <padding
-                android:left="16dp"
-                android:right="16dp"
-                android:top="8dp"
-                android:bottom="8dp"/>
+            <corners android:radius="16dp"/>
+            <gradient
+                android:angle="135"
+                android:startColor="@color/gradientStart"
+                android:endColor="@color/gradientEnd"
+                android:type="linear"/>
         </shape>
     </item>
 </ripple>

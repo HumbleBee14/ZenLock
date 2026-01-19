@@ -3,11 +3,12 @@
     android:color="@color/primaryLight">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="12dp"/>
-            <solid android:color="@color/primary"/>
-            <stroke
-                android:width="1dp"
-                android:color="@color/primaryDark"/>
+            <corners android:radius="16dp"/>
+            <gradient
+                android:angle="135"
+                android:startColor="@color/gradientStart"
+                android:endColor="@color/gradientEnd"
+                android:type="linear"/>
         </shape>
     </item>
 </ripple>

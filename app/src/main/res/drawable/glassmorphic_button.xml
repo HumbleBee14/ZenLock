@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Outer glow/shadow -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp"/>
+            <solid android:color="#40818CF8"/>
+            <padding android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="4dp"/>
+        </shape>
+    </item>
+    
+    <!-- Main glassmorphic button -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="26dp"/>
+            
+            <!-- Gradient background with transparency -->
+            <gradient
+                android:angle="135"
+                android:startColor="#CC6366F1"
+                android:centerColor="#CC7C3AED"
+                android:endColor="#CC8B5CF6"
+                android:type="linear"/>
+            
+            <!-- Subtle border for glass effect -->
+            <stroke
+                android:width="1.5dp"
+                android:color="#40FFFFFF"/>
+        </shape>
+    </item>
+    
+    <!-- Top highlight for glass reflection -->
+    <item
+        android:top="1dp"
+        android:left="1dp"
+        android:right="1dp"
+        android:bottom="40dp">
+        <shape android:shape="rectangle">
+            <corners 
+                android:topLeftRadius="26dp"
+                android:topRightRadius="26dp"/>
+            <gradient
+                android:angle="90"
+                android:startColor="#30FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:type="linear"/>
+        </shape>
+    </item>
+    
+</layer-list>

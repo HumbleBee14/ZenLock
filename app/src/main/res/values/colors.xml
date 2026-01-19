@@ -5,11 +5,15 @@
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
 
-    <!-- Professional Dark Theme Color Palette -->
-    <!-- Primary Colors (Professional Blue) -->
-    <color name="primary">#3B82F6</color>           <!-- Professional blue - Main brand color -->
-    <color name="primaryDark">#1E40AF</color>       <!-- Deep blue for depth -->
-    <color name="primaryLight">#60A5FA</color>      <!-- Light blue for highlights -->
+    <!-- Modern Minimal Color Palette -->
+    <!-- Primary Colors (Clean Blue) -->
+    <color name="primary">#6366F1</color>           <!-- Modern indigo - Clean and professional -->
+    <color name="primaryDark">#4F46E5</color>       <!-- Deep indigo for depth -->
+    <color name="primaryLight">#818CF8</color>      <!-- Light indigo for highlights -->
+    
+    <!-- Gradient Support Colors -->
+    <color name="gradientStart">#6366F1</color>      <!-- Indigo start -->
+    <color name="gradientEnd">#8B5CF6</color>        <!-- Purple end -->
     
     <!-- Secondary Colors (Professional Gray) -->
     <color name="secondary">#6B7280</color>         <!-- Professional gray for accents -->
