@@ -212,6 +212,7 @@ public class AppUtils {
             "com.miui.contacts",            // Xiaomi Contacts/Dialer
             "com.oneplus.dialer",           // OnePlus Dialer
             "com.oppo.dialer",              // Oppo Dialer
+            "com.coloros.odialer",          // Realme/ColorOS Dialer
             "com.vivo.dialer",              // Vivo Dialer
             "com.huawei.contacts"           // Huawei Contacts
         };
@@ -251,6 +252,7 @@ public class AppUtils {
             "com.miui.calendar",                 // Xiaomi Calendar
             "com.oneplus.calendar",              // OnePlus Calendar
             "com.oppo.calendar",                 // Oppo Calendar
+            "com.coloros.calendar",              // Realme/ColorOS Calendar
             "com.vivo.calendar",                 // Vivo Calendar
             "com.huawei.calendar"                // Huawei Calendar
         };
@@ -289,6 +291,8 @@ public class AppUtils {
             "com.miui.clock",                     // Xiaomi Clock
             "com.oneplus.deskclock",              // OnePlus Clock
             "com.oppo.alarmclock",                // Oppo Clock
+            "com.coloros.alarmclock",             // Realme/ColorOS Clock
+            "com.motorola.timeweatherwidget",     // Motorola Clock
             "com.vivo.alarmclock",                // Vivo Clock
             "com.huawei.deskclock"                // Huawei Clock
         };
