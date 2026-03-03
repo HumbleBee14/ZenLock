@@ -13,7 +13,6 @@
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Usage Stats permission for mobile usage tracking -->
@@ -102,13 +101,6 @@
                 <!-- Lock Screen Service for Background Activity Launch -->
                 <service
                     android:name=".LockScreenService"
-                    android:enabled="true"
-                    android:exported="false"
-                    android:foregroundServiceType="specialUse" />
-
-                <!-- Overlay Lock Service for system overlay blocking -->
-                <service
-                    android:name=".OverlayLockService"
                     android:enabled="true"
                     android:exported="false"
                     android:foregroundServiceType="specialUse" />

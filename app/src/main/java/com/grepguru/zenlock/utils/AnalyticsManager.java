@@ -50,7 +50,7 @@ public class AnalyticsManager {
     private Map<String, Long> currentSessionAppUsage = new HashMap<>();
     
     public AnalyticsManager(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.repository = new AnalyticsRepository(context);
         this.sessionPrefs = context.getSharedPreferences(SESSION_PREFS, Context.MODE_PRIVATE);
         this.mobileUsageTracker = new MobileUsageTracker(context);

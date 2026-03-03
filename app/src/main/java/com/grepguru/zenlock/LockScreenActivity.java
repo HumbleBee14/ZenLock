@@ -46,7 +46,7 @@ import java.util.Set;
 
 public class LockScreenActivity extends AppCompatActivity {
 
-    private static boolean isLockScreenActive = false;
+    private static volatile boolean isLockScreenActive = false;
     private EditText pinInput;
     private SharedPreferences preferences;
     private boolean isLaunchingWhitelistedApp = false;

@@ -14,10 +14,73 @@ import com.grepguru.zenlock.utils.KeyguardUtils;
 import com.grepguru.zenlock.utils.MiuiUtils;
 import com.grepguru.zenlock.utils.WhitelistManager;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class AppBlockerService extends AccessibilityService {
+    private static final Set<String> LAUNCHER_PACKAGES = new HashSet<>(Arrays.asList(
+        // Samsung
+        "com.sec.android.app.launcher",           // Samsung One UI Launcher
+        "com.samsung.android.launcher",           // Samsung Launcher (legacy)
+        // Google / AOSP
+        "com.google.android.apps.nexuslauncher",  // Pixel Launcher
+        "com.android.launcher",                   // Stock Android Launcher (legacy)
+        "com.android.launcher2",                  // AOSP Launcher2 (legacy)
+        "com.android.launcher3",                  // AOSP Launcher3
+        "com.google.android.launcher",            // Google Now Launcher (legacy)
+        // Xiaomi / Redmi / POCO
+        "com.miui.home",                          // MIUI / HyperOS Launcher
+        "com.mi.android.globallauncher",          // POCO Launcher
+        // OnePlus
+        "com.oneplus.launcher",                   // OnePlus Launcher (OxygenOS 13+)
+        "net.oneplus.launcher",                   // OnePlus Launcher (older OxygenOS)
+        // Huawei / Honor
+        "com.huawei.android.launcher",            // Huawei EMUI Launcher
+        "com.hihonor.android.launcher",           // Honor MagicOS Launcher
+        // Oppo / Realme
+        "com.oppo.launcher",                      // OPPO ColorOS / Realme UI Launcher
+        "com.realme.launcher",                    // Realme Launcher (legacy)
+        // Vivo
+        "com.bbk.launcher2",                      // Vivo FuntouchOS / OriginOS Launcher
+        "com.vivo.launcher",                      // Vivo Launcher (legacy)
+        // Nothing
+        "com.nothing.launcher",                   // Nothing Phone Launcher
+        // Motorola
+        "com.motorola.launcher3",                 // Moto Launcher
+        "com.motorola.launcher",                  // Moto Launcher (legacy)
+        // Nokia (HMD)
+        "com.hmd.launcher",                       // Nokia Launcher
+        // ASUS
+        "com.asus.launcher",                      // ASUS ZenUI / ROG Launcher
+        // Lenovo
+        "com.lenovo.launcher",                    // Lenovo Launcher
+        // Sony
+        "com.sonymobile.home",                    // Sony Xperia Home (older)
+        "com.sonymobile.launcher",                // Sony Xperia Launcher (newer)
+        "com.sony.launcher",                      // Sony Launcher (legacy)
+        // LG (legacy)
+        "com.lge.launcher2",                      // LG Launcher (older)
+        "com.lge.launcher3",                      // LG Launcher (newer)
+        // HTC
+        "com.htc.launcher",                       // HTC Sense Home
+        "com.htc.launcher.edge",                  // HTC Edge Launcher
+        // Tecno / Infinix / itel (Transsion)
+        "com.transsion.hilauncher",               // Tecno HiOS Launcher
+        "com.transsion.XOSLauncher",              // Infinix XOS Launcher
+        "com.transsion.itel.launcher",            // itel Launcher
+        // ZTE / Nubia
+        "com.zte.mifavor.launcher",               // ZTE MiFavor Launcher
+        "com.nubia.launcher",                     // Nubia Launcher
+        // Third-party launchers
+        "com.nova.launcher",                      // Nova Launcher
+        "com.teslacoilsw.launcher",               // Nova Launcher (alternative pkg)
+        "com.microsoft.launcher",                 // Microsoft Launcher
+        "com.anddoes.launcher",                   // ADW Launcher
+        "com.go.launcher",                        // GO Launcher
+        "com.apex.launcher",                      // Apex Launcher
+        "com.lx.launcher8"                        // Launcher 8
+    ));
     private String lastLoggedPackage = "";
     private long lastLogTime = 0;
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
@@ -129,25 +192,6 @@ public class AppBlockerService extends AccessibilityService {
         }
     }
 
-    
-    private boolean isThirdPartySystemIntegration(String packageName) {
-        // Future: Add special handling for system-integrated third-party apps
-        // Example: Apps that provide system-level services but need temporary access
-        // Currently empty - all apps must be explicitly whitelisted by user
-        
-        String[] specialSystemIntegrations = {
-            // Add packages here only if they provide essential system services
-            // that need temporary access (e.g., emergency services, accessibility)
-        };
-        
-        for (String specialApp : specialSystemIntegrations) {
-            if (specialApp.equals(packageName)) {
-                return true;
-            }
-        }
-        
-        return false; // No automatic allowances - user choice only
-    }
 
     private void launchLockScreen() {
         try {
@@ -183,76 +227,7 @@ public class AppBlockerService extends AccessibilityService {
     }
 
     private boolean isLauncherPackage(String packageName) {
-        // Check if this is a launcher package (skip whitelist check for these)
-        String[] launcherPackages = {
-            // Samsung
-            "com.sec.android.app.launcher",           // Samsung One UI Launcher
-            "com.samsung.android.launcher",           // Samsung Launcher (legacy)
-            // Google / AOSP
-            "com.google.android.apps.nexuslauncher",  // Pixel Launcher
-            "com.android.launcher",                   // Stock Android Launcher (legacy)
-            "com.android.launcher2",                  // AOSP Launcher2 (legacy)
-            "com.android.launcher3",                  // AOSP Launcher3
-            "com.google.android.launcher",            // Google Now Launcher (legacy)
-            // Xiaomi / Redmi / POCO
-            "com.miui.home",                          // MIUI / HyperOS Launcher
-            "com.mi.android.globallauncher",          // POCO Launcher
-            // OnePlus
-            "com.oneplus.launcher",                   // OnePlus Launcher (OxygenOS 13+)
-            "net.oneplus.launcher",                   // OnePlus Launcher (older OxygenOS)
-            // Huawei / Honor
-            "com.huawei.android.launcher",            // Huawei EMUI Launcher
-            "com.hihonor.android.launcher",           // Honor MagicOS Launcher
-            // Oppo / Realme
-            "com.oppo.launcher",                      // OPPO ColorOS / Realme UI Launcher
-            "com.realme.launcher",                    // Realme Launcher (legacy)
-            // Vivo
-            "com.bbk.launcher2",                      // Vivo FuntouchOS / OriginOS Launcher
-            "com.vivo.launcher",                      // Vivo Launcher (legacy)
-            // Nothing
-            "com.nothing.launcher",                   // Nothing Phone Launcher
-            // Motorola
-            "com.motorola.launcher3",                 // Moto Launcher
-            "com.motorola.launcher",                  // Moto Launcher (legacy)
-            // Nokia (HMD)
-            "com.hmd.launcher",                       // Nokia Launcher
-            // ASUS
-            "com.asus.launcher",                      // ASUS ZenUI / ROG Launcher
-            // Lenovo
-            "com.lenovo.launcher",                    // Lenovo Launcher
-            // Sony
-            "com.sonymobile.home",                    // Sony Xperia Home (older)
-            "com.sonymobile.launcher",                // Sony Xperia Launcher (newer)
-            "com.sony.launcher",                      // Sony Launcher (legacy)
-            // LG (legacy)
-            "com.lge.launcher2",                      // LG Launcher (older)
-            "com.lge.launcher3",                      // LG Launcher (newer)
-            // HTC
-            "com.htc.launcher",                       // HTC Sense Home
-            "com.htc.launcher.edge",                  // HTC Edge Launcher
-            // Tecno / Infinix / itel (Transsion)
-            "com.transsion.hilauncher",               // Tecno HiOS Launcher
-            "com.transsion.XOSLauncher",              // Infinix XOS Launcher
-            "com.transsion.itel.launcher",            // itel Launcher
-            // ZTE / Nubia
-            "com.zte.mifavor.launcher",               // ZTE MiFavor Launcher
-            "com.nubia.launcher",                     // Nubia Launcher
-            // Third-party launchers
-            "com.nova.launcher",                      // Nova Launcher
-            "com.teslacoilsw.launcher",               // Nova Launcher (alternative pkg)
-            "com.microsoft.launcher",                 // Microsoft Launcher
-            "com.anddoes.launcher",                   // ADW Launcher
-            "com.go.launcher",                        // GO Launcher
-            "com.apex.launcher",                      // Apex Launcher
-            "com.lx.launcher8",                       // Launcher 8
-        };
-
-        for (String launcherPackage : launcherPackages) {
-            if (packageName.equals(launcherPackage)) {
-                return true;
-            }
-        }
-        return false;
+        return LAUNCHER_PACKAGES.contains(packageName);
     }
 
     private boolean isLauncherBypassClass(String className) {

@@ -51,13 +51,12 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.appcompat)
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.code.gson:gson:2.10.1")
     
     // Room components for SQLite database
     implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    // room-ktx removed: this is a Java project, room-runtime is sufficient
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     
     // LiveData for reactive UI updates

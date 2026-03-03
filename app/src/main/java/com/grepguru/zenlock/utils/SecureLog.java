@@ -62,6 +62,6 @@ public class SecureLog {
         if (data == null || data.length() <= 4) {
             return "****";
         }
-        return data.substring(0, 2) + "****" + data.substring(data.length() - 2);
+        return "****" + data.substring(data.length() - 2);
     }
 }

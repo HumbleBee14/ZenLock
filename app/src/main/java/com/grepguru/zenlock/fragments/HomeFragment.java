@@ -489,7 +489,7 @@ public class HomeFragment extends Fragment {
     private void showOverlayPermissionBanner() {
         new AlertDialog.Builder(getActivity())
                 .setTitle("Permission Required")
-                .setMessage("ZenLock needs 'Display over other apps' permission to show the lock screen.\\n\\nThis allows the app to block access to other apps during focus sessions.")
+                .setMessage("ZenLock needs 'Display over other apps' permission to show the lock screen.\n\nThis allows the app to block access to other apps during focus sessions.")
                 .setPositiveButton("Grant Permission", (dialog, which) -> {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                     intent.setData(android.net.Uri.fromParts("package", getActivity().getPackageName(), null));
@@ -506,11 +506,11 @@ public class HomeFragment extends Fragment {
         if (!hasShownDisclosure) {
             new AlertDialog.Builder(getActivity())
                     .setTitle("Accessibility Permission Required")
-                    .setMessage("ZenLock needs Accessibility Service permission to lock your screen during focus sessions.\\n\\n" +
-                            "This permission allows the app to:\\n" +
-                            "• Prevent access to your device until the timer ends\\n" +
-                            "• Enable complete screen lockdown functionality\\n\\n" +
-                            "No personal data is collected, stored, or transmitted. All data remains on your device.\\n\\n" +
+                    .setMessage("ZenLock needs Accessibility Service permission to lock your screen during focus sessions.\n\n" +
+                            "This permission allows the app to:\n" +
+                            "• Prevent access to your device until the timer ends\n" +
+                            "• Enable complete screen lockdown functionality\n\n" +
+                            "No personal data is collected, stored, or transmitted. All data remains on your device.\n\n" +
                             "You'll be taken to Android Settings to enable this permission.")
                     .setPositiveButton("Continue", (dialog, which) -> {
                         prefs.edit().putBoolean("accessibility_disclosure_shown", true).apply();

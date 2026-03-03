@@ -346,8 +346,8 @@ public class CreateScheduleDialog extends DialogFragment {
             return;
         }
         
-        // Get duration from pickers
-        selectedDurationMinutes = (selectedDurationHours * 60) + selectedDurationMinutes;
+        // Get duration from pickers - use local var to avoid overwriting the minutes field
+        int totalDurationMinutes = (selectedDurationHours * 60) + selectedDurationMinutes;
         
         // Get repeat type
         ScheduleModel.RepeatType repeatType;
@@ -390,7 +390,7 @@ public class CreateScheduleDialog extends DialogFragment {
         schedule.setName(name);
         schedule.setStartHour(selectedHour);
         schedule.setStartMinute(selectedMinute);
-        schedule.setFocusDurationMinutes(selectedDurationMinutes);
+        schedule.setFocusDurationMinutes(totalDurationMinutes);
         schedule.setRepeatType(repeatType);
         schedule.setRepeatDays(repeatDays);
         schedule.setPreNotifyEnabled(preNotifyEnabled);
