@@ -300,6 +300,69 @@
 
             </androidx.cardview.widget.CardView>
 
+            <!-- MIUI Background Pop-up Permission (Xiaomi/Redmi/POCO only) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/miuiCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/card_background">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_overlay_new"
+                        android:contentDescription="Background pop-up"
+                        android:layout_marginEnd="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Background Pop-up (Xiaomi)"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/textPrimary"
+                            android:layout_marginBottom="2dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Allow lock screen to appear from background"
+                            android:textSize="13sp"
+                            android:textColor="@color/textSecondary" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/miuiButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Grant"
+                        android:textSize="13sp"
+                        android:minWidth="70dp"
+                        android:background="@drawable/modern_button_primary"
+                        android:textColor="@color/white" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
         </LinearLayout>
 
     </ScrollView>

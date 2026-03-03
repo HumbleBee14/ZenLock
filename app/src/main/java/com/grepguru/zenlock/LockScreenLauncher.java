@@ -93,6 +93,49 @@ public class LockScreenLauncher {
     }
     
     /**
+     * Launch LockScreenActivity from AppBlockerService when direct startActivity() is blocked.
+     * Used as fallback on MIUI/HyperOS devices where background activity starts are silently dropped.
+     * Uses full-screen intent notification which MIUI does NOT block.
+     */
+    private static final int BLOCKER_NOTIFICATION_ID = 9999;
+
+    public static void launchFromBlocker(Context context) {
+        try {
+            Log.d(TAG, "Launching lock screen via notification fallback (blocker)");
+
+            createNotificationChannel(context);
+
+            Intent lockIntent = new Intent(context, LockScreenActivity.class);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+                context,
+                BLOCKER_NOTIFICATION_ID,
+                lockIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_lock_lock)
+                .setContentTitle("ZenLock Active")
+                .setContentText("Focus session in progress")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setAutoCancel(true)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.notify(BLOCKER_NOTIFICATION_ID, builder.build());
+                Log.d(TAG, "Blocker notification with full-screen intent shown");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to launch blocker notification fallback", e);
+        }
+    }
+
+    /**
      * Create notification channel for Android 8.0+
      */
     private static void createNotificationChannel(Context context) {

@@ -92,6 +92,12 @@ public class LockScreenActivity extends AppCompatActivity {
         }
         isLockScreenActive = true;
 
+        // Dismiss blocker notification if it was used to launch us (MIUI fallback)
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null) {
+            nm.cancel(9999); // BLOCKER_NOTIFICATION_ID from LockScreenLauncher
+        }
+
         // Start overlay lock service
         Intent overlayIntent = new Intent(this, OverlayLockService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

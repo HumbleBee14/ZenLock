@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.grepguru.zenlock.utils.MiuiUtils;
+
 /**
  * Permissions Onboarding Activity
  * Professional screen to request essential permissions for new users
@@ -26,13 +28,15 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private Button overlayButton;
     private Button usageButton;
     private Button alarmButton;
+    private Button miuiButton;
     private Button continueButton;
     private Button exitButton; // New exit button
-    
+
     private CardView accessibilityCard;
     private CardView overlayCard;
     private CardView usageCard;
     private CardView alarmCard;
+    private CardView miuiCard;
     
     // Accessibility consent tracking
     private boolean hasShownAccessibilityDisclosure = false;
@@ -60,13 +64,15 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         overlayButton = findViewById(R.id.overlayButton);
         usageButton = findViewById(R.id.usageButton);
         alarmButton = findViewById(R.id.alarmButton);
+        miuiButton = findViewById(R.id.miuiButton);
         continueButton = findViewById(R.id.continueButton);
         exitButton = findViewById(R.id.exitButton); // Initialize exit button
-        
+
         accessibilityCard = findViewById(R.id.accessibilityCard);
         overlayCard = findViewById(R.id.overlayCard);
         usageCard = findViewById(R.id.usageCard);
         alarmCard = findViewById(R.id.alarmCard);
+        miuiCard = findViewById(R.id.miuiCard);
     }
     
     private void setupClickListeners() {
@@ -74,6 +80,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         overlayButton.setOnClickListener(v -> requestOverlayPermission());
         usageButton.setOnClickListener(v -> requestUsagePermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
+        miuiButton.setOnClickListener(v -> requestMiuiPermission());
         continueButton.setOnClickListener(v -> completeOnboarding());
         exitButton.setOnClickListener(v -> finish()); // Set click listener for exit
     }
@@ -136,13 +143,18 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enable 'Exact alarms' for ZenLock", Toast.LENGTH_LONG).show();
         }
     }
+
+    private void requestMiuiPermission() {
+        MiuiUtils.openMiuiPermissionEditor(this);
+        Toast.makeText(this, "Enable 'Display pop-up windows while running in background' for ZenLock", Toast.LENGTH_LONG).show();
+    }
     
     private void updatePermissionStates() {
         boolean accessibilityGranted = isAccessibilityPermissionGranted();
         boolean overlayGranted = Settings.canDrawOverlays(this);
         boolean usageGranted = isUsagePermissionGranted();
         boolean alarmGranted = isAlarmPermissionGranted();
-        
+
         // Update accessibility card based on consent and permission status
         if (hasShownAccessibilityDisclosure && !userConsentedToAccessibility) {
             // User declined consent - show declined state
@@ -151,10 +163,10 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         } else {
             updatePermissionCard(accessibilityCard, accessibilityButton, accessibilityGranted, "Granted", "Grant");
         }
-        
+
         updatePermissionCard(overlayCard, overlayButton, overlayGranted, "Granted", "Grant");
         updatePermissionCard(usageCard, usageButton, usageGranted, "Granted", "Grant");
-        
+
         // Only show alarm permission for API 31+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             updatePermissionCard(alarmCard, alarmButton, alarmGranted, "Granted", "Grant");
@@ -162,10 +174,19 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         } else {
             alarmCard.setVisibility(View.GONE);
         }
-        
+
+        // Only show MIUI card on Xiaomi/Redmi/POCO devices
+        if (MiuiUtils.isXiaomiDevice()) {
+            boolean miuiGranted = MiuiUtils.canStartActivityFromBackground(this);
+            updatePermissionCard(miuiCard, miuiButton, miuiGranted, "Granted", "Grant");
+            miuiCard.setVisibility(View.VISIBLE);
+        } else {
+            miuiCard.setVisibility(View.GONE);
+        }
+
         // Enable continue button only if essential permissions are granted (Usage Access is optional)
-        // AND user has consented to accessibility (if they declined, they can't continue)
-        boolean essentialGranted = accessibilityGranted && overlayGranted && 
+        // MIUI permission is not essential — the app has a notification fallback for when it's denied
+        boolean essentialGranted = accessibilityGranted && overlayGranted &&
                                  (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted) &&
                                  (hasShownAccessibilityDisclosure ? userConsentedToAccessibility : true);
         continueButton.setEnabled(essentialGranted);

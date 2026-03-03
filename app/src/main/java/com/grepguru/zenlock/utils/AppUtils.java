@@ -86,15 +86,43 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "android"); // System process
         addIfInstalled(pm, allAllowed, "system"); // System process alternative
         
-        // Launcher apps (needed for notification interactions and home button)
+        // Launcher apps (needed for notification interactions, incoming calls, and home button)
+        // When calls come in, Android briefly transitions through the launcher task before
+        // showing InCallUI. Without these, the lock screen blocks incoming calls.
+        // App blocking is handled by AppBlockerService which tracks ALL app opens independently.
         addIfInstalled(pm, allAllowed, "com.sec.android.app.launcher"); // Samsung Launcher
+        addIfInstalled(pm, allAllowed, "com.samsung.android.launcher"); // Samsung Launcher (legacy)
         addIfInstalled(pm, allAllowed, "com.google.android.apps.nexuslauncher"); // Pixel Launcher
         addIfInstalled(pm, allAllowed, "com.android.launcher3"); // Stock Android Launcher
-        addIfInstalled(pm, allAllowed, "com.miui.home"); // Xiaomi Launcher
+        addIfInstalled(pm, allAllowed, "com.android.launcher"); // Stock Android Launcher (legacy)
+        addIfInstalled(pm, allAllowed, "com.miui.home"); // Xiaomi / HyperOS Launcher
+        addIfInstalled(pm, allAllowed, "com.mi.android.globallauncher"); // POCO Launcher
         addIfInstalled(pm, allAllowed, "com.oneplus.launcher"); // OnePlus Launcher
-        addIfInstalled(pm, allAllowed, "com.oppo.launcher"); // Oppo Launcher
-        addIfInstalled(pm, allAllowed, "com.vivo.launcher"); // Vivo Launcher
+        addIfInstalled(pm, allAllowed, "net.oneplus.launcher"); // OnePlus Launcher (older)
+        addIfInstalled(pm, allAllowed, "com.oppo.launcher"); // Oppo / Realme Launcher
+        addIfInstalled(pm, allAllowed, "com.realme.launcher"); // Realme Launcher (legacy)
+        addIfInstalled(pm, allAllowed, "com.bbk.launcher2"); // Vivo Launcher
+        addIfInstalled(pm, allAllowed, "com.vivo.launcher"); // Vivo Launcher (legacy)
         addIfInstalled(pm, allAllowed, "com.huawei.android.launcher"); // Huawei Launcher
+        addIfInstalled(pm, allAllowed, "com.hihonor.android.launcher"); // Honor Launcher
+        addIfInstalled(pm, allAllowed, "com.nothing.launcher"); // Nothing Launcher
+        addIfInstalled(pm, allAllowed, "com.motorola.launcher3"); // Moto Launcher
+        addIfInstalled(pm, allAllowed, "com.motorola.launcher"); // Moto Launcher (legacy)
+        addIfInstalled(pm, allAllowed, "com.hmd.launcher"); // Nokia Launcher
+        addIfInstalled(pm, allAllowed, "com.asus.launcher"); // ASUS Launcher
+        addIfInstalled(pm, allAllowed, "com.lenovo.launcher"); // Lenovo Launcher
+        addIfInstalled(pm, allAllowed, "com.sonymobile.home"); // Sony Xperia Home
+        addIfInstalled(pm, allAllowed, "com.sonymobile.launcher"); // Sony Xperia Launcher
+        addIfInstalled(pm, allAllowed, "com.sony.launcher"); // Sony Launcher (legacy)
+        addIfInstalled(pm, allAllowed, "com.lge.launcher2"); // LG Launcher (older)
+        addIfInstalled(pm, allAllowed, "com.lge.launcher3"); // LG Launcher (newer)
+        addIfInstalled(pm, allAllowed, "com.htc.launcher"); // HTC Launcher
+        addIfInstalled(pm, allAllowed, "com.htc.launcher.edge"); // HTC Edge Launcher
+        addIfInstalled(pm, allAllowed, "com.transsion.hilauncher"); // Tecno Launcher
+        addIfInstalled(pm, allAllowed, "com.transsion.XOSLauncher"); // Infinix Launcher
+        addIfInstalled(pm, allAllowed, "com.transsion.itel.launcher"); // itel Launcher
+        addIfInstalled(pm, allAllowed, "com.zte.mifavor.launcher"); // ZTE Launcher
+        addIfInstalled(pm, allAllowed, "com.nubia.launcher"); // Nubia Launcher
         
         // Google Play Services (needed for core Android functionality)
         addIfInstalled(pm, allAllowed, "com.android.vending"); // Google Play Store

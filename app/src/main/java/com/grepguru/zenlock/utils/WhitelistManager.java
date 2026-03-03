@@ -136,18 +136,58 @@ public class WhitelistManager {
         
         String[] securityRiskPackages = {
             "com.android.settings",           // Allows force stop
-            "com.sec.android.app.launcher",   // Samsung launcher
+            // Samsung
+            "com.sec.android.app.launcher",   // Samsung One UI Launcher
+            "com.samsung.android.launcher",   // Samsung Launcher (legacy)
+            // Google / AOSP
+            "com.google.android.apps.nexuslauncher", // Pixel Launcher
             "com.android.launcher",           // Stock launcher
             "com.android.launcher2",          // Legacy launcher
             "com.android.launcher3",          // AOSP launcher
-            "com.google.android.launcher",    // Google launcher
-            "com.samsung.android.launcher",   // Samsung launcher
-            "com.miui.home",                  // MIUI launcher
-            "com.oneplus.launcher",           // OnePlus launcher
+            "com.google.android.launcher",    // Google Now Launcher (legacy)
+            // Xiaomi / Redmi / POCO
+            "com.miui.home",                  // MIUI / HyperOS launcher
+            "com.mi.android.globallauncher",  // POCO launcher
+            // OnePlus
+            "com.oneplus.launcher",           // OnePlus launcher (newer)
+            "net.oneplus.launcher",           // OnePlus launcher (older)
+            // Huawei / Honor
             "com.huawei.android.launcher",    // Huawei launcher
-            "com.oppo.launcher",              // OPPO launcher
-            "com.vivo.launcher",              // Vivo launcher
-            "com.realme.launcher"             // Realme launcher
+            "com.hihonor.android.launcher",   // Honor launcher
+            // Oppo / Realme
+            "com.oppo.launcher",              // OPPO / Realme launcher
+            "com.realme.launcher",            // Realme launcher (legacy)
+            // Vivo
+            "com.bbk.launcher2",              // Vivo launcher
+            "com.vivo.launcher",              // Vivo launcher (legacy)
+            // Nothing
+            "com.nothing.launcher",           // Nothing Phone launcher
+            // Motorola
+            "com.motorola.launcher3",         // Moto launcher
+            "com.motorola.launcher",          // Moto launcher (legacy)
+            // Nokia (HMD)
+            "com.hmd.launcher",               // Nokia launcher
+            // ASUS
+            "com.asus.launcher",              // ASUS launcher
+            // Lenovo
+            "com.lenovo.launcher",            // Lenovo launcher
+            // Sony
+            "com.sonymobile.home",            // Sony Xperia Home (older)
+            "com.sonymobile.launcher",        // Sony Xperia launcher (newer)
+            "com.sony.launcher",              // Sony launcher (legacy)
+            // LG (legacy)
+            "com.lge.launcher2",              // LG launcher (older)
+            "com.lge.launcher3",              // LG launcher (newer)
+            // HTC
+            "com.htc.launcher",               // HTC Sense Home
+            "com.htc.launcher.edge",          // HTC Edge launcher
+            // Tecno / Infinix / itel (Transsion)
+            "com.transsion.hilauncher",       // Tecno HiOS launcher
+            "com.transsion.XOSLauncher",      // Infinix XOS launcher
+            "com.transsion.itel.launcher",    // itel launcher
+            // ZTE / Nubia
+            "com.zte.mifavor.launcher",       // ZTE MiFavor launcher
+            "com.nubia.launcher"              // Nubia launcher
         };
         
         for (String riskPackage : securityRiskPackages) {

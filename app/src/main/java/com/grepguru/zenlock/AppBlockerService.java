@@ -11,6 +11,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.grepguru.zenlock.utils.AppUtils;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.KeyguardUtils;
+import com.grepguru.zenlock.utils.MiuiUtils;
 import com.grepguru.zenlock.utils.WhitelistManager;
 
 import java.util.HashSet;
@@ -155,12 +156,25 @@ public class AppBlockerService extends AccessibilityService {
                 return;
             }
 
+            // Always show overlay first — this works even when startActivity is blocked
+            OverlayLockService.showOverlay(this);
+
+            // On MIUI/HyperOS, startActivity() from background is silently blocked
+            // unless "Display pop-up windows while running in background" is enabled.
+            // Use full-screen intent notification as fallback which MIUI does NOT block.
+            if (!MiuiUtils.canStartActivityFromBackground(this)) {
+                Log.d("AppBlockerService", "MIUI detected with background start blocked — using notification fallback");
+                LockScreenLauncher.launchFromBlocker(this);
+                return;
+            }
+
             Intent intent = new Intent(this, LockScreenActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            // Log.d("AppBlockerService", "LockScreenActivity launched to block unauthorized app access.");
         } catch (Exception e) {
-            Log.e("AppBlockerService", "Failed to launch LockScreenActivity", e);
+            Log.e("AppBlockerService", "Failed to launch LockScreenActivity, trying notification fallback", e);
+            // Fallback for any OEM that silently blocks without throwing
+            LockScreenLauncher.launchFromBlocker(this);
         }
     }
 
@@ -171,28 +185,68 @@ public class AppBlockerService extends AccessibilityService {
     private boolean isLauncherPackage(String packageName) {
         // Check if this is a launcher package (skip whitelist check for these)
         String[] launcherPackages = {
-            "com.sec.android.app.launcher",           // Samsung Launcher
+            // Samsung
+            "com.sec.android.app.launcher",           // Samsung One UI Launcher
+            "com.samsung.android.launcher",           // Samsung Launcher (legacy)
+            // Google / AOSP
+            "com.google.android.apps.nexuslauncher",  // Pixel Launcher
+            "com.android.launcher",                   // Stock Android Launcher (legacy)
+            "com.android.launcher2",                  // AOSP Launcher2 (legacy)
             "com.android.launcher3",                  // AOSP Launcher3
-            "com.google.android.launcher",            // Google Now Launcher
-            "com.miui.home.launcher",                 // MIUI Launcher
-            "com.oneplus.launcher",                   // OnePlus Launcher
-            "com.huawei.android.launcher",            // Huawei Launcher
-            "com.oppo.launcher",                      // OPPO Launcher
-            "com.vivo.launcher",                      // Vivo Launcher
-            "com.samsung.android.launcher",           // Samsung Launcher
+            "com.google.android.launcher",            // Google Now Launcher (legacy)
+            // Xiaomi / Redmi / POCO
+            "com.miui.home",                          // MIUI / HyperOS Launcher
+            "com.mi.android.globallauncher",          // POCO Launcher
+            // OnePlus
+            "com.oneplus.launcher",                   // OnePlus Launcher (OxygenOS 13+)
+            "net.oneplus.launcher",                   // OnePlus Launcher (older OxygenOS)
+            // Huawei / Honor
+            "com.huawei.android.launcher",            // Huawei EMUI Launcher
+            "com.hihonor.android.launcher",           // Honor MagicOS Launcher
+            // Oppo / Realme
+            "com.oppo.launcher",                      // OPPO ColorOS / Realme UI Launcher
+            "com.realme.launcher",                    // Realme Launcher (legacy)
+            // Vivo
+            "com.bbk.launcher2",                      // Vivo FuntouchOS / OriginOS Launcher
+            "com.vivo.launcher",                      // Vivo Launcher (legacy)
+            // Nothing
+            "com.nothing.launcher",                   // Nothing Phone Launcher
+            // Motorola
+            "com.motorola.launcher3",                 // Moto Launcher
+            "com.motorola.launcher",                  // Moto Launcher (legacy)
+            // Nokia (HMD)
+            "com.hmd.launcher",                       // Nokia Launcher
+            // ASUS
+            "com.asus.launcher",                      // ASUS ZenUI / ROG Launcher
+            // Lenovo
+            "com.lenovo.launcher",                    // Lenovo Launcher
+            // Sony
+            "com.sonymobile.home",                    // Sony Xperia Home (older)
+            "com.sonymobile.launcher",                // Sony Xperia Launcher (newer)
+            "com.sony.launcher",                      // Sony Launcher (legacy)
+            // LG (legacy)
+            "com.lge.launcher2",                      // LG Launcher (older)
+            "com.lge.launcher3",                      // LG Launcher (newer)
+            // HTC
+            "com.htc.launcher",                       // HTC Sense Home
+            "com.htc.launcher.edge",                  // HTC Edge Launcher
+            // Tecno / Infinix / itel (Transsion)
+            "com.transsion.hilauncher",               // Tecno HiOS Launcher
+            "com.transsion.XOSLauncher",              // Infinix XOS Launcher
+            "com.transsion.itel.launcher",            // itel Launcher
+            // ZTE / Nubia
+            "com.zte.mifavor.launcher",               // ZTE MiFavor Launcher
+            "com.nubia.launcher",                     // Nubia Launcher
+            // Third-party launchers
             "com.nova.launcher",                      // Nova Launcher
+            "com.teslacoilsw.launcher",               // Nova Launcher (alternative pkg)
             "com.microsoft.launcher",                 // Microsoft Launcher
             "com.anddoes.launcher",                   // ADW Launcher
-            "com.teslacoilsw.launcher",               // Nova Launcher (alternative)
             "com.go.launcher",                        // GO Launcher
             "com.apex.launcher",                      // Apex Launcher
             "com.lx.launcher8",                       // Launcher 8
-            "com.htc.launcher",                       // HTC Launcher
-            "com.sony.launcher",                      // Sony Launcher
-            "com.lge.launcher2",                      // LG Launcher
-            "com.motorola.launcher"                   // Motorola Launcher
         };
-        
+
         for (String launcherPackage : launcherPackages) {
             if (packageName.equals(launcherPackage)) {
                 return true;
@@ -205,26 +259,19 @@ public class AppBlockerService extends AccessibilityService {
         // Block launcher classes that can bypass the lock
         // Block any class containing "Launcher" keyword (covers custom launchers)
         // Block specific recent activity classes
-        
+
+        String classLower = className.toLowerCase();
+
         // Block any class containing "Launcher" (covers all launchers)
-        if (className.toLowerCase().contains("launcher")) {
+        if (classLower.contains("launcher")) {
             return true;
         }
-        
-        // Block specific recent activity classes
-        String[] recentActivityClasses = {
-            "com.android.quickstep.RecentsActivity",        // Recent Activity button
-            "com.android.quickstep.views.RecentsView",      // Recent Activity view
-            "com.android.systemui.recents.RecentsActivity",  // SystemUI Recent Activity
-            "com.android.systemui.recents.RecentsActivityLegacy"
-        };
-        
-        for (String recentClass : recentActivityClasses) {
-            if (className.equals(recentClass)) {
-                return true;
-            }
+
+        // Block any class containing "Recents" (covers OEM recents screens)
+        if (classLower.contains("recents")) {
+            return true;
         }
-        
+
         return false;
     }
 
