@@ -41,7 +41,7 @@
     </queries>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -80,7 +80,7 @@
         <!-- Whitelist Activity -->
         <activity
             android:name=".WhitelistActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
         <!-- Partner Contact Activity -->
@@ -102,6 +102,13 @@
                 <!-- Lock Screen Service for Background Activity Launch -->
                 <service
                     android:name=".LockScreenService"
+                    android:enabled="true"
+                    android:exported="false"
+                    android:foregroundServiceType="specialUse" />
+
+                <!-- Overlay Lock Service for system overlay blocking -->
+                <service
+                    android:name=".OverlayLockService"
                     android:enabled="true"
                     android:exported="false"
                     android:foregroundServiceType="specialUse" />

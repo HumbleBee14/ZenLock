@@ -218,7 +218,7 @@ public class EnhancedUnlockManager {
                     otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
                 } else {
                     requestOtpButton.setEnabled(true);
-                    otpStatusText.setText("Code valid for 1 hour only");
+                    otpStatusText.setText("Code valid for 5 minutes only");
                     otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
                 }
                 
@@ -303,7 +303,7 @@ public class EnhancedUnlockManager {
             currentText.contains("Wrong") || currentText.contains("Check again") || currentText.contains("not configured")) {
             
             if (method == UnlockMethod.ACCOUNTABILITY_PARTNER_OTP) {
-                statusText.setText("Code valid for 1 hour only");
+                statusText.setText("Code valid for 5 minutes only");
                 statusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
             } else {
                 // For PIN unlock, just hide the status text

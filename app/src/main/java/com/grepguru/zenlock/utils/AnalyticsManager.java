@@ -407,7 +407,7 @@ public class AnalyticsManager {
             calendar.set(Calendar.MILLISECOND, 0);
             
             long monthStart = calendar.getTimeInMillis();
-            long monthEnd = monthStart + (30 * 24 * 60 * 60 * 1000); // Approximate month
+            long monthEnd = monthStart + (30L * 24 * 60 * 60 * 1000); // Approximate month
             
             return repository.getTotalFocusTimeForPeriod(monthStart, monthEnd);
         } catch (Exception e) {

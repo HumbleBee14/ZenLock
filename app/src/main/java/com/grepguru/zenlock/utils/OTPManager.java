@@ -127,7 +127,7 @@ public class OTPManager {
             return false;
         }
 
-        String message = "ZenLock Alert!\n\nUnlock code: " + otp + "\n\nYour accountability partner wants to end their focus session early. Share this code if you approve. Expires in 60 minutes.";
+        String message = "ZenLock Alert!\n\nUnlock code: " + otp + "\n\nYour accountability partner wants to end their focus session early. Share this code if you approve. Expires in 5 minutes.";
 
         try {
             // Since minSdk is 28 (which is >= Build.VERSION_CODES.M (23)),
