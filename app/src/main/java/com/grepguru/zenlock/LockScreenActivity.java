@@ -465,19 +465,28 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        
+
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
             isLaunchingWhitelistedApp = false; // Reset the flag
             Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on pause.");
             return;
         }
-        
+
+        // Check if screen is off — if so, don't restart. The screen turning off triggers
+        // onPause, and restarting would call setTurnScreenOn(true) which turns the screen
+        // back on, creating an infinite wake loop. AppBlockerService will catch any app
+        // when the user wakes the device.
+        if (!isScreenOn()) {
+            Log.d("LockScreenActivity", "Screen is off. Not restarting on pause.");
+            return;
+        }
+
         // Check if system lock screen (Keyguard) is active - if so, don't restart
         if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on pause.")) {
             return;
         }
-        
+
         // Check if AppBlockerService recently allowed a whitelisted app
         long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
         long currentTime = System.currentTimeMillis();
@@ -485,23 +494,29 @@ public class LockScreenActivity extends AppCompatActivity {
             Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on pause.");
             return;
         }
-        
+
         // Check if a whitelisted app is currently in the foreground
         if (isWhitelistedAppInForeground()) {
             Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on pause.");
             return;
         }
-        
+
         // Only restart if we're not already finishing and this is a legitimate pause
         if (!isFinishing() && !isDestroyed()) {
             // Use a longer delay to prevent rapid restarts
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
+                    // Check screen is still on before restarting
+                    if (!isScreenOn()) {
+                        Log.d("LockScreenActivity", "Screen turned off. Canceling restart.");
+                        return;
+                    }
+
                     // Double-check keyguard state before restarting
                     if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
                         return;
                     }
-                    
+
                     // Double-check if AppBlockerService recently allowed a whitelisted app
                     long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
                     long currentTime2 = System.currentTimeMillis();
@@ -509,13 +524,13 @@ public class LockScreenActivity extends AppCompatActivity {
                         Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
                         return;
                     }
-                    
+
                     // Double-check if whitelisted app is still in foreground
                     if (isWhitelistedAppInForeground()) {
                         Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
                         return;
                     }
-                    
+
                     Intent intent = new Intent(this, LockScreenActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -527,18 +542,24 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        
+
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
             Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on stop.");
             return;
         }
-        
+
+        // Don't restart if screen is off (same reason as onPause — prevents wake loop)
+        if (!isScreenOn()) {
+            Log.d("LockScreenActivity", "Screen is off. Not restarting on stop.");
+            return;
+        }
+
         // Check if system lock screen (Keyguard) is active - if so, don't restart
         if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on stop.")) {
             return;
         }
-        
+
         // Check if AppBlockerService recently allowed a whitelisted app
         long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
         long currentTime = System.currentTimeMillis();
@@ -546,23 +567,29 @@ public class LockScreenActivity extends AppCompatActivity {
             Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on stop.");
             return;
         }
-        
+
         // Check if a whitelisted app is currently in the foreground
         if (isWhitelistedAppInForeground()) {
             Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on stop.");
             return;
         }
-        
+
         // Only restart if we're not already finishing
         if (!isFinishing() && !isDestroyed()) {
             // Use a longer delay to prevent rapid restarts
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
+                    // Check screen is still on
+                    if (!isScreenOn()) {
+                        Log.d("LockScreenActivity", "Screen turned off. Canceling restart.");
+                        return;
+                    }
+
                     // Double-check keyguard state before restarting
                     if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
                         return;
                     }
-                    
+
                     // Double-check if AppBlockerService recently allowed a whitelisted app
                     long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
                     long currentTime2 = System.currentTimeMillis();
@@ -570,13 +597,13 @@ public class LockScreenActivity extends AppCompatActivity {
                         Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
                         return;
                     }
-                    
+
                     // Double-check if whitelisted app is still in foreground
                     if (isWhitelistedAppInForeground()) {
                         Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
                         return;
                     }
-                    
+
                     Intent intent = new Intent(this, LockScreenActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -712,8 +739,22 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
     /**
-     * Check if a whitelisted app is currently in the foreground
-     * This prevents LockScreenActivity from restarting when user is using allowed apps
+     * Check if the device screen is currently on.
+     * Used to prevent restarting LockScreenActivity when the screen turns off,
+     * which would cause an infinite wake loop due to setTurnScreenOn(true).
+     */
+    private boolean isScreenOn() {
+        try {
+            android.os.PowerManager powerManager = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
+            return powerManager != null && powerManager.isInteractive();
+        } catch (Exception e) {
+            return true; // Assume screen is on if check fails
+        }
+    }
+
+    /**
+     * Check if a whitelisted app is currently in the foreground.
+     * This prevents LockScreenActivity from restarting when user is using allowed apps.
      */
     private boolean isWhitelistedAppInForeground() {
         try {
