@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -58,6 +60,7 @@ public class HomeFragment extends Fragment {
     private Handler longPressHandler = new Handler(Looper.getMainLooper());
     private Runnable longPressRunnable;
     private ValueAnimator progressAnimator;
+    private ObjectAnimator emojiPulseX, emojiPulseY;
     private boolean isLongPressing = false;
     private static final long ZEN_ACTIVATION_DURATION = 2000; // 2 seconds
 
@@ -118,16 +121,19 @@ public class HomeFragment extends Fragment {
         // Preset chips - ADD to current time instead of setting
         preset15min.setOnClickListener(v -> {
             selectedMinutes = Math.min(selectedMinutes + 15, 1440); // Add 15 minutes
+            tickVibrate();
             updateTimeDisplay();
         });
-        
+
         preset30min.setOnClickListener(v -> {
             selectedMinutes = Math.min(selectedMinutes + 30, 1440); // Add 30 minutes
+            tickVibrate();
             updateTimeDisplay();
         });
-        
+
         preset60min.setOnClickListener(v -> {
             selectedMinutes = Math.min(selectedMinutes + 60, 1440); // Add 1 hour
+            tickVibrate();
             updateTimeDisplay();
         });
     }
@@ -136,10 +142,18 @@ public class HomeFragment extends Fragment {
     private Runnable autoIncrementRunnable;
     private boolean isAutoIncrementing = false;
 
+    private void tickVibrate() {
+        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE));
+        }
+    }
+
     private void setupIncrementButton() {
         increaseTimeButton.setOnClickListener(v -> {
             // Single tap: +5 minutes
             selectedMinutes = Math.min(selectedMinutes + TIME_INCREMENT, 1440);
+            tickVibrate();
             updateTimeDisplay();
         });
 
@@ -175,6 +189,7 @@ public class HomeFragment extends Fragment {
         decreaseTimeButton.setOnClickListener(v -> {
             // Single tap: -5 minutes
             selectedMinutes = Math.max(selectedMinutes - TIME_INCREMENT, 0);
+            tickVibrate();
             updateTimeDisplay();
         });
 
@@ -435,18 +450,29 @@ public class HomeFragment extends Fragment {
     }
 
     private void animateZenEmoji() {
-        ObjectAnimator pulseAnimator = ObjectAnimator.ofFloat(zenEmoji, "scaleX", 1f, 1.1f, 1f);
-        pulseAnimator.setDuration(1200);
-        pulseAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-        pulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        emojiPulseX = ObjectAnimator.ofFloat(zenEmoji, "scaleX", 1f, 1.1f, 1f);
+        emojiPulseX.setDuration(1200);
+        emojiPulseX.setRepeatCount(ObjectAnimator.INFINITE);
+        emojiPulseX.setInterpolator(new AccelerateDecelerateInterpolator());
 
-        ObjectAnimator pulseAnimatorY = ObjectAnimator.ofFloat(zenEmoji, "scaleY", 1f, 1.1f, 1f);
-        pulseAnimatorY.setDuration(1200);
-        pulseAnimatorY.setRepeatCount(ObjectAnimator.INFINITE);
-        pulseAnimatorY.setInterpolator(new AccelerateDecelerateInterpolator());
+        emojiPulseY = ObjectAnimator.ofFloat(zenEmoji, "scaleY", 1f, 1.1f, 1f);
+        emojiPulseY.setDuration(1200);
+        emojiPulseY.setRepeatCount(ObjectAnimator.INFINITE);
+        emojiPulseY.setInterpolator(new AccelerateDecelerateInterpolator());
 
-        pulseAnimator.start();
-        pulseAnimatorY.start();
+        emojiPulseX.start();
+        emojiPulseY.start();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (emojiPulseX != null) { emojiPulseX.cancel(); emojiPulseX = null; }
+        if (emojiPulseY != null) { emojiPulseY.cancel(); emojiPulseY = null; }
+        if (progressAnimator != null) { progressAnimator.cancel(); progressAnimator = null; }
+        isAutoIncrementing = false;
+        autoIncrementHandler.removeCallbacksAndMessages(null);
+        longPressHandler.removeCallbacksAndMessages(null);
     }
 
     private void checkAndStartLockService() {
