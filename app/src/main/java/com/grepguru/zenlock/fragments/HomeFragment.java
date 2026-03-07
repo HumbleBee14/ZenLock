@@ -20,10 +20,13 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,18 +40,24 @@ import com.grepguru.zenlock.utils.AnalyticsManager;
 
 public class HomeFragment extends Fragment {
 
-    // Modern UI Elements
     private MaterialButton increaseTimeButton, decreaseTimeButton;
     private MaterialButton enableLockButton;
     private TextView selectedTimeDisplay;
     private View timeDisplayContainer;
     private Chip preset15min, preset30min, preset60min;
-    
-    // Hidden NumberPickers for dialog
     private NumberPicker hoursPicker, minutesPicker;
-    
-    private int selectedMinutes = 0; // Total minutes
-    private static final int TIME_INCREMENT = 5; // 5 minutes increment
+
+    // Lock Until mode
+    private ImageButton modeToggleButton;
+    private View lockUntilContainer;
+    private View durationControlsContainer;
+    private TextView lockUntilTimeDisplay;
+    private boolean isLockUntilMode = false;
+    private int lockUntilHour = -1;
+    private int lockUntilMinute = -1;
+
+    private int selectedMinutes = 0;
+    private static final int TIME_INCREMENT = 5;
     private AnalyticsManager analyticsManager;
 
     // Zen Mode Progress Overlay Elements
@@ -83,9 +92,14 @@ public class HomeFragment extends Fragment {
         preset30min = view.findViewById(R.id.preset30min);
         preset60min = view.findViewById(R.id.preset60min);
         
-        // Hidden NumberPickers
         hoursPicker = view.findViewById(R.id.hoursPicker);
         minutesPicker = view.findViewById(R.id.minutesPicker);
+
+        // Lock Until mode views
+        modeToggleButton = view.findViewById(R.id.modeToggleButton);
+        lockUntilContainer = view.findViewById(R.id.lockUntilContainer);
+        durationControlsContainer = view.findViewById(R.id.durationControlsContainer);
+        lockUntilTimeDisplay = view.findViewById(R.id.lockUntilTimeDisplay);
 
         // Initialize Zen Progress Overlay
         zenProgressOverlay = view.findViewById(R.id.zenProgressOverlay);
@@ -94,15 +108,19 @@ public class HomeFragment extends Fragment {
         zenProgressMessage = view.findViewById(R.id.zenProgressMessage);
         zenProgressSubtitle = view.findViewById(R.id.zenProgressSubtitle);
 
-        setupNumberPickers(); // hidden but needed for dialog
+        setupNumberPickers();
         setupModernControls();
         setupZenLongPressButton();
+        setupModeToggle();
 
-        // Initialize analytics manager
         analyticsManager = new AnalyticsManager(requireContext());
 
-        // Set default time
-        setTimeInMinutes(10); // Default 10 minutes
+        setTimeInMinutes(10);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        if (prefs.getBoolean("lock_until_mode", false)) {
+            modeToggleButton.performClick();
+        }
 
         return view;
     }
@@ -138,10 +156,88 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void setupModeToggle() {
+        modeToggleButton.setOnClickListener(v -> {
+            isLockUntilMode = !isLockUntilMode;
+            requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("lock_until_mode", isLockUntilMode).apply();
+            tickVibrate();
+
+            if (isLockUntilMode) {
+                modeToggleButton.setImageResource(R.drawable.ic_timer);
+                modeToggleButton.setContentDescription("Switch to duration mode");
+                timeDisplayContainer.setVisibility(View.GONE);
+                durationControlsContainer.setVisibility(View.GONE);
+                lockUntilContainer.setVisibility(View.VISIBLE);
+
+                if (lockUntilHour == -1) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.HOUR_OF_DAY, 1);
+                    lockUntilHour = cal.get(Calendar.HOUR_OF_DAY);
+                    lockUntilMinute = 0;
+                }
+                updateLockUntilDisplay();
+                enableLockButton.setEnabled(true);
+                enableLockButton.setAlpha(1f);
+            } else {
+                modeToggleButton.setImageResource(R.drawable.ic_schedule);
+                modeToggleButton.setContentDescription("Switch to lock until time");
+                timeDisplayContainer.setVisibility(View.VISIBLE);
+                durationControlsContainer.setVisibility(View.VISIBLE);
+                lockUntilContainer.setVisibility(View.GONE);
+                updateTimeDisplay();
+            }
+        });
+
+        lockUntilContainer.setOnClickListener(v -> showLockUntilTimePicker());
+    }
+
+    private void showLockUntilTimePicker() {
+        int hour = lockUntilHour != -1 ? lockUntilHour : Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1;
+        int minute = lockUntilMinute != -1 ? lockUntilMinute : 0;
+
+        android.app.TimePickerDialog picker = new android.app.TimePickerDialog(
+                requireContext(),
+                (view, selectedHour, selectedMinute) -> {
+                    lockUntilHour = selectedHour;
+                    lockUntilMinute = selectedMinute;
+                    updateLockUntilDisplay();
+                    enableLockButton.setEnabled(true);
+                    enableLockButton.setAlpha(1f);
+                },
+                hour, minute, false
+        );
+        picker.setTitle("Lock until");
+        picker.show();
+    }
+
+    private void updateLockUntilDisplay() {
+        int displayHour = lockUntilHour % 12;
+        if (displayHour == 0) displayHour = 12;
+        String amPm = lockUntilHour < 12 ? "AM" : "PM";
+        lockUntilTimeDisplay.setText(String.format("%d:%02d %s", displayHour, lockUntilMinute, amPm));
+    }
+
+    private long getLockUntilDurationMs() {
+        Calendar now = Calendar.getInstance();
+        Calendar target = Calendar.getInstance();
+        target.set(Calendar.HOUR_OF_DAY, lockUntilHour);
+        target.set(Calendar.MINUTE, lockUntilMinute);
+        target.set(Calendar.SECOND, 0);
+        target.set(Calendar.MILLISECOND, 0);
+
+        if (!target.after(now)) {
+            target.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        return target.getTimeInMillis() - now.getTimeInMillis();
+    }
+
     private Handler autoIncrementHandler = new Handler(Looper.getMainLooper());
     private Runnable autoIncrementRunnable;
     private boolean isAutoIncrementing = false;
 
+    @SuppressWarnings("deprecation")
     private void tickVibrate() {
         Vibrator vibrator;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -509,13 +605,39 @@ public class HomeFragment extends Fragment {
     }
 
     private void proceedWithLockSession(SharedPreferences preferences) {
-        SharedPreferences.Editor editor = preferences.edit();
-        long lockDurationMillis = selectedMinutes * 60 * 1000L;
+        long lockDurationMillis;
 
-        if (lockDurationMillis <= 0) {
-            Toast.makeText(getActivity(), "Please select a valid lock time!", Toast.LENGTH_SHORT).show();
-            return;
+        if (isLockUntilMode) {
+            if (lockUntilHour == -1) {
+                Toast.makeText(getActivity(), "Please select a lock until time!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            lockDurationMillis = getLockUntilDurationMs();
+        } else {
+            lockDurationMillis = selectedMinutes * 60 * 1000L;
+            if (lockDurationMillis <= 0) {
+                Toast.makeText(getActivity(), "Please select a valid lock time!", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
+
+        if (lockDurationMillis > 8 * 60 * 60 * 1000L) {
+            long hours = lockDurationMillis / (60 * 60 * 1000L);
+            long mins = (lockDurationMillis % (60 * 60 * 1000L)) / (60 * 1000L);
+            String durationText = hours + "h " + mins + "m";
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Long Session")
+                    .setMessage("You're about to lock for " + durationText + ". Are you sure?")
+                    .setPositiveButton("Lock", (dialog, which) -> startLockSession(preferences, lockDurationMillis))
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } else {
+            startLockSession(preferences, lockDurationMillis);
+        }
+    }
+
+    private void startLockSession(SharedPreferences preferences, long lockDurationMillis) {
+        SharedPreferences.Editor editor = preferences.edit();
 
         long lockStartTime = System.currentTimeMillis();
         long lockEndTime = lockStartTime + lockDurationMillis;
@@ -529,10 +651,8 @@ public class HomeFragment extends Fragment {
         editor.putBoolean("wasDeviceRestarted", false);
         editor.apply();
 
-        // Start analytics tracking
         analyticsManager.startSession(lockDurationMillis);
 
-        // Start LockScreenActivity
         Intent intent = new Intent(getActivity(), LockScreenActivity.class);
         intent.putExtra("lockDuration", lockDurationMillis);
         startActivity(intent);
