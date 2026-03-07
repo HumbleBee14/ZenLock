@@ -32,7 +32,7 @@ import com.grepguru.zenlock.WhitelistActivity;
 
 public class SettingsFragment extends Fragment {
 
-    private SwitchCompat autoRestartToggle, vibrationToggle;
+    private SwitchCompat autoRestartToggle, vibrationToggle, blockNotificationsToggle;
     private SwitchCompat quotesToggle, circularTimerToggle, persistentNotificationToggle;
 
     // Individual default app toggles
@@ -170,6 +170,18 @@ public class SettingsFragment extends Fragment {
         vibrationToggle.setChecked(com.grepguru.zenlock.VibrationUtils.isVibrationEnabled(requireContext()));
         vibrationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             com.grepguru.zenlock.VibrationUtils.setVibrationEnabled(requireContext(), isChecked);
+        });
+
+        // Block Notifications toggle (default ON)
+        blockNotificationsToggle = view.findViewById(R.id.blockNotificationsToggle);
+        blockNotificationsToggle.setChecked(preferences.getBoolean("block_notifications", true));
+        blockNotificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("block_notifications", isChecked);
+            editor.apply();
+            if (isChecked && !isNotificationListenerEnabled()) {
+                promptNotificationAccess();
+            }
         });
 
         // Allow Launcher/Home Screen during Lock toggle
@@ -417,6 +429,14 @@ public class SettingsFragment extends Fragment {
             return;
         }
         updateUnlockMethodStates();
+
+        // Check if notification blocking is enabled but permission not granted (prompt once)
+        if (preferences.getBoolean("block_notifications", true)
+                && !isNotificationListenerEnabled()
+                && !preferences.getBoolean("notification_access_prompted", false)) {
+            preferences.edit().putBoolean("notification_access_prompted", true).apply();
+            promptNotificationAccess();
+        }
     }
     
     private void showPinSetupDialog() {
@@ -549,6 +569,30 @@ public class SettingsFragment extends Fragment {
         dialog.show();
     }
     
+
+    /**
+     * Check if ZenLock has notification listener access
+     */
+    private boolean isNotificationListenerEnabled() {
+        String enabledListeners = android.provider.Settings.Secure.getString(
+                requireContext().getContentResolver(), "enabled_notification_listeners");
+        return enabledListeners != null && enabledListeners.contains(requireContext().getPackageName());
+    }
+
+    /**
+     * Prompt user to enable notification access for ZenLock
+     */
+    private void promptNotificationAccess() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Notification Access Required")
+                .setMessage("To block notifications from other apps during focus sessions, ZenLock needs Notification Access permission.\n\nPlease enable ZenLock in the next screen.")
+                .setPositiveButton("Open Settings", (dialog, which) -> {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
 
     /**
      * Opens email app for sending feedback to developer

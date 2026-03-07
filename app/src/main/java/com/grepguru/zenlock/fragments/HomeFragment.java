@@ -143,7 +143,13 @@ public class HomeFragment extends Fragment {
     private boolean isAutoIncrementing = false;
 
     private void tickVibrate() {
-        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrator;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            android.os.VibratorManager vm = (android.os.VibratorManager) requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+            vibrator = vm != null ? vm.getDefaultVibrator() : null;
+        } else {
+            vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        }
         if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE));
         }
@@ -482,7 +488,27 @@ public class HomeFragment extends Fragment {
             return;
         }
 
+        // Check notification blocking permission (non-blocking, just prompts)
         SharedPreferences preferences = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        if (preferences.getBoolean("block_notifications", true) && !isNotificationListenerEnabled()) {
+            new android.app.AlertDialog.Builder(getActivity())
+                    .setTitle("Notification Access")
+                    .setMessage("Block Notifications is enabled but ZenLock doesn't have Notification Access yet.\n\nWithout this, app notifications can still appear and be used to bypass the lock.\n\nGrant access now?")
+                    .setPositiveButton("Grant", (dialog, which) -> {
+                        startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                    })
+                    .setNegativeButton("Skip", (dialog, which) -> {
+                        // Continue with session start without notification blocking
+                        proceedWithLockSession(preferences);
+                    })
+                    .setCancelable(false)
+                    .show();
+            return;
+        }
+        proceedWithLockSession(preferences);
+    }
+
+    private void proceedWithLockSession(SharedPreferences preferences) {
         SharedPreferences.Editor editor = preferences.edit();
         long lockDurationMillis = selectedMinutes * 60 * 1000L;
 
@@ -552,6 +578,12 @@ public class HomeFragment extends Fragment {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
             Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean isNotificationListenerEnabled() {
+        String enabledListeners = android.provider.Settings.Secure.getString(
+                requireContext().getContentResolver(), "enabled_notification_listeners");
+        return enabledListeners != null && enabledListeners.contains(requireContext().getPackageName());
     }
 
     private boolean isAccessibilityPermissionGranted() {
