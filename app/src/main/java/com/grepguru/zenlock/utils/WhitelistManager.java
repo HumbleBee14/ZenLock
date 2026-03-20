@@ -3,8 +3,11 @@ package com.grepguru.zenlock.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,6 +34,24 @@ public class WhitelistManager {
             return true;
         }
         
+        // Allow any keyboard enabled on the device
+        try {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                List<InputMethodInfo> enabledIMEs = imm.getEnabledInputMethodList();
+                for (InputMethodInfo imi : enabledIMEs) {
+                    if (imi.getPackageName().equals(packageName)) {
+                        return true;
+                    }
+                    if (imi.getServiceInfo() != null && imi.getServiceInfo().packageName.equals(packageName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "IME check failed for: " + packageName, e);
+        }
+
         // SECURITY CHECK: Block known security risk packages
         if (isSecurityRisk(packageName)) {
             return false;

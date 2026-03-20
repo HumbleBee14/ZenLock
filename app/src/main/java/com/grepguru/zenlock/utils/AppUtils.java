@@ -145,6 +145,17 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.fleksy.keyboard"); // Fleksy Keyboard
         addIfInstalled(pm, allAllowed, "com.anysoftkeyboard.api"); // AnySoftKeyboard
         addIfInstalled(pm, allAllowed, "org.pocketworkstation.pckeyboard"); // Hacker's Keyboard
+        addIfInstalled(pm, allAllowed, "com.baidu.input_oppo"); // Realme/Oppo Keyboard
+        addIfInstalled(pm, allAllowed, "com.iflytek.inputmethod.oplus"); // Realme/ColorOS Keyboard
+        addIfInstalled(pm, allAllowed, "com.oppo.opassistant"); // Oppo Assistant Keyboard
+        addIfInstalled(pm, allAllowed, "com.coloros.inputmethod"); // ColorOS Keyboard
+        addIfInstalled(pm, allAllowed, "com.oneplus.inputmethod"); // OnePlus Keyboard
+        addIfInstalled(pm, allAllowed, "com.vivo.inputmethod"); // Vivo Keyboard
+        addIfInstalled(pm, allAllowed, "com.miui.inputmethod"); // Xiaomi MIUI Keyboard
+        addIfInstalled(pm, allAllowed, "com.huawei.inputmethod"); // Huawei Keyboard
+        addIfInstalled(pm, allAllowed, "com.nothing.inputmethod"); // Nothing Keyboard
+        addIfInstalled(pm, allAllowed, "com.grammarly.android.keyboard"); // Grammarly Keyboard
+        addIfInstalled(pm, allAllowed, "com.touchpal.keyboards"); // TouchPal Keyboard
         
         // Security and biometric authentication (always essential for app security)
         addIfInstalled(pm, allAllowed, "com.samsung.android.biometrics.app.setting"); // Samsung Biometrics
