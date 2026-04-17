@@ -87,7 +87,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Prevent multiple instances
         if (isLockScreenActive) {
             Log.d("LockScreenActivity", "Lock screen already active, finishing duplicate instance");
-            finishLockScreen();
+            finish();
             return;
         }
         isLockScreenActive = true;
@@ -908,6 +908,29 @@ public class LockScreenActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
+                long persistedEndTime = preferences.getLong("lockEndTime", 0);
+                long currentTime = System.currentTimeMillis();
+
+                // If the session was extended elsewhere, this timer instance is stale.
+                // Restart from the persisted state instead of ending the focus session early.
+                if (preferences.getBoolean("isLocked", false) && persistedEndTime > currentTime) {
+                    long remainingTimeMillis = persistedEndTime - currentTime;
+                    long persistedTargetDuration = preferences.getLong("lockTargetDuration", 0);
+                    if (persistedTargetDuration <= 0) {
+                        long persistedStartTime = preferences.getLong("lockStartTime", 0);
+                        if (persistedStartTime > 0 && persistedEndTime > persistedStartTime) {
+                            persistedTargetDuration = persistedEndTime - persistedStartTime;
+                        } else {
+                            persistedTargetDuration = remainingTimeMillis;
+                        }
+                    }
+
+                    updateTimerDisplay(remainingTimeMillis);
+                    startCountdownTimer(persistedTargetDuration, remainingTimeMillis);
+                    updatePersistentNotification();
+                    return;
+                }
+
                 // Only show completion toast if not manually unlocked
                 if (!wasManuallyUnlocked) {
                     // End analytics session
@@ -1014,7 +1037,7 @@ public class LockScreenActivity extends AppCompatActivity {
         
         long currentTime = System.currentTimeMillis();
         long remainingTimeMillis = newEndTime - currentTime;
-        
+
         // Restart timer with new duration
         if (countDownTimer != null) {
             countDownTimer.cancel();
