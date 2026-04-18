@@ -85,6 +85,7 @@
     <color name="scoreGold">#FBBF24</color>             <!-- Warm gold for focus score -->
     <color name="scoreGoldDark">#D97706</color>         <!-- Darker gold for score ring track -->
     <color name="cardBorderSubtle">#1FFFFFFF</color>    <!-- Very subtle card borders -->
+    <color name="chipSelectedBg">#206366F1</color>      <!-- Selected chip background -->
     <color name="dividerSubtle">#1AFFFFFF</color>       <!-- Subtle divider -->
 
     <!-- Time Picker Colors -->
