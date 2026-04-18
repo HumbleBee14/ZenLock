@@ -116,6 +116,13 @@
         <item name="android:letterSpacing">0.1</item>
     </style>
 
+    <style name="ModernText.PageTitle" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
     <style name="ModernText.SectionTitle" parent="TextAppearance.MaterialComponents.Subtitle2">
         <item name="android:textColor">@color/textPrimary</item>
         <item name="android:fontFamily">sans-serif-medium</item>
