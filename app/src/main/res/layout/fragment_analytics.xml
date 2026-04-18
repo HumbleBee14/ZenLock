@@ -122,43 +122,58 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp">
 
-                    <ProgressBar
-                        android:id="@+id/focusScoreProgress"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:layout_gravity="center"
-                        android:indeterminate="false"
-                        android:progress="85"
-                        android:max="100"
-                        android:progressDrawable="@drawable/circular_progress_zen"
-                        android:background="@drawable/timer_glow_background" />
+                    <FrameLayout
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="center">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                        <!-- Subtle glow behind ring -->
+                        <View
+                            android:layout_width="140dp"
+                            android:layout_height="140dp"
+                            android:background="@drawable/timer_glow_background" />
 
-                        <TextView
-                            android:id="@+id/todayFocusScore"
+                        <ProgressBar
+                            android:id="@+id/focusScoreProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="140dp"
+                            android:layout_height="140dp"
+                            android:layout_gravity="center"
+                            android:indeterminate="false"
+                            android:progress="85"
+                            android:max="100"
+                            android:progressDrawable="@drawable/circular_progress_zen" />
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="85"
-                            android:textSize="36sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/scoreGold"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="FOCUS SCORE"
-                            style="@style/ModernText.MetricLabel"
-                            android:textColor="@color/textTertiary"/>
+                            <TextView
+                                android:id="@+id/todayFocusScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="85"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/scoreGold"
+                                android:fontFamily="sans-serif-medium"/>
 
-                    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="FOCUS SCORE"
+                                android:textSize="9sp"
+                                android:textColor="@color/textTertiary"
+                                android:fontFamily="sans-serif-medium"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.08"/>
+
+                        </LinearLayout>
+
+                    </FrameLayout>
 
                 </FrameLayout>
 

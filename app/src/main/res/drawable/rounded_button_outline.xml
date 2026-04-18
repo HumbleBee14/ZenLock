@@ -3,11 +3,11 @@
     android:color="@color/primaryLight">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/transparent" />
-            <corners android:radius="8dp" />
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="20dp" />
             <stroke
-                android:width="2dp"
+                android:width="1.5dp"
                 android:color="@color/primary" />
         </shape>
     </item>
-</ripple> 
+</ripple>

@@ -45,7 +45,7 @@
             android:id="@+id/createScheduleBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="+ Create Schedule"
+            android:text="Create Schedule"
             android:textSize="16sp"
             android:textStyle="bold"
             android:background="@drawable/rounded_button"
