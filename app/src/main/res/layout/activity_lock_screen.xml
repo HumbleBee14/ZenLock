@@ -20,7 +20,7 @@
         app:layout_constraintBottom_toTopOf="@id/parentAppsContainer"
         app:layout_constraintHeight_percent="0.65">
 
-        <!-- Timer Container -->
+        <!-- Timer Container with Glow -->
         <FrameLayout
             android:id="@+id/timerContainer"
             android:layout_width="300dp"
@@ -28,8 +28,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="40dp">
-            
+            android:layout_marginTop="40dp"
+            android:background="@drawable/timer_glow_background">
+
             <!-- Default Timer (fallback) -->
             <TextView
                 android:id="@+id/timerCountdown"
@@ -37,11 +38,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="00:25"
-                android:textSize="72sp"
+                android:textSize="80sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
-                android:fontFamily="sans-serif-light"/>
-                
+                android:fontFamily="sans-serif-thin"/>
+
         </FrameLayout>
 
         <!-- Motivational Quote / Message -->
@@ -50,8 +51,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Stay focused, stay productive!"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/textSecondary"
+            android:fontFamily="sans-serif-light"
+            android:lineSpacingMultiplier="1.3"
             android:gravity="center"
             android:maxLines="3"
             android:layout_marginTop="24dp"
@@ -64,13 +67,13 @@
         <!-- Hidden Unlock Arrow -->
         <ImageView
             android:id="@+id/unlockArrow"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_expand_more"
-            android:background="@drawable/circular_button_dark"
-            android:padding="6dp"
+            android:background="@drawable/glass_card_inner"
+            android:padding="8dp"
             android:contentDescription="Show unlock options"
-            android:alpha="0.6"
+            android:alpha="0.5"
             app:layout_constraintTop_toBottomOf="@id/lockscreenMessage"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

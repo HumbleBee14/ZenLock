@@ -1025,8 +1025,7 @@ public class AnalyticsFragment extends Fragment {
             }
             if (recentSessionsContainer != null) {
                 recentSessionsContainer.setVisibility(View.VISIBLE);
-                // Keep the sample data for now since it looks better
-                // displayRecentSessions(recentSessions);
+                displayRecentSessions(recentSessions);
             }
         }
     }
@@ -1047,7 +1046,7 @@ public class AnalyticsFragment extends Fragment {
         LinearLayout sessionItem = new LinearLayout(requireContext());
         sessionItem.setOrientation(LinearLayout.HORIZONTAL);
         sessionItem.setPadding(16, 12, 16, 12);
-        sessionItem.setBackgroundResource(R.drawable.modern_card_background);
+        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
         
         // Session info
         LinearLayout infoLayout = new LinearLayout(requireContext());
@@ -1141,7 +1140,7 @@ public class AnalyticsFragment extends Fragment {
         ));
         sessionItem.setOrientation(LinearLayout.HORIZONTAL);
         sessionItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        sessionItem.setBackgroundResource(R.drawable.modern_card_background);
+        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
         sessionItem.setPadding(48, 48, 48, 48); // 16dp in pixels
         
         LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) sessionItem.getLayoutParams();

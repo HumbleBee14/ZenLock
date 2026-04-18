@@ -95,6 +95,36 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <!-- Premium Text Styles -->
+    <style name="ModernText.Display" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
+        <item name="android:textSize">56sp</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="ModernText.Metric" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ModernText.MetricLabel" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:textColor">@color/textTertiary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.1</item>
+    </style>
+
+    <style name="ModernText.SectionTitle" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0.03</item>
+    </style>
+
     <!-- Legacy Styles -->
     <style name="AppTheme.Picker" parent="Theme.AppCompat.Light.NoActionBar" >
         <item name="android:textColorPrimary">@color/textPrimary</item>

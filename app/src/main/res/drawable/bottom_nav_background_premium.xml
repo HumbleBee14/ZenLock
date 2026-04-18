@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Top border line -->
+    <item android:bottom="-1dp" android:left="-1dp" android:right="-1dp">
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/cardBorderSubtle" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <!-- Gradient fill -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#E6111827"
+                android:endColor="#FF111827"
+                android:angle="90" />
+        </shape>
+    </item>
+</layer-list>
