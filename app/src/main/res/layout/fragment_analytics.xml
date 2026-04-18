@@ -156,20 +156,22 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="85"
-                                android:textSize="28sp"
+                                android:textSize="26sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/scoreGold"
-                                android:fontFamily="sans-serif-medium"/>
+                                android:fontFamily="sans-serif-medium"
+                                android:maxLines="1"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="FOCUS SCORE"
-                                android:textSize="9sp"
+                                android:textSize="8sp"
                                 android:textColor="@color/textTertiary"
                                 android:fontFamily="sans-serif-medium"
                                 android:textAllCaps="true"
-                                android:letterSpacing="0.08"/>
+                                android:letterSpacing="0.06"
+                                android:maxLines="1"/>
 
                         </LinearLayout>
 

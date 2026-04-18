@@ -85,11 +85,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="00:30"
-                    android:textSize="72sp"
+                    android:textSize="64sp"
                     android:textColor="@color/primary"
                     android:fontFamily="sans-serif-thin"
                     android:letterSpacing="-0.02"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="32sp"
+                    android:autoSizeMaxTextSize="64sp"/>
 
                 <TextView
                     android:id="@+id/durationModeLabel"
@@ -123,11 +127,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="09:00 AM"
-                    android:textSize="52sp"
+                    android:textSize="48sp"
                     android:textColor="@color/textPrimary"
                     android:fontFamily="sans-serif-light"
                     android:letterSpacing="-0.02"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="28sp"
+                    android:autoSizeMaxTextSize="48sp"/>
 
                 <TextView
                     android:id="@+id/lockUntilLabel"

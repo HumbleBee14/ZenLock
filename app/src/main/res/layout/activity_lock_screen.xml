@@ -23,8 +23,11 @@
         <!-- Timer Container with Glow -->
         <FrameLayout
             android:id="@+id/timerContainer"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintWidth_max="280dp"
+            app:layout_constraintWidth_percent="0.7"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -38,10 +41,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="00:25"
-                android:textSize="80sp"
+                android:textSize="64sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
-                android:fontFamily="sans-serif-thin"/>
+                android:fontFamily="sans-serif-thin"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="36sp"
+                android:autoSizeMaxTextSize="64sp"/>
 
         </FrameLayout>
 
@@ -143,7 +150,7 @@
 
             <!-- PIN Input with Eye Toggle -->
             <LinearLayout
-                android:layout_width="320dp"
+                android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
