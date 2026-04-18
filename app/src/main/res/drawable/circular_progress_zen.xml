@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Progress Ring Only - No Background -->
+    <!-- Background track ring -->
+    <item>
+        <shape
+            android:shape="ring"
+            android:innerRadiusRatio="2.3"
+            android:thicknessRatio="18"
+            android:useLevel="false">
+            <solid android:color="#15FFFFFF" />
+        </shape>
+    </item>
+    <!-- Progress Ring -->
     <item android:id="@android:id/progress">
         <rotate
             android:fromDegrees="-90"
             android:toDegrees="270">
             <shape
                 android:shape="ring"
-                android:innerRadiusRatio="2.5"
-                android:thicknessRatio="12"
+                android:innerRadiusRatio="2.3"
+                android:thicknessRatio="18"
                 android:useLevel="true">
                 <gradient
-                    android:startColor="@color/primary"
-                    android:centerColor="@color/primaryLight" 
-                    android:endColor="@color/accent"
+                    android:startColor="@color/scoreGold"
+                    android:centerColor="@color/primary"
+                    android:endColor="@color/primaryLight"
                     android:type="sweep" />
             </shape>
         </rotate>
