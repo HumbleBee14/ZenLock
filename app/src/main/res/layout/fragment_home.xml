@@ -24,11 +24,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Focus Time"
-        style="@style/ModernText.Heading"
+        style="@style/ModernText.PageTitle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp"/>
+        android:layout_marginTop="40dp"/>
 
     <TextView
         android:id="@+id/welcomeSubtitle"
@@ -39,7 +39,7 @@
         app:layout_constraintTop_toBottomOf="@id/welcomeTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="6dp"/>
 
     <!-- Timer Selection Card -->
     <androidx.cardview.widget.CardView
@@ -48,8 +48,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:cardBackgroundColor="@color/surface"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/welcomeSubtitle">
 
         <FrameLayout
@@ -83,10 +83,14 @@
                     android:layout_height="wrap_content"
                     android:text="00:30"
                     android:textSize="64sp"
-                    android:textColor="@color/textPrimary"
-                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/primary"
+                    android:fontFamily="sans-serif-thin"
                     android:letterSpacing="-0.02"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="32sp"
+                    android:autoSizeMaxTextSize="64sp"/>
 
                 <TextView
                     android:id="@+id/durationModeLabel"
@@ -120,11 +124,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="09:00 AM"
-                    android:textSize="52sp"
+                    android:textSize="48sp"
                     android:textColor="@color/textPrimary"
                     android:fontFamily="sans-serif-light"
                     android:letterSpacing="-0.02"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="28sp"
+                    android:autoSizeMaxTextSize="48sp"/>
 
                 <TextView
                     android:id="@+id/lockUntilLabel"
@@ -173,41 +181,44 @@
                 <com.google.android.material.chip.Chip
                     android:id="@+id/preset15min"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:text="+15m"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
-                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipBackgroundColor="@android:color/transparent"
                     app:chipStrokeColor="@color/border"
                     app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="20dp"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_marginEnd="4dp"/>
+                    android:layout_marginEnd="6dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/preset30min"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:text="+30m"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
-                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipBackgroundColor="@android:color/transparent"
                     app:chipStrokeColor="@color/border"
                     app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="20dp"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_marginEnd="4dp"/>
+                    android:layout_marginEnd="6dp"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/preset60min"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:text="+1h"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
-                    app:chipBackgroundColor="@color/backgroundSecondary"
+                    app:chipBackgroundColor="@android:color/transparent"
                     app:chipStrokeColor="@color/border"
                     app:chipStrokeWidth="1dp"
+                    app:chipCornerRadius="20dp"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_marginEnd="4dp"/>
+                    android:layout_marginEnd="6dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/increaseTimeButton"
@@ -313,18 +324,19 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/enableLockButton"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="START FOCUS SESSION"
-        android:textSize="16sp"
+        android:layout_height="68dp"
+        android:text="Start Focus"
+        android:textSize="17sp"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-medium"
-        android:letterSpacing="0.08"
+        android:letterSpacing="0.04"
+        android:textAllCaps="false"
         android:background="@drawable/glassmorphic_button"
-        android:elevation="8dp"
+        android:elevation="6dp"
         app:icon="@drawable/ic_lock"
         app:iconGravity="textStart"
         app:iconTint="@color/white"
-        app:iconSize="24dp"
+        app:iconSize="22dp"
         app:iconPadding="12dp"
         app:rippleColor="#40FFFFFF"
         android:layout_marginTop="32dp"
@@ -336,63 +348,16 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hold to activate"
+        android:text="Long press to begin"
         android:textSize="12sp"
-        android:textColor="@color/textTertiary"
+        android:textColor="@color/textSecondary"
         android:fontFamily="sans-serif"
-        android:layout_marginTop="8dp"
+        android:alpha="0.7"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/enableLockButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-<!--    &lt;!&ndash; Quick Timer Presets &ndash;&gt;-->
-<!--    <TextView-->
-<!--        android:id="@+id/presetsLabel"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Quick Presets"-->
-<!--        style="@style/ModernText.Caption"-->
-<!--        android:layout_marginTop="32dp"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/enableLockButton"-->
-<!--        app:layout_constraintStart_toStartOf="parent"/>-->
-
-<!--    <LinearLayout-->
-<!--        android:id="@+id/quickPresetsContainer"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:layout_marginTop="12dp"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/presetsLabel">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/preset30min"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="30m"-->
-<!--            style="@style/ModernButton.Secondary"-->
-<!--            android:layout_marginEnd="8dp"/>-->
-
-<!--        <Button-->
-<!--            android:id="@+id/preset1hour"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="1h"-->
-<!--            style="@style/ModernButton.Secondary"-->
-<!--            android:layout_marginStart="4dp"-->
-<!--            android:layout_marginEnd="4dp"/>-->
-
-<!--        <Button-->
-<!--            android:id="@+id/preset3hour"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="3h"-->
-<!--            style="@style/ModernButton.Secondary"-->
-<!--            android:layout_marginStart="8dp"/>-->
-
-<!--    </LinearLayout>-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

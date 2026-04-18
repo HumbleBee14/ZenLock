@@ -26,7 +26,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
 
     private Button accessibilityButton;
     private Button overlayButton;
-    private Button usageButton;
     private Button alarmButton;
     private Button miuiButton;
     private Button continueButton;
@@ -34,7 +33,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
 
     private CardView accessibilityCard;
     private CardView overlayCard;
-    private CardView usageCard;
     private CardView alarmCard;
     private CardView miuiCard;
     
@@ -62,7 +60,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private void initializeViews() {
         accessibilityButton = findViewById(R.id.accessibilityButton);
         overlayButton = findViewById(R.id.overlayButton);
-        usageButton = findViewById(R.id.usageButton);
         alarmButton = findViewById(R.id.alarmButton);
         miuiButton = findViewById(R.id.miuiButton);
         continueButton = findViewById(R.id.continueButton);
@@ -70,7 +67,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
 
         accessibilityCard = findViewById(R.id.accessibilityCard);
         overlayCard = findViewById(R.id.overlayCard);
-        usageCard = findViewById(R.id.usageCard);
         alarmCard = findViewById(R.id.alarmCard);
         miuiCard = findViewById(R.id.miuiCard);
     }
@@ -78,7 +74,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private void setupClickListeners() {
         accessibilityButton.setOnClickListener(v -> showAccessibilityDisclosure());
         overlayButton.setOnClickListener(v -> requestOverlayPermission());
-        usageButton.setOnClickListener(v -> requestUsagePermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
         miuiButton.setOnClickListener(v -> requestMiuiPermission());
         continueButton.setOnClickListener(v -> completeOnboarding());
@@ -129,12 +124,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         Toast.makeText(this, "Please enable 'Display over other apps' for ZenLock", Toast.LENGTH_LONG).show();
     }
     
-    private void requestUsagePermission() {
-        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-        startActivity(intent);
-        Toast.makeText(this, "Please enable 'Usage access' for ZenLock", Toast.LENGTH_LONG).show();
-    }
-    
     private void requestAlarmPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
@@ -152,7 +141,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     private void updatePermissionStates() {
         boolean accessibilityGranted = isAccessibilityPermissionGranted();
         boolean overlayGranted = Settings.canDrawOverlays(this);
-        boolean usageGranted = isUsagePermissionGranted();
         boolean alarmGranted = isAlarmPermissionGranted();
 
         // Update accessibility card based on consent and permission status
@@ -165,8 +153,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         }
 
         updatePermissionCard(overlayCard, overlayButton, overlayGranted, "Granted", "Grant");
-        updatePermissionCard(usageCard, usageButton, usageGranted, "Granted", "Grant");
-
         // Only show alarm permission for API 31+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             updatePermissionCard(alarmCard, alarmButton, alarmGranted, "Granted", "Grant");
@@ -221,11 +207,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
             }
         }
         return false;
-    }
-    
-    private boolean isUsagePermissionGranted() {
-        // Use the same method as AnalyticsFragment for consistency
-        return com.grepguru.zenlock.utils.UsageStatsPermissionManager.hasUsageStatsPermission(this);
     }
     
     private boolean isAlarmPermissionGranted() {

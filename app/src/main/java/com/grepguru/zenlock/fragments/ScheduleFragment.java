@@ -75,12 +75,6 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void initializeViews(View view) {
-        // Hide coming soon banner since schedule functionality is now complete
-        View comingSoonBanner = view.findViewById(R.id.comingSoonBanner);
-        if (comingSoonBanner != null) {
-            comingSoonBanner.setVisibility(View.GONE);
-        }
-
         // Create schedule button
         createScheduleBtn = view.findViewById(R.id.createScheduleBtn);
         

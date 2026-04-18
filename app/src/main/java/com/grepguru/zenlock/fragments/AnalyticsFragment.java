@@ -1025,8 +1025,7 @@ public class AnalyticsFragment extends Fragment {
             }
             if (recentSessionsContainer != null) {
                 recentSessionsContainer.setVisibility(View.VISIBLE);
-                // Keep the sample data for now since it looks better
-                // displayRecentSessions(recentSessions);
+                displayRecentSessions(recentSessions);
             }
         }
     }
@@ -1042,12 +1041,15 @@ public class AnalyticsFragment extends Fragment {
         }
     }
     
+    private int dpToPx(int dp) {
+        return (int) (dp * requireContext().getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     private View createSessionView(AnalyticsModels.FocusSession session) {
-        // Create a simple session item view
         LinearLayout sessionItem = new LinearLayout(requireContext());
         sessionItem.setOrientation(LinearLayout.HORIZONTAL);
-        sessionItem.setPadding(16, 12, 16, 12);
-        sessionItem.setBackgroundResource(R.drawable.modern_card_background);
+        sessionItem.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12));
+        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
         
         // Session info
         LinearLayout infoLayout = new LinearLayout(requireContext());
@@ -1073,21 +1075,20 @@ public class AnalyticsFragment extends Fragment {
         statusText.setTextSize(12);
         statusText.setTextColor(requireContext().getColor(session.isCompleted() ? R.color.success : R.color.error));
         statusText.setTypeface(null, android.graphics.Typeface.BOLD);
-        
+
         infoLayout.addView(timeText);
         infoLayout.addView(durationText);
         infoLayout.addView(statusText);
-        
+
         sessionItem.addView(infoLayout);
-        
-        // Add margin between items
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 
+            LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, 0, 0, 8);
+        params.setMargins(0, 0, 0, dpToPx(8));
         sessionItem.setLayoutParams(params);
-        
+
         return sessionItem;
     }
     
@@ -1141,11 +1142,11 @@ public class AnalyticsFragment extends Fragment {
         ));
         sessionItem.setOrientation(LinearLayout.HORIZONTAL);
         sessionItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        sessionItem.setBackgroundResource(R.drawable.modern_card_background);
-        sessionItem.setPadding(48, 48, 48, 48); // 16dp in pixels
-        
+        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
+        sessionItem.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+
         LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) sessionItem.getLayoutParams();
-        marginParams.bottomMargin = 24; // 8dp margin
+        marginParams.bottomMargin = dpToPx(8);
         sessionItem.setLayoutParams(marginParams);
         
         // Session status icon
@@ -1157,9 +1158,9 @@ public class AnalyticsFragment extends Fragment {
             session.isPartial() ? R.color.secondary : R.color.warning
         ));
         statusIcon.setGravity(android.view.Gravity.CENTER);
-        statusIcon.setLayoutParams(new LinearLayout.LayoutParams(72, 72)); // 24dp
+        statusIcon.setLayoutParams(new LinearLayout.LayoutParams(dpToPx(24), dpToPx(24)));
         LinearLayout.LayoutParams iconParams = (LinearLayout.LayoutParams) statusIcon.getLayoutParams();
-        iconParams.rightMargin = 36; // 12dp
+        iconParams.rightMargin = dpToPx(12);
         statusIcon.setLayoutParams(iconParams);
         sessionItem.addView(statusIcon);
         
