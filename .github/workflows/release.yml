@@ -68,6 +68,9 @@ jobs:
           echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
           echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build unsigned APK
         run: ./gradlew assembleRelease -x lint
 
