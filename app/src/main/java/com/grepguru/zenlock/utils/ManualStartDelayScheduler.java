@@ -104,7 +104,7 @@ public final class ManualStartDelayScheduler {
         long triggerAtMillis = prefs.getLong(PREF_START_AT, 0L);
         if (triggerAtMillis <= System.currentTimeMillis()) {
             Log.d(TAG, "Clearing stale delayed manual session state");
-            clearPendingSessionState(context);
+            cancelPendingSession(context);
             return false;
         }
 

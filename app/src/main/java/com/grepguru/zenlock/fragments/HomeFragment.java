@@ -1027,7 +1027,7 @@ public class HomeFragment extends Fragment {
         updateLockButtonState();
         Toast.makeText(
                 requireContext(),
-                "Focus session starts " + formatStartDelayLabel(selectedStartDelayMinutes).toLowerCase(),
+                "Focus session starts " + formatStartDelayLabel(selectedStartDelayMinutes).toLowerCase(java.util.Locale.ROOT),
                 Toast.LENGTH_LONG
         ).show();
     }

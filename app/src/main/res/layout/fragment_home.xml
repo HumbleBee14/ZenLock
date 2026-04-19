@@ -381,6 +381,8 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginStart="6dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_expand_more"
                     app:tint="@color/textSecondary" />
 
