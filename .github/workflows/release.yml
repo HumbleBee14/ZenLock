@@ -53,6 +53,12 @@ jobs:
       # 5. Writes the new values back into app/build.gradle.kts via sed
       - name: Bump version
         id: bump
+        # Pass untrusted values (commit message, workflow inputs) via env vars
+        # instead of `${{ }}` substitution so bash doesn't try to execute
+        # anything that looks like a shell command inside them.
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          MANUAL_BUMP_INPUT: ${{ github.event.inputs.bump_type }}
         run: |
           set -e
           GRADLE_FILE="app/build.gradle.kts"
@@ -63,8 +69,9 @@ jobs:
 
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
 
-          MANUAL_BUMP="${{ github.event.inputs.bump_type }}"
-          MSG="${{ github.event.head_commit.message }}"
+          MANUAL_BUMP="$MANUAL_BUMP_INPUT"
+          # Use only the first line (subject) of the commit message for type detection
+          MSG=$(printf '%s' "$COMMIT_MSG" | head -n 1)
 
           if [ "$MANUAL_BUMP" = "major" ]; then
             MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
