@@ -3,13 +3,29 @@ name: Auto Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: "Version bump type (overrides commit-message detection)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
 
 jobs:
   release:
-    if: "!contains(github.event.head_commit.message, 'chore: bump version')"
+    # Skip auto-runs on version-bump commits to prevent infinite loops.
+    # For manual runs (workflow_dispatch), restrict to repo owner only.
+    if: |
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore: bump version')) ||
+      (github.event_name == 'workflow_dispatch' && github.actor == 'HumbleBee14')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -44,8 +60,19 @@ jobs:
 
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
 
+          MANUAL_BUMP="${{ github.event.inputs.bump_type }}"
           MSG="${{ github.event.head_commit.message }}"
-          if echo "$MSG" | grep -qE "^(BREAKING|.*BREAKING CHANGE)"; then
+
+          if [ "$MANUAL_BUMP" = "major" ]; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            BUMP_TYPE="major (manual)"
+          elif [ "$MANUAL_BUMP" = "minor" ]; then
+            MINOR=$((MINOR + 1)); PATCH=0
+            BUMP_TYPE="minor (manual)"
+          elif [ "$MANUAL_BUMP" = "patch" ]; then
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch (manual)"
+          elif echo "$MSG" | grep -qE "^(BREAKING|.*BREAKING CHANGE)"; then
             MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
             BUMP_TYPE="major"
           elif echo "$MSG" | grep -qE "^feat(\(.+\))?:"; then
