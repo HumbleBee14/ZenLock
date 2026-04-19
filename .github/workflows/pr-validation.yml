@@ -49,3 +49,69 @@ jobs:
             exit 1
           fi
           echo "PR description OK"
+
+  dry-run-release:
+    # Simulates the version-bump step from release.yml using the PR title as the
+    # commit message. Catches shell injection, version parsing bugs, or anything
+    # that would break the real release workflow on merge.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Dry-run version bump
+        env:
+          # PR title becomes the squash-merge commit subject, so simulate with it.
+          COMMIT_MSG: ${{ github.event.pull_request.title }}
+        run: |
+          set -e
+          GRADLE_FILE="app/build.gradle.kts"
+          CURRENT_CODE=$(grep -E "^\s*versionCode\s*=" "$GRADLE_FILE" | grep -oE "[0-9]+")
+          CURRENT_NAME=$(grep -E "^\s*versionName\s*=" "$GRADLE_FILE" | grep -oE '"[^"]+"' | tr -d '"')
+
+          if [ -z "$CURRENT_CODE" ] || [ -z "$CURRENT_NAME" ]; then
+            echo "::error::Could not read versionCode or versionName from $GRADLE_FILE"
+            exit 1
+          fi
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+            echo "::error::versionName '$CURRENT_NAME' is not in MAJOR.MINOR.PATCH format"
+            exit 1
+          fi
+
+          MSG=$(printf '%s' "$COMMIT_MSG" | head -n 1)
+
+          if echo "$MSG" | grep -qE "^(BREAKING|.*BREAKING CHANGE)"; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            BUMP_TYPE="major"
+          elif echo "$MSG" | grep -qE "^feat(\(.+\))?:"; then
+            MINOR=$((MINOR + 1)); PATCH=0
+            BUMP_TYPE="minor"
+          else
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          fi
+
+          NEW_NAME="$MAJOR.$MINOR.$PATCH"
+          NEW_CODE=$((CURRENT_CODE + 1))
+
+          echo "Current: code=$CURRENT_CODE name=$CURRENT_NAME"
+          echo "On merge, this PR would bump to: code=$NEW_CODE name=$NEW_NAME ($BUMP_TYPE)"
+
+  build:
+    # Compiles a debug APK to catch build breaks before merge.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug -x lint
