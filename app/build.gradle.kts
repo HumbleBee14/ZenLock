@@ -43,7 +43,30 @@ android {
         sourceCompatibility = JavaVersion.VERSION_15
         targetCompatibility = JavaVersion.VERSION_15
     }
+
+    // Product flavors:
+    //   playstore = default build, no SMS permission. Used for Google Play releases
+    //               and for the default GitHub artifact.
+    //   sms       = adds SEND_SMS permission via a flavor-specific manifest in
+    //               app/src/sms/AndroidManifest.xml. Built only by CI and
+    //               attached to GitHub Releases as an optional "SMS-enabled" variant.
+    //               Named "sms" (not "github") so CI task names and APK filenames
+    //               clearly indicate which variant includes the SMS feature.
+    flavorDimensions += "dist"
+    productFlavors {
+        create("playstore") {
+            dimension = "dist"
+            isDefault = true
+        }
+        create("sms") {
+            dimension = "dist"
+            versionNameSuffix = "-sms"
+        }
+    }
 }
+
+// Android Studio Build Variants panel defaults to playstoreDebug / playstoreRelease
+// so local builds never accidentally include the SMS permission.
 
 dependencies {
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This manifest is merged only into the "sms" product flavor.
+  It adds the SEND_SMS permission so the accountability-partner OTP feature
+  works in the SMS-enabled variant distributed on GitHub Releases.
+  The default "playstore" flavor does NOT include this permission.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.SEND_SMS" />
+</manifest>
