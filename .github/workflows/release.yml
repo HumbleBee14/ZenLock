@@ -1,0 +1,118 @@
+name: Auto Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: "!contains(github.event.head_commit.message, 'chore: bump version')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Version bump logic:
+      # 1. Reads current versionCode and versionName from app/build.gradle.kts
+      # 2. Inspects the merge commit message that triggered this workflow
+      # 3. Decides the semver bump based on conventional-commit prefix:
+      #      feat: .............  minor (1.8.3 -> 1.9.0)
+      #      fix: / chore: / docs: / refactor: / test: / perf: ...  patch (1.8.3 -> 1.8.4)
+      #      BREAKING CHANGE in body (or "BREAKING" prefix) ........ major (1.8.3 -> 2.0.0)
+      # 4. versionCode ALWAYS increments by 1, regardless of bump type (Play Store requires monotonic increase)
+      # 5. Writes the new values back into app/build.gradle.kts via sed
+      - name: Bump version
+        id: bump
+        run: |
+          set -e
+          GRADLE_FILE="app/build.gradle.kts"
+          CURRENT_CODE=$(grep -E "^\s*versionCode\s*=" "$GRADLE_FILE" | grep -oE "[0-9]+")
+          CURRENT_NAME=$(grep -E "^\s*versionName\s*=" "$GRADLE_FILE" | grep -oE '"[^"]+"' | tr -d '"')
+
+          echo "Current: code=$CURRENT_CODE name=$CURRENT_NAME"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
+
+          MSG="${{ github.event.head_commit.message }}"
+          if echo "$MSG" | grep -qE "^(BREAKING|.*BREAKING CHANGE)"; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            BUMP_TYPE="major"
+          elif echo "$MSG" | grep -qE "^feat(\(.+\))?:"; then
+            MINOR=$((MINOR + 1)); PATCH=0
+            BUMP_TYPE="minor"
+          else
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          fi
+
+          NEW_NAME="$MAJOR.$MINOR.$PATCH"
+          NEW_CODE=$((CURRENT_CODE + 1))
+
+          echo "New: code=$NEW_CODE name=$NEW_NAME ($BUMP_TYPE)"
+
+          sed -i "s/versionCode = $CURRENT_CODE/versionCode = $NEW_CODE/" "$GRADLE_FILE"
+          sed -i "s/versionName = \"$CURRENT_NAME\"/versionName = \"$NEW_NAME\"/" "$GRADLE_FILE"
+
+          echo "new_version=$NEW_NAME" >> $GITHUB_OUTPUT
+          echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Build unsigned APK
+        run: ./gradlew assembleRelease -x lint
+
+      - name: Rename APK
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/release/app-release-unsigned.apk \
+             "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-unsigned.apk"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/build.gradle.kts
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+          git tag "v${{ steps.bump.outputs.new_version }}"
+          git push origin main --follow-tags
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "v${{ steps.bump.outputs.new_version }}" | head -n 1)
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s" -n 20)
+          else
+            LOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s" --invert-grep --grep="chore: bump version")
+          fi
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            echo "$LOG"
+            echo "CHANGELOG_EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.bump.outputs.new_version }}
+          name: ZenLock v${{ steps.bump.outputs.new_version }}
+          body: |
+            ## Changes
+            ${{ steps.changelog.outputs.changelog }}
+
+            ---
+            **APK attached below is unsigned** (for developers/testers only).
+            For the official signed release, install from [Google Play](https://play.google.com/store/apps/details?id=com.grepguru.zenlock).
+          files: release-artifacts/*.apk
+          draft: false
+          prerelease: false

@@ -1,0 +1,74 @@
+name: Bug Report
+description: Report a bug in ZenLock
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the form below so we can reproduce and fix it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of what the bug is.
+      placeholder: When I tap X, Y happens instead of Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ZenLock
+        2. Tap on ...
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: Samsung Galaxy S23, OnePlus 11, Pixel 7, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      placeholder: Android 14 (One UI 6.0)
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: ZenLock version
+      description: Find in Settings > About, or on Play Store listing.
+      placeholder: 1.8.3
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Drag and drop here if available.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logcat output
+      description: Optional. Paste relevant logs if you have them.
+      render: shell

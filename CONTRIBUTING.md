@@ -47,9 +47,24 @@ Feature suggestions are welcome! Please:
 git clone https://github.com/HumbleBee14/ZenLock.git
 cd ZenLock
 
-# Create a feature branch
-git checkout -b feature/your-feature-name
+# Create a branch using the required naming pattern
+git checkout -b feat/your-feature-name
 ```
+
+**Branch names must follow this pattern (enforced by CI):**
+
+```
+<type>/<short-description>
+```
+
+Allowed types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`
+
+Examples:
+- `feat/lock-until-time`
+- `fix/notification-crash-android14`
+- `docs/update-readme`
+
+PRs from branches not matching this pattern will fail CI and be closed.
 
 #### 2. Making Changes
 
@@ -105,6 +120,11 @@ Types:
 - `test`: Adding or updating tests
 - `chore`: Maintenance tasks
 
+**Automated version bumping uses these prefixes:**
+- `feat:` triggers a minor version bump (e.g., 1.8.3 to 1.9.0)
+- `fix:`, `chore:`, and others trigger a patch bump (e.g., 1.8.3 to 1.8.4)
+- Include `BREAKING CHANGE` in the commit body for a major bump (e.g., 1.8.3 to 2.0.0)
+
 #### 5. Testing
 
 Before submitting:
@@ -119,7 +139,7 @@ Before submitting:
 
 1. Push your changes to your fork
    ```bash
-   git push origin feature/your-feature-name
+   git push origin feat/your-feature-name
    ```
 
 2. Open a pull request with:
@@ -218,6 +238,21 @@ Need assistance?
 - Ask questions in [GitHub Discussions](https://github.com/HumbleBee14/ZenLock/discussions)
 - Review existing issues and PRs
 - Check the [README](README.md) for project overview
+
+## Repository protections (for maintainers)
+
+To enforce the workflows above, the `main` branch should have these protections enabled in GitHub (Settings > Branches > Add rule for `main`):
+
+- **Require a pull request before merging** (no direct pushes to main)
+- **Require status checks to pass before merging**: check `PR Validation`
+- **Require branches to be up to date before merging**
+- **Require linear history** (forces squash or rebase merge)
+- **Do not allow bypassing the above settings** (even for admins, optional but recommended)
+
+This guarantees:
+- Nobody can push directly to main
+- Every change goes through a PR with validated branch name, title, and description
+- The auto version-bump workflow always runs on a clean, up-to-date main
 
 ## License
 

@@ -1,0 +1,51 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch: $BRANCH"
+          if ! echo "$BRANCH" | grep -qE "^(feat|fix|chore|docs|refactor|test|perf)/[a-z0-9][a-z0-9._-]*$"; then
+            echo "::error::Invalid branch name: '$BRANCH'"
+            echo "::error::Branch must match: feat/<name>, fix/<name>, chore/<name>, docs/<name>, refactor/<name>, test/<name>, or perf/<name>"
+            echo "::error::Example: feat/lock-until-time, fix/notification-crash"
+            exit 1
+          fi
+          echo "Branch name OK"
+
+      - name: Validate PR title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+          requireScope: false
+          subjectPattern: ^[A-Z].+$|^[a-z].+$
+          subjectPatternError: |
+            The PR title subject must start with a letter and not be empty.
+            Example: "feat: add lock until time mode"
+
+      - name: Validate PR description is not empty
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          TRIMMED=$(echo "$PR_BODY" | sed 's/<!--.*-->//g' | tr -d '[:space:]')
+          if [ -z "$TRIMMED" ]; then
+            echo "::error::PR description is empty. Please fill out the PR template."
+            exit 1
+          fi
+          echo "PR description OK"

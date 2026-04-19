@@ -1,0 +1,35 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What is frustrating you, or what workflow are you trying to unlock?
+      placeholder: I want to lock my phone until a specific time instead of a duration because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you thought about.
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Are you willing to contribute this?
+      options:
+        - label: I can work on this myself and open a PR
+        - label: I can help test once someone implements it
