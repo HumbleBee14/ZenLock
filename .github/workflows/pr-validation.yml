@@ -113,5 +113,5 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug -x lint
+      - name: Build both flavors (playstore + sms)
+        run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint

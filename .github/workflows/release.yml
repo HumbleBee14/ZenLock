@@ -108,17 +108,20 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # Build debug APK (auto-signed with Android's debug keystore)
-      # so users can actually install it via sideload. An unsigned release
-      # APK is rejected by Android with "package appears to be invalid".
-      - name: Build debug APK
-        run: ./gradlew assembleDebug -x lint
+      # Build both flavor variants as debug APKs (auto-signed with Android's
+      # debug keystore so they install via sideload):
+      #   - playstore flavor: no SMS permission (matches Play Store build)
+      #   - sms flavor: SEND_SMS permission included (optional variant)
+      - name: Build debug APKs (playstore + sms flavors)
+        run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint
 
-      - name: Rename APK
+      - name: Rename APKs
         run: |
           mkdir -p release-artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk \
+          cp app/build/outputs/apk/playstore/debug/app-playstore-debug.apk \
              "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-debug.apk"
+          cp app/build/outputs/apk/sms/debug/app-sms-debug.apk \
+             "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-sms-debug.apk"
 
       - name: Commit version bump
         run: |
@@ -230,7 +233,13 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
 
             ---
-            **The APK attached below is a debug build** (for developers and testers only).
+            ### Downloads
+
+            Two debug APKs are attached below (both auto-signed with Android's debug keystore so they install via sideload):
+
+            - **`zenlock-vX.Y.Z-debug.apk`** — default build, matches the Play Store version (no SMS permission).
+            - **`zenlock-vX.Y.Z-sms-debug.apk`** — same app with SMS accountability-partner support enabled.
+
             You may need to uninstall the Play Store version first (different signature).
             For the official release, install from [Google Play](https://play.google.com/store/apps/details?id=com.grepguru.zenlock).
           files: release-artifacts/*.apk
