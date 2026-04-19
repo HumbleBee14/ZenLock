@@ -116,18 +116,93 @@ jobs:
           git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin main --follow-tags
 
+      # Changelog generation:
+      # - Finds the previous version tag so we only include commits shipped in THIS release.
+      # - Groups commits by Conventional Commit type into user-friendly sections.
+      # - Strips the "type:" prefix from each line so the final output reads like a product changelog.
+      # - Skips noise: "chore: bump version" commits, and "chore:" commits in general (internal tooling
+      #   doesn't belong in user-facing release notes).
+      # - Any commit not matching a recognized prefix is put under "Other changes".
       - name: Generate changelog
         id: changelog
         run: |
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "v${{ steps.bump.outputs.new_version }}" | head -n 1)
           if [ -z "$PREV_TAG" ]; then
-            LOG=$(git log --pretty=format:"- %s" -n 20)
+            RAW=$(git log --pretty=format:"%s" -n 50)
           else
-            LOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s" --invert-grep --grep="chore: bump version")
+            RAW=$(git log "$PREV_TAG"..HEAD --pretty=format:"%s" --invert-grep --grep="chore: bump version")
           fi
+
+          FEATURES=""
+          FIXES=""
+          PERF=""
+          DOCS=""
+          REFACTOR=""
+          OTHER=""
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            # Strip merge-commit wrapper like "Merge pull request #13 from ..." — keep PR references useful
+            if echo "$line" | grep -qE "^Merge pull request"; then
+              OTHER="${OTHER}- ${line}"$'\n'
+              continue
+            fi
+            case "$line" in
+              feat:*|feat\(*\):*)
+                CLEAN=$(echo "$line" | sed -E 's/^feat(\([^)]+\))?:\s*//')
+                FEATURES="${FEATURES}- ${CLEAN}"$'\n'
+                ;;
+              fix:*|fix\(*\):*)
+                CLEAN=$(echo "$line" | sed -E 's/^fix(\([^)]+\))?:\s*//')
+                FIXES="${FIXES}- ${CLEAN}"$'\n'
+                ;;
+              perf:*|perf\(*\):*)
+                CLEAN=$(echo "$line" | sed -E 's/^perf(\([^)]+\))?:\s*//')
+                PERF="${PERF}- ${CLEAN}"$'\n'
+                ;;
+              docs:*|docs\(*\):*)
+                CLEAN=$(echo "$line" | sed -E 's/^docs(\([^)]+\))?:\s*//')
+                DOCS="${DOCS}- ${CLEAN}"$'\n'
+                ;;
+              refactor:*|refactor\(*\):*)
+                CLEAN=$(echo "$line" | sed -E 's/^refactor(\([^)]+\))?:\s*//')
+                REFACTOR="${REFACTOR}- ${CLEAN}"$'\n'
+                ;;
+              chore:*|chore\(*\):*|test:*|test\(*\):*|style:*|ci:*|build:*)
+                # Intentionally skipped from user-facing changelog
+                ;;
+              *)
+                OTHER="${OTHER}- ${line}"$'\n'
+                ;;
+            esac
+          done <<< "$RAW"
+
+          CHANGELOG=""
+          if [ -n "$FEATURES" ]; then
+            CHANGELOG="${CHANGELOG}### New Features"$'\n'"${FEATURES}"$'\n'
+          fi
+          if [ -n "$FIXES" ]; then
+            CHANGELOG="${CHANGELOG}### Bug Fixes"$'\n'"${FIXES}"$'\n'
+          fi
+          if [ -n "$PERF" ]; then
+            CHANGELOG="${CHANGELOG}### Performance"$'\n'"${PERF}"$'\n'
+          fi
+          if [ -n "$REFACTOR" ]; then
+            CHANGELOG="${CHANGELOG}### Refactors"$'\n'"${REFACTOR}"$'\n'
+          fi
+          if [ -n "$DOCS" ]; then
+            CHANGELOG="${CHANGELOG}### Documentation"$'\n'"${DOCS}"$'\n'
+          fi
+          if [ -n "$OTHER" ]; then
+            CHANGELOG="${CHANGELOG}### Other Changes"$'\n'"${OTHER}"$'\n'
+          fi
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="No user-facing changes in this release."$'\n'
+          fi
+
           {
             echo "changelog<<CHANGELOG_EOF"
-            echo "$LOG"
+            echo "$CHANGELOG"
             echo "CHANGELOG_EOF"
           } >> $GITHUB_OUTPUT
 
@@ -137,11 +212,12 @@ jobs:
           tag_name: v${{ steps.bump.outputs.new_version }}
           name: ZenLock v${{ steps.bump.outputs.new_version }}
           body: |
-            ## Changes
+            ## What's new in v${{ steps.bump.outputs.new_version }}
+
             ${{ steps.changelog.outputs.changelog }}
 
             ---
-            **APK attached below is unsigned** (for developers/testers only).
+            **The APK attached below is unsigned** (for developers and testers only).
             For the official signed release, install from [Google Play](https://play.google.com/store/apps/details?id=com.grepguru.zenlock).
           files: release-artifacts/*.apk
           draft: false
