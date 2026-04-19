@@ -131,6 +131,20 @@
             android:enabled="true"
             android:exported="false" />
 
+        <receiver
+            android:name=".ManualStartDelayReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".ManualStartCancelReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.grepguru.zenlock.ACTION_CANCEL_MANUAL_START" />
+            </intent-filter>
+        </receiver>
+
         <!-- Pre-Notification Receiver -->
         <receiver
             android:name=".PreNotificationReceiver"
