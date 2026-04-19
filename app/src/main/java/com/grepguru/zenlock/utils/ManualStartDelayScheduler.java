@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.grepguru.zenlock.MainActivity;
+import com.grepguru.zenlock.ManualStartCancelReceiver;
 import com.grepguru.zenlock.ManualStartDelayReceiver;
 import com.grepguru.zenlock.R;
 
@@ -27,6 +28,7 @@ public final class ManualStartDelayScheduler {
     private static final int REQUEST_CODE = 41041;
     private static final int NOTIFICATION_REQUEST_CODE = 41042;
     private static final int NOTIFICATION_ID = 41043;
+    private static final int CANCEL_REQUEST_CODE = 41044;
     private static final String CHANNEL_ID = "manual_focus_schedule";
 
     private static final String PREF_PENDING = "pending_manual_start";
@@ -231,6 +233,15 @@ public final class ManualStartDelayScheduler {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
+        Intent cancelIntent = new Intent(context, ManualStartCancelReceiver.class);
+        cancelIntent.setAction(ManualStartCancelReceiver.ACTION_CANCEL);
+        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(
+                context,
+                CANCEL_REQUEST_CODE,
+                cancelIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_lock)
                 .setContentTitle("Focus session scheduled")
@@ -241,7 +252,8 @@ public final class ManualStartDelayScheduler {
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(false)
                 .setContentIntent(contentIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE);
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .addAction(0, "Cancel", cancelPendingIntent);
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

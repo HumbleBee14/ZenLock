@@ -87,12 +87,13 @@ public class HomeFragment extends Fragment {
 
     private int selectedMinutes = 0;
     private static final int TIME_INCREMENT = 5;
-    private static final int[] START_DELAY_OPTIONS_MINUTES = {0, 1, 5, 10, 15, 20, 30, 40, 50, 60};
-    private static final String[] START_DELAY_DISPLAY_VALUES = {"Now", "1m", "5m", "10m", "15m", "20m", "30m", "40m", "50m", "60m"};
+    private static final int[] START_DELAY_OPTIONS_MINUTES = {0, 1, 2, 3, 4, 5, 10, 15, 20, 30, 40, 50, 60};
+    private static final String[] START_DELAY_DISPLAY_VALUES = {"Now", "1m", "2m", "3m", "4m", "5m", "10m", "15m", "20m", "30m", "40m", "50m", "60m"};
     private static final String PREF_START_DELAY_SELECTION = "manual_start_delay_selection";
     private static final long START_DELAY_SCROLL_DISMISS_DELAY_MS = 260;
     private AnalyticsManager analyticsManager;
     private int selectedStartDelayMinutes = 0;
+    private SharedPreferences.OnSharedPreferenceChangeListener pendingSessionListener;
 
     // Zen Mode Progress Overlay Elements
     private View zenProgressOverlay;
@@ -166,6 +167,13 @@ public class HomeFragment extends Fragment {
         }
         updateLockButtonState();
 
+        pendingSessionListener = (sp, key) -> {
+            if ("pending_manual_start".equals(key) && isAdded()) {
+                requireActivity().runOnUiThread(this::updateLockButtonState);
+            }
+        };
+        prefs.registerOnSharedPreferenceChangeListener(pendingSessionListener);
+
         return view;
     }
 
@@ -230,6 +238,7 @@ public class HomeFragment extends Fragment {
                     .putInt(PREF_START_DELAY_SELECTION, selectedStartDelayMinutes)
                     .apply();
             updateStartDelayDisplay();
+            updateLockButtonState();
             tickVibrate();
         });
         startDelayPicker.setOnScrollListener((picker, scrollState) -> {
@@ -751,9 +760,8 @@ public class HomeFragment extends Fragment {
     private void setupZenLongPressButton() {
         enableLockButton.setOnTouchListener((v, event) -> {
             if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    updateLockButtonState();
-                    Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    showCancelPendingDialog();
                 }
                 return true;
             }
@@ -902,6 +910,11 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         dismissStartDelayPickerImmediately();
+        if (pendingSessionListener != null && getContext() != null) {
+            requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE)
+                    .unregisterOnSharedPreferenceChangeListener(pendingSessionListener);
+            pendingSessionListener = null;
+        }
         super.onDestroyView();
         startDelayPopupWindow = null;
         rootContentView = null;
@@ -1150,7 +1163,11 @@ public class HomeFragment extends Fragment {
 
         enableLockButton.setText("Start Focus");
         if (startFocusHint != null) {
-            startFocusHint.setText("Long press to begin");
+            if (selectedStartDelayMinutes > 0) {
+                startFocusHint.setText("Long press to schedule");
+            } else {
+                startFocusHint.setText("Long press to begin");
+            }
         }
 
         boolean canStart = isLockUntilMode ? lockUntilHour != -1 : selectedMinutes > 0;
@@ -1161,9 +1178,9 @@ public class HomeFragment extends Fragment {
     private String getPendingStartHint() {
         long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
         if (pendingStartAtMillis <= 0L) {
-            return "A focus session is already scheduled.";
+            return "Tap to cancel";
         }
-        return "Already scheduled for " + formatClockTime(pendingStartAtMillis);
+        return "Starts at " + formatClockTime(pendingStartAtMillis) + " (tap to cancel)";
     }
 
     private String getPendingStartBlockedMessage() {
@@ -1176,5 +1193,23 @@ public class HomeFragment extends Fragment {
 
     private String formatClockTime(long timeInMillis) {
         return android.text.format.DateFormat.getTimeFormat(requireContext()).format(new Date(timeInMillis));
+    }
+
+    private void showCancelPendingDialog() {
+        long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
+        String message = pendingStartAtMillis > 0L
+                ? "A focus session is scheduled for " + formatClockTime(pendingStartAtMillis) + ". Cancel it?"
+                : "A focus session is scheduled. Cancel it?";
+
+        new AlertDialog.Builder(requireActivity())
+                .setTitle("Cancel Scheduled Session")
+                .setMessage(message)
+                .setPositiveButton("Cancel Session", (dialog, which) -> {
+                    ManualStartDelayScheduler.cancelPendingSession(requireContext());
+                    updateLockButtonState();
+                    Toast.makeText(requireContext(), "Scheduled session cancelled", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Keep", null)
+                .show();
     }
 }
