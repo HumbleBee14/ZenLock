@@ -131,6 +131,11 @@
             android:enabled="true"
             android:exported="false" />
 
+        <receiver
+            android:name=".ManualStartDelayReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <!-- Pre-Notification Receiver -->
         <receiver
             android:name=".PreNotificationReceiver"

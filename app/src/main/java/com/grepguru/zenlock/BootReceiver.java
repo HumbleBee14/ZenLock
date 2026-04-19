@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.grepguru.zenlock.utils.ManualStartDelayScheduler;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 
 /**
@@ -27,6 +28,7 @@ public class BootReceiver extends BroadcastReceiver {
             
             // Reschedule all enabled schedules
             rescheduleAllSchedules(context);
+            ManualStartDelayScheduler.reschedulePendingSession(context);
 
             // Check if there was an active lock session before restart
             SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);

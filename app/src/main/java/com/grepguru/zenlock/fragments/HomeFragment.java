@@ -7,48 +7,77 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewConfiguration;
+import android.widget.PopupWindow;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.grepguru.zenlock.LockScreenActivity;
 import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.utils.AlarmPermissionManager;
 import com.grepguru.zenlock.utils.AnalyticsManager;
+import com.grepguru.zenlock.utils.ManualStartDelayScheduler;
 
 public class HomeFragment extends Fragment {
 
     private MaterialButton increaseTimeButton, decreaseTimeButton;
     private MaterialButton enableLockButton;
     private TextView selectedTimeDisplay;
+    private TextView startFocusHint;
+    private TextView startDelayValue;
+    private View rootContentView;
     private View timeDisplayContainer;
+    private View startDelayValueContainer;
+    private ImageButton modeToggleButton;
+    private ImageView startDelayChevron;
+    private NumberPicker startDelayPicker;
+    private PopupWindow startDelayPopupWindow;
+    private boolean isStartDelayPickerDismissing = false;
+    private int startDelayPickerInitialIndex = 0;
+    private int startDelayPickerTouchStartIndex = 0;
+    private float startDelayPickerTouchDownX = 0f;
+    private float startDelayPickerTouchDownY = 0f;
+    private boolean startDelayPickerMoved = false;
+    private int startDelayPickerScrollState = NumberPicker.OnScrollListener.SCROLL_STATE_IDLE;
     private Chip preset15min, preset30min, preset60min;
     private NumberPicker hoursPicker, minutesPicker;
 
     // Lock Until mode
-    private ImageButton modeToggleButton;
     private View lockUntilContainer;
     private View durationControlsContainer;
     private TextView lockUntilTimeDisplay;
@@ -58,7 +87,12 @@ public class HomeFragment extends Fragment {
 
     private int selectedMinutes = 0;
     private static final int TIME_INCREMENT = 5;
+    private static final int[] START_DELAY_OPTIONS_MINUTES = {0, 1, 5, 10, 15, 20, 30, 40, 50, 60};
+    private static final String[] START_DELAY_DISPLAY_VALUES = {"Now", "1m", "5m", "10m", "15m", "20m", "30m", "40m", "50m", "60m"};
+    private static final String PREF_START_DELAY_SELECTION = "manual_start_delay_selection";
+    private static final long START_DELAY_SCROLL_DISMISS_DELAY_MS = 260;
     private AnalyticsManager analyticsManager;
+    private int selectedStartDelayMinutes = 0;
 
     // Zen Mode Progress Overlay Elements
     private View zenProgressOverlay;
@@ -79,10 +113,18 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        rootContentView = view;
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        selectedStartDelayMinutes = prefs.getInt(PREF_START_DELAY_SELECTION, 0);
 
         // Initialize UI elements
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
+        startFocusHint = view.findViewById(R.id.startFocusHint);
+        startDelayValue = view.findViewById(R.id.startDelayValue);
         timeDisplayContainer = view.findViewById(R.id.timeDisplayContainer);
+        startDelayValueContainer = view.findViewById(R.id.startDelayValueContainer);
+        startDelayChevron = view.findViewById(R.id.startDelayChevron);
         enableLockButton = view.findViewById(R.id.enableLockButton);
         increaseTimeButton = view.findViewById(R.id.increaseTimeButton);
         decreaseTimeButton = view.findViewById(R.id.decreaseTimeButton);
@@ -110,6 +152,7 @@ public class HomeFragment extends Fragment {
 
         setupNumberPickers();
         setupModernControls();
+        setupStartDelayControls();
         setupZenLongPressButton();
         setupModeToggle();
 
@@ -117,10 +160,11 @@ public class HomeFragment extends Fragment {
 
         setTimeInMinutes(10);
 
-        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        updateStartDelayDisplay();
         if (prefs.getBoolean("lock_until_mode", false)) {
             modeToggleButton.performClick();
         }
+        updateLockButtonState();
 
         return view;
     }
@@ -156,6 +200,240 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void setupStartDelayControls() {
+        View popupContent = getLayoutInflater().inflate(R.layout.overlay_start_delay_picker, null);
+        startDelayPicker = popupContent.findViewById(R.id.startDelayPicker);
+        startDelayPicker.setMinValue(0);
+        startDelayPicker.setMaxValue(START_DELAY_DISPLAY_VALUES.length - 1);
+        startDelayPicker.setDisplayedValues(START_DELAY_DISPLAY_VALUES);
+        startDelayPicker.setWrapSelectorWheel(true);
+        startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
+        styleStartDelayPicker();
+
+        startDelayPopupWindow = new PopupWindow(
+                popupContent,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
+        );
+        startDelayPopupWindow.setOutsideTouchable(true);
+        startDelayPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        startDelayPopupWindow.setOnDismissListener(
+                () -> startDelayChevron.animate().rotation(0f).setDuration(160).start()
+        );
+
+        startDelayValueContainer.setOnClickListener(v -> toggleStartDelayPicker());
+        startDelayPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            selectedStartDelayMinutes = START_DELAY_OPTIONS_MINUTES[newVal];
+            requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE)
+                    .edit()
+                    .putInt(PREF_START_DELAY_SELECTION, selectedStartDelayMinutes)
+                    .apply();
+            updateStartDelayDisplay();
+            tickVibrate();
+        });
+        startDelayPicker.setOnScrollListener((picker, scrollState) -> {
+            startDelayPickerScrollState = scrollState;
+            if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE
+                    && startDelayPopupWindow != null
+                    && startDelayPopupWindow.isShowing()
+                    && picker.getValue() != startDelayPickerInitialIndex) {
+                picker.postDelayed(() -> {
+                    if (startDelayPopupWindow != null
+                            && startDelayPopupWindow.isShowing()
+                            && startDelayPickerScrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE
+                            && picker.getValue() != startDelayPickerInitialIndex) {
+                        hideStartDelayPicker();
+                    }
+                }, START_DELAY_SCROLL_DISMISS_DELAY_MS);
+            }
+        });
+        startDelayPicker.setOnTouchListener((v, event) -> {
+            int touchSlop = ViewConfiguration.get(requireContext()).getScaledTouchSlop();
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    startDelayPickerTouchDownX = event.getX();
+                    startDelayPickerTouchDownY = event.getY();
+                    startDelayPickerTouchStartIndex = startDelayPicker.getValue();
+                    startDelayPickerMoved = false;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (Math.abs(event.getX() - startDelayPickerTouchDownX) > touchSlop
+                            || Math.abs(event.getY() - startDelayPickerTouchDownY) > touchSlop) {
+                        startDelayPickerMoved = true;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    startDelayPicker.postDelayed(() -> {
+                        if (startDelayPopupWindow == null || !startDelayPopupWindow.isShowing()) {
+                            return;
+                        }
+                        if (startDelayPickerScrollState != NumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
+                            return;
+                        }
+                        int currentIndex = startDelayPicker.getValue();
+                        if (currentIndex != startDelayPickerInitialIndex) {
+                            hideStartDelayPicker();
+                            return;
+                        }
+                        if (!startDelayPickerMoved && currentIndex == startDelayPickerTouchStartIndex) {
+                            hideStartDelayPicker();
+                        }
+                    }, 120);
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
+    }
+
+    private void styleStartDelayPicker() {
+        float textSizePx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                15,
+                requireContext().getResources().getDisplayMetrics()
+        );
+
+        for (int i = 0; i < startDelayPicker.getChildCount(); i++) {
+            View child = startDelayPicker.getChildAt(i);
+            if (child instanceof EditText) {
+                EditText input = (EditText) child;
+                input.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                input.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+            }
+        }
+
+        try {
+            Field selectorWheelPaintField = NumberPicker.class.getDeclaredField("mSelectorWheelPaint");
+            selectorWheelPaintField.setAccessible(true);
+            Paint selectorWheelPaint = (Paint) selectorWheelPaintField.get(startDelayPicker);
+            selectorWheelPaint.setTextSize(textSizePx);
+            selectorWheelPaint.setColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+            Field dividerHeightField = NumberPicker.class.getDeclaredField("mSelectionDividerHeight");
+            dividerHeightField.setAccessible(true);
+            dividerHeightField.set(startDelayPicker, 0);
+            startDelayPicker.invalidate();
+        } catch (Exception ignored) {
+            // Best-effort styling for platform NumberPicker internals.
+        }
+    }
+
+    private void toggleStartDelayPicker() {
+        if (startDelayPopupWindow != null && startDelayPopupWindow.isShowing()) {
+            hideStartDelayPicker();
+        } else {
+            showStartDelayPicker();
+        }
+    }
+
+    private void showStartDelayPicker() {
+        if (startDelayPopupWindow == null || rootContentView == null) {
+            return;
+        }
+
+        startDelayPickerInitialIndex = getStartDelayIndex(selectedStartDelayMinutes);
+        startDelayPickerScrollState = NumberPicker.OnScrollListener.SCROLL_STATE_IDLE;
+        startDelayPicker.setValue(startDelayPickerInitialIndex);
+        View popupContent = startDelayPopupWindow.getContentView();
+        popupContent.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        );
+
+        int popupWidth = popupContent.getMeasuredWidth();
+        int popupHeight = popupContent.getMeasuredHeight();
+        int gap = dpToPx(8);
+        int inset = dpToPx(12);
+
+        android.graphics.Rect visibleFrame = new android.graphics.Rect();
+        rootContentView.getWindowVisibleDisplayFrame(visibleFrame);
+
+        int[] anchorLocation = new int[2];
+        startDelayValueContainer.getLocationOnScreen(anchorLocation);
+
+        int anchorLeft = anchorLocation[0];
+        int anchorTop = anchorLocation[1];
+        int anchorWidth = startDelayValueContainer.getWidth();
+        int anchorHeight = startDelayValueContainer.getHeight();
+        int anchorCenterX = anchorLeft + (anchorWidth / 2);
+        int anchorCenterY = anchorTop + (anchorHeight / 2);
+
+        int x = anchorCenterX - (popupWidth / 2);
+        int y = anchorCenterY - (popupHeight / 2);
+
+        x = Math.max(visibleFrame.left + inset, Math.min(x, visibleFrame.right - popupWidth - inset));
+        y = Math.max(visibleFrame.top + inset, Math.min(y, visibleFrame.bottom - popupHeight - inset));
+
+        startDelayChevron.animate().rotation(180f).setDuration(160).start();
+
+        isStartDelayPickerDismissing = false;
+        startDelayPopupWindow.showAtLocation(rootContentView, Gravity.NO_GRAVITY, x, y);
+        popupContent.setAlpha(0f);
+        popupContent.setScaleX(0.96f);
+        popupContent.setScaleY(0.96f);
+        popupContent.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(160)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+    }
+
+    private void hideStartDelayPicker() {
+        PopupWindow popupWindow = startDelayPopupWindow;
+        if (popupWindow != null && popupWindow.isShowing()) {
+            if (isStartDelayPickerDismissing) {
+                return;
+            }
+            isStartDelayPickerDismissing = true;
+            View popupContent = popupWindow.getContentView();
+            popupContent.animate()
+                    .alpha(0f)
+                    .scaleX(0.96f)
+                    .scaleY(0.96f)
+                    .setDuration(140)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        if (popupWindow.isShowing()) {
+                            popupWindow.dismiss();
+                        }
+                        if (popupContent != null) {
+                            popupContent.setAlpha(1f);
+                            popupContent.setScaleX(1f);
+                            popupContent.setScaleY(1f);
+                        }
+                        isStartDelayPickerDismissing = false;
+                    })
+                    .start();
+        } else {
+            startDelayChevron.animate().rotation(0f).setDuration(160).start();
+        }
+    }
+
+    private void dismissStartDelayPickerImmediately() {
+        PopupWindow popupWindow = startDelayPopupWindow;
+        if (popupWindow != null) {
+            View popupContent = popupWindow.getContentView();
+            if (popupContent != null) {
+                popupContent.animate().cancel();
+                popupContent.setAlpha(1f);
+                popupContent.setScaleX(1f);
+                popupContent.setScaleY(1f);
+            }
+            if (popupWindow.isShowing()) {
+                popupWindow.dismiss();
+            }
+        }
+        isStartDelayPickerDismissing = false;
+        if (startDelayChevron != null) {
+            startDelayChevron.animate().cancel();
+            startDelayChevron.setRotation(0f);
+        }
+    }
+
     private void setupModeToggle() {
         modeToggleButton.setOnClickListener(v -> {
             isLockUntilMode = !isLockUntilMode;
@@ -177,8 +455,7 @@ public class HomeFragment extends Fragment {
                     lockUntilMinute = 0;
                 }
                 updateLockUntilDisplay();
-                enableLockButton.setEnabled(true);
-                enableLockButton.setAlpha(1f);
+                updateLockButtonState();
             } else {
                 modeToggleButton.setImageResource(R.drawable.ic_schedule);
                 modeToggleButton.setContentDescription("Switch to lock until time");
@@ -202,8 +479,7 @@ public class HomeFragment extends Fragment {
                     lockUntilHour = selectedHour;
                     lockUntilMinute = selectedMinute;
                     updateLockUntilDisplay();
-                    enableLockButton.setEnabled(true);
-                    enableLockButton.setAlpha(1f);
+                    updateLockButtonState();
                 },
                 hour, minute, false
         );
@@ -231,6 +507,21 @@ public class HomeFragment extends Fragment {
         }
 
         return target.getTimeInMillis() - now.getTimeInMillis();
+    }
+
+    private long getNextLockUntilEndTimeMillis() {
+        Calendar now = Calendar.getInstance();
+        Calendar target = Calendar.getInstance();
+        target.set(Calendar.HOUR_OF_DAY, lockUntilHour);
+        target.set(Calendar.MINUTE, lockUntilMinute);
+        target.set(Calendar.SECOND, 0);
+        target.set(Calendar.MILLISECOND, 0);
+
+        if (!target.after(now)) {
+            target.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        return target.getTimeInMillis();
     }
 
     private Handler autoIncrementHandler = new Handler(Looper.getMainLooper());
@@ -351,14 +642,38 @@ public class HomeFragment extends Fragment {
         // Format: HH:MM
         selectedTimeDisplay.setText(String.format("%02d:%02d", hours, minutes));
         
-        // Update button state
-        if (selectedMinutes == 0) {
-            enableLockButton.setEnabled(false);
-            enableLockButton.setAlpha(0.5f);
-        } else {
-            enableLockButton.setEnabled(true);
-            enableLockButton.setAlpha(1f);
+        updateLockButtonState();
+    }
+
+    private void updateStartDelayDisplay() {
+        if (startDelayPicker.getValue() != getStartDelayIndex(selectedStartDelayMinutes)) {
+            startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         }
+        startDelayValue.setText(formatStartDelayLabel(selectedStartDelayMinutes));
+    }
+
+    private String formatStartDelayLabel(int minutes) {
+        if (minutes <= 0) {
+            return "Now";
+        }
+        if (minutes == 1) {
+            return "In 1 min";
+        }
+        return "In " + minutes + " min";
+    }
+
+    private int getStartDelayIndex(int minutes) {
+        for (int i = 0; i < START_DELAY_OPTIONS_MINUTES.length; i++) {
+            if (START_DELAY_OPTIONS_MINUTES[i] == minutes) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private int dpToPx(int dp) {
+        float density = requireContext().getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     private void setupNumberPickers() {
@@ -435,6 +750,14 @@ public class HomeFragment extends Fragment {
 
     private void setupZenLongPressButton() {
         enableLockButton.setOnTouchListener((v, event) -> {
+            if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    updateLockButtonState();
+                    Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     startZenActivation();
@@ -454,6 +777,12 @@ public class HomeFragment extends Fragment {
 
     private void startZenActivation() {
         if (isLongPressing) return;
+        hideStartDelayPicker();
+        if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
+            updateLockButtonState();
+            Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // Check accessibility permission first
         if (!isAccessibilityPermissionGranted()) {
@@ -526,9 +855,13 @@ public class HomeFragment extends Fragment {
     private void completeZenActivation() {
         isLongPressing = false;
 
-        // Show completion message
-        zenProgressMessage.setText("🎯 ZEN Mode Activated!");
-        zenProgressSubtitle.setText("Beginning your mindful focus session");
+        if (selectedStartDelayMinutes > 0) {
+            zenProgressMessage.setText("⏳ Focus session scheduled");
+            zenProgressSubtitle.setText(formatStartDelayLabel(selectedStartDelayMinutes));
+        } else {
+            zenProgressMessage.setText("🎯 ZEN Mode Activated!");
+            zenProgressSubtitle.setText("Beginning your mindful focus session");
+        }
 
         // Delay then start lock service
         longPressHandler.postDelayed(() -> {
@@ -568,7 +901,10 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        dismissStartDelayPickerImmediately();
         super.onDestroyView();
+        startDelayPopupWindow = null;
+        rootContentView = null;
         if (emojiPulseX != null) { emojiPulseX.cancel(); emojiPulseX = null; }
         if (emojiPulseY != null) { emojiPulseY.cancel(); emojiPulseY = null; }
         if (progressAnimator != null) { progressAnimator.cancel(); progressAnimator = null; }
@@ -606,13 +942,15 @@ public class HomeFragment extends Fragment {
 
     private void proceedWithLockSession(SharedPreferences preferences) {
         long lockDurationMillis;
+        Long absoluteLockEndTimeMillis = null;
 
         if (isLockUntilMode) {
             if (lockUntilHour == -1) {
                 Toast.makeText(getActivity(), "Please select a lock until time!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            lockDurationMillis = getLockUntilDurationMs();
+            absoluteLockEndTimeMillis = getNextLockUntilEndTimeMillis();
+            lockDurationMillis = absoluteLockEndTimeMillis - System.currentTimeMillis();
         } else {
             lockDurationMillis = selectedMinutes * 60 * 1000L;
             if (lockDurationMillis <= 0) {
@@ -625,18 +963,78 @@ public class HomeFragment extends Fragment {
             long hours = lockDurationMillis / (60 * 60 * 1000L);
             long mins = (lockDurationMillis % (60 * 60 * 1000L)) / (60 * 1000L);
             String durationText = hours + "h " + mins + "m";
+            Long finalAbsoluteLockEndTimeMillis = absoluteLockEndTimeMillis;
             new AlertDialog.Builder(getActivity())
                     .setTitle("Long Session")
                     .setMessage("You're about to lock for " + durationText + ". Are you sure?")
-                    .setPositiveButton("Lock", (dialog, which) -> startLockSession(preferences, lockDurationMillis))
+                    .setPositiveButton("Lock", (dialog, which) -> startOrScheduleLockSession(
+                            preferences, lockDurationMillis, finalAbsoluteLockEndTimeMillis
+                    ))
                     .setNegativeButton("Cancel", null)
                     .show();
         } else {
-            startLockSession(preferences, lockDurationMillis);
+            startOrScheduleLockSession(preferences, lockDurationMillis, absoluteLockEndTimeMillis);
         }
     }
 
+    private void startOrScheduleLockSession(SharedPreferences preferences, long lockDurationMillis,
+                                            @Nullable Long absoluteLockEndTimeMillis) {
+        if (selectedStartDelayMinutes > 0) {
+            scheduleManualStart(preferences, lockDurationMillis, absoluteLockEndTimeMillis);
+            return;
+        }
+        startLockSession(preferences, lockDurationMillis);
+    }
+
+    private void scheduleManualStart(SharedPreferences preferences, long lockDurationMillis,
+                                     @Nullable Long absoluteLockEndTimeMillis) {
+        if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
+            updateLockButtonState();
+            Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!AlarmPermissionManager.canScheduleExactAlarms(requireContext())) {
+            if (requireActivity() instanceof AppCompatActivity) {
+                AlarmPermissionManager.requestExactAlarmPermission((AppCompatActivity) requireActivity());
+            }
+            return;
+        }
+
+        long scheduledStartTimeMillis = System.currentTimeMillis() + (selectedStartDelayMinutes * 60_000L);
+        if (absoluteLockEndTimeMillis != null && absoluteLockEndTimeMillis <= scheduledStartTimeMillis) {
+            Toast.makeText(
+                    requireContext(),
+                    "Pick a later lock-until time or a shorter start delay.",
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
+        }
+
+        boolean scheduled = ManualStartDelayScheduler.scheduleSession(
+                requireContext(),
+                selectedStartDelayMinutes,
+                lockDurationMillis,
+                absoluteLockEndTimeMillis
+        );
+
+        if (!scheduled) {
+            Toast.makeText(requireContext(), "Couldn't schedule your focus session yet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        preferences.edit().remove("current_session_source").apply();
+        updateLockButtonState();
+        Toast.makeText(
+                requireContext(),
+                "Focus session starts " + formatStartDelayLabel(selectedStartDelayMinutes).toLowerCase(),
+                Toast.LENGTH_LONG
+        ).show();
+    }
+
     private void startLockSession(SharedPreferences preferences, long lockDurationMillis) {
+        ManualStartDelayScheduler.cancelPendingSession(requireContext());
+
         SharedPreferences.Editor editor = preferences.edit();
 
         long lockStartTime = System.currentTimeMillis();
@@ -649,9 +1047,10 @@ public class HomeFragment extends Fragment {
         editor.putLong("lockTargetDuration", lockDurationMillis);
         editor.putLong("uptimeAtLock", uptimeAtLock);
         editor.putBoolean("wasDeviceRestarted", false);
+        editor.putString("current_session_source", "manual");
         editor.apply();
 
-        analyticsManager.startSession(lockDurationMillis);
+        analyticsManager.startSession(lockDurationMillis, "manual");
 
         Intent intent = new Intent(getActivity(), LockScreenActivity.class);
         intent.putExtra("lockDuration", lockDurationMillis);
@@ -729,6 +1128,53 @@ public class HomeFragment extends Fragment {
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(lockIntent);
             requireActivity().finish();
+            return;
         }
+        updateLockButtonState();
+    }
+
+    private void updateLockButtonState() {
+        if (enableLockButton == null) {
+            return;
+        }
+
+        if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
+            enableLockButton.setEnabled(true);
+            enableLockButton.setAlpha(0.55f);
+            enableLockButton.setText("Focus Scheduled");
+            if (startFocusHint != null) {
+                startFocusHint.setText(getPendingStartHint());
+            }
+            return;
+        }
+
+        enableLockButton.setText("Start Focus");
+        if (startFocusHint != null) {
+            startFocusHint.setText("Long press to begin");
+        }
+
+        boolean canStart = isLockUntilMode ? lockUntilHour != -1 : selectedMinutes > 0;
+        enableLockButton.setEnabled(canStart);
+        enableLockButton.setAlpha(canStart ? 1f : 0.5f);
+    }
+
+    private String getPendingStartHint() {
+        long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
+        if (pendingStartAtMillis <= 0L) {
+            return "A focus session is already scheduled.";
+        }
+        return "Already scheduled for " + formatClockTime(pendingStartAtMillis);
+    }
+
+    private String getPendingStartBlockedMessage() {
+        long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
+        if (pendingStartAtMillis <= 0L) {
+            return "A focus session is already scheduled.";
+        }
+        return "A focus session is already scheduled for " + formatClockTime(pendingStartAtMillis);
+    }
+
+    private String formatClockTime(long timeInMillis) {
+        return android.text.format.DateFormat.getTimeFormat(requireContext()).format(new Date(timeInMillis));
     }
 }
