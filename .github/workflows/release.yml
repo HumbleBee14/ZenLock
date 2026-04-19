@@ -31,7 +31,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use a PAT (not GITHUB_TOKEN) so the workflow can push the
+          # version-bump commit and tag through branch protection.
+          # The PAT belongs to an admin who is in the ruleset bypass list.
+          token: ${{ secrets.RELEASE_PAT }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
