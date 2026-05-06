@@ -314,7 +314,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="8dp"
-        android:text="ZenLock uses Accessibility only to lock your screen and block distractions. No data is collected or shared."
+        android:text="You can grant these now or later — ZenLock will ask only when a feature needs it. No data is collected or shared."
         android:textColor="@color/textSecondary"
         android:textSize="13sp"
         android:gravity="center"
@@ -340,13 +340,13 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/exitButton"
+                android:id="@+id/skipButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Exit"
+                android:text="Skip for now"
                 android:textColor="@color/textPrimary"
                 app:strokeColor="@color/textSecondary" />
 
@@ -357,7 +357,7 @@
                 android:layout_height="56dp"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:enabled="false"
+                android:enabled="true"
                 android:text="Continue"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -365,12 +365,13 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/onboardingFootnote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Essential permissions must be granted to continue"
+            android:text="You can grant permissions later from the app"
             android:textColor="@color/textSecondary"
             android:textSize="12sp" />
 

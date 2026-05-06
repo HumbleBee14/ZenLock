@@ -784,6 +784,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void startZenActivation() {
+        startZenActivation(false);
+    }
+
+    private void startZenActivation(boolean unlockWarningAcknowledged) {
         if (isLongPressing) return;
         hideStartDelayPicker();
         if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
@@ -795,6 +799,13 @@ public class HomeFragment extends Fragment {
         // Check accessibility permission first
         if (!isAccessibilityPermissionGranted()) {
             showAccessibilityDisclosureDialog();
+            return;
+        }
+
+        // Same rule as SettingsFragment.updateUnlockMethodStates(): pin OR partner phone configured.
+        // Show a warning before locking if neither is set, so users know they may get locked out.
+        if (!unlockWarningAcknowledged && !hasAnyUnlockMethodConfigured()) {
+            showNoUnlockMethodWarning();
             return;
         }
 
@@ -834,6 +845,22 @@ public class HomeFragment extends Fragment {
             }
         };
         longPressHandler.postDelayed(longPressRunnable, ZEN_ACTIVATION_DURATION);
+    }
+
+    private boolean hasAnyUnlockMethodConfigured() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        boolean pinConfigured = !prefs.getString("unlock_pin", "").isEmpty();
+        boolean partnerConfigured = !prefs.getString("partner_phone", "").isEmpty();
+        return pinConfigured || partnerConfigured;
+    }
+
+    private void showNoUnlockMethodWarning() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("⚠️ No unlock method configured")
+                .setMessage("No unlock methods configured! You may get locked out during focus sessions. Please enable at least one unlock method.")
+                .setPositiveButton("Continue anyway", (dialog, which) -> startZenActivation(true))
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void cancelZenActivation() {

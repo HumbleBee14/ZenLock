@@ -6,14 +6,14 @@
     <color name="transparent">#00000000</color>
 
     <!-- Modern Minimal Color Palette -->
-    <!-- Primary Colors (Clean Blue) -->
-    <color name="primary">#6366F1</color>           <!-- Modern indigo - Clean and professional -->
-    <color name="primaryDark">#4F46E5</color>       <!-- Deep indigo for depth -->
-    <color name="primaryLight">#818CF8</color>      <!-- Light indigo for highlights -->
-    
-    <!-- Gradient Support Colors -->
-    <color name="gradientStart">#6366F1</color>      <!-- Indigo start -->
-    <color name="gradientEnd">#8B5CF6</color>        <!-- Purple end -->
+    <!-- Primary Colors (Refined Slate-Blue — calm, confident, SaaS-grade) -->
+    <color name="primary">#4263EB</color>           <!-- Slate-blue, less candy than indigo -->
+    <color name="primaryDark">#364FC7</color>       <!-- Deeper slate for pressed states -->
+    <color name="primaryLight">#5C7CFA</color>      <!-- Soft slate-blue for highlights -->
+
+    <!-- Gradient Support Colors (used only on hero CTAs) -->
+    <color name="gradientStart">#4263EB</color>      <!-- Slate-blue start -->
+    <color name="gradientEnd">#5C7CFA</color>        <!-- Soft slate-blue end (single-hue, no purple) -->
     
     <!-- Secondary Colors (Professional Gray) -->
     <color name="secondary">#6B7280</color>         <!-- Professional gray for accents -->

@@ -1,7 +1,9 @@
 package com.grepguru.zenlock;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -23,13 +25,15 @@ import com.grepguru.zenlock.utils.MiuiUtils;
 public class PermissionsOnboardingActivity extends AppCompatActivity {
     
     private static final String TAG = "PermissionsOnboarding";
+    private static final String PREFS_NAME = "FocusLockPrefs";
+    private static final String KEY_ONBOARDING_SEEN = "onboarding_seen";
 
     private Button accessibilityButton;
     private Button overlayButton;
     private Button alarmButton;
     private Button miuiButton;
     private Button continueButton;
-    private Button exitButton; // New exit button
+    private Button skipButton;
 
     private CardView accessibilityCard;
     private CardView overlayCard;
@@ -63,7 +67,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         alarmButton = findViewById(R.id.alarmButton);
         miuiButton = findViewById(R.id.miuiButton);
         continueButton = findViewById(R.id.continueButton);
-        exitButton = findViewById(R.id.exitButton); // Initialize exit button
+        skipButton = findViewById(R.id.skipButton);
 
         accessibilityCard = findViewById(R.id.accessibilityCard);
         overlayCard = findViewById(R.id.overlayCard);
@@ -76,8 +80,9 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         overlayButton.setOnClickListener(v -> requestOverlayPermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
         miuiButton.setOnClickListener(v -> requestMiuiPermission());
+        // Both buttons enter the app — onboarding is informational, not a gate.
         continueButton.setOnClickListener(v -> completeOnboarding());
-        exitButton.setOnClickListener(v -> finish()); // Set click listener for exit
+        skipButton.setOnClickListener(v -> completeOnboarding());
     }
     
     private void showAccessibilityDisclosure() {
@@ -102,7 +107,7 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
             userConsentedToAccessibility = false;
             hasShownAccessibilityDisclosure = true;
             dialog.dismiss();
-            Toast.makeText(this, "Accessibility permission is required for ZenLock to function properly", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No problem — you can enable this later when you start a focus session.", Toast.LENGTH_LONG).show();
         });
         
         // Prevent dismissing by tapping outside or back button
@@ -170,12 +175,14 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
             miuiCard.setVisibility(View.GONE);
         }
 
-        // Enable continue button only if essential permissions are granted (Usage Access is optional)
-        // MIUI permission is not essential — the app has a notification fallback for when it's denied
+        // Onboarding is no longer a gate — the Continue button is always enabled.
+        // Label adapts: "Continue" once everything essential is granted, otherwise "Skip for now".
         boolean essentialGranted = accessibilityGranted && overlayGranted &&
-                                 (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted) &&
-                                 (hasShownAccessibilityDisclosure ? userConsentedToAccessibility : true);
-        continueButton.setEnabled(essentialGranted);
+                                 (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted);
+        continueButton.setEnabled(true);
+        continueButton.setText(essentialGranted ? "Continue" : "Skip for now");
+        // Hide the redundant "Skip" outline button when everything is already granted.
+        skipButton.setVisibility(essentialGranted ? View.GONE : View.VISIBLE);
     }
     
     private void updatePermissionCard(CardView card, Button button, boolean granted, 
@@ -219,52 +226,18 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     }
     
     private void completeOnboarding() {
-        // Navigate to main activity
+        // Mark onboarding as seen so it isn't shown again on next launch.
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_ONBOARDING_SEEN, true).apply();
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
-    
-    /**
-     * Check if all essential permissions are granted
-     */
-    public static boolean areEssentialPermissionsGranted(android.content.Context context) {
-        try {
-            // Check accessibility - use same logic as instance method
-            boolean accessibilityGranted = false;
-            android.view.accessibility.AccessibilityManager am =
-                (android.view.accessibility.AccessibilityManager) context.getSystemService(ACCESSIBILITY_SERVICE);
-            if (am != null) {
-                String packageName = context.getPackageName();
-                java.util.List<android.accessibilityservice.AccessibilityServiceInfo> enabledServices =
-                    am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-                for (android.accessibilityservice.AccessibilityServiceInfo service : enabledServices) {
-                    String serviceId = service.getId();
-                    if (serviceId.startsWith(packageName + "/") ||
-                        serviceId.contains("com.grepguru.zenlock.AppBlockerService")) {
-                        accessibilityGranted = true;
-                        break;
-                    }
-                }
-            }
-            // Check overlay
-            boolean overlayGranted = Settings.canDrawOverlays(context);
-            // Check alarm (API 31+)
-            boolean alarmGranted = true;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                android.app.AlarmManager alarmManager =
-                    (android.app.AlarmManager) context.getSystemService(ALARM_SERVICE);
-                if (alarmManager != null) {
-                    alarmGranted = alarmManager.canScheduleExactAlarms();
-                } else {
-                    alarmGranted = false;
-                }
-            }
-            // Final result
-            return accessibilityGranted && overlayGranted && alarmGranted;
-        } catch (Exception e) {
-            return false; // If there's an error, assume permissions are not granted
-        }
+
+    public static boolean hasSeenOnboarding(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(KEY_ONBOARDING_SEEN, false);
     }
 }

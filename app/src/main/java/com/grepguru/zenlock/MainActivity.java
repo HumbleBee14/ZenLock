@@ -30,20 +30,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "=== MainActivity onCreate START ===");
         Log.d(TAG, "Intent that started this activity: " + getIntent().toString());
 
-        // Check if essential permissions are granted - if not, show onboarding
-        Log.d(TAG, "About to check essential permissions...");
-        boolean permissionsGranted = PermissionsOnboardingActivity.areEssentialPermissionsGranted(this);
-        Log.d(TAG, "Essential permissions check result: " + permissionsGranted);
-
-        if (!permissionsGranted) {
-            Log.d(TAG, "Permissions not granted, redirecting to onboarding");
-            // Redirect to permissions onboarding
+        // Show the permissions tour ONCE on first launch as an introduction.
+        // After that, never block the app — features prompt for permissions just-in-time.
+        if (!PermissionsOnboardingActivity.hasSeenOnboarding(this)) {
+            Log.d(TAG, "First launch — showing permissions tour (skippable)");
             startActivity(new Intent(this, PermissionsOnboardingActivity.class));
             finish();
             return;
         }
-        
-        Log.d(TAG, "All permissions granted, continuing to main app");
+
+        Log.d(TAG, "Onboarding already seen, continuing to main app");
         setContentView(R.layout.activity_main);
         
         // Setup permission launcher
