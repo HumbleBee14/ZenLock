@@ -27,45 +27,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        Log.d(TAG, "=== MainActivity onCreate START ===");
-        Log.d(TAG, "Intent that started this activity: " + getIntent().toString());
-
-        // Show the permissions tour ONCE on first launch as an introduction.
-        // After that, never block the app — features prompt for permissions just-in-time.
         if (!PermissionsOnboardingActivity.hasSeenOnboarding(this)) {
-            Log.d(TAG, "First launch — showing permissions tour (skippable)");
             startActivity(new Intent(this, PermissionsOnboardingActivity.class));
             finish();
             return;
         }
 
-        Log.d(TAG, "Onboarding already seen, continuing to main app");
         setContentView(R.layout.activity_main);
-        
-        // Setup permission launcher
+
         setupPermissionLauncher();
-        
-        // Check and request notification permission
-        checkNotificationPermission();
-        
-                // Check exact alarm permission for schedules
-                checkExactAlarmPermission();
-
-                // Check foreground service permission for background launch
-                checkForegroundServicePermission();
-
-                // Clean up any stale session state
-                cleanupStaleSessionState();
-        
-        // Ensure all enabled schedules are activated
+        cleanupStaleSessionState();
         activateEnabledSchedules();
-        
-        // Initialize analytics and auto-fetch data
         initializeAnalytics();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        // Load HomeFragment by default
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new HomeFragment()).commit();
         }
@@ -111,42 +87,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         );
-    }
-    
-    /**
-     * Check and request notification permission if needed
-     */
-    private void checkNotificationPermission() {
-        if (!NotificationPermissionManager.hasNotificationPermission(this)) {
-            Log.d(TAG, "Requesting notification permission");
-            NotificationPermissionManager.requestNotificationPermission(this, notificationPermissionLauncher);
-        } else {
-            Log.d(TAG, "Notification permission already granted");
-        }
-    }
-    
-    /**
-     * Check exact alarm permission for scheduling
-     */
-    private void checkExactAlarmPermission() {
-        if (!AlarmPermissionManager.canScheduleExactAlarms(this)) {
-            Log.d(TAG, "Exact alarm permission not granted, requesting...");
-            AlarmPermissionManager.requestExactAlarmPermission(this);
-        } else {
-            Log.d(TAG, "Exact alarm permission already granted");
-        }
-    }
-
-    /**
-     * Check foreground service permission for background launch
-     */
-    private void checkForegroundServicePermission() {
-        if (!ForegroundServicePermissionManager.canStartForegroundService(this)) {
-            Log.d(TAG, "Foreground service permission not granted, requesting...");
-            ForegroundServicePermissionManager.requestForegroundServicePermission(this);
-        } else {
-            Log.d(TAG, "Foreground service permission already granted");
-        }
     }
     
     /**

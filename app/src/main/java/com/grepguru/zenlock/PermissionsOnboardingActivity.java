@@ -58,7 +58,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updatePermissionStates();
-        // Removed auto-navigation - let user click "Continue to App" button instead
     }
     
     private void initializeViews() {
@@ -80,7 +79,6 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
         overlayButton.setOnClickListener(v -> requestOverlayPermission());
         alarmButton.setOnClickListener(v -> requestAlarmPermission());
         miuiButton.setOnClickListener(v -> requestMiuiPermission());
-        // Both buttons enter the app — onboarding is informational, not a gate.
         continueButton.setOnClickListener(v -> completeOnboarding());
         skipButton.setOnClickListener(v -> completeOnboarding());
     }
@@ -175,13 +173,10 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
             miuiCard.setVisibility(View.GONE);
         }
 
-        // Onboarding is no longer a gate — the Continue button is always enabled.
-        // Label adapts: "Continue" once everything essential is granted, otherwise "Skip for now".
+        // Show one action: "Continue" if all essential granted, else "Skip for now".
         boolean essentialGranted = accessibilityGranted && overlayGranted &&
                                  (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmGranted);
-        continueButton.setEnabled(true);
-        continueButton.setText(essentialGranted ? "Continue" : "Skip for now");
-        // Hide the redundant "Skip" outline button when everything is already granted.
+        continueButton.setVisibility(essentialGranted ? View.VISIBLE : View.GONE);
         skipButton.setVisibility(essentialGranted ? View.GONE : View.VISIBLE);
     }
     
@@ -226,9 +221,8 @@ public class PermissionsOnboardingActivity extends AppCompatActivity {
     }
     
     private void completeOnboarding() {
-        // Mark onboarding as seen so it isn't shown again on next launch.
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_ONBOARDING_SEEN, true).apply();
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY_ONBOARDING_SEEN, true).apply();
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

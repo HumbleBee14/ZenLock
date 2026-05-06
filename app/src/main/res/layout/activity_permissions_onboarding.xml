@@ -334,35 +334,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
+            <!-- Outlined "Skip for now" — shown while permissions are pending. -->
             <Button
                 android:id="@+id/skipButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="56dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:minWidth="160dp"
                 android:text="Skip for now"
                 android:textColor="@color/textPrimary"
                 app:strokeColor="@color/textSecondary" />
 
+            <!-- Filled "Continue" — shown only when all essential permissions are granted. -->
             <Button
                 android:id="@+id/continueButton"
                 style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:enabled="true"
                 android:text="Continue"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-        </LinearLayout>
+        </FrameLayout>
 
         <TextView
             android:id="@+id/onboardingFootnote"
