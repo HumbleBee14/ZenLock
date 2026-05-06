@@ -10,8 +10,8 @@ android {
         applicationId = "com.grepguru.zenlock"
         minSdk = 28
         targetSdk = 36
-        versionCode = 31
-        versionName = "1.10.0"
+        versionCode = 32
+        versionName = "1.10.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // major.minor.patch
@@ -63,6 +63,7 @@ android {
             versionNameSuffix = "-sms"
         }
     }
+    buildToolsVersion = "37.0.0"
 }
 
 // Android Studio Build Variants panel defaults to playstoreDebug / playstoreRelease

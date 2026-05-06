@@ -27,49 +27,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        Log.d(TAG, "=== MainActivity onCreate START ===");
-        Log.d(TAG, "Intent that started this activity: " + getIntent().toString());
-
-        // Check if essential permissions are granted - if not, show onboarding
-        Log.d(TAG, "About to check essential permissions...");
-        boolean permissionsGranted = PermissionsOnboardingActivity.areEssentialPermissionsGranted(this);
-        Log.d(TAG, "Essential permissions check result: " + permissionsGranted);
-
-        if (!permissionsGranted) {
-            Log.d(TAG, "Permissions not granted, redirecting to onboarding");
-            // Redirect to permissions onboarding
+        if (!PermissionsOnboardingActivity.hasSeenOnboarding(this)) {
             startActivity(new Intent(this, PermissionsOnboardingActivity.class));
             finish();
             return;
         }
-        
-        Log.d(TAG, "All permissions granted, continuing to main app");
+
         setContentView(R.layout.activity_main);
-        
-        // Setup permission launcher
+
         setupPermissionLauncher();
-        
-        // Check and request notification permission
-        checkNotificationPermission();
-        
-                // Check exact alarm permission for schedules
-                checkExactAlarmPermission();
-
-                // Check foreground service permission for background launch
-                checkForegroundServicePermission();
-
-                // Clean up any stale session state
-                cleanupStaleSessionState();
-        
-        // Ensure all enabled schedules are activated
+        cleanupStaleSessionState();
         activateEnabledSchedules();
-        
-        // Initialize analytics and auto-fetch data
         initializeAnalytics();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        // Load HomeFragment by default
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new HomeFragment()).commit();
         }
@@ -115,42 +87,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         );
-    }
-    
-    /**
-     * Check and request notification permission if needed
-     */
-    private void checkNotificationPermission() {
-        if (!NotificationPermissionManager.hasNotificationPermission(this)) {
-            Log.d(TAG, "Requesting notification permission");
-            NotificationPermissionManager.requestNotificationPermission(this, notificationPermissionLauncher);
-        } else {
-            Log.d(TAG, "Notification permission already granted");
-        }
-    }
-    
-    /**
-     * Check exact alarm permission for scheduling
-     */
-    private void checkExactAlarmPermission() {
-        if (!AlarmPermissionManager.canScheduleExactAlarms(this)) {
-            Log.d(TAG, "Exact alarm permission not granted, requesting...");
-            AlarmPermissionManager.requestExactAlarmPermission(this);
-        } else {
-            Log.d(TAG, "Exact alarm permission already granted");
-        }
-    }
-
-    /**
-     * Check foreground service permission for background launch
-     */
-    private void checkForegroundServicePermission() {
-        if (!ForegroundServicePermissionManager.canStartForegroundService(this)) {
-            Log.d(TAG, "Foreground service permission not granted, requesting...");
-            ForegroundServicePermissionManager.requestForegroundServicePermission(this);
-        } else {
-            Log.d(TAG, "Foreground service permission already granted");
-        }
     }
     
     /**
