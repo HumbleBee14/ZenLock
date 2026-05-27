@@ -64,6 +64,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             return
         }
 
+        let inFrictionBypass: Bool = {
+            guard let until = defaults?.object(forKey: "friction_bypass_until_\(groupId)") as? Date else { return false }
+            return Date() < until
+        }()
+
         let shouldBlock: Bool
         switch group.blockMode {
         case .timeBased:
@@ -71,7 +76,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         case .usageBased:
             shouldBlock = reason == .thresholdReached
         case .frictionBased:
-            shouldBlock = true
+            shouldBlock = !inFrictionBypass
         }
 
         if shouldBlock {

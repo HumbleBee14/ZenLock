@@ -40,16 +40,37 @@ final class BlockingService {
         }
     }
 
-    func deactivateGroup(_ group: BlockGroup) {
+    enum DeactivationError: Error, LocalizedError {
+        case deepFocusLocked
+
+        var errorDescription: String? {
+            switch self {
+            case .deepFocusLocked:
+                return "Deep Focus is on. This group can't be turned off while its session is active."
+            }
+        }
+    }
+
+    @discardableResult
+    func deactivateGroup(_ group: BlockGroup) -> Result<Void, DeactivationError> {
+        let shared = group.toShared()
+        if shared.deepFocusEnabled && ScheduleEvaluator.isWithinSchedule(shared) && shared.blockMode == .timeBased {
+            return .failure(.deepFocusLocked)
+        }
+        if shared.deepFocusEnabled && shared.blockMode != .timeBased {
+            return .failure(.deepFocusLocked)
+        }
+
         group.isActive = false
         group.updatedAt = Date()
-        let shared = group.toShared()
 
         shieldManager.removeShield(forGroupId: shared.id)
         scheduleManager.stopMonitoring(forGroupId: shared.id)
 
         storage.setGroupActive(shared.id, false)
+        storage.resetOpenCount(shared.id)
         syncGroupToAppGroups(group)
+        return .success(())
     }
 
     /// Re-evaluate all active groups (call from sceneDidBecomeActive). Heals from token drift
@@ -69,11 +90,20 @@ final class BlockingService {
                     shieldManager.removeShield(forGroupId: shared.id)
                 }
             case .frictionBased:
-                shieldManager.applyShield(for: shared, selection: selection)
+                if isInFrictionBypass(shared.id) {
+                    shieldManager.removeShield(forGroupId: shared.id)
+                } else {
+                    shieldManager.applyShield(for: shared, selection: selection)
+                }
             case .usageBased:
                 break
             }
         }
+    }
+
+    private func isInFrictionBypass(_ groupId: String) -> Bool {
+        guard let until = Constants.sharedDefaults?.object(forKey: "friction_bypass_until_\(groupId)") as? Date else { return false }
+        return Date() < until
     }
 
     func syncGroupToAppGroups(_ group: BlockGroup) {

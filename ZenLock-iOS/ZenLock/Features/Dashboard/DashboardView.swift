@@ -35,6 +35,14 @@ struct DashboardView: View {
             .sheet(isPresented: $viewModel.showSettings) {
                 SettingsView()
             }
+            .alert("Heads up", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { viewModel.errorMessage = nil }
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
             .onAppear { viewModel.loadGroups(context: modelContext) }
         }
     }

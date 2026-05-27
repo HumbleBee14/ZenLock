@@ -40,6 +40,7 @@ struct CreateGroupView: View {
 
     @State private var webFilterEnabled = false
     @State private var blockAdultContent = false
+    @State private var deepFocusEnabled = false
 
     var onCreated: () -> Void
 
@@ -56,6 +57,7 @@ struct CreateGroupView: View {
                         blockModeSection
                         modeConfigSection
                         webFilterSection
+                        deepFocusSection
                         createButton
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -344,10 +346,24 @@ struct CreateGroupView: View {
                     }
                 }
 
+                if frictionType == .delay {
+                    HStack {
+                        Text("\(frictionDelay)s base delay")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Spacer()
+                    }
+                    Slider(value: Binding(
+                        get: { Double(frictionDelay) },
+                        set: { frictionDelay = Int($0) }
+                    ), in: 3...60, step: 1)
+                    .tint(Color(hex: colorHex))
+                }
+
                 ZenToggle(isOn: $progressiveDelay, label: "Progressive Delay")
 
                 if progressiveDelay {
-                    Text("Delay increases each time you try to open the app")
+                    Text("Delay increases by 5s each time you tap \"Open anyway\" (capped at 2 min).")
                         .font(ZenTheme.caption)
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
@@ -362,6 +378,20 @@ struct CreateGroupView: View {
                 ZenToggle(isOn: $webFilterEnabled, label: "Block Websites")
                 if webFilterEnabled {
                     ZenToggle(isOn: $blockAdultContent, label: "Block Adult Content")
+                }
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private var deepFocusSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
+                ZenToggle(isOn: $deepFocusEnabled, label: "🔒 Deep Focus Mode")
+                if deepFocusEnabled {
+                    Text("You won't be able to disable this group while it's active. Sessions can only end when the schedule ends.")
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.textSecondary)
                 }
             }
             .padding(ZenTheme.Spacing.md)
@@ -423,6 +453,7 @@ struct CreateGroupView: View {
         group.progressiveDelay = progressiveDelay
         group.webFilterEnabled = webFilterEnabled
         group.blockAdultContent = blockAdultContent
+        group.deepFocusEnabled = deepFocusEnabled
 
         modelContext.insert(group)
         try? modelContext.save()

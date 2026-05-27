@@ -7,6 +7,8 @@ final class DashboardViewModel {
     var groups: [BlockGroup] = []
     var showCreateGroup = false
     var showSettings = false
+    var errorMessage: String?
+
     private let blockingService: BlockingService
 
     init(blockingService: BlockingService = BlockingService()) {
@@ -21,13 +23,20 @@ final class DashboardViewModel {
     func toggleGroup(_ group: BlockGroup, context: ModelContext) {
         do {
             if group.isActive {
-                blockingService.deactivateGroup(group)
+                switch blockingService.deactivateGroup(group) {
+                case .success:
+                    break
+                case .failure(let error):
+                    errorMessage = error.errorDescription
+                    return
+                }
             } else {
                 try blockingService.activateGroup(group)
             }
             try context.save()
         } catch {
             group.isActive = false
+            errorMessage = error.localizedDescription
         }
     }
 
