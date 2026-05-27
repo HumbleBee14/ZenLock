@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var showWebFilter = false
     @State private var showAccountability = false
+    @State private var showBypassPrevention = false
 
     var body: some View {
         NavigationStack {
@@ -17,6 +18,7 @@ struct SettingsView: View {
                         screenTimeSection
                         webFilterSection
                         accountabilitySection
+                        bypassPreventionSection
                         aboutSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -39,7 +41,32 @@ struct SettingsView: View {
             .sheet(isPresented: $showAccountability) {
                 AccountabilityView()
             }
+            .sheet(isPresented: $showBypassPrevention) {
+                BypassPreventionView()
+            }
         }
+    }
+
+    private var bypassPreventionSection: some View {
+        Button { showBypassPrevention = true } label: {
+            GlassCard {
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    GroupIcon(systemName: "lock.shield.fill", color: ZenTheme.primary)
+                    VStack(alignment: .leading) {
+                        Text("Make it hard to bypass")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Four layers of friction — set them all")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").foregroundStyle(ZenTheme.textSecondary)
+                }
+                .padding(ZenTheme.Spacing.md)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var accountabilitySection: some View {

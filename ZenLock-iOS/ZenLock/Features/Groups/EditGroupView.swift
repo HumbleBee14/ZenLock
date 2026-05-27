@@ -10,6 +10,7 @@ struct EditGroupView: View {
     @State private var selection: FamilyActivitySelection
     @State private var showAppPicker = false
     @State private var scheduleDays: Set<Int>
+    @State private var pendingUnlockAt: Date?
 
     init(group: BlockGroup) {
         self.group = group
@@ -156,11 +157,26 @@ struct EditGroupView: View {
     }
 
     private var deleteCard: some View {
-        ZenButton(title: "Delete Group", icon: "trash", style: .destructive) {
-            modelContext.delete(group)
-            try? modelContext.save()
-            BlockingService().removeGroupFromAppGroups(group.id.uuidString)
-            dismiss()
+        VStack(spacing: ZenTheme.Spacing.sm) {
+            if group.deepFocusEnabled && group.isActive {
+                ZenButton(title: "Request Early Unlock", icon: "person.2.fill", style: .secondary) {
+                    let unlocksAt = AccountabilityManager().requestUnlock(group: group)
+                    pendingUnlockAt = unlocksAt
+                }
+                if let pendingUnlockAt {
+                    Text("Cool-down ends \(pendingUnlockAt, style: .relative). You'll get a notification when the unlock window opens.")
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+
+            ZenButton(title: "Delete Group", icon: "trash", style: .destructive) {
+                modelContext.delete(group)
+                try? modelContext.save()
+                BlockingService().removeGroupFromAppGroups(group.id.uuidString)
+                dismiss()
+            }
         }
     }
 
