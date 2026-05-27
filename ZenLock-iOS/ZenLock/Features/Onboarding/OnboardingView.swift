@@ -186,6 +186,7 @@ struct OnboardingView: View {
 
     private func describe(_ error: Error) -> (String, Bool) {
         if let fc = error as? FamilyControlsError {
+            let code = (fc as NSError).code
             switch fc {
             case .authorizationCanceled:
                 return ("You cancelled the request. Tap Authorize and choose Continue.", false)
@@ -194,13 +195,19 @@ struct OnboardingView: View {
             case .invalidAccountType:
                 return ("Screen Time isn't available on this Apple ID. ZenLock needs a personal Apple ID with Screen Time enabled (not a managed/child account).", true)
             case .restricted:
-                return ("Screen Time is restricted on this device — usually by a parent/MDM profile. Remove the restriction in Settings → Screen Time and try again.", true)
+                return ("Screen Time is restricted on this device — usually by a parent/MDM profile. Remove it in Settings → Screen Time and try again.", true)
             case .unavailable:
                 return ("Family Controls isn't available. Make sure Screen Time is turned on in Settings → Screen Time.", true)
             case .networkError:
                 return ("Couldn't reach Apple to verify Screen Time. Check your connection and try again.", false)
+            case .invalidArgument:
+                return ("Invalid request to Screen Time. Restart the app and try again.", false)
+            case .authenticationMethodUnavailable:
+                return ("Screen Time authentication isn't available. In Settings → Screen Time, enable a passcode or biometric and try again.", true)
+            case .unauthorized:
+                return ("ZenLock isn't authorized for Screen Time. In Settings → Screen Time → Apps with Screen Time Access, allow ZenLock and try again.", true)
             @unknown default:
-                return ("Authorization failed: \(fc) (\((fc as NSError).code)). Open ZenLock's signing in Xcode and confirm the Family Controls capability is enabled.", true)
+                return ("Authorization failed (code \(code)). In Xcode → ZenLock target → Signing & Capabilities, confirm Family Controls is added.", true)
             }
         }
         let ns = error as NSError

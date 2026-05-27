@@ -68,10 +68,10 @@ struct QuickFocusSheet: View {
                         .font(ZenTheme.headline)
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
-                Slider(value: $durationMinutes, in: 5...240, step: 5)
+                Slider(value: $durationMinutes, in: 1...240, step: 1)
                     .tint(ZenTheme.primary)
                 HStack {
-                    ForEach([15, 25, 45, 60, 90], id: \.self) { preset in
+                    ForEach([5, 15, 25, 45, 60, 90], id: \.self) { preset in
                         Button("\(preset)m") {
                             withAnimation(ZenTheme.springy) { durationMinutes = Double(preset) }
                         }

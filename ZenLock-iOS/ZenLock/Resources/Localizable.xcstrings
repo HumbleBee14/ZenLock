@@ -76,6 +76,9 @@
     "Blocking Mode" : {
       "extractionState" : "manual"
     },
+    "Check what's actually stored in App Groups" : {
+
+    },
     "Cool-down" : {
 
     },
@@ -92,6 +95,9 @@
 
     },
     "Delay increases by 5s each time you tap \"Open anyway\" (capped at 2 min)." : {
+
+    },
+    "Diagnostics" : {
 
     },
     "End" : {
