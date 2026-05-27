@@ -3,12 +3,12 @@
 ## Before first submission
 
 - [ ] **Family Controls entitlement** — request via Apple Developer portal → Certificates, Identifiers & Profiles → Capability Requests. Required separately for the main app and *each* extension:
-  - `com.grepguru.zenlock`
-  - `com.grepguru.zenlock.DeviceActivityMonitor`
-  - `com.grepguru.zenlock.ShieldConfiguration`
-  - `com.grepguru.zenlock.ShieldAction`
-  - `com.grepguru.zenlock.DeviceActivityReport`
-- [ ] **App Group** `group.com.grepguru.zenlock` provisioned for all the targets above + `com.grepguru.zenlock.Widget`.
+  - `com.humblebee.zenlock`
+  - `com.humblebee.zenlock.DeviceActivityMonitor`
+  - `com.humblebee.zenlock.ShieldConfiguration`
+  - `com.humblebee.zenlock.ShieldAction`
+  - `com.humblebee.zenlock.DeviceActivityReport`
+- [ ] **App Group** `group.com.humblebee.zenlock` provisioned for all the targets above + `com.humblebee.zenlock.Widget`.
 - [ ] **Privacy policy URL** — host `PRIVACY.md` somewhere reachable (GitHub Pages is fine).
 - [ ] **App Store privacy nutrition labels**: "Data Not Collected" across the board.
 - [ ] **Screenshots** for required device sizes (6.7", 6.1", 5.5" iPhone). Need at least 3 per size — recommended: Dashboard, Block Group creation, Shield in the wild, Insights, Quick Focus.

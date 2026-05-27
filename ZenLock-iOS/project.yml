@@ -8,7 +8,7 @@
 # setting pointer and leaves the file alone.
 name: ZenLock
 options:
-  bundleIdPrefix: com.grepguru
+  bundleIdPrefix: com.humblebee
   deploymentTarget:
     iOS: "17.0"
   xcodeVersion: "26.0"
@@ -42,7 +42,7 @@ targets:
       base:
         INFOPLIST_FILE: ZenLock/Resources/Info.plist
         CODE_SIGN_ENTITLEMENTS: ZenLock/ZenLock.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: false
@@ -63,7 +63,7 @@ targets:
       base:
         INFOPLIST_FILE: DeviceActivityMonitorExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.DeviceActivityMonitor
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.DeviceActivityMonitor
         TARGETED_DEVICE_FAMILY: "1"
 
   ShieldConfigurationExtension:
@@ -76,7 +76,7 @@ targets:
       base:
         INFOPLIST_FILE: ShieldConfigurationExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: ShieldConfigurationExtension/ShieldConfigurationExtension.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.ShieldConfiguration
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.ShieldConfiguration
         TARGETED_DEVICE_FAMILY: "1"
 
   ShieldActionExtension:
@@ -89,7 +89,7 @@ targets:
       base:
         INFOPLIST_FILE: ShieldActionExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: ShieldActionExtension/ShieldActionExtension.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.ShieldAction
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.ShieldAction
         TARGETED_DEVICE_FAMILY: "1"
 
   DeviceActivityReportExtension:
@@ -102,7 +102,7 @@ targets:
       base:
         INFOPLIST_FILE: DeviceActivityReportExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: DeviceActivityReportExtension/DeviceActivityReportExtension.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.DeviceActivityReport
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.DeviceActivityReport
         TARGETED_DEVICE_FAMILY: "1"
 
   ZenLockWidget:
@@ -115,5 +115,5 @@ targets:
       base:
         INFOPLIST_FILE: ZenLockWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: ZenLockWidget/ZenLockWidget.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.Widget
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.Widget
         TARGETED_DEVICE_FAMILY: "1"

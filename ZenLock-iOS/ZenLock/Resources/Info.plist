@@ -34,7 +34,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.grepguru.zenlock</string>
+			<string>com.humblebee.zenlock</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>zenlock</string>

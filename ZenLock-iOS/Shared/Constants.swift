@@ -1,7 +1,7 @@
 import Foundation
 
 enum Constants {
-    static let appGroupID = "group.com.grepguru.zenlock"
+    static let appGroupID = "group.com.humblebee.zenlock"
     static let maxActivities = 20
     static let maxStores = 50
 

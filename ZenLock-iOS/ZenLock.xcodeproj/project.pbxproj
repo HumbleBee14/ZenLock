@@ -848,7 +848,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.Widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.Widget;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -926,7 +926,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -944,7 +944,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -961,7 +961,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.ShieldConfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldConfiguration;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -976,7 +976,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.DeviceActivityReport;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -992,7 +992,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.ShieldAction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldAction;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1008,7 +1008,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.DeviceActivityMonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityMonitor;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1023,7 +1023,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.DeviceActivityReport;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1039,7 +1039,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.ShieldAction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldAction;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1055,7 +1055,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.Widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.Widget;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1071,7 +1071,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.ShieldConfiguration;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldConfiguration;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1155,7 +1155,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.grepguru.zenlock.DeviceActivityMonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityMonitor;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
