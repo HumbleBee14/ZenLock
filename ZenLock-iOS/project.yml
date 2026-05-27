@@ -1,0 +1,119 @@
+# Run `xcodegen generate` after pulling a branch that adds or removes targets
+# (Phases 3b, 4c added DeviceActivityReportExtension and ZenLockWidget).
+#
+# IMPORTANT: We deliberately do NOT use xcodegen's `entitlements:` block on any
+# target. xcodegen's "Generating plists..." step overwrites the file contents
+# on every generate, wiping the family-controls + App Group keys. Instead we
+# set CODE_SIGN_ENTITLEMENTS in settings, which xcodegen treats as a build
+# setting pointer and leaves the file alone.
+name: ZenLock
+options:
+  bundleIdPrefix: com.humblebee
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.0"
+  groupSortPosition: top
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    # Your Apple Developer team ID. Required for Family Controls — provisioning
+    # profiles can only be issued against a real team. Find it in the Apple
+    # Developer portal → Membership, or in any signed pbxproj.
+    DEVELOPMENT_TEAM: 252N2WS4Y3
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: false
+    # Xcode "Update to recommended settings" — modern defaults
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: true
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: true
+    ENABLE_STRICT_OBJC_MSGSEND: true
+    GCC_NO_COMMON_BLOCKS: true
+    LOCALIZATION_PREFERS_STRING_CATALOGS: true
+
+targets:
+  ZenLock:
+    type: application
+    platform: iOS
+    sources:
+      - path: ZenLock
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: ZenLock/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ZenLock/ZenLock.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: false
+    dependencies:
+      - target: DeviceActivityMonitorExtension
+      - target: ShieldConfigurationExtension
+      - target: ShieldActionExtension
+      - target: DeviceActivityReportExtension
+      - target: ZenLockWidget
+
+  DeviceActivityMonitorExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: DeviceActivityMonitorExtension
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: DeviceActivityMonitorExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.DeviceActivityMonitor
+        TARGETED_DEVICE_FAMILY: "1"
+
+  ShieldConfigurationExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShieldConfigurationExtension
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: ShieldConfigurationExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShieldConfigurationExtension/ShieldConfigurationExtension.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.ShieldConfiguration
+        TARGETED_DEVICE_FAMILY: "1"
+
+  ShieldActionExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShieldActionExtension
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: ShieldActionExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShieldActionExtension/ShieldActionExtension.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.ShieldAction
+        TARGETED_DEVICE_FAMILY: "1"
+
+  DeviceActivityReportExtension:
+    type: extensionkit-extension
+    platform: iOS
+    sources:
+      - path: DeviceActivityReportExtension
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: DeviceActivityReportExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DeviceActivityReportExtension/DeviceActivityReportExtension.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.DeviceActivityReport
+        TARGETED_DEVICE_FAMILY: "1"
+
+  ZenLockWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ZenLockWidget
+      - path: Shared
+    settings:
+      base:
+        INFOPLIST_FILE: ZenLockWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ZenLockWidget/ZenLockWidget.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.Widget
+        TARGETED_DEVICE_FAMILY: "1"

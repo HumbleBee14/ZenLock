@@ -43,3 +43,7 @@ gradle/wrapper/dists/
 *.swp
 *~.nib
 *.DS_Store
+
+# Planning docs (not for commit)
+implementation_plan.md
+zenlock_ios_technical_reference.md

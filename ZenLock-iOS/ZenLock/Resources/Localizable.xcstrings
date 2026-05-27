@@ -1,0 +1,264 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    ":" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ min" : {
+
+    },
+    "%@s base delay" : {
+
+    },
+    "🔒 Deep Focus Mode" : {
+      "extractionState" : "manual"
+    },
+    "About" : {
+      "extractionState" : "manual"
+    },
+    "Accountability partner" : {
+
+    },
+    "Accountability Partner" : {
+      "extractionState" : "manual"
+    },
+    "Active On" : {
+      "extractionState" : "manual"
+    },
+    "Add friction before opening" : {
+      "extractionState" : "manual"
+    },
+    "Always-On Web Filter" : {
+      "extractionState" : "manual"
+    },
+    "Always-on web filtering" : {
+
+    },
+    "Apps" : {
+
+    },
+    "Apps to Block" : {
+      "extractionState" : "manual"
+    },
+    "Authorization Status" : {
+      "extractionState" : "manual"
+    },
+    "Authorized" : {
+      "extractionState" : "manual"
+    },
+    "Block Adult Content" : {
+      "extractionState" : "manual"
+    },
+    "Block adult content + custom domains 24/7" : {
+
+    },
+    "Block after usage limit reached" : {
+      "extractionState" : "manual"
+    },
+    "Block apps right now for a set amount of time" : {
+      "extractionState" : "manual"
+    },
+    "Block during scheduled hours" : {
+      "extractionState" : "manual"
+    },
+    "Block everything, right now." : {
+
+    },
+    "Block Groups" : {
+      "extractionState" : "manual"
+    },
+    "Block Websites" : {
+      "extractionState" : "manual"
+    },
+    "Blocking Mode" : {
+      "extractionState" : "manual"
+    },
+    "Check what's actually stored in App Groups" : {
+
+    },
+    "Cool-down" : {
+
+    },
+    "Cool-down ends %@. You'll get a notification when the unlock window opens." : {
+
+    },
+    "Create Group" : {
+      "extractionState" : "manual"
+    },
+    "Create your first group to start blocking distracting apps." : {
+      "extractionState" : "manual"
+    },
+    "Custom Domains" : {
+
+    },
+    "Delay increases by 5s each time you tap \"Open anyway\" (capped at 2 min)." : {
+
+    },
+    "Diagnostics" : {
+
+    },
+    "End" : {
+      "extractionState" : "manual"
+    },
+    "Focus" : {
+      "extractionState" : "manual"
+    },
+    "Focus Score" : {
+
+    },
+    "Focus session active" : {
+
+    },
+    "Four layers of friction" : {
+
+    },
+    "Four layers of friction — set them all" : {
+
+    },
+    "Friction" : {
+
+    },
+    "Friction Type" : {
+      "extractionState" : "manual"
+    },
+    "Friction-Based" : {
+      "extractionState" : "manual"
+    },
+    "Group Name" : {
+      "extractionState" : "manual"
+    },
+    "How long ZenLock makes you wait between requesting an unlock and the shield actually coming down." : {
+
+    },
+    "Icon & Color" : {
+      "extractionState" : "manual"
+    },
+    "Insights" : {
+      "extractionState" : "manual"
+    },
+    "Layer %@" : {
+
+    },
+    "Make it hard to bypass" : {
+      "extractionState" : "manual"
+    },
+    "minutes" : {
+
+    },
+    "Name" : {
+
+    },
+    "Name someone you trust. When you ask to unlock a group, ZenLock starts a cool-down with their name on the screen — and a sequence of notifications during the wait. You're meant to show your phone to them in that moment." : {
+
+    },
+    "No app on iOS can truly stop a determined user from bypassing a block — Apple's sandbox doesn't allow it, and apps that claim otherwise are using fragile tricks that break. What we can do is stack enough small frictions that bypassing isn't worth the effort in the moment of weakness." : {
+
+    },
+    "No block groups yet" : {
+      "extractionState" : "manual"
+    },
+    "Not Authorized" : {
+      "extractionState" : "manual"
+    },
+    "One-shot session. Apps unlock when the timer ends." : {
+
+    },
+    "over the last 7 days" : {
+
+    },
+    "Partner's name" : {
+
+    },
+    "Per Day" : {
+      "extractionState" : "manual"
+    },
+    "Per Hour" : {
+      "extractionState" : "manual"
+    },
+    "Progressive Delay" : {
+      "extractionState" : "manual"
+    },
+    "Quick Focus Session" : {
+      "extractionState" : "manual"
+    },
+    "Recent Sessions" : {
+
+    },
+    "Repeat" : {
+      "extractionState" : "manual"
+    },
+    "Schedule" : {
+      "extractionState" : "manual"
+    },
+    "Schedule crosses midnight — will be split into two windows." : {
+      "extractionState" : "manual"
+    },
+    "Screen Time" : {
+      "extractionState" : "manual"
+    },
+    "Screen Time Access" : {
+
+    },
+    "Select Apps" : {
+      "extractionState" : "manual"
+    },
+    "Settings" : {
+      "extractionState" : "manual"
+    },
+    "Slow down unlocks with a cool-down + nudges" : {
+
+    },
+    "Start" : {
+      "extractionState" : "manual"
+    },
+    "Start a focus session and it'll show up here." : {
+
+    },
+    "Stay focused. Stay present." : {
+      "extractionState" : "manual"
+    },
+    "Take control of your screen time.\nStay focused. Stay present." : {
+
+    },
+    "These filters apply 24/7, independent of your blocking groups. Use this for things you never want to see — adult content, gambling sites, specific domains." : {
+
+    },
+    "Time-Based" : {
+      "extractionState" : "manual"
+    },
+    "until apps unlock" : {
+
+    },
+    "Usage data is rendered inside Apple's sandboxed extension. ZenLock never sees the raw numbers — they stay on your device." : {
+
+    },
+    "Usage Limit" : {
+      "extractionState" : "manual"
+    },
+    "Usage-Based" : {
+      "extractionState" : "manual"
+    },
+    "Uses Apple's built-in adult content classifier in Safari and apps that respect the system filter." : {
+
+    },
+    "What to block" : {
+
+    },
+    "You won't be able to disable this group while it's active. Sessions can only end when the schedule ends." : {
+
+    },
+    "ZenLock" : {
+      "extractionState" : "manual"
+    },
+    "ZenLock is free and open source. Your data never leaves your device." : {
+
+    },
+    "ZenLock needs Screen Time permission to block apps. This data never leaves your device." : {
+
+    }
+  },
+  "version" : "1.0"
+}
