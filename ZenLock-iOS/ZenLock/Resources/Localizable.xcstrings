@@ -109,6 +109,9 @@
     "Focus Score" : {
 
     },
+    "Focus session active" : {
+
+    },
     "Four layers of friction" : {
 
     },
@@ -160,7 +163,7 @@
     "Not Authorized" : {
       "extractionState" : "manual"
     },
-    "One-shot session. No schedule. Apps unblock when the timer ends." : {
+    "One-shot session. Apps unlock when the timer ends." : {
 
     },
     "over the last 7 days" : {
@@ -225,6 +228,9 @@
     },
     "Time-Based" : {
       "extractionState" : "manual"
+    },
+    "until apps unlock" : {
+
     },
     "Usage data is rendered inside Apple's sandboxed extension. ZenLock never sees the raw numbers — they stay on your device." : {
 

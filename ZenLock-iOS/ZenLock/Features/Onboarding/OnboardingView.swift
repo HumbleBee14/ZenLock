@@ -207,7 +207,7 @@ struct OnboardingView: View {
             case .unauthorized:
                 return ("ZenLock isn't authorized for Screen Time. In Settings → Screen Time → Apps with Screen Time Access, allow ZenLock and try again.", true)
             @unknown default:
-                return ("Authorization failed (code \(code)). In Xcode → ZenLock target → Signing & Capabilities, confirm Family Controls is added.", true)
+                return ("Couldn't authorize Screen Time right now (code \(code)). Try again or restart the device.", true)
             }
         }
         let ns = error as NSError

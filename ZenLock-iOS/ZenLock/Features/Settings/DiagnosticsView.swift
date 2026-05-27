@@ -109,9 +109,8 @@ struct DiagnosticsView: View {
         case .notDetermined: return "notDetermined"
         case .denied: return "denied"
         case .approved: return "approved"
-        case .approvedWithDataAccess:
-            <#code#>
-        @unknown default: return "unknown"
+        case .approvedWithDataAccess: return "approvedWithDataAccess"
+        @unknown default: return "unknown(\(s.rawValue))"
         }
     }
 }
