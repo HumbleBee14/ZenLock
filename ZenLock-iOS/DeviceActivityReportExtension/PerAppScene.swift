@@ -224,18 +224,19 @@ struct PerAppView: View {
         let maxDuration = max(data.rows.first?.duration ?? 1, 1)
         let fraction = row.duration / maxDuration
 
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Group {
                 if let token = row.token {
                     Label(token)
                         .labelStyle(IconOnlyLabelStyle())
+                        .scaleEffect(1.6)
                 } else {
                     Image(systemName: "app.fill")
-                        .font(.system(size: 40))
+                        .font(.system(size: 44))
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 54, height: 54)
+            .frame(width: 56, height: 56)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(displayName(for: row))

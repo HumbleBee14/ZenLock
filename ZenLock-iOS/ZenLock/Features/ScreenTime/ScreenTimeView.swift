@@ -36,18 +36,18 @@ struct ScreenTimeView: View {
         .navigationTitle("Today's Screen Time")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            refresh()
+            refreshSilently()
         }
         .onChange(of: dailyGoalMinutes) { _, _ in
-            refresh()
+            forceReload()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { refresh() }
+            if phase == .active { refreshSilently() }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    refresh()
+                    forceReload()
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -56,9 +56,8 @@ struct ScreenTimeView: View {
         }
     }
 
-    private func refresh() {
+    private func refreshSilently() {
         filterEnd = Date()
-        reportID = UUID()
 
         if !hasEverRenderedData {
             showInitialLoader = true
@@ -79,6 +78,11 @@ struct ScreenTimeView: View {
                 }
             }
         }
+    }
+
+    private func forceReload() {
+        filterEnd = Date()
+        reportID = UUID()
     }
 
     private var todayFilter: DeviceActivityFilter {
