@@ -8,8 +8,8 @@ struct ScreenTimeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var filterEnd: Date = Date()
     @State private var reportID: UUID = UUID()
-    @State private var hasEverRenderedData: Bool = ScreenTimeSnapshot.load() != nil
-    @State private var showInitialLoader: Bool = ScreenTimeSnapshot.load() == nil
+    @State private var hasCachedData: Bool = ScreenTimeSnapshot.load() != nil
+    @State private var loaderVisible: Bool = ScreenTimeSnapshot.load() == nil
 
     var body: some View {
         ZStack {
@@ -21,10 +21,9 @@ struct ScreenTimeView: View {
             )
             .id(reportID)
 
-            if showInitialLoader {
+            if loaderVisible && !hasCachedData {
                 VStack(spacing: 12) {
-                    ProgressView()
-                        .tint(ZenTheme.primary)
+                    ProgressView().tint(ZenTheme.primary)
                     Text("Fetching today's usage…")
                         .font(.callout)
                         .foregroundStyle(ZenTheme.textSecondary)
@@ -36,13 +35,19 @@ struct ScreenTimeView: View {
         .navigationTitle("Today's Screen Time")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            refreshSilently()
+            checkCacheAndLoad()
         }
         .onChange(of: dailyGoalMinutes) { _, _ in
             forceReload()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { refreshSilently() }
+            if phase == .active { checkCacheAndLoad() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .screenTimeSnapshotUpdated)) { _ in
+            if ScreenTimeSnapshot.load() != nil {
+                hasCachedData = true
+                loaderVisible = false
+            }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -54,27 +59,27 @@ struct ScreenTimeView: View {
                 .tint(ZenTheme.primary)
             }
         }
+        .task {
+            DarwinNotificationBridge.shared.start()
+        }
     }
 
-    private func refreshSilently() {
-        filterEnd = Date()
+    private func checkCacheAndLoad() {
+        if ScreenTimeSnapshot.load() != nil {
+            hasCachedData = true
+            loaderVisible = false
+        } else {
+            loaderVisible = true
+        }
 
-        if !hasEverRenderedData {
-            showInitialLoader = true
+        if !hasCachedData {
             Task {
-                try? await Task.sleep(nanoseconds: 2_500_000_000)
-                if ScreenTimeSnapshot.load() == nil {
-                    await MainActor.run {
-                        filterEnd = Date()
-                        reportID = UUID()
-                    }
-                    try? await Task.sleep(nanoseconds: 2_500_000_000)
-                }
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
                 await MainActor.run {
                     if ScreenTimeSnapshot.load() != nil {
-                        hasEverRenderedData = true
+                        hasCachedData = true
                     }
-                    showInitialLoader = false
+                    loaderVisible = false
                 }
             }
         }
@@ -89,6 +94,30 @@ struct ScreenTimeView: View {
         let start = Calendar.current.startOfDay(for: Date())
         return DeviceActivityFilter(
             segment: .daily(during: DateInterval(start: start, end: filterEnd))
+        )
+    }
+}
+
+extension Notification.Name {
+    static let screenTimeSnapshotUpdated = Notification.Name("zen.screenTimeSnapshotUpdated")
+}
+
+final class DarwinNotificationBridge: @unchecked Sendable {
+    static let shared = DarwinNotificationBridge()
+    private var started = false
+
+    func start() {
+        guard !started else { return }
+        started = true
+        let name = "com.humblebee.zenlock.snapshot.updated" as CFString
+        let center = CFNotificationCenterGetDarwinNotifyCenter()
+        let observer = Unmanaged.passUnretained(self).toOpaque()
+        CFNotificationCenterAddObserver(
+            center, observer,
+            { _, _, _, _, _ in
+                NotificationCenter.default.post(name: .screenTimeSnapshotUpdated, object: nil)
+            },
+            name, nil, .deliverImmediately
         )
     }
 }

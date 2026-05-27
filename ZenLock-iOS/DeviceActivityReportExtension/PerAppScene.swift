@@ -2,6 +2,9 @@ import DeviceActivity
 import FamilyControls
 import ManagedSettings
 import SwiftUI
+import os.log
+
+private let extLog = Logger(subsystem: "com.humblebee.zenlock", category: "PerAppScene")
 
 struct PerAppScene: @preconcurrency DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .init("perApp")
@@ -12,6 +15,7 @@ struct PerAppScene: @preconcurrency DeviceActivityReportScene {
     }
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> PerAppData {
+        extLog.notice("makeConfiguration START")
         var totalDuration: TimeInterval = 0
         var perApp: [String: (token: ApplicationToken?, name: String, duration: TimeInterval)] = [:]
 
@@ -55,6 +59,8 @@ struct PerAppScene: @preconcurrency DeviceActivityReportScene {
             capturedAt: Date()
         )
         ScreenTimeSnapshot.save(snapshot)
+        let verifyLoad = ScreenTimeSnapshot.load()
+        extLog.notice("makeConfiguration SAVED — total=\(totalDuration, format: .fixed(precision: 0))s rows=\(rows.count) loadVerify=\(verifyLoad != nil)")
 
         let defaults = UserDefaults(suiteName: "group.com.humblebee.zenlock")
         defaults?.synchronize()
