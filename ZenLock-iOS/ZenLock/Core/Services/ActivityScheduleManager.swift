@@ -70,16 +70,29 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
     private func startUsageBasedMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
         guard let limitMinutes = group.usageLimitMinutes else { return }
 
-        let schedule = DeviceActivitySchedule(
-            intervalStart: DateComponents(hour: 0, minute: 0),
-            intervalEnd: DateComponents(hour: 23, minute: 59),
-            repeats: true
-        )
+        // Hourly resets the threshold counter every hour; daily uses one full-day schedule.
+        // Both cost exactly one of the 20 activity slots.
+        let schedule: DeviceActivitySchedule
+        switch group.usagePeriod ?? .daily {
+        case .hourly:
+            schedule = DeviceActivitySchedule(
+                intervalStart: DateComponents(minute: 0),
+                intervalEnd: DateComponents(minute: 59),
+                repeats: true
+            )
+        case .daily:
+            schedule = DeviceActivitySchedule(
+                intervalStart: DateComponents(hour: 0, minute: 0),
+                intervalEnd: DateComponents(hour: 23, minute: 59),
+                repeats: true
+            )
+        }
 
         let usageEvent = DeviceActivityEvent(
             applications: selection.applicationTokens,
             categories: selection.categoryTokens,
-            threshold: DateComponents(minute: limitMinutes)
+            threshold: DateComponents(minute: limitMinutes),
+            includesPastActivity: false
         )
 
         try center.startMonitoring(

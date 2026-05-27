@@ -9,6 +9,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
+        let groupId = extractGroupId(from: activity)
+        defaults?.set(Date(), forKey: "schedule_start_\(groupId)")
         evaluateBlockState(for: activity, reason: .intervalStart)
     }
 
