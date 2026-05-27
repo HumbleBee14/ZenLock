@@ -8,7 +8,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if hasCompletedOnboarding && screenTimeManager.isAuthorized {
-                DashboardView()
+                MainTabs()
             } else {
                 OnboardingView {
                     withAnimation(ZenTheme.smooth) {
@@ -18,5 +18,18 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+private struct MainTabs: View {
+    var body: some View {
+        TabView {
+            DashboardView()
+                .tabItem { Label("Focus", systemImage: "shield.lefthalf.filled") }
+
+            NavigationStack { AnalyticsView() }
+                .tabItem { Label("Insights", systemImage: "chart.bar.fill") }
+        }
+        .tint(ZenTheme.primary)
     }
 }
