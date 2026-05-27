@@ -10,5 +10,16 @@
 	<string>1</string>
 	<key>NSFamilyControlsUsageDescription</key>
 	<string>ZenLock needs Screen Time access to block distracting apps and help you stay focused.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.grepguru.zenlock</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>zenlock</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

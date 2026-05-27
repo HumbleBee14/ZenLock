@@ -3,6 +3,7 @@ import SwiftData
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(DeepLinkRouter.self) private var router
     @State private var viewModel = DashboardViewModel()
     @State private var showQuickFocus = false
 
@@ -48,7 +49,13 @@ struct DashboardView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
-            .onAppear { viewModel.loadGroups(context: modelContext) }
+            .onAppear {
+                viewModel.loadGroups(context: modelContext)
+                if router.consume() == .quickFocus { showQuickFocus = true }
+            }
+            .onChange(of: router.pending) { _, _ in
+                if router.consume() == .quickFocus { showQuickFocus = true }
+            }
         }
     }
 

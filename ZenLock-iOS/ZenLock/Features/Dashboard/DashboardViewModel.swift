@@ -18,6 +18,13 @@ final class DashboardViewModel {
     func loadGroups(context: ModelContext) {
         let descriptor = FetchDescriptor<BlockGroup>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
         groups = (try? context.fetch(descriptor)) ?? []
+        updateWidgetSnapshot(context: context)
+    }
+
+    private func updateWidgetSnapshot(context: ModelContext) {
+        let sessions = (try? context.fetch(FetchDescriptor<FocusSession>())) ?? []
+        let summary = StreakCalculator.summary(from: sessions)
+        Constants.sharedDefaults?.set(summary.focusScore, forKey: "zen_widget_focus_score")
     }
 
     func toggleGroup(_ group: BlockGroup, context: ModelContext) {

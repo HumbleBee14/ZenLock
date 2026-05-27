@@ -7,12 +7,15 @@ struct ZenLockApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var blockingService = BlockingService()
+    @State private var router = DeepLinkRouter()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(screenTimeManager)
                 .environment(blockingService)
+                .environment(router)
+                .onOpenURL { url in router.handle(url) }
         }
         .modelContainer(for: [BlockGroup.self, FocusSession.self])
         .onChange(of: scenePhase) { _, phase in

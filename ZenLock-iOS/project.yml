@@ -35,6 +35,7 @@ targets:
       - target: ShieldConfigurationExtension
       - target: ShieldActionExtension
       - target: DeviceActivityReportExtension
+      - target: ZenLockWidget
 
   DeviceActivityMonitorExtension:
     type: app-extension
@@ -90,4 +91,18 @@ targets:
       base:
         INFOPLIST_FILE: DeviceActivityReportExtension/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.DeviceActivityReport
+        TARGETED_DEVICE_FAMILY: "1"
+
+  ZenLockWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ZenLockWidget
+      - path: Shared
+    entitlements:
+      path: ZenLockWidget/ZenLockWidget.entitlements
+    settings:
+      base:
+        INFOPLIST_FILE: ZenLockWidget/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.Widget
         TARGETED_DEVICE_FAMILY: "1"
