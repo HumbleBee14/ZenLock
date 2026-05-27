@@ -4,6 +4,7 @@ import FamilyControls
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var screenTimeManager = ScreenTimeManager()
+    @State private var showWebFilter = false
 
     var body: some View {
         NavigationStack {
@@ -13,6 +14,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         screenTimeSection
+                        webFilterSection
                         aboutSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -29,7 +31,33 @@ struct SettingsView: View {
                 }
             }
             .onAppear { screenTimeManager.refreshStatus() }
+            .sheet(isPresented: $showWebFilter) {
+                WebFilterView()
+            }
         }
+    }
+
+    private var webFilterSection: some View {
+        Button { showWebFilter = true } label: {
+            GlassCard {
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    GroupIcon(systemName: "globe", color: ZenTheme.accent)
+                    VStack(alignment: .leading) {
+                        Text("Always-On Web Filter")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Block adult content + custom domains 24/7")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(ZenTheme.textSecondary)
+                }
+                .padding(ZenTheme.Spacing.md)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var screenTimeSection: some View {
