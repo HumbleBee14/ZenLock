@@ -213,9 +213,9 @@ private struct GroupRow: View {
                     Text(group.name)
                         .font(ZenTheme.headline)
                         .foregroundStyle(ZenTheme.text)
-                    Text(group.blockMode.displayName)
+                    Text(statusLine)
                         .font(ZenTheme.caption)
-                        .foregroundStyle(ZenTheme.textSecondary)
+                        .foregroundStyle(statusColor)
                 }
 
                 Spacer()
@@ -235,6 +235,32 @@ private struct GroupRow: View {
             Button(role: .destructive) { onDelete() } label: {
                 Label("Delete", systemImage: "trash")
             }
+        }
+    }
+
+    private var statusLine: String {
+        if !group.isActive { return group.blockMode.displayName }
+        switch group.blockMode {
+        case .timeBased:
+            return ScheduleEvaluator.isWithinSchedule(group.toShared())
+                ? "Blocking now · time-based"
+                : "Armed · waiting for window"
+        case .usageBased:
+            return "Armed · blocks at usage limit"
+        case .frictionBased:
+            return "Friction active"
+        }
+    }
+
+    private var statusColor: Color {
+        guard group.isActive else { return ZenTheme.textSecondary }
+        switch group.blockMode {
+        case .timeBased:
+            return ScheduleEvaluator.isWithinSchedule(group.toShared())
+                ? ZenTheme.success
+                : ZenTheme.warning
+        case .usageBased, .frictionBased:
+            return ZenTheme.success
         }
     }
 }

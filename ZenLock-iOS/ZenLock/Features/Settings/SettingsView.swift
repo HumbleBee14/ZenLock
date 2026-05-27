@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var showWebFilter = false
     @State private var showAccountability = false
     @State private var showBypassPrevention = false
+    @State private var showDiagnostics = false
 
     var body: some View {
         NavigationStack {
@@ -19,6 +20,7 @@ struct SettingsView: View {
                         webFilterSection
                         accountabilitySection
                         bypassPreventionSection
+                        diagnosticsSection
                         aboutSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -44,7 +46,32 @@ struct SettingsView: View {
             .sheet(isPresented: $showBypassPrevention) {
                 BypassPreventionView()
             }
+            .sheet(isPresented: $showDiagnostics) {
+                DiagnosticsView()
+            }
         }
+    }
+
+    private var diagnosticsSection: some View {
+        Button { showDiagnostics = true } label: {
+            GlassCard {
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    GroupIcon(systemName: "stethoscope", color: ZenTheme.warning)
+                    VStack(alignment: .leading) {
+                        Text("Diagnostics")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Check what's actually stored in App Groups")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").foregroundStyle(ZenTheme.textSecondary)
+                }
+                .padding(ZenTheme.Spacing.md)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var bypassPreventionSection: some View {

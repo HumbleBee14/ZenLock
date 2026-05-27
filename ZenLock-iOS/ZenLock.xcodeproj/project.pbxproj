@@ -67,6 +67,7 @@
 		CF9EB13C5ADAC1C8971018C6 /* DeviceActivityReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDE7A7685CA05E37ED69E04 /* DeviceActivityReportExtension.swift */; };
 		D1E55C8BB0EB3BF2258D614C /* ZenLockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */; };
 		D1E94CC9F66A7A61ADD47540 /* HapticFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0A14BBA091DED00CDE852E /* HapticFeedback.swift */; };
+		D79F327783C837E5112087B1 /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */; };
 		D9CAF2CCC16180AD76DA4EE6 /* ShieldManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCA29EFA5294A266FC7CF1C /* ShieldManager.swift */; };
 		DBE9872807CC3F80630AA855 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */; };
 		DBF15FF229EC00240FBD6765 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4469DD617CAFA30F379C050F /* Theme.swift */; };
@@ -193,6 +194,7 @@
 		A7965C0110E68B05051C4E93 /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		A8279A2418C396D8D6161793 /* AppGroupStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStorage.swift; sourceTree = "<group>"; };
 		AAEF71C75BB1D4CDC11DC34D /* ZenLockWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockWidget.swift; sourceTree = "<group>"; };
+		ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
 		B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEvaluator.swift; sourceTree = "<group>"; };
 		BB020DD6D16C2F15BACFAAEA /* ShieldActionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShieldActionExtension.entitlements; sourceTree = "<group>"; };
 		BBDE7A7685CA05E37ED69E04 /* DeviceActivityReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityReportExtension.swift; sourceTree = "<group>"; };
@@ -489,6 +491,7 @@
 		C334D175B578CA164B622C98 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */,
 				BE57ADA74309FD2D82535765 /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -725,6 +728,7 @@
 				866E04FC274093C2A064BA28 /* DashboardView.swift in Sources */,
 				655D44B3BB231D6B5D396F6C /* DashboardViewModel.swift in Sources */,
 				8404A267995A2DB81812FA41 /* DeepLinkRouter.swift in Sources */,
+				D79F327783C837E5112087B1 /* DiagnosticsView.swift in Sources */,
 				86CE014E951007F692B2BEDA /* EditGroupView.swift in Sources */,
 				B7B3793AB695B82E70E5ABC9 /* EntitlementManager.swift in Sources */,
 				B15100BABD61322A8B13F4D2 /* FocusSession.swift in Sources */,
