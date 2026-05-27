@@ -6,21 +6,21 @@ import UserNotifications
 
 class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
-    private let defaults = UserDefaults(suiteName: "group.com.grepguru.zenlock")
+    private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
-        evaluateBlockState(for: activity)
+        evaluateBlockState(for: activity, reason: .intervalStart)
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        evaluateBlockState(for: activity)
+        evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 
     override func eventDidReachThreshold(
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
-        evaluateBlockState(for: activity, thresholdReached: true)
+        evaluateBlockState(for: activity, reason: .thresholdReached)
     }
 
     override func eventWillReachThresholdWarning(
@@ -28,7 +28,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         activity: DeviceActivityName
     ) {
         let groupId = extractGroupId(from: activity)
-        let groupName = loadGroupName(for: groupId)
+        let groupName = loadGroup(groupId)?.name ?? "ZenLock"
 
         let content = UNMutableNotificationContent()
         content.title = "⏳ Almost at your limit"
@@ -43,32 +43,48 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         UNUserNotificationCenter.current().add(request)
     }
 
-    private func evaluateBlockState(
-        for activity: DeviceActivityName,
-        thresholdReached: Bool = false
-    ) {
-        let groupId = extractGroupId(from: activity)
+    // MARK: - Single-path evaluation
 
-        if thresholdReached, isPrematureThreshold(for: groupId) {
+    private enum EvalReason {
+        case intervalStart, intervalEnd, thresholdReached
+    }
+
+    private func evaluateBlockState(for activity: DeviceActivityName, reason: EvalReason) {
+        let groupId = extractGroupId(from: activity)
+        let storeName = ManagedSettingsStore.Name(activity.rawValue)
+
+        if reason == .thresholdReached, isPrematureThreshold(for: groupId) {
             return
         }
 
-        let isActive = defaults?.bool(forKey: "zen_active_\(groupId)") ?? false
+        guard let group = loadGroup(groupId), group.isActive else {
+            ManagedSettingsStore(named: storeName).clearAllSettings()
+            return
+        }
 
-        let storeName = ManagedSettingsStore.Name(activity.rawValue)
-        if isActive {
-            applyShield(storeName: storeName, groupId: groupId)
+        let shouldBlock: Bool
+        switch group.blockMode {
+        case .timeBased:
+            shouldBlock = (reason != .intervalEnd) && ScheduleEvaluator.isWithinSchedule(group)
+        case .usageBased:
+            shouldBlock = reason == .thresholdReached
+        case .frictionBased:
+            shouldBlock = true
+        }
+
+        if shouldBlock {
+            applyShield(storeName: storeName, group: group)
         } else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
         }
     }
 
-    private func applyShield(storeName: ManagedSettingsStore.Name, groupId: String) {
+    private func applyShield(storeName: ManagedSettingsStore.Name, group: SharedBlockGroup) {
         var store = ManagedSettingsStore(named: storeName)
         store.clearAllSettings()
         store = ManagedSettingsStore(named: storeName)
 
-        guard let selectionData = defaults?.data(forKey: "zen_selection_\(groupId)"),
+        guard let selectionData = defaults?.data(forKey: Constants.Keys.selectionPrefix + group.id),
               let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: selectionData) else {
             return
         }
@@ -78,6 +94,12 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         }
         if !selection.categoryTokens.isEmpty {
             store.shield.applicationCategories = .specific(selection.categoryTokens)
+        }
+        if group.webFilterEnabled, !selection.webDomainTokens.isEmpty {
+            store.shield.webDomains = selection.webDomainTokens
+        }
+        if group.blockAdultContent {
+            store.webContent.blockedByFilter = .auto()
         }
     }
 
@@ -96,11 +118,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         return raw
     }
 
-    private func loadGroupName(for groupId: String) -> String {
-        guard let data = defaults?.data(forKey: "zen_block_groups"),
+    private func loadGroup(_ groupId: String) -> SharedBlockGroup? {
+        guard let data = defaults?.data(forKey: Constants.Keys.blockGroups),
               let groups = try? JSONDecoder().decode([SharedBlockGroup].self, from: data) else {
-            return "ZenLock"
+            return nil
         }
-        return groups.first(where: { $0.id == groupId })?.name ?? "ZenLock"
+        return groups.first(where: { $0.id == groupId })
     }
 }

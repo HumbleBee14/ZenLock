@@ -29,6 +29,7 @@ struct CreateGroupView: View {
     @State private var scheduleEndHour = 6
     @State private var scheduleEndMinute = 0
     @State private var scheduleRepeats = true
+    @State private var scheduleDays: Set<Int> = Set(1...7)  // 1=Sun ... 7=Sat
 
     @State private var usageLimitMinutes = 60
     @State private var usagePeriod: UsagePeriod = .daily
@@ -242,9 +243,51 @@ struct CreateGroupView: View {
                     }
                 }
 
-                ZenToggle(isOn: $scheduleRepeats, label: "Repeat Daily")
+                ZenToggle(isOn: $scheduleRepeats, label: "Repeat")
+
+                if scheduleRepeats {
+                    Text("Active On")
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.textSecondary)
+                    daySelector
+                }
+
+                if crossesMidnight {
+                    Label("Schedule crosses midnight — will be split into two windows.", systemImage: "moon.stars")
+                        .font(ZenTheme.caption2)
+                        .foregroundStyle(ZenTheme.textSecondary)
+                }
             }
             .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private var crossesMidnight: Bool {
+        let s = scheduleStartHour * 60 + scheduleStartMinute
+        let e = scheduleEndHour * 60 + scheduleEndMinute
+        return s > e
+    }
+
+    private static let dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
+
+    private var daySelector: some View {
+        HStack(spacing: 6) {
+            ForEach(1...7, id: \.self) { day in
+                let selected = scheduleDays.contains(day)
+                Button {
+                    withAnimation(ZenTheme.springy) {
+                        if selected { scheduleDays.remove(day) } else { scheduleDays.insert(day) }
+                    }
+                } label: {
+                    Text(Self.dayLabels[day - 1])
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(selected ? .white : ZenTheme.textSecondary)
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle().fill(selected ? Color(hex: colorHex) : ZenTheme.surfaceLight.opacity(0.4))
+                        )
+                }
+            }
         }
     }
 
@@ -372,6 +415,7 @@ struct CreateGroupView: View {
         group.scheduleEndHour = scheduleEndHour
         group.scheduleEndMinute = scheduleEndMinute
         group.scheduleRepeats = scheduleRepeats
+        group.scheduleDaysOfWeek = scheduleRepeats ? Array(scheduleDays).sorted() : nil
         group.usageLimitMinutes = usageLimitMinutes
         group.usagePeriod = usagePeriod
         group.frictionType = frictionType

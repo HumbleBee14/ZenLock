@@ -26,9 +26,16 @@ final class BlockingService {
 
         guard let selection = group.decodedSelection else { return }
 
-        shieldManager.applyShield(for: shared, selection: selection)
-
-        if shared.blockMode == .timeBased || shared.blockMode == .usageBased {
+        switch shared.blockMode {
+        case .timeBased:
+            try scheduleManager.startMonitoring(for: shared, selection: selection)
+            if ScheduleEvaluator.isWithinSchedule(shared) {
+                shieldManager.applyShield(for: shared, selection: selection)
+            }
+        case .usageBased:
+            try scheduleManager.startMonitoring(for: shared, selection: selection)
+        case .frictionBased:
+            shieldManager.applyShield(for: shared, selection: selection)
             try scheduleManager.startMonitoring(for: shared, selection: selection)
         }
     }
@@ -43,6 +50,30 @@ final class BlockingService {
 
         storage.setGroupActive(shared.id, false)
         syncGroupToAppGroups(group)
+    }
+
+    /// Re-evaluate all active groups (call from sceneDidBecomeActive). Heals from token drift
+    /// and any extension callbacks that may have been missed under system load.
+    func evaluateActiveGroups(_ groups: [BlockGroup]) {
+        for group in groups where group.isActive {
+            guard let selection = group.decodedSelection else {
+                continue
+            }
+            let shared = group.toShared()
+
+            switch shared.blockMode {
+            case .timeBased:
+                if ScheduleEvaluator.isWithinSchedule(shared) {
+                    shieldManager.applyShield(for: shared, selection: selection)
+                } else {
+                    shieldManager.removeShield(forGroupId: shared.id)
+                }
+            case .frictionBased:
+                shieldManager.applyShield(for: shared, selection: selection)
+            case .usageBased:
+                break
+            }
+        }
     }
 
     func syncGroupToAppGroups(_ group: BlockGroup) {
