@@ -4,6 +4,7 @@ import SwiftData
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = DashboardViewModel()
+    @State private var showQuickFocus = false
 
     var body: some View {
         NavigationStack {
@@ -14,6 +15,7 @@ struct DashboardView: View {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         headerSection
                         statsSection
+                        quickFocusButton
                         groupsSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -34,6 +36,9 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $viewModel.showSettings) {
                 SettingsView()
+            }
+            .sheet(isPresented: $showQuickFocus) {
+                QuickFocusSheet()
             }
             .alert("Heads up", isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
@@ -76,6 +81,33 @@ struct DashboardView: View {
         }
     }
 
+    private var quickFocusButton: some View {
+        Button { showQuickFocus = true } label: {
+            GlassCard {
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    Image(systemName: "timer")
+                        .font(.title2)
+                        .foregroundStyle(ZenTheme.accent)
+                        .frame(width: 44, height: 44)
+                        .background(Circle().fill(ZenTheme.accent.opacity(0.15)))
+                    VStack(alignment: .leading) {
+                        Text("Quick Focus Session")
+                            .font(ZenTheme.headline)
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Block apps right now for a set amount of time")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(ZenTheme.textSecondary)
+                }
+                .padding(ZenTheme.Spacing.md)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
     private var groupsSection: some View {
         VStack(spacing: ZenTheme.Spacing.md) {
             HStack {
@@ -94,11 +126,16 @@ struct DashboardView: View {
                 emptyState
             } else {
                 ForEach(viewModel.groups) { group in
-                    GroupRow(
-                        group: group,
-                        onToggle: { viewModel.toggleGroup(group, context: modelContext) },
-                        onDelete: { viewModel.deleteGroup(group, context: modelContext) }
-                    )
+                    NavigationLink {
+                        EditGroupView(group: group)
+                    } label: {
+                        GroupRow(
+                            group: group,
+                            onToggle: { viewModel.toggleGroup(group, context: modelContext) },
+                            onDelete: { viewModel.deleteGroup(group, context: modelContext) }
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
