@@ -11,14 +11,17 @@ options:
   bundleIdPrefix: com.grepguru
   deploymentTarget:
     iOS: "17.0"
-  xcodeVersion: "16.0"
+  xcodeVersion: "26.0"
   groupSortPosition: top
   generateEmptyDirectories: true
 
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    DEVELOPMENT_TEAM: ""
+    # Your Apple Developer team ID. Required for Family Controls — provisioning
+    # profiles can only be issued against a real team. Find it in the Apple
+    # Developer portal → Membership, or in any signed pbxproj.
+    DEVELOPMENT_TEAM: 252N2WS4Y3
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: false
     # Xcode "Update to recommended settings" — modern defaults
