@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var showWebFilter = false
+    @State private var showAccountability = false
 
     var body: some View {
         NavigationStack {
@@ -15,6 +16,7 @@ struct SettingsView: View {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         screenTimeSection
                         webFilterSection
+                        accountabilitySection
                         aboutSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -34,7 +36,32 @@ struct SettingsView: View {
             .sheet(isPresented: $showWebFilter) {
                 WebFilterView()
             }
+            .sheet(isPresented: $showAccountability) {
+                AccountabilityView()
+            }
         }
+    }
+
+    private var accountabilitySection: some View {
+        Button { showAccountability = true } label: {
+            GlassCard {
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    GroupIcon(systemName: "person.2.fill", color: ZenTheme.warning)
+                    VStack(alignment: .leading) {
+                        Text("Accountability Partner")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Slow down unlocks with a cool-down + nudges")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").foregroundStyle(ZenTheme.textSecondary)
+                }
+                .padding(ZenTheme.Spacing.md)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var webFilterSection: some View {
