@@ -46,7 +46,6 @@ class ShieldActionExtension: ShieldActionDelegate {
 
         case .secondaryButtonPressed:
             if let group, group.deepFocusEnabled {
-                // Deep Focus: secondary path is disabled by config, but defend in depth.
                 completionHandler(.close)
                 return
             }
@@ -91,8 +90,7 @@ class ShieldActionExtension: ShieldActionDelegate {
         defaults?.set(count, forKey: key)
     }
 
-    /// Briefly lifts the shield so the user can use the app after their friction interaction.
-    /// The DeviceActivityMonitor re-applies when the bypass expires (next interval tick or app foreground).
+    /// Temporarily lift shield; re-applied on next monitor tick or foreground.
     private func grantFrictionBypass(for groupId: String, seconds: Int) {
         let expiry = Date().addingTimeInterval(TimeInterval(seconds))
         defaults?.set(expiry, forKey: "friction_bypass_until_\(groupId)")

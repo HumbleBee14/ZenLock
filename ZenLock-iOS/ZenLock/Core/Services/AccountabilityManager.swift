@@ -6,11 +6,7 @@ struct AccountabilityPartner: Codable, Equatable {
     var coolDownMinutes: Int
 }
 
-/// Single-device accountability: there is no real second user, but the UX
-/// patterns from Opal/Brick still work — name a partner, make unlocks slow
-/// and visible, schedule local notifications during the cool-down so the
-/// user has to stop and reconsider. The partner's role is to be a person
-/// the user feels accountable to; we just enforce friction.
+/// Single-device accountability using partner-based friction to encourage mindful unlocks.
 final class AccountabilityManager {
     static let partnerKey = "zen_accountability_partner"
     static let pendingUnlockKey = "zen_pending_unlock"
@@ -53,8 +49,7 @@ final class AccountabilityManager {
         return try? JSONDecoder().decode(PendingUnlock.self, from: data)
     }
 
-    /// Begin an unlock cool-down. Schedules a sequence of nudges and a final notification
-    /// when the unlock window opens. Returns the unlock-at date.
+    /// Request unlock with cool-down nudges. Returns unlock-at date.
     @discardableResult
     func requestUnlock(group: BlockGroup) -> Date {
         let partner = self.partner

@@ -2,9 +2,7 @@ import Foundation
 
 enum ScheduleEvaluator {
 
-    /// Returns true if `date` falls inside the group's schedule window AND the day-of-week filter,
-    /// taking cross-midnight wrap into account.
-    /// For non-time-based modes, returns true unconditionally (the mode owns its own gating).
+    /// Check if date is within group's schedule, accounting for day-of-week and cross-midnight wraps.
     static func isWithinSchedule(_ group: SharedBlockGroup, at date: Date = Date(), calendar: Calendar = .current) -> Bool {
         guard group.blockMode == .timeBased else { return true }
 
@@ -20,8 +18,6 @@ enum ScheduleEvaluator {
 
         if let allowedDays = group.scheduleDaysOfWeek, !allowedDays.isEmpty {
             if let weekday = comps.weekday, !allowedDays.contains(weekday) {
-                // For cross-midnight schedules, the "tail" portion belongs to the previous day's session.
-                // Allow it if yesterday's weekday is permitted and we're inside the post-midnight tail.
                 let crossesMidnight = startHour > endHour || (startHour == endHour && startMin > endMin)
                 if crossesMidnight && isInPostMidnightTail(hour: hour, minute: minute, endHour: endHour, endMin: endMin) {
                     let prevWeekday = ((weekday - 2 + 7) % 7) + 1

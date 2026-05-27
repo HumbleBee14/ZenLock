@@ -8,8 +8,7 @@ final class SessionRecorder {
         self.context = context
     }
 
-    /// Begin a new session record. Returns the inserted session so callers can persist its id
-    /// alongside the group (e.g. so deactivation can find and finalize it).
+    /// Create and return a new session record.
     @discardableResult
     func begin(group: BlockGroup, targetDuration: TimeInterval) -> FocusSession {
         let session = FocusSession(
@@ -23,7 +22,7 @@ final class SessionRecorder {
         return session
     }
 
-    /// Finalize the most recent open session for the given group.
+    /// End the open session for a group.
     func end(group: BlockGroup, completed: Bool) {
         let groupId = group.id
         var descriptor = FetchDescriptor<FocusSession>(

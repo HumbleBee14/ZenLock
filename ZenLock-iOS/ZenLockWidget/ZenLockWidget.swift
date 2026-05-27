@@ -31,7 +31,7 @@ struct StatusEntry: TimelineEntry {
 }
 
 struct StatusProvider: TimelineProvider {
-    private let appGroupID = "group.com.grepguru.zenlock"
+    private let appGroupID = "group.com.humblebee.zenlock"
 
     func placeholder(in context: Context) -> StatusEntry {
         StatusEntry(date: .now, activeCount: 2, totalCount: 4, focusScore: 78, nextGroupName: "Evening Wind-down")
@@ -43,7 +43,6 @@ struct StatusProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<StatusEntry>) -> Void) {
         let entry = currentEntry()
-        // Refresh every 30 min — system may coalesce this.
         let next = Date().addingTimeInterval(30 * 60)
         completion(Timeline(entries: [entry], policy: .after(next)))
     }

@@ -29,7 +29,7 @@ struct CreateGroupView: View {
     @State private var scheduleEndHour = 6
     @State private var scheduleEndMinute = 0
     @State private var scheduleRepeats = true
-    @State private var scheduleDays: Set<Int> = Set(1...7)  // 1=Sun ... 7=Sat
+    @State private var scheduleDays: Set<Int> = Set(1...7)
 
     @State private var usageLimitMinutes = 60
     @State private var usagePeriod: UsagePeriod = .daily

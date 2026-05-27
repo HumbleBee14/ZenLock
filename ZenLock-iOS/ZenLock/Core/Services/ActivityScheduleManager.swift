@@ -70,8 +70,6 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
     private func startUsageBasedMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
         guard let limitMinutes = group.usageLimitMinutes else { return }
 
-        // Hourly resets the threshold counter every hour; daily uses one full-day schedule.
-        // Both cost exactly one of the 20 activity slots.
         let schedule: DeviceActivitySchedule
         switch group.usagePeriod ?? .daily {
         case .hourly:

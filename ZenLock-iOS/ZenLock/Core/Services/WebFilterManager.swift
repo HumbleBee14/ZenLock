@@ -2,9 +2,7 @@ import Foundation
 import ManagedSettings
 import FamilyControls
 
-/// Manages a single global web-content filter that's independent of any BlockGroup.
-/// Useful for "always block adult content" / "always block these custom domains"
-/// behavior the user wants on regardless of which focus session is active.
+/// Global web filter independent of BlockGroups (always-on adult/domain blocking).
 final class WebFilterManager {
     static var globalStoreName: ManagedSettingsStore.Name { .init("zen_global_web") }
     static let selectionKey = "zen_global_web_selection"

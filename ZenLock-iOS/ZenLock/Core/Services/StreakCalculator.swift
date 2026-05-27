@@ -4,13 +4,12 @@ enum StreakCalculator {
     struct Summary {
         let currentStreak: Int
         let bestStreak: Int
-        let focusScore: Int          // 0-100, last 7 days
-        let totalFocusMinutes: Int   // last 7 days
-        let completedSessions: Int   // last 7 days
+        let focusScore: Int
+        let totalFocusMinutes: Int
+        let completedSessions: Int
     }
 
-    /// Computes a streak/score summary from a list of sessions. A "focus day" is any day with
-    /// at least one completed session (or any session ≥ 15 minutes).
+    /// Compute streak, best streak, and focus score from sessions. Focus day = completed or ≥15 min.
     static func summary(from sessions: [FocusSession], calendar: Calendar = .current, today: Date = Date()) -> Summary {
         let focusDays = Set(sessions
             .filter { $0.wasCompleted || $0.actualDuration >= 15 * 60 }
@@ -24,7 +23,6 @@ enum StreakCalculator {
             cursor = prev
         }
 
-        // best streak: walk all focus days sorted, count consecutive runs
         let sorted = focusDays.sorted()
         var best = 0
         var run = 0
@@ -47,7 +45,6 @@ enum StreakCalculator {
         let attempted = lastWeek.count
 
         let completionRate = attempted > 0 ? Double(completed) / Double(attempted) : 0
-        // 70% weight on completion, 30% on raw minutes (capped at 600 = 10h/week target)
         let minuteScore = min(1.0, Double(totalMinutes) / 600.0)
         let score = Int(((completionRate * 0.7) + (minuteScore * 0.3)) * 100)
 

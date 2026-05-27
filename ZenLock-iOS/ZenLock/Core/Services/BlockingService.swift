@@ -73,8 +73,7 @@ final class BlockingService {
         return .success(())
     }
 
-    /// Re-evaluate all active groups (call from sceneDidBecomeActive). Heals from token drift
-    /// and any extension callbacks that may have been missed under system load.
+    /// Re-evaluate active groups and sync shield state on app foreground.
     func evaluateActiveGroups(_ groups: [BlockGroup]) {
         for group in groups where group.isActive {
             guard let selection = group.decodedSelection else {
