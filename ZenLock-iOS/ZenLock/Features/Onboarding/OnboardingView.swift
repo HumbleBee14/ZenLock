@@ -1,10 +1,12 @@
 import SwiftUI
+import FamilyControls
 
 struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var isAuthorizing = false
     @State private var authError: String?
+    @State private var showOpenSettings = false
     var onComplete: () -> Void
 
     var body: some View {
@@ -104,10 +106,23 @@ struct OnboardingView: View {
             }
 
             if let error = authError {
-                Text(error)
-                    .font(ZenTheme.caption)
-                    .foregroundStyle(ZenTheme.error)
-                    .multilineTextAlignment(.center)
+                VStack(spacing: ZenTheme.Spacing.sm) {
+                    Text(error)
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.error)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, ZenTheme.Spacing.lg)
+
+                    if showOpenSettings {
+                        Button("Open Settings") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.primary)
+                    }
+                }
             }
 
             Spacer()
@@ -151,6 +166,7 @@ struct OnboardingView: View {
     private func authorize() {
         isAuthorizing = true
         authError = nil
+        showOpenSettings = false
         Task {
             do {
                 try await screenTimeManager.requestAuthorization()
@@ -158,11 +174,36 @@ struct OnboardingView: View {
                 AppGroupStorage().setBool(true, forKey: Constants.Keys.onboardingCompleted)
                 await MainActor.run { onComplete() }
             } catch {
+                let (message, offerSettings) = describe(error)
                 await MainActor.run {
-                    authError = "Authorization failed. Please try again."
+                    authError = message
+                    showOpenSettings = offerSettings
                     isAuthorizing = false
                 }
             }
         }
+    }
+
+    private func describe(_ error: Error) -> (String, Bool) {
+        if let fc = error as? FamilyControlsError {
+            switch fc {
+            case .authorizationCanceled:
+                return ("You cancelled the request. Tap Authorize and choose Continue.", false)
+            case .authorizationConflict:
+                return ("Another app already has Screen Time access. Open Settings → Screen Time → Apps with Screen Time Access and remove the other app.", true)
+            case .invalidAccountType:
+                return ("Screen Time isn't available on this Apple ID. ZenLock needs a personal Apple ID with Screen Time enabled (not a managed/child account).", true)
+            case .restricted:
+                return ("Screen Time is restricted on this device — usually by a parent/MDM profile. Remove the restriction in Settings → Screen Time and try again.", true)
+            case .unavailable:
+                return ("Family Controls isn't available. Make sure Screen Time is turned on in Settings → Screen Time.", true)
+            case .networkError:
+                return ("Couldn't reach Apple to verify Screen Time. Check your connection and try again.", false)
+            @unknown default:
+                return ("Authorization failed: \(fc) (\((fc as NSError).code)). Open ZenLock's signing in Xcode and confirm the Family Controls capability is enabled.", true)
+            }
+        }
+        let ns = error as NSError
+        return ("Authorization failed: \(error.localizedDescription) [\(ns.domain) \(ns.code)]", true)
     }
 }
