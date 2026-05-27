@@ -70,8 +70,6 @@ final class DashboardViewModel {
             return TimeInterval(diff * 60)
         case .usageBased:
             return TimeInterval((group.usageLimitMinutes ?? 0) * 60)
-        case .frictionBased:
-            return 0
         }
     }
 }

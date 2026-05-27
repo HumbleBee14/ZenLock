@@ -6,5 +6,6 @@ struct ZenLockReportExtension: DeviceActivityReportExtension {
     var body: some DeviceActivityReportScene {
         TotalUsageScene()
         PerCategoryScene()
+        PerAppScene()
     }
 }

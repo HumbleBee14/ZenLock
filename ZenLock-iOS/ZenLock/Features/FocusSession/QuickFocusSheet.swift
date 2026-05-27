@@ -35,14 +35,13 @@ struct QuickFocusSheet: View {
             }
             .navigationTitle("Quick Focus")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
             }
-            .familyActivityPicker(isPresented: $showPicker, selection: $selection)
+            .zenAppPicker(isPresented: $showPicker, selection: $selection, title: "Apps to Block")
             .alert("Couldn't start", isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })) {
                 Button("OK", role: .cancel) {}
             } message: { Text(startError ?? "") }
@@ -150,7 +149,8 @@ struct QuickFocusSheet: View {
                 Text(summary)
                     .font(ZenTheme.caption)
                     .foregroundStyle(ZenTheme.textSecondary)
-                ZenButton(title: "Choose Apps", icon: "plus.app", style: .secondary) {
+                SelectionPreview(selection: selection)
+                ZenButton(title: hasSelection ? "Edit Selection" : "Choose Apps", icon: "plus.app", style: .secondary) {
                     showPicker = true
                 }
             }

@@ -24,7 +24,6 @@ struct AccountabilityView: View {
             }
             .navigationTitle("Accountability")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }

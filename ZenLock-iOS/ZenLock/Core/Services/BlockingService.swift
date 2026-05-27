@@ -34,9 +34,6 @@ final class BlockingService {
             }
         case .usageBased:
             try scheduleManager.startMonitoring(for: shared, selection: selection)
-        case .frictionBased:
-            shieldManager.applyShield(for: shared, selection: selection)
-            try scheduleManager.startMonitoring(for: shared, selection: selection)
         }
     }
 
@@ -46,7 +43,7 @@ final class BlockingService {
         var errorDescription: String? {
             switch self {
             case .deepFocusLocked:
-                return "Deep Focus is on. This group can't be turned off while its session is active."
+                return "Strict Mode is on. This group can't be turned off while its session is active."
             }
         }
     }
@@ -87,12 +84,6 @@ final class BlockingService {
                     shieldManager.applyShield(for: shared, selection: selection)
                 } else {
                     shieldManager.removeShield(forGroupId: shared.id)
-                }
-            case .frictionBased:
-                if isInFrictionBypass(shared.id) {
-                    shieldManager.removeShield(forGroupId: shared.id)
-                } else {
-                    shieldManager.applyShield(for: shared, selection: selection)
                 }
             case .usageBased:
                 break

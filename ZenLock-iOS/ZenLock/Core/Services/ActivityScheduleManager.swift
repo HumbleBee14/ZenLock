@@ -18,8 +18,6 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
             try startTimeBasedMonitoring(for: group)
         case .usageBased:
             try startUsageBasedMonitoring(for: group, selection: selection)
-        case .frictionBased:
-            try startFrictionMonitoring(for: group)
         }
         storage.setScheduleStartTime(Date(), forGroupId: group.id)
     }
@@ -99,12 +97,4 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         )
     }
 
-    private func startFrictionMonitoring(for group: SharedBlockGroup) throws {
-        let schedule = DeviceActivitySchedule(
-            intervalStart: DateComponents(hour: 0, minute: 0),
-            intervalEnd: DateComponents(hour: 23, minute: 59),
-            repeats: true
-        )
-        try center.startMonitoring(DeviceActivityName(group.id), during: schedule)
-    }
 }

@@ -1,5 +1,5 @@
 # Run `xcodegen generate` after pulling a branch that adds or removes targets
-# (Phases 3b, 4c added DeviceActivityReportExtension and ZenLockWidget).
+# (Phase 3b added DeviceActivityReportExtension).
 #
 # IMPORTANT: We deliberately do NOT use xcodegen's `entitlements:` block on any
 # target. xcodegen's "Generating plists..." step overwrites the file contents
@@ -51,7 +51,6 @@ targets:
       - target: ShieldConfigurationExtension
       - target: ShieldActionExtension
       - target: DeviceActivityReportExtension
-      - target: ZenLockWidget
 
   DeviceActivityMonitorExtension:
     type: app-extension
@@ -93,7 +92,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
 
   DeviceActivityReportExtension:
-    type: extensionkit-extension
+    type: app-extension
     platform: iOS
     sources:
       - path: DeviceActivityReportExtension
@@ -105,15 +104,3 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.DeviceActivityReport
         TARGETED_DEVICE_FAMILY: "1"
 
-  ZenLockWidget:
-    type: app-extension
-    platform: iOS
-    sources:
-      - path: ZenLockWidget
-      - path: Shared
-    settings:
-      base:
-        INFOPLIST_FILE: ZenLockWidget/Info.plist
-        CODE_SIGN_ENTITLEMENTS: ZenLockWidget/ZenLockWidget.entitlements
-        PRODUCT_BUNDLE_IDENTIFIER: com.humblebee.zenlock.Widget
-        TARGETED_DEVICE_FAMILY: "1"

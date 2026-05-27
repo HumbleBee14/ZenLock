@@ -21,12 +21,6 @@ final class ShieldManager: ShieldManaging {
         if !selection.categoryTokens.isEmpty {
             store.shield.applicationCategories = .specific(selection.categoryTokens)
         }
-        if group.webFilterEnabled, !selection.webDomainTokens.isEmpty {
-            store.shield.webDomains = selection.webDomainTokens
-        }
-        if group.blockAdultContent {
-            store.webContent.blockedByFilter = .auto()
-        }
     }
 
     func removeShield(forGroupId id: String) {

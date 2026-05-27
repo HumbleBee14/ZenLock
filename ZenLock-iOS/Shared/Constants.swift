@@ -10,6 +10,9 @@ enum Constants {
         static let selectionPrefix = "zen_selection_"
         static let activeGroupPrefix = "zen_active_"
         static let openCountPrefix = "zen_open_count_"
+        static let openCountDatePrefix = "zen_open_count_date_"
+        static let frictionBypassUntilPrefix = "friction_bypass_until_"
+        static let dailyGoalMinutes = "zen_daily_goal_minutes"
         static let onboardingCompleted = "zen_onboarding_completed"
         static let userTier = "zen_user_tier"
         static let trialStartDate = "zen_trial_start_date"
@@ -18,7 +21,6 @@ enum Constants {
     }
 
     enum Defaults {
-        static let frictionDelaySeconds = 10
         static let usageLimitMinutes = 60
         static let trialDurationDays = 7
     }

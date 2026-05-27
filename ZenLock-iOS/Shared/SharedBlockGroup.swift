@@ -13,10 +13,6 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
     var usageLimitMinutes: Int?
     var usagePeriod: UsagePeriod?
 
-    var frictionDelaySeconds: Int?
-    var frictionType: FrictionType?
-    var progressiveDelay: Bool
-
     var scheduleStartHour: Int?
     var scheduleStartMinute: Int?
     var scheduleEndHour: Int?
@@ -24,10 +20,11 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
     var scheduleDaysOfWeek: [Int]?
     var scheduleRepeats: Bool
 
-    var webFilterEnabled: Bool
-    var blockAdultContent: Bool
     var deepFocusEnabled: Bool
     var customShieldMessage: String?
+
+    var maxOpensPerDay: Int?
+    var maxMinutesPerOpen: Int?
 
     init(
         id: String = UUID().uuidString,
@@ -39,19 +36,16 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
         selectionData: Data? = nil,
         usageLimitMinutes: Int? = nil,
         usagePeriod: UsagePeriod? = nil,
-        frictionDelaySeconds: Int? = nil,
-        frictionType: FrictionType? = nil,
-        progressiveDelay: Bool = false,
         scheduleStartHour: Int? = nil,
         scheduleStartMinute: Int? = nil,
         scheduleEndHour: Int? = nil,
         scheduleEndMinute: Int? = nil,
         scheduleDaysOfWeek: [Int]? = nil,
         scheduleRepeats: Bool = false,
-        webFilterEnabled: Bool = false,
-        blockAdultContent: Bool = false,
         deepFocusEnabled: Bool = false,
-        customShieldMessage: String? = nil
+        customShieldMessage: String? = nil,
+        maxOpensPerDay: Int? = nil,
+        maxMinutesPerOpen: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -62,19 +56,16 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
         self.selectionData = selectionData
         self.usageLimitMinutes = usageLimitMinutes
         self.usagePeriod = usagePeriod
-        self.frictionDelaySeconds = frictionDelaySeconds
-        self.frictionType = frictionType
-        self.progressiveDelay = progressiveDelay
         self.scheduleStartHour = scheduleStartHour
         self.scheduleStartMinute = scheduleStartMinute
         self.scheduleEndHour = scheduleEndHour
         self.scheduleEndMinute = scheduleEndMinute
         self.scheduleDaysOfWeek = scheduleDaysOfWeek
         self.scheduleRepeats = scheduleRepeats
-        self.webFilterEnabled = webFilterEnabled
-        self.blockAdultContent = blockAdultContent
         self.deepFocusEnabled = deepFocusEnabled
         self.customShieldMessage = customShieldMessage
+        self.maxOpensPerDay = maxOpensPerDay
+        self.maxMinutesPerOpen = maxMinutesPerOpen
     }
 }
 
@@ -92,19 +83,16 @@ extension SharedBlockGroup {
         self.selectionData = try c.decodeIfPresent(Data.self, forKey: .selectionData)
         self.usageLimitMinutes = try c.decodeIfPresent(Int.self, forKey: .usageLimitMinutes)
         self.usagePeriod = try c.decodeIfPresent(UsagePeriod.self, forKey: .usagePeriod)
-        self.frictionDelaySeconds = try c.decodeIfPresent(Int.self, forKey: .frictionDelaySeconds)
-        self.frictionType = try c.decodeIfPresent(FrictionType.self, forKey: .frictionType)
-        self.progressiveDelay = try c.decodeIfPresent(Bool.self, forKey: .progressiveDelay) ?? false
         self.scheduleStartHour = try c.decodeIfPresent(Int.self, forKey: .scheduleStartHour)
         self.scheduleStartMinute = try c.decodeIfPresent(Int.self, forKey: .scheduleStartMinute)
         self.scheduleEndHour = try c.decodeIfPresent(Int.self, forKey: .scheduleEndHour)
         self.scheduleEndMinute = try c.decodeIfPresent(Int.self, forKey: .scheduleEndMinute)
         self.scheduleDaysOfWeek = try c.decodeIfPresent([Int].self, forKey: .scheduleDaysOfWeek)
         self.scheduleRepeats = try c.decodeIfPresent(Bool.self, forKey: .scheduleRepeats) ?? false
-        self.webFilterEnabled = try c.decodeIfPresent(Bool.self, forKey: .webFilterEnabled) ?? false
-        self.blockAdultContent = try c.decodeIfPresent(Bool.self, forKey: .blockAdultContent) ?? false
         self.deepFocusEnabled = try c.decodeIfPresent(Bool.self, forKey: .deepFocusEnabled) ?? false
         self.customShieldMessage = try c.decodeIfPresent(String.self, forKey: .customShieldMessage)
+        self.maxOpensPerDay = try c.decodeIfPresent(Int.self, forKey: .maxOpensPerDay)
+        self.maxMinutesPerOpen = try c.decodeIfPresent(Int.self, forKey: .maxMinutesPerOpen)
     }
 }
 

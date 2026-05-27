@@ -25,7 +25,6 @@ struct DiagnosticsView: View {
             }
             .navigationTitle("Diagnostics")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
@@ -64,7 +63,7 @@ struct DiagnosticsView: View {
             out.append("    mode=\(g.blockMode), active=\(g.isActive), deepFocus=\(g.deepFocusEnabled)")
             if let data = g.selectionData {
                 if let sel = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
-                    out.append("    selection: apps=\(sel.applicationTokens.count), cats=\(sel.categoryTokens.count), web=\(sel.webDomainTokens.count)")
+                    out.append("    selection: apps=\(sel.applicationTokens.count), cats=\(sel.categoryTokens.count)")
                 } else {
                     out.append("    ❌ selectionData failed to decode")
                 }

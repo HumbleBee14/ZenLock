@@ -10,7 +10,7 @@
     "%@ min" : {
 
     },
-    "%@s base delay" : {
+    "%@ min per open" : {
 
     },
     "🔒 Deep Focus Mode" : {
@@ -34,10 +34,7 @@
     "Always-On Web Filter" : {
       "extractionState" : "manual"
     },
-    "Always-on web filtering" : {
-
-    },
-    "Apps" : {
+    "Appearance" : {
 
     },
     "Apps to Block" : {
@@ -51,9 +48,6 @@
     },
     "Block Adult Content" : {
       "extractionState" : "manual"
-    },
-    "Block adult content + custom domains 24/7" : {
-
     },
     "Block after usage limit reached" : {
       "extractionState" : "manual"
@@ -91,10 +85,7 @@
     "Create your first group to start blocking distracting apps." : {
       "extractionState" : "manual"
     },
-    "Custom Domains" : {
-
-    },
-    "Delay increases by 5s each time you tap \"Open anyway\" (capped at 2 min)." : {
+    "Daily Screen Time Goal" : {
 
     },
     "Diagnostics" : {
@@ -118,9 +109,6 @@
     "Four layers of friction — set them all" : {
 
     },
-    "Friction" : {
-
-    },
     "Friction Type" : {
       "extractionState" : "manual"
     },
@@ -142,8 +130,14 @@
     "Layer %@" : {
 
     },
+    "Locks the group so it can't be disabled mid-session." : {
+
+    },
     "Make it hard to bypass" : {
       "extractionState" : "manual"
+    },
+    "Max %@ opens / day" : {
+
     },
     "minutes" : {
 
@@ -159,6 +153,9 @@
     },
     "No block groups yet" : {
       "extractionState" : "manual"
+    },
+    "No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends." : {
+
     },
     "Not Authorized" : {
       "extractionState" : "manual"
@@ -220,10 +217,16 @@
     "Stay focused. Stay present." : {
       "extractionState" : "manual"
     },
+    "Strict Mode active. Mode, apps, and schedule are locked until this session ends." : {
+
+    },
     "Take control of your screen time.\nStay focused. Stay present." : {
 
     },
-    "These filters apply 24/7, independent of your blocking groups. Use this for things you never want to see — adult content, gambling sites, specific domains." : {
+    "Target time you want to spend on your phone each day. Shown on the Screen Time tab." : {
+
+    },
+    "Time Limit" : {
 
     },
     "Time-Based" : {
@@ -241,13 +244,7 @@
     "Usage-Based" : {
       "extractionState" : "manual"
     },
-    "Uses Apple's built-in adult content classifier in Safari and apps that respect the system filter." : {
-
-    },
     "What to block" : {
-
-    },
-    "You won't be able to disable this group while it's active. Sessions can only end when the schedule ends." : {
 
     },
     "ZenLock" : {

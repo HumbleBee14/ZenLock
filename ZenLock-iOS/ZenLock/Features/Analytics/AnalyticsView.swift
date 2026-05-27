@@ -48,7 +48,6 @@ struct AnalyticsView: View {
         }
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     private var summary: StreakCalculator.Summary {

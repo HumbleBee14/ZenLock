@@ -4,10 +4,11 @@ import FamilyControls
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var screenTimeManager = ScreenTimeManager()
-    @State private var showWebFilter = false
     @State private var showAccountability = false
     @State private var showBypassPrevention = false
     @State private var showDiagnostics = false
+    @AppStorage(AppThemeStorage.key) private var themeRaw: String = AppTheme.system.rawValue
+    @AppStorage(Constants.Keys.dailyGoalMinutes, store: Constants.sharedDefaults) private var dailyGoalMinutes: Int = DailyGoalStorage.defaultMinutes
 
     var body: some View {
         NavigationStack {
@@ -17,7 +18,8 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         screenTimeSection
-                        webFilterSection
+                        dailyGoalSection
+                        appearanceSection
                         accountabilitySection
                         bypassPreventionSection
                         diagnosticsSection
@@ -29,17 +31,14 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                         .foregroundStyle(ZenTheme.primary)
                 }
             }
+            .preferredColorScheme(AppTheme(rawValue: themeRaw)?.colorScheme)
             .onAppear { screenTimeManager.refreshStatus() }
-            .sheet(isPresented: $showWebFilter) {
-                WebFilterView()
-            }
             .sheet(isPresented: $showAccountability) {
                 AccountabilityView()
             }
@@ -118,29 +117,6 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 
-    private var webFilterSection: some View {
-        Button { showWebFilter = true } label: {
-            GlassCard {
-                HStack(spacing: ZenTheme.Spacing.md) {
-                    GroupIcon(systemName: "globe", color: ZenTheme.accent)
-                    VStack(alignment: .leading) {
-                        Text("Always-On Web Filter")
-                            .font(ZenTheme.body)
-                            .foregroundStyle(ZenTheme.text)
-                        Text("Block adult content + custom domains 24/7")
-                            .font(ZenTheme.caption)
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(ZenTheme.textSecondary)
-                }
-                .padding(ZenTheme.Spacing.md)
-            }
-        }
-        .buttonStyle(.plain)
-    }
-
     private var screenTimeSection: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
@@ -160,6 +136,58 @@ struct SettingsView: View {
                     }
                     Spacer()
                 }
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private var dailyGoalSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
+                Text("Daily Screen Time Goal")
+                    .font(ZenTheme.headline)
+                    .foregroundStyle(ZenTheme.text)
+                HStack {
+                    Text(formatGoal(dailyGoalMinutes))
+                        .font(ZenTheme.title2)
+                        .foregroundStyle(ZenTheme.text)
+                    Spacer()
+                }
+                Slider(value: Binding(
+                    get: { Double(dailyGoalMinutes) },
+                    set: { dailyGoalMinutes = Int($0) }
+                ), in: 15...720, step: 15)
+                .tint(ZenTheme.primary)
+                Text("Target time you want to spend on your phone each day. Shown on the Screen Time tab.")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private func formatGoal(_ minutes: Int) -> String {
+        let h = minutes / 60
+        let m = minutes % 60
+        if h == 0 { return "\(m)m" }
+        if m == 0 { return "\(h)h" }
+        return "\(h)h \(m)m"
+    }
+
+    private var appearanceSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
+                Text("Appearance")
+                    .font(ZenTheme.headline)
+                    .foregroundStyle(ZenTheme.text)
+
+                Picker("Theme", selection: $themeRaw) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Label(theme.label, systemImage: theme.icon).tag(theme.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .tint(ZenTheme.primary)
             }
             .padding(ZenTheme.Spacing.md)
         }

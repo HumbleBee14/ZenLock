@@ -20,30 +20,6 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         return buildConfiguration(for: group, fallbackName: category.localizedDisplayName)
     }
 
-    override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
-        let group = webDomain.token.flatMap { resolveGroup(forWebDomain: $0) }
-        let groupName = group?.name ?? "ZenLock"
-        let tint = group.map { UIColor(hex: $0.colorHex) ?? indigoColor } ?? indigoColor
-
-        return ShieldConfiguration(
-            backgroundBlurStyle: .systemThickMaterial,
-            backgroundColor: .white,
-            icon: nil,
-            title: ShieldConfiguration.Label(text: "🔒 Website Blocked", color: .black),
-            subtitle: ShieldConfiguration.Label(
-                text: "Blocked by \(groupName).",
-                color: .secondaryLabel
-            ),
-            primaryButtonLabel: ShieldConfiguration.Label(text: "Go Back", color: .white),
-            primaryButtonBackgroundColor: tint,
-            secondaryButtonLabel: nil
-        )
-    }
-
-    override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
-        configuration(shielding: webDomain)
-    }
-
     // MARK: - Group resolution
 
     private func loadGroups() -> [SharedBlockGroup] {
@@ -70,77 +46,69 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         return groups.first
     }
 
-    private func resolveGroup(forWebDomain token: WebDomainToken) -> SharedBlockGroup? {
-        let groups = loadGroups().filter(\.isActive)
-        for group in groups {
-            guard let selectionData = defaults?.data(forKey: Constants.Keys.selectionPrefix + group.id),
-                  let selection = decodeSelection(selectionData) else { continue }
-            if selection.webDomainTokens.contains(token) { return group }
-        }
-        return groups.first
-    }
-
     // MARK: - Configuration building
 
     private func buildConfiguration(for group: SharedBlockGroup?, fallbackName: String?) -> ShieldConfiguration {
         let groupName = group?.name ?? fallbackName ?? "ZenLock"
         let tint = group.flatMap { UIColor(hex: $0.colorHex) } ?? indigoColor
-
-        if let group, group.blockMode == .frictionBased {
-            return frictionConfiguration(group: group, groupName: groupName, tint: tint)
-        }
-
-        return blockConfiguration(groupName: groupName, message: group?.customShieldMessage, tint: tint, isDeepFocus: group?.deepFocusEnabled ?? false)
+        return blockConfiguration(group: group, groupName: groupName, tint: tint)
     }
 
-    private func blockConfiguration(groupName: String, message: String?, tint: UIColor, isDeepFocus: Bool) -> ShieldConfiguration {
-        let subtitle = message ?? "This app is blocked by \(groupName)."
-        let secondary: ShieldConfiguration.Label? = isDeepFocus
-            ? nil
-            : ShieldConfiguration.Label(text: "Request Unlock", color: grayColor)
+    private func blockConfiguration(group: SharedBlockGroup?, groupName: String, tint: UIColor) -> ShieldConfiguration {
+        let isDeepFocus = group?.deepFocusEnabled ?? false
+        let openCount = group.map { currentDailyOpenCount(for: $0.id) } ?? 0
 
-        return ShieldConfiguration(
-            backgroundBlurStyle: .systemThickMaterial,
-            backgroundColor: .white,
-            icon: nil,
-            title: ShieldConfiguration.Label(text: isDeepFocus ? "🔒 Deep Focus" : "🧘 Stay Focused", color: .black),
-            subtitle: ShieldConfiguration.Label(text: subtitle, color: .secondaryLabel),
-            primaryButtonLabel: ShieldConfiguration.Label(text: "Close App", color: .white),
-            primaryButtonBackgroundColor: tint,
-            secondaryButtonLabel: secondary
-        )
-    }
-
-    private func frictionConfiguration(group: SharedBlockGroup, groupName: String, tint: UIColor) -> ShieldConfiguration {
-        let openCount = defaults?.integer(forKey: Constants.Keys.openCountPrefix + group.id) ?? 0
-        let baseDelay = group.frictionDelaySeconds ?? Constants.Defaults.frictionDelaySeconds
-        let delaySeconds: Int = {
-            guard group.progressiveDelay else { return baseDelay }
-            return min(baseDelay + (openCount * 5), 120)
+        let capReached: Bool = {
+            guard let cap = group?.maxOpensPerDay else { return false }
+            return openCount >= cap
         }()
 
-        let subtitle: String
-        switch group.frictionType ?? .breathing {
-        case .breathing:
-            subtitle = group.customShieldMessage ?? "Take 3 deep breaths.\nInhale 4 · Hold 7 · Exhale 8."
-        case .question:
-            subtitle = group.customShieldMessage ?? "🤔 What are you opening \(groupName) for?\nIs it worth your time right now?"
-        case .delay:
-            subtitle = group.customShieldMessage ?? "Wait \(delaySeconds) seconds before opening.\n(Then you'll get a brief window to use \(groupName).)"
+        var subtitleParts: [String] = []
+        if let msg = group?.customShieldMessage {
+            subtitleParts.append(msg)
+        } else {
+            subtitleParts.append("This app is blocked by \(groupName).")
+        }
+        if let cap = group?.maxOpensPerDay {
+            subtitleParts.append("\(openCount)/\(cap) opens today")
+        }
+        if let mins = group?.maxMinutesPerOpen {
+            subtitleParts.append("\(mins) min per open")
         }
 
+        let canBypass = !isDeepFocus && !capReached
+        let secondaryText: String
+        if capReached {
+            secondaryText = ""
+        } else if group?.maxMinutesPerOpen != nil || group?.maxOpensPerDay != nil {
+            secondaryText = "Open Anyway"
+        } else {
+            secondaryText = "Request Unlock"
+        }
+        let secondaryLabel: ShieldConfiguration.Label? = canBypass
+            ? ShieldConfiguration.Label(text: secondaryText, color: .white)
+            : nil
+
+        let title = capReached ? "🚫 Daily Limit Reached" : (isDeepFocus ? "🔒 Strict Mode" : "🧘 \(groupName)")
+
         return ShieldConfiguration(
-            backgroundBlurStyle: .systemThickMaterial,
-            backgroundColor: .white,
+            backgroundBlurStyle: .systemUltraThinMaterialDark,
+            backgroundColor: UIColor.black.withAlphaComponent(0.85),
             icon: nil,
-            title: ShieldConfiguration.Label(text: "🧘 Mindful Moment", color: .black),
-            subtitle: ShieldConfiguration.Label(text: subtitle, color: .secondaryLabel),
-            primaryButtonLabel: ShieldConfiguration.Label(text: "I'll come back later", color: .white),
+            title: ShieldConfiguration.Label(text: title, color: .white),
+            subtitle: ShieldConfiguration.Label(text: subtitleParts.joined(separator: "\n"), color: UIColor.white.withAlphaComponent(0.7)),
+            primaryButtonLabel: ShieldConfiguration.Label(text: "Close App", color: .white),
             primaryButtonBackgroundColor: tint,
-            secondaryButtonLabel: group.deepFocusEnabled
-                ? nil
-                : ShieldConfiguration.Label(text: "Open anyway", color: grayColor)
+            secondaryButtonLabel: secondaryLabel
         )
+    }
+
+    private func currentDailyOpenCount(for groupId: String) -> Int {
+        let today = Calendar.current.startOfDay(for: Date())
+        let dateKey = Constants.Keys.openCountDatePrefix + groupId
+        let stored = defaults?.object(forKey: dateKey) as? Date
+        if stored != today { return 0 }
+        return defaults?.integer(forKey: Constants.Keys.openCountPrefix + groupId) ?? 0
     }
 }
 

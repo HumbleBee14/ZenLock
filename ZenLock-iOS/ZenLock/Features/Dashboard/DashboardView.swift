@@ -247,8 +247,6 @@ private struct GroupRow: View {
                 : "Armed · waiting for window"
         case .usageBased:
             return "Armed · blocks at usage limit"
-        case .frictionBased:
-            return "Friction active"
         }
     }
 
@@ -259,7 +257,7 @@ private struct GroupRow: View {
             return ScheduleEvaluator.isWithinSchedule(group.toShared())
                 ? ZenTheme.success
                 : ZenTheme.warning
-        case .usageBased, .frictionBased:
+        case .usageBased:
             return ZenTheme.success
         }
     }
@@ -270,7 +268,6 @@ extension BlockMode {
         switch self {
         case .timeBased: "clock.fill"
         case .usageBased: "hourglass"
-        case .frictionBased: "hand.raised.fill"
         }
     }
 
@@ -278,7 +275,6 @@ extension BlockMode {
         switch self {
         case .timeBased: "Time-Based"
         case .usageBased: "Usage-Based"
-        case .frictionBased: "Friction-Based"
         }
     }
 }

@@ -74,9 +74,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         case .timeBased:
             shouldBlock = (reason != .intervalEnd) && ScheduleEvaluator.isWithinSchedule(group)
         case .usageBased:
-            shouldBlock = reason == .thresholdReached
-        case .frictionBased:
-            shouldBlock = !inFrictionBypass
+            shouldBlock = (reason == .thresholdReached) && !inFrictionBypass
         }
 
         if shouldBlock {
@@ -101,12 +99,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         }
         if !selection.categoryTokens.isEmpty {
             store.shield.applicationCategories = .specific(selection.categoryTokens)
-        }
-        if group.webFilterEnabled, !selection.webDomainTokens.isEmpty {
-            store.shield.webDomains = selection.webDomainTokens
-        }
-        if group.blockAdultContent {
-            store.webContent.blockedByFilter = .auto()
         }
     }
 

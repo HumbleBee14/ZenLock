@@ -28,8 +28,8 @@ struct BypassPreventionView: View {
                             tier: 3,
                             icon: "moon.zzz.fill",
                             color: ZenTheme.accent,
-                            title: "Deep Focus mode",
-                            body: "Turn on Deep Focus per group to make it impossible to disable the block until its schedule ends — even from inside ZenLock."
+                            title: "Strict Mode",
+                            body: "Turn on Strict Mode per group to make it impossible to disable the block until its schedule ends — even from inside ZenLock."
                         )
                         layerCard(
                             tier: 4,
@@ -45,7 +45,6 @@ struct BypassPreventionView: View {
             }
             .navigationTitle("Make it hard to bypass")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }

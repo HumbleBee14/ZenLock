@@ -17,15 +17,6 @@ class ShieldActionExtension: ShieldActionDelegate {
 
     override func handle(
         action: ShieldAction,
-        for webDomain: WebDomainToken,
-        completionHandler: @escaping (ShieldActionResponse) -> Void
-    ) {
-        let group = resolveGroup { selection in selection.webDomainTokens.contains(webDomain) }
-        handle(action: action, group: group, completionHandler: completionHandler)
-    }
-
-    override func handle(
-        action: ShieldAction,
         for category: ActivityCategoryToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
@@ -50,10 +41,20 @@ class ShieldActionExtension: ShieldActionDelegate {
                 return
             }
 
-            if let group, group.blockMode == .frictionBased {
-                bumpOpenCount(for: group.id)
-                grantFrictionBypass(for: group.id, seconds: 60)
-                completionHandler(.close)
+            if let group, group.blockMode == .usageBased {
+                if let cap = group.maxOpensPerDay, dailyOpenCount(for: group.id) >= cap {
+                    completionHandler(.close)
+                    return
+                }
+                if group.maxMinutesPerOpen != nil || group.maxOpensPerDay != nil {
+                    bumpOpenCount(for: group.id)
+                    let session = (group.maxMinutesPerOpen ?? 5) * 60
+                    grantFrictionBypass(for: group.id, seconds: session)
+                    completionHandler(.close)
+                } else {
+                    requestUnlock(groupName: group.name)
+                    completionHandler(.defer)
+                }
             } else {
                 requestUnlock(groupName: group?.name)
                 completionHandler(.defer)
@@ -85,12 +86,27 @@ class ShieldActionExtension: ShieldActionDelegate {
     }
 
     private func bumpOpenCount(for groupId: String) {
+        rolloverDailyCountIfNeeded(for: groupId)
         let key = Constants.Keys.openCountPrefix + groupId
         let count = (defaults?.integer(forKey: key) ?? 0) + 1
         defaults?.set(count, forKey: key)
     }
 
-    /// Temporarily lift shield; re-applied on next monitor tick or foreground.
+    private func dailyOpenCount(for groupId: String) -> Int {
+        rolloverDailyCountIfNeeded(for: groupId)
+        return defaults?.integer(forKey: Constants.Keys.openCountPrefix + groupId) ?? 0
+    }
+
+    private func rolloverDailyCountIfNeeded(for groupId: String) {
+        let today = Calendar.current.startOfDay(for: Date())
+        let dateKey = Constants.Keys.openCountDatePrefix + groupId
+        let stored = defaults?.object(forKey: dateKey) as? Date
+        if stored != today {
+            defaults?.set(0, forKey: Constants.Keys.openCountPrefix + groupId)
+            defaults?.set(today, forKey: dateKey)
+        }
+    }
+
     private func grantFrictionBypass(for groupId: String, seconds: Int) {
         let expiry = Date().addingTimeInterval(TimeInterval(seconds))
         defaults?.set(expiry, forKey: "friction_bypass_until_\(groupId)")

@@ -17,7 +17,6 @@ struct ContentView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -26,6 +25,9 @@ private struct MainTabs: View {
         TabView {
             DashboardView()
                 .tabItem { Label("Focus", systemImage: "shield.lefthalf.filled") }
+
+            NavigationStack { ScreenTimeView() }
+                .tabItem { Label("Screen Time", systemImage: "hourglass") }
 
             NavigationStack { AnalyticsView() }
                 .tabItem { Label("Insights", systemImage: "chart.bar.fill") }
