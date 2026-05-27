@@ -91,8 +91,7 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         let usageEvent = DeviceActivityEvent(
             applications: selection.applicationTokens,
             categories: selection.categoryTokens,
-            threshold: DateComponents(minute: limitMinutes),
-            includesPastActivity: false
+            threshold: DateComponents(minute: limitMinutes)
         )
 
         try center.startMonitoring(

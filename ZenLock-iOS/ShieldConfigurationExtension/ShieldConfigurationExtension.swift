@@ -21,7 +21,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     }
 
     override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
-        let group = resolveGroup(forWebDomain: webDomain.token)
+        let group = webDomain.token.flatMap { resolveGroup(forWebDomain: $0) }
         let groupName = group?.name ?? "ZenLock"
         let tint = group.map { UIColor(hex: $0.colorHex) ?? indigoColor } ?? indigoColor
 

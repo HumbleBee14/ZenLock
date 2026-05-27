@@ -2,6 +2,7 @@ import Foundation
 import FamilyControls
 import Combine
 
+@MainActor
 @Observable
 final class ScreenTimeManager {
     private(set) var authorizationStatus: AuthorizationStatus = .notDetermined
@@ -20,7 +21,7 @@ final class ScreenTimeManager {
 
     func requestAuthorization() async throws {
         try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-        await MainActor.run { refreshStatus() }
+        refreshStatus()
     }
 
     func refreshStatus() {

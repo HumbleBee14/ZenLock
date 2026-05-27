@@ -6,7 +6,7 @@ import FamilyControls
 /// Useful for "always block adult content" / "always block these custom domains"
 /// behavior the user wants on regardless of which focus session is active.
 final class WebFilterManager {
-    static let globalStoreName = ManagedSettingsStore.Name("zen_global_web")
+    static var globalStoreName: ManagedSettingsStore.Name { .init("zen_global_web") }
     static let selectionKey = "zen_global_web_selection"
     static let adultFilterKey = "zen_global_adult_filter"
 

@@ -1,7 +1,7 @@
 import DeviceActivity
 import SwiftUI
 
-struct TotalUsageScene: DeviceActivityReportScene {
+struct TotalUsageScene: @preconcurrency DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .init("totalUsage")
 
     let content: (TotalUsageData) -> TotalUsageView

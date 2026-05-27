@@ -1,7 +1,7 @@
 import DeviceActivity
 import SwiftUI
 
-struct PerCategoryScene: DeviceActivityReportScene {
+struct PerCategoryScene: @preconcurrency DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .init("perCategory")
     let content: (PerCategoryData) -> PerCategoryView
 
