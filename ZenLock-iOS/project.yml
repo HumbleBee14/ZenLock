@@ -1,5 +1,11 @@
 # Run `xcodegen generate` after pulling a branch that adds or removes targets
 # (Phases 3b, 4c added DeviceActivityReportExtension and ZenLockWidget).
+#
+# IMPORTANT: We deliberately do NOT use xcodegen's `entitlements:` block on any
+# target. xcodegen's "Generating plists..." step overwrites the file contents
+# on every generate, wiping the family-controls + App Group keys. Instead we
+# set CODE_SIGN_ENTITLEMENTS in settings, which xcodegen treats as a build
+# setting pointer and leaves the file alone.
 name: ZenLock
 options:
   bundleIdPrefix: com.grepguru
@@ -15,6 +21,12 @@ settings:
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: false
+    # Xcode "Update to recommended settings" — modern defaults
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: true
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: true
+    ENABLE_STRICT_OBJC_MSGSEND: true
+    GCC_NO_COMMON_BLOCKS: true
+    LOCALIZATION_PREFERS_STRING_CATALOGS: true
 
 targets:
   ZenLock:
@@ -23,11 +35,10 @@ targets:
     sources:
       - path: ZenLock
       - path: Shared
-    entitlements:
-      path: ZenLock/ZenLock.entitlements
     settings:
       base:
         INFOPLIST_FILE: ZenLock/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ZenLock/ZenLock.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
@@ -45,11 +56,10 @@ targets:
     sources:
       - path: DeviceActivityMonitorExtension
       - path: Shared
-    entitlements:
-      path: DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.entitlements
     settings:
       base:
         INFOPLIST_FILE: DeviceActivityMonitorExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.DeviceActivityMonitor
         TARGETED_DEVICE_FAMILY: "1"
 
@@ -59,11 +69,10 @@ targets:
     sources:
       - path: ShieldConfigurationExtension
       - path: Shared
-    entitlements:
-      path: ShieldConfigurationExtension/ShieldConfigurationExtension.entitlements
     settings:
       base:
         INFOPLIST_FILE: ShieldConfigurationExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShieldConfigurationExtension/ShieldConfigurationExtension.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.ShieldConfiguration
         TARGETED_DEVICE_FAMILY: "1"
 
@@ -73,25 +82,23 @@ targets:
     sources:
       - path: ShieldActionExtension
       - path: Shared
-    entitlements:
-      path: ShieldActionExtension/ShieldActionExtension.entitlements
     settings:
       base:
         INFOPLIST_FILE: ShieldActionExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShieldActionExtension/ShieldActionExtension.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.ShieldAction
         TARGETED_DEVICE_FAMILY: "1"
 
   DeviceActivityReportExtension:
-    type: app-extension
+    type: extensionkit-extension
     platform: iOS
     sources:
       - path: DeviceActivityReportExtension
       - path: Shared
-    entitlements:
-      path: DeviceActivityReportExtension/DeviceActivityReportExtension.entitlements
     settings:
       base:
         INFOPLIST_FILE: DeviceActivityReportExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DeviceActivityReportExtension/DeviceActivityReportExtension.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.DeviceActivityReport
         TARGETED_DEVICE_FAMILY: "1"
 
@@ -101,10 +108,9 @@ targets:
     sources:
       - path: ZenLockWidget
       - path: Shared
-    entitlements:
-      path: ZenLockWidget/ZenLockWidget.entitlements
     settings:
       base:
         INFOPLIST_FILE: ZenLockWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ZenLockWidget/ZenLockWidget.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.grepguru.zenlock.Widget
         TARGETED_DEVICE_FAMILY: "1"
