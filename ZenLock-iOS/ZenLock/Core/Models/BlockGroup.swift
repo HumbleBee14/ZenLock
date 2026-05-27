@@ -6,6 +6,8 @@ import FamilyControls
 final class BlockGroup {
     @Attribute(.unique) var id: UUID
     var name: String
+    var icon: String
+    var colorHex: String
     var blockMode: BlockMode
     var isActive: Bool
 
@@ -36,6 +38,8 @@ final class BlockGroup {
     init(
         id: UUID = UUID(),
         name: String,
+        icon: String = "lock.shield",
+        colorHex: String = "#7C3AED",
         blockMode: BlockMode = .timeBased,
         isActive: Bool = false,
         selectionData: Data? = nil,
@@ -57,6 +61,8 @@ final class BlockGroup {
     ) {
         self.id = id
         self.name = name
+        self.icon = icon
+        self.colorHex = colorHex
         self.blockMode = blockMode
         self.isActive = isActive
         self.selectionData = selectionData
@@ -91,6 +97,8 @@ final class BlockGroup {
         SharedBlockGroup(
             id: id.uuidString,
             name: name,
+            icon: icon,
+            colorHex: colorHex,
             blockMode: blockMode,
             isActive: isActive,
             selectionData: selectionData,

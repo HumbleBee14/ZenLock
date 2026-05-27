@@ -7,9 +7,22 @@ struct CreateGroupView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
+    @State private var icon = "lock.shield"
+    @State private var colorHex = "#7C3AED"
     @State private var blockMode: BlockMode = .timeBased
     @State private var selection = FamilyActivitySelection()
     @State private var showAppPicker = false
+
+    private static let iconChoices = [
+        "lock.shield", "moon.fill", "briefcase.fill", "book.fill",
+        "figure.run", "leaf.fill", "person.fill", "gamecontroller.fill",
+        "tv.fill", "message.fill", "cart.fill", "newspaper.fill"
+    ]
+
+    private static let colorChoices = [
+        "#7C3AED", "#4F46E5", "#06B6D4", "#10B981",
+        "#F59E0B", "#EF4444", "#EC4899", "#8B5CF6"
+    ]
 
     @State private var scheduleStartHour = 22
     @State private var scheduleStartMinute = 0
@@ -37,6 +50,7 @@ struct CreateGroupView: View {
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         nameSection
+                        identitySection
                         appSelectionSection
                         blockModeSection
                         modeConfigSection
@@ -73,6 +87,59 @@ struct CreateGroupView: View {
                     .font(ZenTheme.body)
                     .foregroundStyle(ZenTheme.text)
                     .tint(ZenTheme.primary)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private var identitySection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
+                Text("Icon & Color")
+                    .font(ZenTheme.headline)
+                    .foregroundStyle(ZenTheme.text)
+
+                HStack(spacing: ZenTheme.Spacing.md) {
+                    GroupIcon(systemName: icon, color: Color(hex: colorHex), size: 56)
+
+                    VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: ZenTheme.Spacing.sm) {
+                                ForEach(Self.iconChoices, id: \.self) { symbol in
+                                    Button {
+                                        withAnimation(ZenTheme.springy) { icon = symbol }
+                                    } label: {
+                                        Image(systemName: symbol)
+                                            .font(.system(size: 18, weight: .semibold))
+                                            .foregroundStyle(icon == symbol ? Color(hex: colorHex) : ZenTheme.textSecondary)
+                                            .frame(width: 36, height: 36)
+                                            .background(
+                                                Circle().fill(icon == symbol ? Color(hex: colorHex).opacity(0.18) : ZenTheme.surfaceLight.opacity(0.4))
+                                            )
+                                    }
+                                }
+                            }
+                        }
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: ZenTheme.Spacing.sm) {
+                                ForEach(Self.colorChoices, id: \.self) { hex in
+                                    Button {
+                                        withAnimation(ZenTheme.springy) { colorHex = hex }
+                                    } label: {
+                                        Circle()
+                                            .fill(Color(hex: hex))
+                                            .frame(width: 28, height: 28)
+                                            .overlay(
+                                                Circle()
+                                                    .strokeBorder(Color.white.opacity(colorHex == hex ? 0.9 : 0), lineWidth: 2)
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .padding(ZenTheme.Spacing.md)
         }
@@ -298,7 +365,7 @@ struct CreateGroupView: View {
     }
 
     private func createGroup() {
-        let group = BlockGroup(name: name, blockMode: blockMode)
+        let group = BlockGroup(name: name, icon: icon, colorHex: colorHex, blockMode: blockMode)
         group.decodedSelection = selection
         group.scheduleStartHour = scheduleStartHour
         group.scheduleStartMinute = scheduleStartMinute

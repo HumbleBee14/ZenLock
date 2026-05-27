@@ -153,8 +153,8 @@ private struct GroupRow: View {
         GlassCard {
             HStack(spacing: ZenTheme.Spacing.md) {
                 GroupIcon(
-                    systemName: group.blockMode.icon,
-                    color: group.isActive ? ZenTheme.success : ZenTheme.textSecondary
+                    systemName: group.icon,
+                    color: group.isActive ? Color(hex: group.colorHex) : ZenTheme.textSecondary
                 )
 
                 VStack(alignment: .leading, spacing: 2) {
