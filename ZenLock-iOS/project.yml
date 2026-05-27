@@ -1,3 +1,5 @@
+# Run `xcodegen generate` after pulling a branch that adds or removes targets
+# (Phases 3b, 4c added DeviceActivityReportExtension and ZenLockWidget).
 name: ZenLock
 options:
   bundleIdPrefix: com.grepguru

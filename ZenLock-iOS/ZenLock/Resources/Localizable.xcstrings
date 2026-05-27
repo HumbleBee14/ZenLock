@@ -1,0 +1,138 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "ZenLock" : {
+      "extractionState" : "manual"
+    },
+    "Stay focused. Stay present." : {
+      "extractionState" : "manual"
+    },
+    "Focus" : {
+      "extractionState" : "manual"
+    },
+    "Insights" : {
+      "extractionState" : "manual"
+    },
+    "Settings" : {
+      "extractionState" : "manual"
+    },
+    "Block Groups" : {
+      "extractionState" : "manual"
+    },
+    "Create Group" : {
+      "extractionState" : "manual"
+    },
+    "Quick Focus Session" : {
+      "extractionState" : "manual"
+    },
+    "Block apps right now for a set amount of time" : {
+      "extractionState" : "manual"
+    },
+    "No block groups yet" : {
+      "extractionState" : "manual"
+    },
+    "Create your first group to start blocking distracting apps." : {
+      "extractionState" : "manual"
+    },
+    "Group Name" : {
+      "extractionState" : "manual"
+    },
+    "Icon & Color" : {
+      "extractionState" : "manual"
+    },
+    "Apps to Block" : {
+      "extractionState" : "manual"
+    },
+    "Select Apps" : {
+      "extractionState" : "manual"
+    },
+    "Blocking Mode" : {
+      "extractionState" : "manual"
+    },
+    "Time-Based" : {
+      "extractionState" : "manual"
+    },
+    "Usage-Based" : {
+      "extractionState" : "manual"
+    },
+    "Friction-Based" : {
+      "extractionState" : "manual"
+    },
+    "Block during scheduled hours" : {
+      "extractionState" : "manual"
+    },
+    "Block after usage limit reached" : {
+      "extractionState" : "manual"
+    },
+    "Add friction before opening" : {
+      "extractionState" : "manual"
+    },
+    "Schedule" : {
+      "extractionState" : "manual"
+    },
+    "Start" : {
+      "extractionState" : "manual"
+    },
+    "End" : {
+      "extractionState" : "manual"
+    },
+    "Repeat" : {
+      "extractionState" : "manual"
+    },
+    "Active On" : {
+      "extractionState" : "manual"
+    },
+    "Schedule crosses midnight — will be split into two windows." : {
+      "extractionState" : "manual"
+    },
+    "Usage Limit" : {
+      "extractionState" : "manual"
+    },
+    "Per Hour" : {
+      "extractionState" : "manual"
+    },
+    "Per Day" : {
+      "extractionState" : "manual"
+    },
+    "Friction Type" : {
+      "extractionState" : "manual"
+    },
+    "Progressive Delay" : {
+      "extractionState" : "manual"
+    },
+    "Block Websites" : {
+      "extractionState" : "manual"
+    },
+    "Block Adult Content" : {
+      "extractionState" : "manual"
+    },
+    "🔒 Deep Focus Mode" : {
+      "extractionState" : "manual"
+    },
+    "Always-On Web Filter" : {
+      "extractionState" : "manual"
+    },
+    "Accountability Partner" : {
+      "extractionState" : "manual"
+    },
+    "Make it hard to bypass" : {
+      "extractionState" : "manual"
+    },
+    "Screen Time" : {
+      "extractionState" : "manual"
+    },
+    "About" : {
+      "extractionState" : "manual"
+    },
+    "Authorization Status" : {
+      "extractionState" : "manual"
+    },
+    "Authorized" : {
+      "extractionState" : "manual"
+    },
+    "Not Authorized" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.0"
+}
