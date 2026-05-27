@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00020E520228EA1D8E55C739 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0BA8A688D3B38DD2C29687 /* AppTheme.swift */; };
+		0043ECC013F0C7BB05F66D40 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */; };
 		00874C9EB778C2AA418B6665 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		06A5D2CA33E836495D508530 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD3BCDEDD9E8EDFAD0B6BA49 /* Assets.xcassets */; };
 		06D92B00F9389BFDE3AFDA60 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8280FAFAD080C479C9B257 /* NotificationManager.swift */; };
@@ -16,7 +17,6 @@
 		1B02CAC8543F11B9DCC1E1D4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88407A534BE54012983883BE /* BlockingService.swift */; };
 		22502BC47A09433F3D76C812 /* BypassPreventionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22668C8D96E7C390F4A066E1 /* BypassPreventionView.swift */; };
 		22FF508118E0BB3C7B1ED841 /* PerCategoryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12AF19807605F8299C82376 /* PerCategoryScene.swift */; };
-		23E842AD809CF5C85A52B5DA /* ScreenTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */; };
 		251E7A44AC16208CF19BACDC /* AppGroupStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8279A2418C396D8D6161793 /* AppGroupStorage.swift */; };
 		298D4DEF329F97DAFCAC4334 /* GroupDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */; };
 		29A7FC7126029071BCCE0F77 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5753251B13D3012A1BD8F71 /* ContentView.swift */; };
@@ -25,7 +25,6 @@
 		3ABDA887850297802944DC99 /* ShieldActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		403D89F9ED0F449726C4B030 /* ZenButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44D38D937F80C62479ECD3E /* ZenButton.swift */; };
 		4B111BBEE417B921CECB6D25 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */; };
-		52B6EAD69C9BC73BF9D2E420 /* ScreenTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */; };
 		5B7FE0224894FBCC65ECDA0B /* ActivityScheduleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898A6C5E9A8DFDF5B3DA8FD6 /* ActivityScheduleManager.swift */; };
 		5C3D19198FAD0E6CC45CAC89 /* SelectionPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD0C4009777D862A37B9BBB /* SelectionPreview.swift */; };
 		5E8A4D7128EF455847FF39D0 /* PerAppScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC35B4FF2E313FA944734E69 /* PerAppScene.swift */; };
@@ -57,13 +56,11 @@
 		A3B0E335E78CBB34D13867F4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */; };
 		AD251D83EBB005CB36117CA2 /* DeviceActivityReportExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B15100BABD61322A8B13F4D2 /* FocusSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2D0D2399C949DC7600E001 /* FocusSession.swift */; };
-		B408C9493D19ADCB3B80CAF9 /* ScreenTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */; };
 		B44BF950C7459311A683886C /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		B493C2A200BF277346EE9262 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		B71F979C9735F48DB8A0362C /* DeviceActivityMonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53D97839F0D12E2E1F8B1DEB /* DeviceActivityMonitorExtension.swift */; };
 		B7B3793AB695B82E70E5ABC9 /* EntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F778EC846C0E45E0389556CD /* EntitlementManager.swift */; };
 		BCC42DA1E6484767338D89E1 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F831C8C3A67335EE4D553B30 /* AnalyticsView.swift */; };
-		BF577FE0CEF1CE6DA84FE486 /* ScreenTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */; };
 		C35FDFC1371F02A02F452CE6 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		C4BDF23C9428AA4099760CFD /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E568D8A9F39F395C07F6EAE5 /* GlassCard.swift */; };
 		C870ED4E9C4F210D014C7536 /* ScheduleEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */; };
@@ -78,7 +75,6 @@
 		DBF15FF229EC00240FBD6765 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4469DD617CAFA30F379C050F /* Theme.swift */; };
 		E11F2898454979B27C073EFC /* SharedBlockGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */; };
 		E12AFA598B5C79089F6504AC /* ScheduleEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */; };
-		E199BAD5A595EB45708D64B5 /* ScreenTimeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */; };
 		E6CD43B17049B3E96A9449CB /* GlassMorphism.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3753701A090FE21F595D03BA /* GlassMorphism.swift */; };
 		EDDE3C37C432DB2C0DB94AAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE57ADA74309FD2D82535765 /* SettingsView.swift */; };
 		F1774DD41E22EF4DED56539E /* AccountabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */; };
@@ -146,6 +142,7 @@
 		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		13707278B6171125FF34B453 /* AccountabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityView.swift; sourceTree = "<group>"; };
 		14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockApp.swift; sourceTree = "<group>"; };
+		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1E2D0D2399C949DC7600E001 /* FocusSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusSession.swift; sourceTree = "<group>"; };
 		21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecorder.swift; sourceTree = "<group>"; };
 		223855CB6620CCBF81459D3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -175,7 +172,6 @@
 		8478883EBA61B7089072B764 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		88407A534BE54012983883BE /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
 		898A6C5E9A8DFDF5B3DA8FD6 /* ActivityScheduleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityScheduleManager.swift; sourceTree = "<group>"; };
-		A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeSnapshot.swift; sourceTree = "<group>"; };
 		A7965C0110E68B05051C4E93 /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		A8279A2418C396D8D6161793 /* AppGroupStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStorage.swift; sourceTree = "<group>"; };
 		ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
@@ -287,7 +283,6 @@
 			children = (
 				D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */,
 				B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */,
-				A1A43CFE368D4EE701988316 /* ScreenTimeSnapshot.swift */,
 				74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */,
 				E2726AD82516A5DC3C92E130 /* SharedEnums.swift */,
 			);
@@ -443,6 +438,7 @@
 				7267C7115B7BF463A1917D10 /* Features */,
 				74A1658E59CD4C470D0B5A02 /* Resources */,
 				F5753251B13D3012A1BD8F71 /* ContentView.swift */,
+				1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */,
 				6D9EB63D339C1A7AE3D52179 /* ZenLock.entitlements */,
 				14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */,
 			);
@@ -650,6 +646,7 @@
 			files = (
 				06A5D2CA33E836495D508530 /* Assets.xcassets in Resources */,
 				9B45B4287383632EFEA06D0E /* Localizable.xcstrings in Resources */,
+				0043ECC013F0C7BB05F66D40 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -691,7 +688,6 @@
 				6EF3E5F09034FDBA433921CF /* QuickFocusSheet.swift in Sources */,
 				F4C9102572CD749F3F6315DB /* ScheduleEvaluator.swift in Sources */,
 				9F0E87B5F7DEDC945638F54B /* ScreenTimeManager.swift in Sources */,
-				B408C9493D19ADCB3B80CAF9 /* ScreenTimeSnapshot.swift in Sources */,
 				6DC75C1A5435F55FDBB22CC9 /* ScreenTimeView.swift in Sources */,
 				95EABD0ED9B337B0602352FC /* SelectionCoder.swift in Sources */,
 				5C3D19198FAD0E6CC45CAC89 /* SelectionPreview.swift in Sources */,
@@ -718,7 +714,6 @@
 			files = (
 				DBE9872807CC3F80630AA855 /* Constants.swift in Sources */,
 				C870ED4E9C4F210D014C7536 /* ScheduleEvaluator.swift in Sources */,
-				E199BAD5A595EB45708D64B5 /* ScreenTimeSnapshot.swift in Sources */,
 				3508769C0004F32C8A2CC0DA /* SharedBlockGroup.swift in Sources */,
 				B44BF950C7459311A683886C /* SharedEnums.swift in Sources */,
 				FDFAC32768CB1409EAB92AA4 /* ShieldConfigurationExtension.swift in Sources */,
@@ -731,7 +726,6 @@
 			files = (
 				A3B0E335E78CBB34D13867F4 /* Constants.swift in Sources */,
 				F6CFB381FCAFBC2AF381A302 /* ScheduleEvaluator.swift in Sources */,
-				BF577FE0CEF1CE6DA84FE486 /* ScreenTimeSnapshot.swift in Sources */,
 				8EBF3561618F0A374B16D9D0 /* SharedBlockGroup.swift in Sources */,
 				C35FDFC1371F02A02F452CE6 /* SharedEnums.swift in Sources */,
 				13B841F04D26293196957F9A /* ShieldActionExtension.swift in Sources */,
@@ -745,7 +739,6 @@
 				4B111BBEE417B921CECB6D25 /* Constants.swift in Sources */,
 				B71F979C9735F48DB8A0362C /* DeviceActivityMonitorExtension.swift in Sources */,
 				E12AFA598B5C79089F6504AC /* ScheduleEvaluator.swift in Sources */,
-				23E842AD809CF5C85A52B5DA /* ScreenTimeSnapshot.swift in Sources */,
 				99AB1A7D79F5EC53A7F0B7A9 /* SharedBlockGroup.swift in Sources */,
 				FEEC793CC2EC31150A830104 /* SharedEnums.swift in Sources */,
 			);
@@ -760,7 +753,6 @@
 				5E8A4D7128EF455847FF39D0 /* PerAppScene.swift in Sources */,
 				22FF508118E0BB3C7B1ED841 /* PerCategoryScene.swift in Sources */,
 				88DB66881C6946A9367494D6 /* ScheduleEvaluator.swift in Sources */,
-				52B6EAD69C9BC73BF9D2E420 /* ScreenTimeSnapshot.swift in Sources */,
 				E11F2898454979B27C073EFC /* SharedBlockGroup.swift in Sources */,
 				00874C9EB778C2AA418B6665 /* SharedEnums.swift in Sources */,
 				7CAE18E62AA67DF4C99D4557 /* TotalUsageScene.swift in Sources */,

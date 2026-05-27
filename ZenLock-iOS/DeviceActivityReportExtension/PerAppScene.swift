@@ -2,9 +2,6 @@ import DeviceActivity
 import FamilyControls
 import ManagedSettings
 import SwiftUI
-import os.log
-
-private let extLog = Logger(subsystem: "com.humblebee.zenlock", category: "PerAppScene")
 
 struct PerAppScene: @preconcurrency DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .init("perApp")
@@ -15,7 +12,6 @@ struct PerAppScene: @preconcurrency DeviceActivityReportScene {
     }
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> PerAppData {
-        extLog.notice("makeConfiguration START")
         var totalDuration: TimeInterval = 0
         var perApp: [String: (token: ApplicationToken?, name: String, duration: TimeInterval)] = [:]
 
@@ -38,33 +34,15 @@ struct PerAppScene: @preconcurrency DeviceActivityReportScene {
             }
         }
 
-        let sortedTuples = perApp
+        let rows = perApp
             .filter { $0.value.duration >= 60 }
             .sorted { $0.value.duration > $1.value.duration }
+            .map {
+                PerAppRow(token: $0.value.token, name: $0.value.name, duration: $0.value.duration)
+            }
 
-        let rows = sortedTuples.map {
-            PerAppRow(token: $0.value.token, name: $0.value.name, duration: $0.value.duration)
-        }
-
-        let snapshotRows = sortedTuples.map {
-            ScreenTimeSnapshot.Row(
-                bundleID: $0.key,
-                name: $0.value.name,
-                duration: $0.value.duration
-            )
-        }
-        let snapshot = ScreenTimeSnapshot(
-            totalDuration: totalDuration,
-            rows: snapshotRows,
-            capturedAt: Date()
-        )
-        ScreenTimeSnapshot.save(snapshot)
-        let verifyLoad = ScreenTimeSnapshot.load()
-        extLog.notice("makeConfiguration SAVED — total=\(totalDuration, format: .fixed(precision: 0))s rows=\(rows.count) loadVerify=\(verifyLoad != nil)")
-
-        let defaults = UserDefaults(suiteName: "group.com.humblebee.zenlock")
-        defaults?.synchronize()
-        let storedGoal = defaults?.integer(forKey: "zen_daily_goal_minutes") ?? 0
+        let storedGoal = UserDefaults(suiteName: Constants.appGroupID)?
+            .integer(forKey: Constants.Keys.dailyGoalMinutes) ?? 0
         let goalMinutes = storedGoal > 0 ? storedGoal : 180
 
         return PerAppData(totalDuration: totalDuration, rows: rows, goalMinutes: goalMinutes)
