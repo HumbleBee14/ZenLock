@@ -6,6 +6,10 @@ struct DashboardView: View {
     @Environment(DeepLinkRouter.self) private var router
     @State private var viewModel = DashboardViewModel()
     @State private var showQuickFocus = false
+    @State private var activeFocus: ActiveSession?
+    @State private var now = Date()
+
+    private let focusTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack {
@@ -51,10 +55,23 @@ struct DashboardView: View {
             }
             .onAppear {
                 viewModel.loadGroups(context: modelContext)
+                activeFocus = ActiveSession.load()
                 if router.consume() == .quickFocus { showQuickFocus = true }
             }
             .onChange(of: router.pending) { _, _ in
                 if router.consume() == .quickFocus { showQuickFocus = true }
+            }
+            .onChange(of: showQuickFocus) { _, _ in
+                activeFocus = ActiveSession.load()
+            }
+            .onReceive(focusTimer) { _ in
+                now = Date()
+                let fresh = ActiveSession.load()
+                if let f = fresh, now >= f.endsAt {
+                    activeFocus = nil
+                } else {
+                    activeFocus = fresh
+                }
             }
         }
     }
@@ -90,29 +107,79 @@ struct DashboardView: View {
 
     private var quickFocusButton: some View {
         Button { showQuickFocus = true } label: {
-            GlassCard {
-                HStack(spacing: ZenTheme.Spacing.md) {
-                    Image(systemName: "timer")
-                        .font(.title2)
-                        .foregroundStyle(ZenTheme.accent)
-                        .frame(width: 44, height: 44)
-                        .background(Circle().fill(ZenTheme.accent.opacity(0.15)))
-                    VStack(alignment: .leading) {
-                        Text("Quick Focus Session")
-                            .font(ZenTheme.headline)
-                            .foregroundStyle(ZenTheme.text)
-                        Text("Block apps right now for a set amount of time")
-                            .font(ZenTheme.caption)
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(ZenTheme.textSecondary)
-                }
-                .padding(ZenTheme.Spacing.md)
+            if let a = activeFocus {
+                activeFocusCard(a)
+            } else {
+                idleFocusCard
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private var idleFocusCard: some View {
+        GlassCard {
+            HStack(spacing: ZenTheme.Spacing.md) {
+                Image(systemName: "timer")
+                    .font(.title2)
+                    .foregroundStyle(ZenTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(Circle().fill(ZenTheme.accent.opacity(0.15)))
+                VStack(alignment: .leading) {
+                    Text("Quick Focus Session")
+                        .font(ZenTheme.headline)
+                        .foregroundStyle(ZenTheme.text)
+                    Text("Block apps right now for a set amount of time")
+                        .font(ZenTheme.caption)
+                        .foregroundStyle(ZenTheme.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(ZenTheme.textSecondary)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private func activeFocusCard(_ a: ActiveSession) -> some View {
+        let coolingDown = (a.cooldownEndsAt.map { now < $0 }) ?? false
+        return GlassCard {
+            HStack(spacing: ZenTheme.Spacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(ZenTheme.success.opacity(0.18))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "shield.lefthalf.filled")
+                        .font(.title2)
+                        .foregroundStyle(ZenTheme.success)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(coolingDown ? ZenTheme.accent : ZenTheme.success)
+                            .frame(width: 8, height: 8)
+                        Text(coolingDown ? "Cool-down in progress" : "Focus session active")
+                            .font(ZenTheme.headline)
+                            .foregroundStyle(ZenTheme.text)
+                    }
+                    Text("\(formattedRemaining(a.endsAt)) until apps unlock")
+                        .font(ZenTheme.caption.monospacedDigit())
+                        .foregroundStyle(ZenTheme.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(ZenTheme.textSecondary)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private func formattedRemaining(_ end: Date) -> String {
+        let total = max(0, Int(end.timeIntervalSince(now)))
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
+        return String(format: "%02d:%02d", m, s)
     }
 
     private var groupsSection: some View {

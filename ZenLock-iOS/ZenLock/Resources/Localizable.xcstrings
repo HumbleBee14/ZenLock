@@ -13,6 +13,12 @@
     "%@ min per open" : {
 
     },
+    "%@ until apps unlock" : {
+
+    },
+    "%@m" : {
+
+    },
     "🔒 Deep Focus Mode" : {
       "extractionState" : "manual"
     },
@@ -58,9 +64,6 @@
     "Block during scheduled hours" : {
       "extractionState" : "manual"
     },
-    "Block everything, right now." : {
-
-    },
     "Block Groups" : {
       "extractionState" : "manual"
     },
@@ -77,6 +80,9 @@
 
     },
     "Cool-down ends %@. You'll get a notification when the unlock window opens." : {
+
+    },
+    "Cool-down Timerr" : {
 
     },
     "Create Group" : {
@@ -98,9 +104,6 @@
       "extractionState" : "manual"
     },
     "Focus Score" : {
-
-    },
-    "Focus session active" : {
 
     },
     "Four layers of friction" : {
@@ -139,9 +142,6 @@
     "Max %@ opens / day" : {
 
     },
-    "minutes" : {
-
-    },
     "Name" : {
 
     },
@@ -159,9 +159,6 @@
     },
     "Not Authorized" : {
       "extractionState" : "manual"
-    },
-    "One-shot session. Apps unlock when the timer ends." : {
-
     },
     "over the last 7 days" : {
 
@@ -232,17 +229,11 @@
     "Time-Based" : {
       "extractionState" : "manual"
     },
-    "until apps unlock" : {
-
-    },
     "Usage Limit" : {
       "extractionState" : "manual"
     },
     "Usage-Based" : {
       "extractionState" : "manual"
-    },
-    "What to block" : {
-
     },
     "ZenLock" : {
       "extractionState" : "manual"

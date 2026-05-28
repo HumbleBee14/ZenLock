@@ -2,7 +2,8 @@ import DeviceActivity
 import SwiftUI
 
 @main
-struct ZenLockReportExtension: DeviceActivityReportExtension {
+struct ZenLockReportExtension: @preconcurrency DeviceActivityReportExtension {
+    @MainActor
     var body: some DeviceActivityReportScene {
         TotalUsageScene()
         PerCategoryScene()
