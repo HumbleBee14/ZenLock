@@ -61,6 +61,9 @@
     "Block apps right now for a set amount of time" : {
       "extractionState" : "manual"
     },
+    "Block apps, right now." : {
+
+    },
     "Block during scheduled hours" : {
       "extractionState" : "manual"
     },
@@ -82,7 +85,7 @@
     "Cool-down ends %@. You'll get a notification when the unlock window opens." : {
 
     },
-    "Cool-down Timerr" : {
+    "Cool-down to stop" : {
 
     },
     "Create Group" : {

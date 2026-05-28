@@ -233,7 +233,9 @@ struct GroupFormView: View {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
                 Text("Time Limit").font(ZenTheme.headline).foregroundStyle(ZenTheme.text)
                 HStack {
-                    Text("\(draft.usageLimitMinutes) min").font(ZenTheme.title2).foregroundStyle(ZenTheme.text)
+                    Text(usageLimitLabel(draft.usageLimitMinutes))
+                        .font(ZenTheme.title2)
+                        .foregroundStyle(ZenTheme.text)
                     Spacer()
                     Picker("Period", selection: $draft.usagePeriod) {
                         Text("Per Hour").tag(UsagePeriod.hourly)
@@ -241,11 +243,27 @@ struct GroupFormView: View {
                     }
                     .pickerStyle(.segmented)
                     .frame(width: 160)
+                    .onChange(of: draft.usagePeriod) { _, _ in
+                        let opts = usageLimitOptions
+                        if !opts.contains(draft.usageLimitMinutes) {
+                            draft.usageLimitMinutes = opts.min(by: { abs($0 - draft.usageLimitMinutes) < abs($1 - draft.usageLimitMinutes) }) ?? opts[0]
+                        }
+                    }
                 }
                 Slider(value: Binding(
-                    get: { Double(draft.usageLimitMinutes) },
-                    set: { draft.usageLimitMinutes = Int($0) }
-                ), in: 5...480, step: 5)
+                    get: {
+                        let opts = usageLimitOptions
+                        let idx = opts.firstIndex(of: draft.usageLimitMinutes)
+                            ?? opts.firstIndex(where: { $0 >= draft.usageLimitMinutes })
+                            ?? (opts.count - 1)
+                        return Double(idx)
+                    },
+                    set: { newValue in
+                        let opts = usageLimitOptions
+                        let idx = min(max(Int(newValue.rounded()), 0), opts.count - 1)
+                        draft.usageLimitMinutes = opts[idx]
+                    }
+                ), in: 0...Double(max(usageLimitOptions.count - 1, 1)), step: 1)
                 .tint(ZenTheme.primary)
 
                 Divider().background(ZenTheme.surfaceLight.opacity(0.5))
@@ -261,7 +279,7 @@ struct GroupFormView: View {
                     Slider(value: Binding(
                         get: { Double(draft.maxOpensPerDay) },
                         set: { draft.maxOpensPerDay = Int($0) }
-                    ), in: 1...50, step: 1)
+                    ), in: 1...120, step: 1)
                     .tint(ZenTheme.primary)
                 }
 
@@ -276,7 +294,7 @@ struct GroupFormView: View {
                     Slider(value: Binding(
                         get: { Double(draft.maxMinutesPerOpen) },
                         set: { draft.maxMinutesPerOpen = Int($0) }
-                    ), in: 1...30, step: 1)
+                    ), in: 1...50, step: 1)
                     .tint(ZenTheme.primary)
                 }
             }
@@ -284,6 +302,26 @@ struct GroupFormView: View {
         }
         .disabled(lockStructure)
         .opacity(lockStructure ? 0.6 : 1)
+    }
+
+    private var usageLimitOptions: [Int] {
+        switch draft.usagePeriod {
+        case .hourly:
+            return [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+        case .daily:
+            // 15-min steps to 1h, then 30-min steps to 12h.
+            var opts = [15, 30, 45, 60]
+            opts.append(contentsOf: stride(from: 90, through: 720, by: 30))
+            return opts
+        }
+    }
+
+    private func usageLimitLabel(_ m: Int) -> String {
+        if m < 60 { return "\(m) min" }
+        let h = m / 60
+        let rem = m % 60
+        if rem == 0 { return "\(h) hr" }
+        return "\(h) hr \(rem) min"
     }
 
     private var deepFocusCard: some View {

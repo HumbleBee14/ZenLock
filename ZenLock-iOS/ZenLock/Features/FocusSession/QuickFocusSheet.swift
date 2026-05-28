@@ -82,7 +82,7 @@ struct QuickFocusSheet: View {
             ZStack {
                 ZenTheme.background.ignoresSafeArea()
                 ScrollView {
-                    VStack(spacing: ZenTheme.Spacing.lg) {
+                    VStack(spacing: ZenTheme.Spacing.md) {
                         if let active {
                             activeCard(active)
                         } else {
@@ -90,10 +90,15 @@ struct QuickFocusSheet: View {
                             durationCard
                             cooldownConfigCard
                             appsCard
-                            startButton
                         }
                     }
                     .padding(ZenTheme.Spacing.md)
+                    .padding(.bottom, 100)
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if active == nil {
+                    startBar
                 }
             }
             .navigationTitle("Quick Focus")
@@ -248,19 +253,20 @@ private var extendPickerSheet: some View {
             Image(systemName: "timer")
                 .font(.system(size: 40))
                 .foregroundStyle(ZenTheme.primary)
+            Text("Block apps, right now.")
+                .font(ZenTheme.title2)
+                .foregroundStyle(ZenTheme.text)
         }
         .padding(.top, ZenTheme.Spacing.md)
     }
 
     private var durationCard: some View {
-        GlassCard {
-            WheelDurationPicker(
-                options: Self.durationOptions,
-                selectionMinutes: $durationMinutes
-            )
-            .frame(height: 140)
-            .padding(ZenTheme.Spacing.sm)
-        }
+        WheelDurationPicker(
+            options: Self.durationOptions,
+            selectionMinutes: $durationMinutes
+        )
+        .frame(height: 180)
+        .padding(.vertical, ZenTheme.Spacing.md)
     }
 
     private var cooldownConfigCard: some View {
@@ -268,7 +274,7 @@ private var extendPickerSheet: some View {
             HStack(spacing: ZenTheme.Spacing.md) {
                 Image(systemName: "hourglass")
                     .foregroundStyle(ZenTheme.accent)
-                Text("Cool-down Timerr")
+                Text("Cool-down to stop")
                     .font(ZenTheme.callout)
                     .foregroundStyle(ZenTheme.text)
                 Spacer()
@@ -294,10 +300,31 @@ private var extendPickerSheet: some View {
     private var appsCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
-                SelectionPreview(selection: selection)
-                ZenButton(title: hasSelection ? "Edit apps" : "Choose apps", icon: "plus.app", style: .secondary) {
-                    showPicker = true
+                if hasSelection {
+                    SelectionPreview(selection: selection)
                 }
+                Button {
+                    showPicker = true
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: hasSelection ? "pencil" : "plus.app.fill")
+                            .font(.body.weight(.semibold))
+                        Text(hasSelection ? "Edit apps" : "Choose apps to block")
+                            .font(ZenTheme.body.weight(.semibold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .opacity(0.6)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, ZenTheme.Spacing.md)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: ZenTheme.CornerRadius.md, style: .continuous)
+                            .fill(ZenTheme.primary)
+                    )
+                }
+                .buttonStyle(.plain)
             }
             .padding(ZenTheme.Spacing.md)
         }
@@ -309,6 +336,21 @@ private var extendPickerSheet: some View {
         }
         .disabled(!hasSelection)
         .opacity(hasSelection ? 1 : 0.5)
+    }
+
+    private var startBar: some View {
+        VStack(spacing: 0) {
+            LinearGradient(
+                colors: [ZenTheme.background.opacity(0), ZenTheme.background],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(height: 24)
+
+            startButton
+                .padding(.horizontal, ZenTheme.Spacing.md)
+                .padding(.bottom, ZenTheme.Spacing.sm)
+                .background(ZenTheme.background)
+        }
     }
 
     private var hasSelection: Bool {
