@@ -235,9 +235,6 @@
     "until apps unlock" : {
 
     },
-    "Usage data is rendered inside Apple's sandboxed extension. ZenLock never sees the raw numbers — they stay on your device." : {
-
-    },
     "Usage Limit" : {
       "extractionState" : "manual"
     },

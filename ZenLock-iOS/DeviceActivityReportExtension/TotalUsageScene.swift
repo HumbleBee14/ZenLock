@@ -12,26 +12,17 @@ struct TotalUsageScene: @preconcurrency DeviceActivityReportScene {
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> TotalUsageData {
         var totalDuration: TimeInterval = 0
-        var appCount = 0
         var pickupCount = 0
 
         for await activity in data {
             for await segment in activity.activitySegments {
                 totalDuration += segment.totalActivityDuration
                 pickupCount += segment.totalPickupsWithoutApplicationActivity
-                for await categoryActivity in segment.categories {
-                    for await appActivity in categoryActivity.applications {
-                        if appActivity.totalActivityDuration > 0 {
-                            appCount += 1
-                        }
-                    }
-                }
             }
         }
 
         return TotalUsageData(
             totalDuration: totalDuration,
-            uniqueAppsUsed: appCount,
             pickups: pickupCount
         )
     }
@@ -39,7 +30,6 @@ struct TotalUsageScene: @preconcurrency DeviceActivityReportScene {
 
 struct TotalUsageData {
     let totalDuration: TimeInterval
-    let uniqueAppsUsed: Int
     let pickups: Int
 }
 
@@ -47,12 +37,9 @@ struct TotalUsageView: View {
     let data: TotalUsageData
 
     var body: some View {
-        VStack(spacing: 16) {
-            statTile(value: formatted(data.totalDuration), label: "Total screen time", icon: "hourglass")
-            HStack(spacing: 12) {
-                statTile(value: "\(data.uniqueAppsUsed)", label: "Apps used", icon: "square.grid.2x2.fill")
-                statTile(value: "\(data.pickups)", label: "Pickups", icon: "hand.tap.fill")
-            }
+        HStack(spacing: 12) {
+            statTile(value: formatted(data.totalDuration), label: "Screen time", icon: "hourglass")
+            statTile(value: "\(data.pickups)", label: "Pickups", icon: "hand.tap.fill")
         }
     }
 

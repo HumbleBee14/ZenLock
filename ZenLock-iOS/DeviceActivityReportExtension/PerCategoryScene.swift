@@ -39,8 +39,6 @@ struct PerCategoryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("By Category")
-                .font(.headline)
             if data.rows.isEmpty {
                 Text("No usage recorded for this range.")
                     .font(.caption)

@@ -9,10 +9,10 @@ enum StreakCalculator {
         let completedSessions: Int
     }
 
-    /// Compute streak, best streak, and focus score from sessions. Focus day = completed or ≥15 min.
+    /// Compute streak, best streak, and focus score from sessions. Focus day = at least one completed session.
     static func summary(from sessions: [FocusSession], calendar: Calendar = .current, today: Date = Date()) -> Summary {
         let focusDays = Set(sessions
-            .filter { $0.wasCompleted || $0.actualDuration >= 15 * 60 }
+            .filter { $0.wasCompleted }
             .compactMap { calendar.dateInterval(of: .day, for: $0.startedAt)?.start })
 
         var currentStreak = 0

@@ -18,36 +18,96 @@ struct AnalyticsView: View {
     }
 
     @State private var range: Range = .today
+    @State private var historyExpanded: Bool = false
 
     var body: some View {
         ZStack {
             ZenTheme.background.ignoresSafeArea()
             ScrollView {
-                VStack(spacing: ZenTheme.Spacing.lg) {
+                VStack(spacing: ZenTheme.Spacing.md) {
                     streakCard
                     rangePicker
-                    GlassCard {
-                        DeviceActivityReport(
-                            DeviceActivityReport.Context("totalUsage"),
-                            filter: filter(for: range)
-                        )
-                        .padding(ZenTheme.Spacing.md)
-                    }
-                    GlassCard {
-                        DeviceActivityReport(
-                            DeviceActivityReport.Context("perCategory"),
-                            filter: filter(for: range)
-                        )
-                        .padding(ZenTheme.Spacing.md)
-                    }
+                    reportContainer(context: "totalUsage", height: 130)
+                    reportContainer(context: "perCategory", height: 420)
                     historySection
-                    privacyNote
                 }
-                .padding(ZenTheme.Spacing.md)
+                .padding(.horizontal, ZenTheme.Spacing.md)
+                .padding(.vertical, ZenTheme.Spacing.sm)
             }
         }
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func reportContainer(context: String, height: CGFloat) -> some View {
+        GlassCard {
+            nonInteractiveReport(context: context, height: height)
+                .padding(.horizontal, ZenTheme.Spacing.sm)
+                .padding(.vertical, 6)
+        }
+    }
+
+    private var historySection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 0) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) { historyExpanded.toggle() }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "list.bullet")
+                            .foregroundStyle(ZenTheme.textSecondary)
+                        Text("Recent Sessions")
+                            .font(ZenTheme.headline)
+                            .foregroundStyle(ZenTheme.text)
+                        Spacer()
+                        if !sessions.isEmpty {
+                            Text("\(min(sessions.count, 10))")
+                                .font(ZenTheme.caption.monospacedDigit())
+                                .foregroundStyle(ZenTheme.textSecondary)
+                        }
+                        Image(systemName: "chevron.down")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(ZenTheme.textSecondary)
+                            .rotationEffect(.degrees(historyExpanded ? 180 : 0))
+                    }
+                    .padding(ZenTheme.Spacing.md)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if historyExpanded {
+                    Divider().background(ZenTheme.textSecondary.opacity(0.15))
+                    VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
+                        if sessions.isEmpty {
+                            Text("Start a focus session and it'll show up here.")
+                                .font(ZenTheme.caption)
+                                .foregroundStyle(ZenTheme.textSecondary)
+                        } else {
+                            ForEach(Array(sessions.prefix(10))) { session in
+                                HStack {
+                                    Image(systemName: session.wasCompleted ? "checkmark.circle.fill" : "circle.dashed")
+                                        .foregroundStyle(session.wasCompleted ? ZenTheme.success : ZenTheme.textSecondary)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(session.groupName).font(ZenTheme.body).foregroundStyle(ZenTheme.text)
+                                        Text(session.startedAt, format: .relative(presentation: .named))
+                                            .font(ZenTheme.caption)
+                                            .foregroundStyle(ZenTheme.textSecondary)
+                                    }
+                                    Spacer()
+                                    Text(durationLabel(session.actualDuration))
+                                        .font(ZenTheme.caption.monospacedDigit())
+                                        .foregroundStyle(ZenTheme.textSecondary)
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, ZenTheme.Spacing.md)
+                    .padding(.bottom, ZenTheme.Spacing.md)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+        }
     }
 
     private var summary: StreakCalculator.Summary {
@@ -95,59 +155,27 @@ struct AnalyticsView: View {
         }
     }
 
-    private var historySection: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
-                Text("Recent Sessions")
-                    .font(ZenTheme.headline)
-                    .foregroundStyle(ZenTheme.text)
-                if sessions.isEmpty {
-                    Text("Start a focus session and it'll show up here.")
-                        .font(ZenTheme.caption)
-                        .foregroundStyle(ZenTheme.textSecondary)
-                } else {
-                    ForEach(Array(sessions.prefix(10))) { session in
-                        HStack {
-                            Image(systemName: session.wasCompleted ? "checkmark.circle.fill" : "circle.dashed")
-                                .foregroundStyle(session.wasCompleted ? ZenTheme.success : ZenTheme.textSecondary)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(session.groupName).font(ZenTheme.body).foregroundStyle(ZenTheme.text)
-                                Text(session.startedAt, format: .relative(presentation: .named))
-                                    .font(ZenTheme.caption)
-                                    .foregroundStyle(ZenTheme.textSecondary)
-                            }
-                            Spacer()
-                            Text(durationLabel(session.actualDuration))
-                                .font(ZenTheme.caption.monospacedDigit())
-                                .foregroundStyle(ZenTheme.textSecondary)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-            }
-            .padding(ZenTheme.Spacing.md)
-        }
-    }
-
-    private func durationLabel(_ seconds: TimeInterval) -> String {
+private func durationLabel(_ seconds: TimeInterval) -> String {
         let m = Int(seconds / 60)
         if m < 60 { return "\(m)m" }
         return "\(m / 60)h \(m % 60)m"
     }
+
+    private func nonInteractiveReport(context: String, height: CGFloat) -> some View {
+        DeviceActivityReport(
+            DeviceActivityReport.Context(context),
+            filter: filter(for: range)
+        )
+        .frame(height: height)
+        .allowsHitTesting(false)
+    }
+
 
     private var rangePicker: some View {
         Picker("Range", selection: $range) {
             ForEach(Range.allCases) { r in Text(r.label).tag(r) }
         }
         .pickerStyle(.segmented)
-    }
-
-    private var privacyNote: some View {
-        Text("Usage data is rendered inside Apple's sandboxed extension. ZenLock never sees the raw numbers — they stay on your device.")
-            .font(ZenTheme.caption)
-            .foregroundStyle(ZenTheme.textSecondary)
-            .multilineTextAlignment(.center)
-            .padding(.top, ZenTheme.Spacing.sm)
     }
 
     private func filter(for range: Range) -> DeviceActivityFilter {
@@ -167,3 +195,4 @@ struct AnalyticsView: View {
         )
     }
 }
+
