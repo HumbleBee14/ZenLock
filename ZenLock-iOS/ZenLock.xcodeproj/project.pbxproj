@@ -138,11 +138,11 @@
 /* Begin PBXFileReference section */
 		03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeView.swift; sourceTree = "<group>"; };
 		05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		13707278B6171125FF34B453 /* AccountabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityView.swift; sourceTree = "<group>"; };
 		14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockApp.swift; sourceTree = "<group>"; };
-		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1E2D0D2399C949DC7600E001 /* FocusSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusSession.swift; sourceTree = "<group>"; };
 		21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecorder.swift; sourceTree = "<group>"; };
 		223855CB6620CCBF81459D3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -160,7 +160,7 @@
 		4DB812D2BA2B97210A54F092 /* CreateGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupView.swift; sourceTree = "<group>"; };
 		53D97839F0D12E2E1F8B1DEB /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 		59C21EDEB20C0158FF35BB68 /* ShimmerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerEffect.swift; sourceTree = "<group>"; };
-		59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = DeviceActivityReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = DeviceActivityReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DB4341A01097A5CB98FE73D /* DeviceActivityReportExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DeviceActivityReportExtension.entitlements; sourceTree = "<group>"; };
 		6B63757CB990E8EA6113BA88 /* TotalUsageScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TotalUsageScene.swift; sourceTree = "<group>"; };
 		6D9EB63D339C1A7AE3D52179 /* ZenLock.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZenLock.entitlements; sourceTree = "<group>"; };
@@ -186,7 +186,7 @@
 		C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDraft.swift; sourceTree = "<group>"; };
 		C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityManager.swift; sourceTree = "<group>"; };
 		C5CBA8C07B8331C410BED093 /* ZenAppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenAppPickerSheet.swift; sourceTree = "<group>"; };
-		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA2B2383DF70EBD52A8E8875 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		CC97810203DA62035C511E67 /* SelectionCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCoder.swift; sourceTree = "<group>"; };
 		CDF2006FA47B38A32466125B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -195,7 +195,7 @@
 		D98B852770CBC75C77B40F69 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DA04357C2A813D332A0AB784 /* PulseCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseCircle.swift; sourceTree = "<group>"; };
 		DAD2BAC9DB917AD1C6F88F0F /* ZenCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenCard.swift; sourceTree = "<group>"; };
-		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF0BA8A688D3B38DD2C29687 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		E2726AD82516A5DC3C92E130 /* SharedEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedEnums.swift; sourceTree = "<group>"; };
 		E44D38D937F80C62479ECD3E /* ZenButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenButton.swift; sourceTree = "<group>"; };
@@ -853,14 +853,17 @@
 				CODE_SIGN_ENTITLEMENTS = ZenLock/ZenLock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ZenLock/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZenLock;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -871,14 +874,17 @@
 				CODE_SIGN_ENTITLEMENTS = ZenLock/ZenLock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ZenLock/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZenLock;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -894,7 +900,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldConfiguration;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -910,7 +916,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -926,7 +932,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldAction;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -942,7 +948,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityMonitor;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -958,7 +964,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -974,7 +980,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldAction;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -990,7 +996,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.ShieldConfiguration;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1074,7 +1080,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityMonitor;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
