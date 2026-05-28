@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00020E520228EA1D8E55C739 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0BA8A688D3B38DD2C29687 /* AppTheme.swift */; };
 		0043ECC013F0C7BB05F66D40 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */; };
+		0050DE5EBF9FE67A064EC3C6 /* DeviceActivityReportExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		00874C9EB778C2AA418B6665 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		06A5D2CA33E836495D508530 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD3BCDEDD9E8EDFAD0B6BA49 /* Assets.xcassets */; };
 		06D92B00F9389BFDE3AFDA60 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8280FAFAD080C479C9B257 /* NotificationManager.swift */; };
@@ -21,6 +22,7 @@
 		298D4DEF329F97DAFCAC4334 /* GroupDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */; };
 		29A7FC7126029071BCCE0F77 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5753251B13D3012A1BD8F71 /* ContentView.swift */; };
 		2C17A17F656EDAB5D97ABB63 /* DeviceActivityMonitorExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2F26F79383AA73EA58F116CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF58FEA5534B2637987D8603 /* Assets.xcassets */; };
 		3508769C0004F32C8A2CC0DA /* SharedBlockGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */; };
 		3ABDA887850297802944DC99 /* ShieldActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		403D89F9ED0F449726C4B030 /* ZenButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44D38D937F80C62479ECD3E /* ZenButton.swift */; };
@@ -54,7 +56,6 @@
 		9F0E87B5F7DEDC945638F54B /* ScreenTimeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28819B79F42B36191AC45E5A /* ScreenTimeManager.swift */; };
 		9FD08E66691813CB75FEFAC7 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */; };
 		A3B0E335E78CBB34D13867F4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */; };
-		AD251D83EBB005CB36117CA2 /* DeviceActivityReportExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B15100BABD61322A8B13F4D2 /* FocusSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2D0D2399C949DC7600E001 /* FocusSession.swift */; };
 		B44BF950C7459311A683886C /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		B493C2A200BF277346EE9262 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
@@ -119,6 +120,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		3E266EF64079A4BFE430F503 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				0050DE5EBF9FE67A064EC3C6 /* DeviceActivityReportExtension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52F21EC3A88B330FFC023DB1 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,7 +140,6 @@
 				2C17A17F656EDAB5D97ABB63 /* DeviceActivityMonitorExtension.appex in Embed Foundation Extensions */,
 				61678F8157C56B635AC21E6F /* ShieldConfigurationExtension.appex in Embed Foundation Extensions */,
 				3ABDA887850297802944DC99 /* ShieldActionExtension.appex in Embed Foundation Extensions */,
-				AD251D83EBB005CB36117CA2 /* DeviceActivityReportExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -138,8 +149,8 @@
 /* Begin PBXFileReference section */
 		03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeView.swift; sourceTree = "<group>"; };
 		05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		13707278B6171125FF34B453 /* AccountabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityView.swift; sourceTree = "<group>"; };
 		14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockApp.swift; sourceTree = "<group>"; };
 		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -160,7 +171,7 @@
 		4DB812D2BA2B97210A54F092 /* CreateGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupView.swift; sourceTree = "<group>"; };
 		53D97839F0D12E2E1F8B1DEB /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 		59C21EDEB20C0158FF35BB68 /* ShimmerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerEffect.swift; sourceTree = "<group>"; };
-		59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = DeviceActivityReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = DeviceActivityReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DB4341A01097A5CB98FE73D /* DeviceActivityReportExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DeviceActivityReportExtension.entitlements; sourceTree = "<group>"; };
 		6B63757CB990E8EA6113BA88 /* TotalUsageScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TotalUsageScene.swift; sourceTree = "<group>"; };
 		6D9EB63D339C1A7AE3D52179 /* ZenLock.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZenLock.entitlements; sourceTree = "<group>"; };
@@ -175,6 +186,7 @@
 		A7965C0110E68B05051C4E93 /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		A8279A2418C396D8D6161793 /* AppGroupStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStorage.swift; sourceTree = "<group>"; };
 		ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
+		AF58FEA5534B2637987D8603 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEvaluator.swift; sourceTree = "<group>"; };
 		BB020DD6D16C2F15BACFAAEA /* ShieldActionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShieldActionExtension.entitlements; sourceTree = "<group>"; };
 		BBDE7A7685CA05E37ED69E04 /* DeviceActivityReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityReportExtension.swift; sourceTree = "<group>"; };
@@ -186,7 +198,7 @@
 		C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDraft.swift; sourceTree = "<group>"; };
 		C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityManager.swift; sourceTree = "<group>"; };
 		C5CBA8C07B8331C410BED093 /* ZenAppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenAppPickerSheet.swift; sourceTree = "<group>"; };
-		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA2B2383DF70EBD52A8E8875 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		CC97810203DA62035C511E67 /* SelectionCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCoder.swift; sourceTree = "<group>"; };
 		CDF2006FA47B38A32466125B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -437,6 +449,7 @@
 				83555FC14D25DB3D6266BF47 /* DesignSystem */,
 				7267C7115B7BF463A1917D10 /* Features */,
 				74A1658E59CD4C470D0B5A02 /* Resources */,
+				AF58FEA5534B2637987D8603 /* Assets.xcassets */,
 				F5753251B13D3012A1BD8F71 /* ContentView.swift */,
 				1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */,
 				6D9EB63D339C1A7AE3D52179 /* ZenLock.entitlements */,
@@ -526,7 +539,7 @@
 			);
 			productName = DeviceActivityReportExtension;
 			productReference = 59D02AA34C223B9379F9A27E /* DeviceActivityReportExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
+			productType = "com.apple.product-type.extensionkit-extension";
 		};
 		47755E245F0FE7CF084EC997 /* ShieldActionExtension */ = {
 			isa = PBXNativeTarget;
@@ -569,6 +582,7 @@
 				26A3227D838F6F8C01064EB3 /* Sources */,
 				9A5BA5297136950204D8E7D1 /* Resources */,
 				52F21EC3A88B330FFC023DB1 /* Embed Foundation Extensions */,
+				3E266EF64079A4BFE430F503 /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
@@ -592,7 +606,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					176E8E813F23EE75B4B5B608 = {
 						DevelopmentTeam = 252N2WS4Y3;
@@ -644,6 +658,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F26F79383AA73EA58F116CD /* Assets.xcassets in Resources */,
 				06A5D2CA33E836495D508530 /* Assets.xcassets in Resources */,
 				9B45B4287383632EFEA06D0E /* Localizable.xcstrings in Resources */,
 				0043ECC013F0C7BB05F66D40 /* PrivacyInfo.xcprivacy in Resources */,
@@ -789,6 +804,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -840,6 +856,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -853,13 +870,10 @@
 				CODE_SIGN_ENTITLEMENTS = ZenLock/ZenLock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ZenLock/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ZenLock;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -874,13 +888,10 @@
 				CODE_SIGN_ENTITLEMENTS = ZenLock/ZenLock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ZenLock/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ZenLock;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock;
 				SDKROOT = iphoneos;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -912,7 +923,6 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
@@ -960,7 +970,6 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.humblebee.zenlock.DeviceActivityReport;
 				SDKROOT = iphoneos;
@@ -1004,6 +1013,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1062,6 +1072,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

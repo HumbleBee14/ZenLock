@@ -51,6 +51,9 @@ targets:
       - target: ShieldConfigurationExtension
       - target: ShieldActionExtension
       - target: DeviceActivityReportExtension
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
 
   DeviceActivityMonitorExtension:
     type: app-extension
@@ -92,7 +95,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
 
   DeviceActivityReportExtension:
-    type: app-extension
+    type: extensionkit-extension
     platform: iOS
     sources:
       - path: DeviceActivityReportExtension
