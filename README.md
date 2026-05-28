@@ -6,12 +6,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Android](https://img.shields.io/badge/Android-Published-brightgreen.svg)](https://play.google.com/store/apps/details?id=com.grepguru.zenlock)
-[![iOS](https://img.shields.io/badge/iOS-In%20Development-orange.svg)](ZenLock-iOS/)
+[![iOS](https://img.shields.io/badge/iOS-Published-brightgreen.svg)](https://apps.apple.com/us/app/zenlock-focus-app-blocker/id6774016090)
 [![Downloads](https://img.shields.io/badge/Downloads-500%2B-brightgreen.svg)](https://play.google.com/store/apps/details?id=com.grepguru.zenlock)
 
 ZenLock is a productivity app that helps you maintain focus by blocking distracting applications during dedicated focus sessions. With an accountability system to prevent impulsive early exits, ZenLock keeps you committed to your goals.
 
-**Status**: Android published on Google Play. iOS in active development.
+**Status**: Android published on Google Play. iOS published on App Store.
 
 ## Why ZenLock?
 
@@ -47,6 +47,7 @@ Java + Android Accessibility Service. Published on Google Play.
 
 ### iOS
 Swift 6 + SwiftUI + Screen Time API. Built with native shields, friction screens, custom block UI, and a Home Screen widget.
+<a href="https://apps.apple.com/us/app/zenlock-focus-app-blocker/id6774016090" target="_blank">Get it on App Store</a>.
 
 
 ## Usage

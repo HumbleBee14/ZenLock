@@ -6,12 +6,13 @@ ZenLock is a digital-detox app that runs entirely on your device. We do not coll
 
 ## What ZenLock accesses
 
-| Permission | Why | Where it lives |
-| --- | --- | --- |
-| **Screen Time (Family Controls)** | To block selected apps via the Screen Time API. | On-device only. |
-| **App Selection** | When you pick apps to block, iOS returns *opaque tokens* — random identifiers we cannot decode. We never see the names or bundle IDs of the apps you choose. | On-device, inside an App Group container shared between ZenLock and its system extensions. |
-| **Notifications** | To warn you near usage limits and to schedule accountability nudges. | On-device only. |
-| **Device Activity** | Reports (Insights tab) render usage charts. The data is sandboxed inside Apple's `DeviceActivityReport` extension — ZenLock never sees the raw numbers. | On-device, inside Apple's sandbox. |
+| Permission | Why |
+| --- | --- |
+| **App Blocking** | To block selected apps during focus sessions. |
+| **Notifications** | To send you reminders and alerts during focus sessions. |
+| **Usage Reports** | To show you focus session statistics and trends. |
+
+All data stays on your device. We never see your app names, usage numbers, or any personal information.
 
 ## What ZenLock does NOT do
 

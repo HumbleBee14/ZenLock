@@ -19,25 +19,25 @@ ZenLock is a digital wellbeing app that runs entirely on your device. We do not 
 
 ### iOS
 
-ZenLock on iOS uses Apple's Screen Time API (Family Controls framework) to provide blocking and usage insights. Specifically:
+ZenLock on iOS uses Apple's built-in Screen Time framework to provide app blocking and usage tracking. Here's what happens:
 
-- **Family Controls authorization** — Required by iOS so ZenLock can block selected apps. Granted once during onboarding.
-- **App selection (FamilyActivityPicker)** — When you pick which apps to block, iOS returns *opaque tokens* — random identifiers ZenLock cannot decode into app names or bundle identifiers. We literally cannot tell which apps you chose; only iOS itself knows.
-- **DeviceActivity reports** — The Screen Time tab renders today's usage. This data is sandboxed inside Apple's `DeviceActivityReport` system extension. ZenLock's main app process never reads the raw numbers; Apple renders them directly inside an isolated UI extension.
-- **Local notifications** — Used to warn you when approaching a usage limit or when an accountability prompt fires.
+- **App Blocking Permission** — iOS requires permission to block apps. You grant this once during setup. ZenLock cannot block anything without your explicit approval.
+- **App Selection** — When you choose which apps to block, iOS protects your privacy by not showing ZenLock the actual app names. Instead, iOS gives ZenLock encrypted references that it cannot read or decode. This means even if someone accessed ZenLock's code or data, they couldn't see which apps you selected.
+- **Usage Statistics** — Your daily usage report (the Insights tab) is rendered by iOS itself in a sandboxed area that ZenLock's main app cannot access. ZenLock never receives the raw numbers; Apple displays them directly.
+- **Notifications** — ZenLock sends you reminders and alerts during focus sessions (e.g., "You're approaching your limit").
 
-All of the above lives inside an App Group container on your device, shared only between the ZenLock app and its system extensions. No data leaves the device.
+All of this data stays in a private container on your device, visible only to ZenLock and its system extensions. Nothing leaves your phone.
 
 ### Android
 
-ZenLock on Android uses platform APIs to provide blocking and usage tracking. Specifically:
+ZenLock on Android uses Android's built-in system permissions to monitor which app is open and apply blocks. Here's what it accesses:
 
-- **Usage Access (`PACKAGE_USAGE_STATS`)** — Required so ZenLock can read which app is currently in the foreground in order to apply blocks. Granted once via system Settings.
-- **Accessibility Service (optional)** — Used for more responsive blocking on devices where Usage Access alone is insufficient. You can revoke at any time.
-- **Notifications** — Used for the same warnings and nudges as on iOS.
-- **Boot Completed (`RECEIVE_BOOT_COMPLETED`)** — So your schedules and active blocks resume automatically after a restart.
+- **Usage Permission** — ZenLock needs permission to see which app you're currently using so it can block it if necessary. You grant this once in system Settings. Without this, ZenLock cannot block anything.
+- **Accessibility Service (optional)** — On some Android devices, the basic usage permission isn't enough to block apps reliably. If you enable the Accessibility Service (optional), ZenLock can respond faster. You can turn this off anytime in Settings.
+- **Notifications** — ZenLock sends you reminders during focus sessions, just like on iOS.
+- **Auto-Start Permission** — If you set up recurring focus schedules, ZenLock needs permission to restart your schedules after your phone reboots.
 
-All data is stored in the app's private storage on your device.
+All data is stored in a private folder on your device that only ZenLock can access. Nothing is sent anywhere.
 
 ## What ZenLock does NOT do
 
