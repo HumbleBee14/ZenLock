@@ -1,12 +1,15 @@
 import SwiftUI
+import SwiftData
 import FamilyControls
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var showAccountability = false
     @State private var showBypassPrevention = false
     @State private var showDiagnostics = false
+    @State private var reapplied = false
     @AppStorage(AppThemeStorage.key) private var themeRaw: String = AppTheme.system.rawValue
     @AppStorage(Constants.Keys.dailyGoalMinutes, store: Constants.sharedDefaults) private var dailyGoalMinutes: Int = DailyGoalStorage.defaultMinutes
     @AppStorage(Constants.Keys.globalCooldownMinutes, store: Constants.sharedDefaults) private var cooldownMinutes: Int = CooldownService.minimum
@@ -138,8 +141,35 @@ struct SettingsView: View {
                     }
                     Spacer()
                 }
+
+                Divider().overlay(ZenTheme.textSecondary.opacity(0.2))
+
+                Button(action: reapplyBlocks) {
+                    HStack(spacing: ZenTheme.Spacing.sm) {
+                        Image(systemName: reapplied ? "checkmark.circle.fill" : "arrow.clockwise")
+                            .foregroundStyle(reapplied ? ZenTheme.success : ZenTheme.primary)
+                            .contentTransition(.symbolEffect(.replace))
+                        Text(reapplied ? "Blocks re-applied" : "Re-apply blocks now")
+                            .font(ZenTheme.body)
+                            .foregroundStyle(ZenTheme.text)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.plain)
+                Text("Use this if a scheduled session should be blocking but isn't.")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
             }
             .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private func reapplyBlocks() {
+        let groups = (try? modelContext.fetch(FetchDescriptor<BlockGroup>())) ?? []
+        BlockingService().evaluateActiveGroups(groups)
+        withAnimation(ZenTheme.springy) { reapplied = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation(ZenTheme.smooth) { reapplied = false }
         }
     }
 

@@ -11,6 +11,8 @@ struct EditGroupView: View {
     @State private var pending: AccountabilityManager.PendingUnlock?
     @State private var now = Date()
     @State private var showStopConfirm = false
+    @State private var showDeleteConfirm = false
+    @State private var deleteConfirmText = ""
 
     private let stopCoordinator = SessionStopCoordinator()
     private let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -106,14 +108,32 @@ struct EditGroupView: View {
     }
 
     private var deleteCard: some View {
-        ZenButton(title: "Delete Group", icon: "trash", style: .destructive) {
-            modelContext.delete(group)
-            try? modelContext.save()
-            BlockingService().removeGroupFromAppGroups(group.id.uuidString)
-            dismiss()
+        ZenButton(title: "Delete Session", icon: "trash", style: .destructive) {
+            deleteConfirmText = ""
+            showDeleteConfirm = true
         }
         .disabled(lockStructure)
         .opacity(lockStructure ? 0.5 : 1)
+        .alert("Delete “\(group.name)”?", isPresented: $showDeleteConfirm) {
+            TextField("Type \"delete\" to confirm", text: $deleteConfirmText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                if deleteConfirmText.trimmingCharacters(in: .whitespaces).lowercased() == "delete" {
+                    deleteSession()
+                }
+            }
+        } message: {
+            Text("Type \"delete\" to permanently delete this session.")
+        }
+    }
+
+    private func deleteSession() {
+        modelContext.delete(group)
+        try? modelContext.save()
+        BlockingService().removeGroupFromAppGroups(group.id.uuidString)
+        dismiss()
     }
 
     private func save() {

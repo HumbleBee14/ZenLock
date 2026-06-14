@@ -12,8 +12,8 @@ struct ScheduleNotifier {
 
     func scheduleStartNotification(groupId: String, groupName: String, hour: Int, minute: Int, repeats: Bool) {
         let content = UNMutableNotificationContent()
-        content.title = "🔒 \(groupName) is starting"
-        content.body = "Your focus session begins now. Open ZenLock if apps aren't blocked yet."
+        content.title = "🔒 \(groupName) session activated"
+        content.body = "Your focus session begins. Tap to enable."
         content.sound = .default
 
         var components = DateComponents()
