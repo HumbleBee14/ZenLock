@@ -2,8 +2,7 @@ import SwiftUI
 import FamilyControls
 import ManagedSettings
 
-/// Compact grid of the apps + categories in a FamilyActivitySelection. Uses Apple's `Label(token)`
-/// view so we can show name + icon without ever seeing the underlying bundle ID ourselves.
+/// Grid of selected apps and categories using Apple's Label view.
 struct SelectionPreview: View {
     let selection: FamilyActivitySelection
     var maxRowsBeforeScroll: Int = 2

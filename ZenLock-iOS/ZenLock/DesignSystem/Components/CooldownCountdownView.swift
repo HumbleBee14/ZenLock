@@ -1,8 +1,6 @@
 import SwiftUI
 
-/// Shared cool-down countdown: time remaining, an animated progress bar, and a
-/// cancel ("keep focusing") action. Used wherever a stop is in its cool-down —
-/// dashboard rows, the session editor, and Quick Focus.
+/// Cool-down countdown with time, progress bar, and cancel action.
 struct CooldownCountdownView: View {
     let endsAt: Date
     let startedAt: Date
@@ -10,7 +8,6 @@ struct CooldownCountdownView: View {
     let onCancel: () -> Void
 
     var body: some View {
-        // Self-updating clock — independent of any parent timer.
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let now = context.date
             let remaining = max(0, Int(endsAt.timeIntervalSince(now)))

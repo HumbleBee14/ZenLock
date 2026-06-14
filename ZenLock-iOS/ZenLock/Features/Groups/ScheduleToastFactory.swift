@@ -1,7 +1,6 @@
 import Foundation
 
-/// Builds the user-facing toast describing what happened when a focus session
-/// was armed/activated on save.
+/// Toast message for focus session arm/activate outcome.
 enum ScheduleToastFactory {
     static func make(for outcome: BlockingService.ArmOutcome, group: BlockGroup) -> ZenToastData {
         switch outcome {

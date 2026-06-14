@@ -124,8 +124,6 @@ class ShieldActionExtension: ShieldActionDelegate {
         content.body = "Open ZenLock to unlock."
         content.sound = .default
 
-        // A short interval trigger fires reliably even as the extension is torn
-        // down; a nil trigger from a closing extension can be dropped or delayed.
         let request = UNNotificationRequest(
             identifier: "unlock_request",
             content: content,

@@ -59,7 +59,6 @@ struct CreateGroupView: View {
         onCreated()
 
         toast = ScheduleToastFactory.make(for: outcome, group: group)
-        // Let the toast breathe before dismissing the sheet.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { dismiss() }
     }
 }

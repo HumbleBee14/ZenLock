@@ -8,7 +8,6 @@ struct GroupFormView: View {
     var lockStructure: Bool = false
 
     @State private var showAppPicker = false
-    @State private var editingField: String?
     @FocusState private var nameFocused: Bool
 
     private static let iconChoices = [
@@ -173,9 +172,16 @@ struct GroupFormView: View {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
                 Text("Schedule").font(ZenTheme.headline).foregroundStyle(ZenTheme.text)
 
-                HStack(spacing: ZenTheme.Spacing.lg) {
-                    timeField(label: "Start", hour: $draft.scheduleStartHour, minute: $draft.scheduleStartMinute)
-                    timeField(label: "End", hour: $draft.scheduleEndHour, minute: $draft.scheduleEndMinute)
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Start").font(ZenTheme.caption).foregroundStyle(ZenTheme.textSecondary)
+                        timePicker(hour: $draft.scheduleStartHour, minute: $draft.scheduleStartMinute)
+                    }
+                    Spacer()
+                    VStack(alignment: .leading) {
+                        Text("End").font(ZenTheme.caption).foregroundStyle(ZenTheme.textSecondary)
+                        timePicker(hour: $draft.scheduleEndHour, minute: $draft.scheduleEndMinute)
+                    }
                 }
 
                 ZenToggle(isOn: $draft.scheduleRepeats, label: "Repeat")
@@ -190,10 +196,6 @@ struct GroupFormView: View {
                         .font(ZenTheme.caption2)
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
-
-                Divider().overlay(ZenTheme.textSecondary.opacity(0.2))
-
-                ZenToggle(isOn: $draft.notifyBeforeStart, label: "Remind me 1 minute before")
             }
             .padding(ZenTheme.Spacing.md)
         }
@@ -307,7 +309,6 @@ struct GroupFormView: View {
         case .hourly:
             return [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
         case .daily:
-            // 15-min steps to 1h, then 30-min steps to 12h.
             var opts = [15, 30, 45, 60]
             opts.append(contentsOf: stride(from: 90, through: 720, by: 30))
             return opts
@@ -352,50 +353,20 @@ struct GroupFormView: View {
         return parts.joined(separator: ", ")
     }
 
-    private func timeField(label: String, hour: Binding<Int>, minute: Binding<Int>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label).font(ZenTheme.caption).foregroundStyle(ZenTheme.textSecondary)
-            Button {
-                editingField = label
-            } label: {
-                Text(timeLabel(hour: hour.wrappedValue, minute: minute.wrappedValue))
-                    .font(ZenTheme.title2.monospacedDigit())
-                    .foregroundStyle(ZenTheme.text)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, ZenTheme.Spacing.sm)
-                    .padding(.horizontal, ZenTheme.Spacing.md)
-                    .background(RoundedRectangle(cornerRadius: ZenTheme.CornerRadius.md).fill(ZenTheme.surfaceLight.opacity(0.4)))
+    private func timePicker(hour: Binding<Int>, minute: Binding<Int>) -> some View {
+        HStack(spacing: 4) {
+            Picker("", selection: hour) {
+                ForEach(0..<24, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
             }
-            .buttonStyle(.plain)
-            .disabled(lockStructure)
-            .popover(isPresented: Binding(get: { editingField == label }, set: { if !$0 { editingField = nil } })) {
-                DatePicker("", selection: timeBinding(hour: hour, minute: minute), displayedComponents: .hourAndMinute)
-                    .datePickerStyle(.wheel)
-                    .labelsHidden()
-                    .padding()
-                    .presentationCompactAdaptation(.popover)
+            .frame(width: 60)
+            Text(":").foregroundStyle(ZenTheme.textSecondary)
+            Picker("", selection: minute) {
+                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
             }
+            .frame(width: 60)
         }
-    }
-
-    private func timeLabel(hour: Int, minute: Int) -> String {
-        let period = hour < 12 ? "AM" : "PM"
-        var h = hour % 12
-        if h == 0 { h = 12 }
-        return String(format: "%d:%02d %@", h, minute, period)
-    }
-
-    private func timeBinding(hour: Binding<Int>, minute: Binding<Int>) -> Binding<Date> {
-        Binding(
-            get: {
-                Calendar.current.date(bySettingHour: hour.wrappedValue, minute: minute.wrappedValue, second: 0, of: Date()) ?? Date()
-            },
-            set: { newDate in
-                let comps = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                hour.wrappedValue = comps.hour ?? 0
-                minute.wrappedValue = comps.minute ?? 0
-            }
-        )
+        .pickerStyle(.wheel)
+        .frame(height: 80)
     }
 }
 

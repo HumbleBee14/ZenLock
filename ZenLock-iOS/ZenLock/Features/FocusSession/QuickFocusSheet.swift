@@ -423,10 +423,7 @@ private var extendPickerSheet: some View {
         session.save()
         active = session
 
-        // Register with DeviceActivity so iOS auto-clears the block when timer expires
         registerDeviceActivitySchedule(endsAt: endsAt)
-
-        // Local notification when the timer ends, so we can clean up even if the app is killed.
         scheduleEndNotification(at: endsAt)
     }
 

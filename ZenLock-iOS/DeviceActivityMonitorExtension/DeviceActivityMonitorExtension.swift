@@ -9,9 +9,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
-        // Apply the shield first — the callback can be killed early under the
-        // extension's tight memory/time budget, so do the essential work before
-        // any bookkeeping writes.
+        // Apply shield first due to extension's tight memory/time budget.
         evaluateBlockState(for: activity, reason: .intervalStart)
         let groupId = extractGroupId(from: activity)
         defaults?.set(Date(), forKey: "schedule_start_\(groupId)")

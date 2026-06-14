@@ -1,7 +1,6 @@
 import SwiftUI
 import FamilyControls
 import ManagedSettings
-import UserNotifications
 
 struct DiagnosticsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -72,11 +71,9 @@ struct DiagnosticsView: View {
                 out.append("    ⚠️ no selectionData stored")
             }
 
-            // Per-group active flag (the extensions read this)
             let activeKey = Constants.Keys.activeGroupPrefix + g.id
             out.append("    \(activeKey) = \(defaults.bool(forKey: activeKey))")
 
-            // Per-group selection (extensions read this separately from the array)
             let selKey = Constants.Keys.selectionPrefix + g.id
             if let _ = defaults.data(forKey: selKey) {
                 out.append("    ✅ \(selKey) exists")
@@ -84,7 +81,6 @@ struct DiagnosticsView: View {
                 out.append("    ❌ \(selKey) MISSING — extension can't read selection")
             }
 
-            // Check ManagedSettingsStore actually has shields applied
             let storeName = ManagedSettingsStore.Name(g.id)
             let store = ManagedSettingsStore(named: storeName)
             let appCount = store.shield.applications?.count ?? 0
@@ -96,49 +92,11 @@ struct DiagnosticsView: View {
             out.append("    Shield store: apps=\(appCount), cats=\(catCount)")
         }
 
-        // The 'main' picker also writes here
         out.append("")
         out.append("Bundle ID: \(Bundle.main.bundleIdentifier ?? "?")")
         out.append("Onboarding done: \(defaults.bool(forKey: Constants.Keys.onboardingCompleted))")
 
         lines = out
-        appendNotificationDiagnostics()
-    }
-
-    private func appendNotificationDiagnostics() {
-        Task {
-            let center = UNUserNotificationCenter.current()
-            let settings = await center.notificationSettings()
-            let requests = await center.pendingNotificationRequests()
-
-            var out: [String] = []
-            out.append("")
-            out.append("=== Notifications ===")
-            out.append("Auth: \(notifAuthString(settings.authorizationStatus))")
-            let pending = requests.filter { $0.identifier.hasPrefix("zen_schedule_start_") }
-            out.append("Pending heads-up: \(pending.count)")
-            let f = DateFormatter()
-            f.dateFormat = "MMM d, h:mm a"
-            for r in pending {
-                if let t = r.trigger as? UNCalendarNotificationTrigger {
-                    out.append("  • \(r.content.title) → next \(t.nextTriggerDate().map(f.string(from:)) ?? "?")")
-                } else if let t = r.trigger as? UNTimeIntervalNotificationTrigger {
-                    out.append("  • \(r.content.title) → in \(Int(t.timeInterval))s")
-                }
-            }
-            lines.append(contentsOf: out)
-        }
-    }
-
-    private func notifAuthString(_ s: UNAuthorizationStatus) -> String {
-        switch s {
-        case .notDetermined: return "notDetermined ⚠️"
-        case .denied: return "denied ❌"
-        case .authorized: return "authorized ✅"
-        case .provisional: return "provisional"
-        case .ephemeral: return "ephemeral"
-        @unknown default: return "unknown(\(s.rawValue))"
-        }
     }
 
     private func authString(_ s: AuthorizationStatus) -> String {

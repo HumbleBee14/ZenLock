@@ -69,8 +69,6 @@ struct EditGroupView: View {
 
     @ViewBuilder
     private var unlockCard: some View {
-        // Strict Mode can never be unlocked early. Normal active sessions can,
-        // after a Face ID check and the global cool-down.
         if group.isActive && !group.deepFocusEnabled {
             if let pending {
                 CooldownCountdownView(
@@ -140,13 +138,17 @@ struct EditGroupView: View {
         draft.apply(to: group)
         try? modelContext.save()
 
-        // Saving always (re-)arms the session so the edited schedule takes
-        // effect and auto-activates. Only a manual toggle-off turns it off.
         let service = BlockingService()
-        service.removeGroupFromAppGroups(group.id.uuidString)
-        group.isActive = true
-        _ = try? service.armOrActivate(group)
-        try? modelContext.save()
+        if group.isActive {
+            // Re-register monitoring so edited schedule/apps take effect and
+            // continue to auto-activate without reopening the app.
+            service.removeGroupFromAppGroups(group.id.uuidString)
+            group.isActive = true
+            _ = try? service.armOrActivate(group)
+            try? modelContext.save()
+        } else {
+            service.syncGroupToAppGroups(group)
+        }
         dismiss()
     }
 }
