@@ -19,9 +19,6 @@
     "About" : {
       "extractionState" : "manual"
     },
-    "Accountability partner" : {
-
-    },
     "Accountability Partner" : {
       "extractionState" : "manual"
     },
@@ -112,12 +109,6 @@
     "Focus Sessions" : {
       "extractionState" : "manual"
     },
-    "Four layers of friction" : {
-
-    },
-    "Four layers of friction — set them all" : {
-
-    },
     "Friction Type" : {
       "extractionState" : "manual"
     },
@@ -148,9 +139,6 @@
     "Name" : {
 
     },
-    "Name someone you trust. When you ask to unlock a group, ZenLock starts a cool-down with their name on the screen — and a sequence of notifications during the wait. You're meant to show your phone to them in that moment." : {
-
-    },
     "No app on iOS can truly stop a determined user from bypassing a block — Apple's sandbox doesn't allow it, and apps that claim otherwise are using fragile tricks that break. What we can do is stack enough small frictions that bypassing isn't worth the effort in the moment of weakness." : {
 
     },
@@ -167,9 +155,6 @@
       "extractionState" : "manual"
     },
     "over the last 7 days" : {
-
-    },
-    "Partner's name" : {
 
     },
     "Per Day" : {
@@ -208,9 +193,6 @@
     "Settings" : {
       "extractionState" : "manual"
     },
-    "Slow down unlocks with a cool-down + nudges" : {
-
-    },
     "Star on GitHub" : {
 
     },
@@ -236,6 +218,12 @@
 
     },
     "The wait between requesting to stop a focus session and apps actually unlocking. Applies everywhere. Strict Mode can't be stopped at all." : {
+
+    },
+    "Three layers of friction" : {
+
+    },
+    "Three layers of friction — set them all" : {
 
     },
     "Time by Category" : {

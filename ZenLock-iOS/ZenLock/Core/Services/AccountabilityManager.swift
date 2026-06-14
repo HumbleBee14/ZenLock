@@ -1,13 +1,6 @@
 import Foundation
 
-struct AccountabilityPartner: Codable, Equatable {
-    var name: String
-    var coolDownMinutes: Int
-}
-
-/// Single-device accountability using partner-based friction to encourage mindful unlocks.
 final class AccountabilityManager {
-    static let partnerKey = "zen_accountability_partner"
     static let pendingUnlockKey = "zen_pending_unlock"
 
     struct PendingUnlock: Codable {
@@ -22,26 +15,6 @@ final class AccountabilityManager {
     init(defaults: UserDefaults? = Constants.sharedDefaults) {
         self.defaults = defaults
     }
-
-    // MARK: - Partner
-
-    var partner: AccountabilityPartner? {
-        get {
-            guard let data = defaults?.data(forKey: Self.partnerKey) else { return nil }
-            return try? JSONDecoder().decode(AccountabilityPartner.self, from: data)
-        }
-        set {
-            guard let value = newValue else {
-                defaults?.removeObject(forKey: Self.partnerKey)
-                return
-            }
-            if let data = try? JSONEncoder().encode(value) {
-                defaults?.set(data, forKey: Self.partnerKey)
-            }
-        }
-    }
-
-    // MARK: - Unlock flow
 
     var pendingUnlock: PendingUnlock? {
         guard let data = defaults?.data(forKey: Self.pendingUnlockKey) else { return nil }

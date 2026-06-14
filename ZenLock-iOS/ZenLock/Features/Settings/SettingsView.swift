@@ -6,7 +6,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var screenTimeManager = ScreenTimeManager()
-    @State private var showAccountability = false
     @State private var showBypassPrevention = false
     @State private var showDiagnostics = false
     @State private var reapplied = false
@@ -22,10 +21,9 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         screenTimeSection
+                        appearanceSection
                         dailyGoalSection
                         cooldownSection
-                        appearanceSection
-                        accountabilitySection
                         bypassPreventionSection
                         diagnosticsSection
                         aboutSection
@@ -44,9 +42,6 @@ struct SettingsView: View {
             }
             .preferredColorScheme(AppTheme(rawValue: themeRaw)?.colorScheme)
             .onAppear { screenTimeManager.refreshStatus() }
-            .sheet(isPresented: $showAccountability) {
-                AccountabilityView()
-            }
             .sheet(isPresented: $showBypassPrevention) {
                 BypassPreventionView()
             }
@@ -87,29 +82,7 @@ struct SettingsView: View {
                         Text("Make it hard to bypass")
                             .font(ZenTheme.body)
                             .foregroundStyle(ZenTheme.text)
-                        Text("Four layers of friction — set them all")
-                            .font(ZenTheme.caption)
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right").foregroundStyle(ZenTheme.textSecondary)
-                }
-                .padding(ZenTheme.Spacing.md)
-            }
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var accountabilitySection: some View {
-        Button { showAccountability = true } label: {
-            GlassCard {
-                HStack(spacing: ZenTheme.Spacing.md) {
-                    GroupIcon(systemName: "person.2.fill", color: ZenTheme.warning)
-                    VStack(alignment: .leading) {
-                        Text("Accountability Partner")
-                            .font(ZenTheme.body)
-                            .foregroundStyle(ZenTheme.text)
-                        Text("Slow down unlocks with a cool-down + nudges")
+                        Text("Three layers of friction — set them all")
                             .font(ZenTheme.caption)
                             .foregroundStyle(ZenTheme.textSecondary)
                     }

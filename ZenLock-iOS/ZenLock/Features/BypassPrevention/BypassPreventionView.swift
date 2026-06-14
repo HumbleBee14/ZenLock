@@ -31,13 +31,6 @@ struct BypassPreventionView: View {
                             title: "Strict Mode",
                             body: "Turn on Strict Mode per group to make it impossible to disable the block until its schedule ends — even from inside ZenLock."
                         )
-                        layerCard(
-                            tier: 4,
-                            icon: "person.2.fill",
-                            color: ZenTheme.warning,
-                            title: "Accountability partner",
-                            body: "Name a partner; their name shows up during every unlock cool-down. You're meant to show your phone to them in that moment instead of just clicking through."
-                        )
                         openSettings
                     }
                     .padding(ZenTheme.Spacing.md)
@@ -56,7 +49,7 @@ struct BypassPreventionView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
-            Text("Four layers of friction")
+            Text("Three layers of friction")
                 .font(ZenTheme.title2)
                 .foregroundStyle(ZenTheme.text)
             Text("No app on iOS can truly stop a determined user from bypassing a block — Apple's sandbox doesn't allow it, and apps that claim otherwise are using fragile tricks that break. What we can do is stack enough small frictions that bypassing isn't worth the effort in the moment of weakness.")

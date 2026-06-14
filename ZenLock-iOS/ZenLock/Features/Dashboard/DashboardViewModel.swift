@@ -31,6 +31,7 @@ final class DashboardViewModel {
 
     var toast: ZenToastData?
     var stopConfirmGroup: BlockGroup?
+    var deleteConfirmGroup: BlockGroup?
 
     func toggleGroup(_ group: BlockGroup, context: ModelContext) {
         if group.isActive {

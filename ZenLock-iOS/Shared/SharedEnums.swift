@@ -20,7 +20,6 @@ enum PremiumFeature: String, Codable, CaseIterable, Sendable {
     case unlimitedGroups
     case advancedAnalytics
     case customThemes
-    case accountability
     case widget
     case deepFocus
 }

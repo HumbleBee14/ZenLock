@@ -27,6 +27,11 @@ struct DashboardView: View {
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
                     .padding(.top, ZenTheme.Spacing.sm)
+                    .padding(.bottom, 96)
+                }
+
+                if !viewModel.groups.isEmpty {
+                    addSessionFAB
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -60,6 +65,17 @@ struct DashboardView: View {
                     viewModel.confirmStop(context: modelContext)
                 }
             }
+            .deleteConfirmation(
+                sessionName: viewModel.deleteConfirmGroup?.name ?? "",
+                isPresented: Binding(
+                    get: { viewModel.deleteConfirmGroup != nil },
+                    set: { if !$0 { viewModel.deleteConfirmGroup = nil } }
+                )
+            ) {
+                if let group = viewModel.deleteConfirmGroup {
+                    viewModel.deleteGroup(group, context: modelContext)
+                }
+            }
             .onAppear {
                 viewModel.loadGroups(context: modelContext)
                 activeFocus = ActiveSession.load()
@@ -82,6 +98,24 @@ struct DashboardView: View {
                 }
                 viewModel.finalizeElapsedCooldowns(context: modelContext)
             }
+        }
+    }
+
+    private var addSessionFAB: some View {
+        VStack {
+            Spacer()
+            Button {
+                viewModel.showCreateGroup = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(ZenTheme.primary)
+                    .frame(width: 60, height: 60)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.18), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+            }
+            .padding(.bottom, ZenTheme.Spacing.lg)
         }
     }
 
@@ -224,7 +258,7 @@ struct DashboardView: View {
                             now: now,
                             pendingUnlock: viewModel.pendingUnlock(for: group),
                             onToggle: { viewModel.toggleGroup(group, context: modelContext) },
-                            onDelete: { viewModel.deleteGroup(group, context: modelContext) },
+                            onDelete: { viewModel.deleteConfirmGroup = group },
                             onCancelCooldown: { viewModel.cancelStop(group) }
                         )
                     }
