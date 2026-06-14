@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    ":" : {
-
-    },
     "%@" : {
 
     },
@@ -238,11 +235,17 @@
     "Time-Based" : {
       "extractionState" : "manual"
     },
+    "Type \"delete\" to permanently delete this session." : {
+
+    },
     "Usage Limit" : {
       "extractionState" : "manual"
     },
     "Usage-Based" : {
       "extractionState" : "manual"
+    },
+    "Use this if a scheduled session should be blocking but isn't." : {
+
     },
     "ZenLock" : {
       "extractionState" : "manual"

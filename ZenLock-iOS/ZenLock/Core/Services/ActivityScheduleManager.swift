@@ -17,6 +17,7 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         switch group.blockMode {
         case .timeBased:
             try startTimeBasedMonitoring(for: group)
+            try startHeartbeatMonitoring(for: group)
             scheduleStartBackstop(for: group)
         case .usageBased:
             try startUsageBasedMonitoring(for: group, selection: selection)
@@ -28,9 +29,23 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         center.stopMonitoring([
             DeviceActivityName(id),
             DeviceActivityName("\(id)-A"),
-            DeviceActivityName("\(id)-B")
+            DeviceActivityName("\(id)-B"),
+            DeviceActivityName("\(id)-HB")
         ])
         notifier.cancelStartNotification(groupId: id)
+    }
+
+    /// All-day repeating monitor whose recurring callbacks let the extension
+    /// re-assert shields even with the app killed — a reliable substitute for
+    /// the unreliable one-shot start callback. 15 min is the API floor.
+    private func startHeartbeatMonitoring(for group: SharedBlockGroup) throws {
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: 0, minute: 0),
+            intervalEnd: DateComponents(hour: 23, minute: 59),
+            repeats: true,
+            warningTime: DateComponents(minute: 15)
+        )
+        try center.startMonitoring(DeviceActivityName("\(group.id)-HB"), during: schedule)
     }
 
     private func scheduleStartBackstop(for group: SharedBlockGroup) {
