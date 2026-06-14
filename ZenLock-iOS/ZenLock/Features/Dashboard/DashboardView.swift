@@ -257,9 +257,7 @@ private struct GroupRow: View {
                     Text(group.name)
                         .font(ZenTheme.headline)
                         .foregroundStyle(ZenTheme.text)
-                    Text(statusLine)
-                        .font(ZenTheme.caption)
-                        .foregroundStyle(statusColor)
+                    statusView
                 }
 
                 Spacer()
@@ -282,15 +280,25 @@ private struct GroupRow: View {
         }
     }
 
-    private var statusLine: String {
-        if !group.isActive { return group.blockMode.displayName }
+    private var statusView: some View {
+        HStack(spacing: 5) {
+            Text(statusWord)
+            Image(systemName: group.blockMode.icon)
+            if group.deepFocusEnabled {
+                Image(systemName: "lock.fill")
+            }
+        }
+        .font(ZenTheme.caption)
+        .foregroundStyle(statusColor)
+    }
+
+    private var statusWord: String {
+        if !group.isActive { return "Off" }
         switch group.blockMode {
         case .timeBased:
-            return ScheduleEvaluator.isWithinSchedule(group.toShared())
-                ? "Blocking now · time-based"
-                : "Armed · waiting for window"
+            return ScheduleEvaluator.isWithinSchedule(group.toShared()) ? "Blocking" : "Armed"
         case .usageBased:
-            return "Armed · blocks at usage limit"
+            return "Armed"
         }
     }
 

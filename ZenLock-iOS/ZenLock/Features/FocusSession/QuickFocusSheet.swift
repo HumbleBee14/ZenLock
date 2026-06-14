@@ -67,14 +67,12 @@ struct QuickFocusSheet: View {
     @State private var startError: String?
     @State private var active: ActiveSession?
     @State private var now = Date()
-    @State private var cooldownMinutes: Int = 1
     @State private var showExtendPicker = false
     @State private var extendMinutes: Int = 10
     @State private var showAddAppsPicker = false
     @State private var addAppsSelection = FamilyActivitySelection()
 
     static let durationOptions: [Int] = [10, 20, 30, 40, 50, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480, 510, 540, 570, 600, 630, 660, 690, 720]
-    static let cooldownOptions: [Int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     private func durationLabel(_ m: Int) -> String {
         if m < 60 { return "\(m)min" }
@@ -97,7 +95,6 @@ struct QuickFocusSheet: View {
                         } else {
                             header
                             durationCard
-                            cooldownConfigCard
                             appsCard
                         }
                     }
@@ -169,7 +166,7 @@ struct QuickFocusSheet: View {
                 VStack(spacing: ZenTheme.Spacing.sm) {
                     HStack(spacing: ZenTheme.Spacing.sm) {
                         ZenButton(title: "Stop", icon: "stop.fill", style: .destructive) {
-                            startCooldown(minutes: a.cooldownConfigMinutes)
+                            Task { await requestStop() }
                         }
                         ZenButton(title: "Extend", icon: "plus.circle.fill", style: .primary) {
                             extendMinutes = 10
@@ -265,6 +262,13 @@ private var extendPickerSheet: some View {
         return String(format: "%02d:%02d", s / 60, s % 60)
     }
 
+    private func requestStop() async {
+        guard active != nil else { return }
+        let ok = await BiometricGate.authenticate(reason: "Stop your focus session")
+        guard ok else { return }
+        startCooldown(minutes: CooldownService.minutes)
+    }
+
     private func startCooldown(minutes: Int) {
         guard var a = active else { return }
         a.cooldownEndsAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
@@ -315,34 +319,6 @@ private var extendPickerSheet: some View {
         )
         .frame(height: 180)
         .padding(.vertical, ZenTheme.Spacing.md)
-    }
-
-    private var cooldownConfigCard: some View {
-        GlassCard {
-            HStack(spacing: ZenTheme.Spacing.md) {
-                Image(systemName: "hourglass")
-                    .foregroundStyle(ZenTheme.accent)
-                Text("Cool-down to stop")
-                    .font(ZenTheme.callout)
-                    .foregroundStyle(ZenTheme.text)
-                Spacer()
-                Text("\(cooldownMinutes)m")
-                    .font(ZenTheme.callout.monospacedDigit().weight(.semibold))
-                    .foregroundStyle(ZenTheme.accent)
-                    .frame(minWidth: 32, alignment: .trailing)
-                Slider(
-                    value: Binding(
-                        get: { Double(cooldownMinutes) },
-                        set: { cooldownMinutes = Int($0.rounded()) }
-                    ),
-                    in: 1...10,
-                    step: 1
-                )
-                .tint(ZenTheme.accent)
-                .frame(width: 140)
-            }
-            .padding(ZenTheme.Spacing.md)
-        }
     }
 
     private var appsCard: some View {
@@ -452,8 +428,7 @@ private var extendPickerSheet: some View {
             endsAt: endsAt,
             appCount: selection.applicationTokens.count,
             catCount: selection.categoryTokens.count,
-            cooldownEndsAt: nil,
-            cooldownConfigMinutes: cooldownMinutes
+            cooldownEndsAt: nil
         )
         session.save()
         active = session
@@ -547,7 +522,6 @@ struct ActiveSession: Codable, Equatable {
     var appCount: Int
     var catCount: Int
     var cooldownEndsAt: Date?
-    var cooldownConfigMinutes: Int = 1
 
     static func load() -> ActiveSession? {
         guard let data = Constants.sharedDefaults?.data(forKey: "zen_quick_focus_session"),

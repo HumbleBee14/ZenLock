@@ -13,6 +13,7 @@ enum Constants {
         static let openCountDatePrefix = "zen_open_count_date_"
         static let frictionBypassUntilPrefix = "friction_bypass_until_"
         static let dailyGoalMinutes = "zen_daily_goal_minutes"
+        static let globalCooldownMinutes = "zen_global_cooldown_minutes"
         static let onboardingCompleted = "zen_onboarding_completed"
         static let userTier = "zen_user_tier"
         static let trialStartDate = "zen_trial_start_date"

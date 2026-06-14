@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var showDiagnostics = false
     @AppStorage(AppThemeStorage.key) private var themeRaw: String = AppTheme.system.rawValue
     @AppStorage(Constants.Keys.dailyGoalMinutes, store: Constants.sharedDefaults) private var dailyGoalMinutes: Int = DailyGoalStorage.defaultMinutes
+    @AppStorage(Constants.Keys.globalCooldownMinutes, store: Constants.sharedDefaults) private var cooldownMinutes: Int = CooldownService.minimum
 
     var body: some View {
         NavigationStack {
@@ -19,6 +20,7 @@ struct SettingsView: View {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         screenTimeSection
                         dailyGoalSection
+                        cooldownSection
                         appearanceSection
                         accountabilitySection
                         bypassPreventionSection
@@ -159,6 +161,27 @@ struct SettingsView: View {
                 ), in: 15...720, step: 15)
                 .tint(ZenTheme.primary)
                 Text("Target time you want to spend on your phone each day. Shown on the Screen Time tab.")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private var cooldownSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
+                Text("Stop Cool-down")
+                    .font(ZenTheme.headline)
+                    .foregroundStyle(ZenTheme.text)
+                HStack {
+                    Text(CooldownService.label(cooldownMinutes))
+                        .font(ZenTheme.title2)
+                        .foregroundStyle(ZenTheme.text)
+                    Spacer()
+                }
+                CooldownSlider(minutes: $cooldownMinutes)
+                Text("The wait between requesting to stop a focus session and apps actually unlocking. Applies everywhere. Strict Mode can't be stopped at all.")
                     .font(ZenTheme.caption)
                     .foregroundStyle(ZenTheme.textSecondary)
             }

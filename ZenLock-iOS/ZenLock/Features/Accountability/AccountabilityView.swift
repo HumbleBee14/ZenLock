@@ -5,7 +5,6 @@ struct AccountabilityView: View {
 
     private let manager = AccountabilityManager()
     @State private var name = ""
-    @State private var coolDown = 5
     @State private var partnerSet = false
 
     var body: some View {
@@ -16,7 +15,6 @@ struct AccountabilityView: View {
                     VStack(spacing: ZenTheme.Spacing.lg) {
                         explainer
                         partnerCard
-                        coolDownCard
                         actionButton
                     }
                     .padding(ZenTheme.Spacing.md)
@@ -59,28 +57,6 @@ struct AccountabilityView: View {
         }
     }
 
-    private var coolDownCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
-                HStack {
-                    Text("Cool-down")
-                        .font(ZenTheme.headline)
-                        .foregroundStyle(ZenTheme.text)
-                    Spacer()
-                    Text("\(coolDown) min")
-                        .font(ZenTheme.headline)
-                        .foregroundStyle(ZenTheme.primary)
-                }
-                Slider(value: Binding(get: { Double(coolDown) }, set: { coolDown = Int($0) }), in: 1...30, step: 1)
-                    .tint(ZenTheme.primary)
-                Text("How long ZenLock makes you wait between requesting an unlock and the shield actually coming down.")
-                    .font(ZenTheme.caption)
-                    .foregroundStyle(ZenTheme.textSecondary)
-            }
-            .padding(ZenTheme.Spacing.md)
-        }
-    }
-
     @ViewBuilder
     private var actionButton: some View {
         if partnerSet {
@@ -102,13 +78,12 @@ struct AccountabilityView: View {
     private func load() {
         if let existing = manager.partner {
             name = existing.name
-            coolDown = existing.coolDownMinutes
             partnerSet = true
         }
     }
 
     private func save() {
-        manager.partner = AccountabilityPartner(name: name, coolDownMinutes: coolDown)
+        manager.partner = AccountabilityPartner(name: name, coolDownMinutes: CooldownService.minutes)
         partnerSet = true
     }
 }

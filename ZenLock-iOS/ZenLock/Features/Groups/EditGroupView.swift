@@ -57,20 +57,27 @@ struct EditGroupView: View {
 
     @ViewBuilder
     private var unlockCard: some View {
-        if group.deepFocusEnabled && group.isActive {
+        // Strict Mode can never be unlocked early. Normal active sessions can,
+        // after a Face ID check and the global cool-down.
+        if group.isActive && !group.deepFocusEnabled {
             VStack(spacing: ZenTheme.Spacing.sm) {
-                ZenButton(title: "Request Early Unlock", icon: "person.2.fill", style: .secondary) {
-                    let unlocksAt = AccountabilityManager().requestUnlock(group: group)
-                    pendingUnlockAt = unlocksAt
+                ZenButton(title: "Stop (cool-down)", icon: "hourglass", style: .secondary) {
+                    Task { await requestUnlock() }
                 }
                 if let pendingUnlockAt {
-                    Text("Cool-down ends \(pendingUnlockAt, style: .relative). You'll get a notification when the unlock window opens.")
+                    Text("Cool-down ends \(pendingUnlockAt, style: .relative). Apps unlock automatically then.")
                         .font(ZenTheme.caption)
                         .foregroundStyle(ZenTheme.textSecondary)
                         .multilineTextAlignment(.center)
                 }
             }
         }
+    }
+
+    private func requestUnlock() async {
+        let ok = await BiometricGate.authenticate(reason: "Stop “\(group.name)”")
+        guard ok else { return }
+        pendingUnlockAt = AccountabilityManager().requestUnlock(group: group)
     }
 
     private var deleteCard: some View {

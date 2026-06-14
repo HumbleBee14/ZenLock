@@ -53,7 +53,7 @@ final class AccountabilityManager {
     @discardableResult
     func requestUnlock(group: BlockGroup) -> Date {
         let partner = self.partner
-        let cool = partner?.coolDownMinutes ?? 5
+        let cool = CooldownService.minutes
         let now = Date()
         let unlocksAt = now.addingTimeInterval(TimeInterval(cool * 60))
 
