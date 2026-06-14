@@ -11,11 +11,13 @@ protocol ActivityScheduleManaging {
 final class ActivityScheduleManager: ActivityScheduleManaging {
     private let center = DeviceActivityCenter()
     private let storage = AppGroupStorage()
+    private let notifier = ScheduleNotifier()
 
     func startMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
         switch group.blockMode {
         case .timeBased:
             try startTimeBasedMonitoring(for: group)
+            scheduleStartBackstop(for: group)
         case .usageBased:
             try startUsageBasedMonitoring(for: group, selection: selection)
         }
@@ -28,6 +30,18 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
             DeviceActivityName("\(id)-A"),
             DeviceActivityName("\(id)-B")
         ])
+        notifier.cancelStartNotification(groupId: id)
+    }
+
+    private func scheduleStartBackstop(for group: SharedBlockGroup) {
+        guard let h = group.scheduleStartHour, let m = group.scheduleStartMinute else { return }
+        notifier.scheduleStartNotification(
+            groupId: group.id,
+            groupName: group.name,
+            hour: h,
+            minute: m,
+            repeats: group.scheduleRepeats
+        )
     }
 
     func stopAllMonitoring() {
