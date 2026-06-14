@@ -43,6 +43,9 @@
     "Apps to Block" : {
       "extractionState" : "manual"
     },
+    "Apps unlock automatically when this ends." : {
+
+    },
     "Authorization Status" : {
       "extractionState" : "manual"
     },
@@ -74,9 +77,6 @@
       "extractionState" : "manual"
     },
     "Check what's actually stored in App Groups" : {
-
-    },
-    "Cool-down ends %@. Apps unlock automatically then." : {
 
     },
     "Create Focus Session" : {

@@ -48,6 +48,18 @@ struct DashboardView: View {
                 Text(viewModel.errorMessage ?? "")
             }
             .zenToast(Bindable(viewModel).toast)
+            .alert(
+                "Stop the focus session?",
+                isPresented: Binding(
+                    get: { viewModel.stopConfirmGroup != nil },
+                    set: { if !$0 { viewModel.stopConfirmGroup = nil } }
+                )
+            ) {
+                Button("No", role: .cancel) {}
+                Button("Yes", role: .destructive) {
+                    viewModel.confirmStop(context: modelContext)
+                }
+            }
             .onAppear {
                 viewModel.loadGroups(context: modelContext)
                 activeFocus = ActiveSession.load()
@@ -68,6 +80,7 @@ struct DashboardView: View {
                 } else {
                     activeFocus = fresh
                 }
+                viewModel.finalizeElapsedCooldowns(context: modelContext)
             }
         }
     }
@@ -208,8 +221,11 @@ struct DashboardView: View {
                     } label: {
                         GroupRow(
                             group: group,
+                            now: now,
+                            pendingUnlock: viewModel.pendingUnlock(for: group),
                             onToggle: { viewModel.toggleGroup(group, context: modelContext) },
-                            onDelete: { viewModel.deleteGroup(group, context: modelContext) }
+                            onDelete: { viewModel.deleteGroup(group, context: modelContext) },
+                            onCancelCooldown: { viewModel.cancelStop(group) }
                         )
                     }
                     .buttonStyle(.plain)
@@ -242,8 +258,11 @@ struct DashboardView: View {
 
 private struct GroupRow: View {
     let group: BlockGroup
+    let now: Date
+    let pendingUnlock: AccountabilityManager.PendingUnlock?
     let onToggle: () -> Void
     let onDelete: () -> Void
+    let onCancelCooldown: () -> Void
 
     var body: some View {
         GlassCard {
@@ -253,22 +272,33 @@ private struct GroupRow: View {
                     color: group.isActive ? Color(hex: group.colorHex) : ZenTheme.textSecondary
                 )
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(group.name)
                         .font(ZenTheme.headline)
                         .foregroundStyle(ZenTheme.text)
-                    statusView
+                    if let pending = pendingUnlock {
+                        CooldownCountdownView(
+                            endsAt: pending.unlocksAt,
+                            startedAt: pending.requestedAt,
+                            compact: true,
+                            onCancel: onCancelCooldown
+                        )
+                    } else {
+                        statusView
+                    }
                 }
 
                 Spacer()
 
-                Button {
-                    withAnimation(ZenTheme.springy) { onToggle() }
-                } label: {
-                    Image(systemName: group.isActive ? "shield.checkered" : "shield.slash")
-                        .font(.title2)
-                        .foregroundStyle(group.isActive ? ZenTheme.success : ZenTheme.textSecondary)
-                        .contentTransition(.symbolEffect(.replace))
+                if pendingUnlock == nil {
+                    Button {
+                        withAnimation(ZenTheme.springy) { onToggle() }
+                    } label: {
+                        Image(systemName: group.isActive ? "shield.checkered" : "shield.slash")
+                            .font(.title2)
+                            .foregroundStyle(group.isActive ? ZenTheme.success : ZenTheme.textSecondary)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
                 }
             }
             .padding(ZenTheme.Spacing.md)

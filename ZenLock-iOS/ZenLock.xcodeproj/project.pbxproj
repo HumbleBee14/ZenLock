@@ -13,12 +13,15 @@
 		00874C9EB778C2AA418B6665 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		06A5D2CA33E836495D508530 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD3BCDEDD9E8EDFAD0B6BA49 /* Assets.xcassets */; };
 		06D92B00F9389BFDE3AFDA60 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8280FAFAD080C479C9B257 /* NotificationManager.swift */; };
+		0C41787BAB7EEF958DC703CA /* CooldownCountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0864C33F0DACB73771F17269 /* CooldownCountdownView.swift */; };
 		0D7B70546E5119590777606C /* ZenCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD2BAC9DB917AD1C6F88F0F /* ZenCard.swift */; };
 		13B841F04D26293196957F9A /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D29DA41F9A7EB7C589BAB8C3 /* ShieldActionExtension.swift */; };
 		1B02CAC8543F11B9DCC1E1D4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88407A534BE54012983883BE /* BlockingService.swift */; };
 		22502BC47A09433F3D76C812 /* BypassPreventionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22668C8D96E7C390F4A066E1 /* BypassPreventionView.swift */; };
 		22FF508118E0BB3C7B1ED841 /* PerCategoryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12AF19807605F8299C82376 /* PerCategoryScene.swift */; };
 		251E7A44AC16208CF19BACDC /* AppGroupStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8279A2418C396D8D6161793 /* AppGroupStorage.swift */; };
+		280FDB2C811C80F1C781E729 /* SessionStopCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14305E4C1FAFDEA9B5EE7CD /* SessionStopCoordinator.swift */; };
+		295EC75C7DEADEE9CD0C6F24 /* ZenNotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A58B46F150FEBD0B240169 /* ZenNotificationDelegate.swift */; };
 		298D4DEF329F97DAFCAC4334 /* GroupDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */; };
 		29A7FC7126029071BCCE0F77 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5753251B13D3012A1BD8F71 /* ContentView.swift */; };
 		2C17A17F656EDAB5D97ABB63 /* DeviceActivityMonitorExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -83,6 +86,7 @@
 		E12AFA598B5C79089F6504AC /* ScheduleEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */; };
 		E6CD43B17049B3E96A9449CB /* GlassMorphism.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3753701A090FE21F595D03BA /* GlassMorphism.swift */; };
 		EDDE3C37C432DB2C0DB94AAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE57ADA74309FD2D82535765 /* SettingsView.swift */; };
+		F0B626382AEECA01B726A401 /* ScheduleNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09C0D82B4DF7D11856E3A4C /* ScheduleNotifier.swift */; };
 		F1774DD41E22EF4DED56539E /* AccountabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */; };
 		F4C9102572CD749F3F6315DB /* ScheduleEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */; };
 		F57C227DD9B1B0C044D6EB98 /* SharedBlockGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */; };
@@ -155,11 +159,12 @@
 /* Begin PBXFileReference section */
 		03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeView.swift; sourceTree = "<group>"; };
 		05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0864C33F0DACB73771F17269 /* CooldownCountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooldownCountdownView.swift; sourceTree = "<group>"; };
+		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		13707278B6171125FF34B453 /* AccountabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityView.swift; sourceTree = "<group>"; };
 		14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockApp.swift; sourceTree = "<group>"; };
-		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1E2D0D2399C949DC7600E001 /* FocusSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusSession.swift; sourceTree = "<group>"; };
 		21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecorder.swift; sourceTree = "<group>"; };
 		223855CB6620CCBF81459D3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -187,9 +192,11 @@
 		74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedBlockGroup.swift; sourceTree = "<group>"; };
 		79DF186E8ECD25F234E7972F /* GroupFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupFormView.swift; sourceTree = "<group>"; };
 		7DD0C4009777D862A37B9BBB /* SelectionPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionPreview.swift; sourceTree = "<group>"; };
+		81A58B46F150FEBD0B240169 /* ZenNotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenNotificationDelegate.swift; sourceTree = "<group>"; };
 		8478883EBA61B7089072B764 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		88407A534BE54012983883BE /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
 		898A6C5E9A8DFDF5B3DA8FD6 /* ActivityScheduleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityScheduleManager.swift; sourceTree = "<group>"; };
+		A09C0D82B4DF7D11856E3A4C /* ScheduleNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleNotifier.swift; sourceTree = "<group>"; };
 		A7965C0110E68B05051C4E93 /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		A8279A2418C396D8D6161793 /* AppGroupStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStorage.swift; sourceTree = "<group>"; };
 		ADCA066471B620FACC2E36E6 /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
@@ -207,18 +214,19 @@
 		C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDraft.swift; sourceTree = "<group>"; };
 		C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityManager.swift; sourceTree = "<group>"; };
 		C5CBA8C07B8331C410BED093 /* ZenAppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenAppPickerSheet.swift; sourceTree = "<group>"; };
-		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA2B2383DF70EBD52A8E8875 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		CC97810203DA62035C511E67 /* SelectionCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCoder.swift; sourceTree = "<group>"; };
 		CCCB7504A05579B5790CD081 /* ScheduleToastFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleToastFactory.swift; sourceTree = "<group>"; };
 		CDF2006FA47B38A32466125B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		D14305E4C1FAFDEA9B5EE7CD /* SessionStopCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStopCoordinator.swift; sourceTree = "<group>"; };
 		D29DA41F9A7EB7C589BAB8C3 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
 		D86E889E8AEE1C9E6B5B8F2A /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D98B852770CBC75C77B40F69 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DA04357C2A813D332A0AB784 /* PulseCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseCircle.swift; sourceTree = "<group>"; };
 		DA25B42280E7E6E216C478D3 /* BiometricGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricGate.swift; sourceTree = "<group>"; };
 		DAD2BAC9DB917AD1C6F88F0F /* ZenCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenCard.swift; sourceTree = "<group>"; };
-		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF0BA8A688D3B38DD2C29687 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		E2726AD82516A5DC3C92E130 /* SharedEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedEnums.swift; sourceTree = "<group>"; };
 		E44D38D937F80C62479ECD3E /* ZenButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenButton.swift; sourceTree = "<group>"; };
@@ -269,10 +277,13 @@
 				6E2FD9952A9E60558D838D6B /* DeepLinkRouter.swift */,
 				F778EC846C0E45E0389556CD /* EntitlementManager.swift */,
 				FE8280FAFAD080C479C9B257 /* NotificationManager.swift */,
+				A09C0D82B4DF7D11856E3A4C /* ScheduleNotifier.swift */,
 				28819B79F42B36191AC45E5A /* ScreenTimeManager.swift */,
 				21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */,
+				D14305E4C1FAFDEA9B5EE7CD /* SessionStopCoordinator.swift */,
 				2FCA29EFA5294A266FC7CF1C /* ShieldManager.swift */,
 				A7965C0110E68B05051C4E93 /* StreakCalculator.swift */,
+				81A58B46F150FEBD0B240169 /* ZenNotificationDelegate.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -280,6 +291,7 @@
 		09C57E3548C4289EA624E36E /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				0864C33F0DACB73771F17269 /* CooldownCountdownView.swift */,
 				5D128BCBD04673CEAE4EC835 /* CooldownSlider.swift */,
 				E568D8A9F39F395C07F6EAE5 /* GlassCard.swift */,
 				2E36D3B465D7D43F5A86E3EB /* GroupIcon.swift */,
@@ -624,7 +636,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					176E8E813F23EE75B4B5B608 = {
 						DevelopmentTeam = 252N2WS4Y3;
@@ -702,6 +714,7 @@
 				22502BC47A09433F3D76C812 /* BypassPreventionView.swift in Sources */,
 				65DFBFBC580B8C46F455C5FF /* Constants.swift in Sources */,
 				29A7FC7126029071BCCE0F77 /* ContentView.swift in Sources */,
+				0C41787BAB7EEF958DC703CA /* CooldownCountdownView.swift in Sources */,
 				C6B8E91E3B89A6EFFD15ED6E /* CooldownService.swift in Sources */,
 				D08AB3F0AE298C3F7ECF7D6F /* CooldownSlider.swift in Sources */,
 				95F07BA27B32D01C6F35210C /* CreateGroupView.swift in Sources */,
@@ -723,12 +736,14 @@
 				CE424507267817458632ED33 /* PulseCircle.swift in Sources */,
 				6EF3E5F09034FDBA433921CF /* QuickFocusSheet.swift in Sources */,
 				F4C9102572CD749F3F6315DB /* ScheduleEvaluator.swift in Sources */,
+				F0B626382AEECA01B726A401 /* ScheduleNotifier.swift in Sources */,
 				FDB8B09D8028B6EDC2ACE9F9 /* ScheduleToastFactory.swift in Sources */,
 				9F0E87B5F7DEDC945638F54B /* ScreenTimeManager.swift in Sources */,
 				6DC75C1A5435F55FDBB22CC9 /* ScreenTimeView.swift in Sources */,
 				95EABD0ED9B337B0602352FC /* SelectionCoder.swift in Sources */,
 				5C3D19198FAD0E6CC45CAC89 /* SelectionPreview.swift in Sources */,
 				FBE4FE7E20AFEBFDDFB915C4 /* SessionRecorder.swift in Sources */,
+				280FDB2C811C80F1C781E729 /* SessionStopCoordinator.swift in Sources */,
 				EDDE3C37C432DB2C0DB94AAD /* SettingsView.swift in Sources */,
 				F57C227DD9B1B0C044D6EB98 /* SharedBlockGroup.swift in Sources */,
 				B493C2A200BF277346EE9262 /* SharedEnums.swift in Sources */,
@@ -741,6 +756,7 @@
 				403D89F9ED0F449726C4B030 /* ZenButton.swift in Sources */,
 				0D7B70546E5119590777606C /* ZenCard.swift in Sources */,
 				D1E55C8BB0EB3BF2258D614C /* ZenLockApp.swift in Sources */,
+				295EC75C7DEADEE9CD0C6F24 /* ZenNotificationDelegate.swift in Sources */,
 				688612429F2F9258BB2C76EF /* ZenToast.swift in Sources */,
 				8A5DFE1B2D91525D06E0447D /* ZenToggle.swift in Sources */,
 			);
@@ -828,6 +844,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -879,6 +896,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -1035,6 +1053,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1093,6 +1112,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

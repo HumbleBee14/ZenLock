@@ -11,6 +11,7 @@ final class DashboardViewModel {
     var errorMessage: String?
 
     private let blockingService: BlockingService
+    private let stopCoordinator = SessionStopCoordinator()
 
     init(blockingService: BlockingService = BlockingService()) {
         self.blockingService = blockingService
@@ -29,13 +30,20 @@ final class DashboardViewModel {
     }
 
     var toast: ZenToastData?
+    var stopConfirmGroup: BlockGroup?
 
     func toggleGroup(_ group: BlockGroup, context: ModelContext) {
         if group.isActive {
-            Task { await deactivate(group, context: context) }
+            stopConfirmGroup = group
         } else {
             activate(group, context: context)
         }
+    }
+
+    func confirmStop(context: ModelContext) {
+        guard let group = stopConfirmGroup else { return }
+        stopConfirmGroup = nil
+        Task { await deactivate(group, context: context) }
     }
 
     private func activate(_ group: BlockGroup, context: ModelContext) {
@@ -55,32 +63,32 @@ final class DashboardViewModel {
 
     @MainActor
     private func deactivate(_ group: BlockGroup, context: ModelContext) async {
-        // Strict Mode is checked first — a locked session never reaches auth.
-        let shared = group.toShared()
-        if shared.deepFocusEnabled,
-           (shared.blockMode != .timeBased || ScheduleEvaluator.isWithinSchedule(shared)) {
+        switch await stopCoordinator.requestStop(group) {
+        case .blockedStrict:
             toast = ZenToastData(
                 message: "Strict Mode is on — this session can't be stopped until its schedule ends.",
                 kind: .warning
             )
-            return
-        }
-
-        // Require the device owner (Face ID / Touch ID / passcode) to stop.
-        let ok = await BiometricGate.authenticate(reason: "Stop “\(group.name)” focus session")
-        guard ok else {
+        case .authFailed:
             toast = ZenToastData(message: "Authentication required to stop.", kind: .warning)
-            return
+        case .cooldownStarted:
+            toast = ZenToastData(message: "Cooling down — apps unlock when the timer ends.", kind: .info)
         }
+    }
 
-        let recorder = SessionRecorder(context: context)
-        switch blockingService.deactivateGroup(group) {
-        case .success:
-            recorder.end(group: group, completed: true)
-            try? context.save()
-        case .failure(let error):
-            errorMessage = error.errorDescription
+    /// Called by the dashboard timer to finalize any elapsed cool-downs.
+    func finalizeElapsedCooldowns(context: ModelContext) {
+        for group in groups where stopCoordinator.pendingUnlock(for: group) != nil {
+            stopCoordinator.finalizeIfElapsed(group, context: context)
         }
+    }
+
+    func pendingUnlock(for group: BlockGroup) -> AccountabilityManager.PendingUnlock? {
+        stopCoordinator.pendingUnlock(for: group)
+    }
+
+    func cancelStop(_ group: BlockGroup) {
+        stopCoordinator.cancelStop(group)
     }
 
     func deleteGroup(_ group: BlockGroup, context: ModelContext) {

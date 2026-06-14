@@ -240,21 +240,11 @@ private var extendPickerSheet: some View {
     }
 
     private func cooldownActiveCard(endsAt: Date) -> some View {
-        GlassCard {
-            VStack(spacing: ZenTheme.Spacing.sm) {
-                Label("Cool-down", systemImage: "hourglass")
-                    .font(ZenTheme.caption)
-                    .foregroundStyle(ZenTheme.accent)
-                Text(timeRemaining(endsAt))
-                    .font(.system(size: 36, weight: .bold, design: .monospaced))
-                    .foregroundStyle(ZenTheme.accent)
-                ZenButton(title: "Keep focusing", icon: "arrow.uturn.backward", style: .primary) {
-                    cancelCooldown()
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(ZenTheme.Spacing.md)
-        }
+        CooldownCountdownView(
+            endsAt: endsAt,
+            startedAt: endsAt.addingTimeInterval(TimeInterval(-CooldownService.minutes * 60)),
+            onCancel: { cancelCooldown() }
+        )
     }
 
     private func timeRemaining(_ end: Date) -> String {

@@ -1,5 +1,4 @@
 import Foundation
-import UserNotifications
 
 struct AccountabilityPartner: Codable, Equatable {
     var name: String
@@ -49,10 +48,9 @@ final class AccountabilityManager {
         return try? JSONDecoder().decode(PendingUnlock.self, from: data)
     }
 
-    /// Request unlock with cool-down nudges. Returns unlock-at date.
+    /// Begin the cool-down. Returns the unlock-at date.
     @discardableResult
     func requestUnlock(group: BlockGroup) -> Date {
-        let partner = self.partner
         let cool = CooldownService.minutes
         let now = Date()
         let unlocksAt = now.addingTimeInterval(TimeInterval(cool * 60))
@@ -66,55 +64,10 @@ final class AccountabilityManager {
         if let data = try? JSONEncoder().encode(pending) {
             defaults?.set(data, forKey: Self.pendingUnlockKey)
         }
-
-        scheduleNudges(group: group, partnerName: partner?.name, cool: cool)
         return unlocksAt
     }
 
     func cancelPendingUnlock() {
         defaults?.removeObject(forKey: Self.pendingUnlockKey)
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: ["unlock_nudge_1", "unlock_nudge_mid", "unlock_ready"])
-    }
-
-    private func scheduleNudges(group: BlockGroup, partnerName: String?, cool: Int) {
-        let center = UNUserNotificationCenter.current()
-        let partnerHint = partnerName.map { " (\($0) is your accountability partner)" } ?? ""
-
-        let nudge1 = UNMutableNotificationContent()
-        nudge1.title = "Are you sure?"
-        nudge1.body = "You asked to unlock \(group.name)\(partnerHint). The shield comes down in \(cool) minutes — you can still close this and stay focused."
-        nudge1.sound = .default
-
-        let nudge1Req = UNNotificationRequest(
-            identifier: "unlock_nudge_1",
-            content: nudge1,
-            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 30, repeats: false)
-        )
-        center.add(nudge1Req)
-
-        if cool >= 3 {
-            let mid = UNMutableNotificationContent()
-            mid.title = "Halfway through the cool-down"
-            mid.body = "Last chance to back out and keep your focus streak intact."
-            mid.sound = .default
-            let midReq = UNNotificationRequest(
-                identifier: "unlock_nudge_mid",
-                content: mid,
-                trigger: UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(cool * 30), repeats: false)
-            )
-            center.add(midReq)
-        }
-
-        let ready = UNMutableNotificationContent()
-        ready.title = "🔓 \(group.name) is unlockable"
-        ready.body = "Tap to manage in ZenLock\(partnerHint)."
-        ready.sound = .default
-        let readyReq = UNNotificationRequest(
-            identifier: "unlock_ready",
-            content: ready,
-            trigger: UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(cool * 60), repeats: false)
-        )
-        center.add(readyReq)
     }
 }
