@@ -73,6 +73,12 @@
     "Block Groups" : {
       "extractionState" : "manual"
     },
+    "Focus Sessions" : {
+      "extractionState" : "manual"
+    },
+    "No focus sessions yet" : {
+      "extractionState" : "manual"
+    },
     "Block Websites" : {
       "extractionState" : "manual"
     },
@@ -91,7 +97,13 @@
     "Cool-down to stop" : {
 
     },
+    "Create Focus Session" : {
+      "extractionState" : "manual"
+    },
     "Create Group" : {
+      "extractionState" : "manual"
+    },
+    "Create your first focus session to start blocking distracting apps." : {
       "extractionState" : "manual"
     },
     "Create your first group to start blocking distracting apps." : {

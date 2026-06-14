@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import DeviceActivity
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -8,6 +9,7 @@ struct DashboardView: View {
     @State private var showQuickFocus = false
     @State private var activeFocus: ActiveSession?
     @State private var now = Date()
+    @State private var summaryFilterEnd = Date()
 
     private let focusTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -18,17 +20,26 @@ struct DashboardView: View {
 
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
-                        headerSection
-                        statsSection
+                        summarySection
                         quickFocusButton
                         groupsSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
-                    .padding(.top, ZenTheme.Spacing.md)
+                    .padding(.top, ZenTheme.Spacing.sm)
                 }
             }
-            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("ZenLock")
+                            .font(ZenTheme.title2.weight(.bold))
+                            .foregroundStyle(ZenTheme.text)
+                        Text("Stay focused. Stay present.")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { viewModel.showSettings = true } label: {
                         Image(systemName: "gearshape.fill")
@@ -56,6 +67,7 @@ struct DashboardView: View {
             .onAppear {
                 viewModel.loadGroups(context: modelContext)
                 activeFocus = ActiveSession.load()
+                summaryFilterEnd = Date()
                 if router.consume() == .quickFocus { showQuickFocus = true }
             }
             .onChange(of: router.pending) { _, _ in
@@ -76,33 +88,19 @@ struct DashboardView: View {
         }
     }
 
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: ZenTheme.Spacing.xs) {
-            Text("ZenLock")
-                .font(ZenTheme.largeTitle)
-                .foregroundStyle(ZenTheme.text)
-            Text("Stay focused. Stay present.")
-                .font(ZenTheme.callout)
-                .foregroundStyle(ZenTheme.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    private var summarySection: some View {
+        DeviceActivityReport(
+            DeviceActivityReport.Context("dashboardSummary"),
+            filter: summaryFilter
+        )
+        .frame(height: 132)
     }
 
-    private var statsSection: some View {
-        HStack(spacing: ZenTheme.Spacing.md) {
-            StatCard(
-                title: "Active",
-                value: "\(viewModel.activeGroupCount)",
-                icon: "shield.checkered",
-                color: ZenTheme.success
-            )
-            StatCard(
-                title: "Groups",
-                value: "\(viewModel.totalGroupCount)",
-                icon: "square.stack.3d.up",
-                color: ZenTheme.primary
-            )
-        }
+    private var summaryFilter: DeviceActivityFilter {
+        let start = Calendar.current.startOfDay(for: Date())
+        return DeviceActivityFilter(
+            segment: .daily(during: DateInterval(start: start, end: summaryFilterEnd))
+        )
     }
 
     private var quickFocusButton: some View {
@@ -185,7 +183,7 @@ struct DashboardView: View {
     private var groupsSection: some View {
         VStack(spacing: ZenTheme.Spacing.md) {
             HStack {
-                Text("Block Groups")
+                Text("Focus Sessions")
                     .font(ZenTheme.headline)
                     .foregroundStyle(ZenTheme.text)
                 Spacer()
@@ -221,44 +219,18 @@ struct DashboardView: View {
                 Image(systemName: "shield.slash")
                     .font(.system(size: 48))
                     .foregroundStyle(ZenTheme.textSecondary)
-                Text("No block groups yet")
+                Text("No focus sessions yet")
                     .font(ZenTheme.headline)
                     .foregroundStyle(ZenTheme.text)
-                Text("Create your first group to start blocking distracting apps.")
+                Text("Create your first focus session to start blocking distracting apps.")
                     .font(ZenTheme.callout)
                     .foregroundStyle(ZenTheme.textSecondary)
                     .multilineTextAlignment(.center)
-                ZenButton(title: "Create Group", icon: "plus") {
+                ZenButton(title: "Create Focus Session", icon: "plus") {
                     viewModel.showCreateGroup = true
                 }
             }
             .padding(ZenTheme.Spacing.xl)
-        }
-    }
-}
-
-private struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundStyle(color)
-                    Spacer()
-                }
-                Text(value)
-                    .font(ZenTheme.title)
-                    .foregroundStyle(ZenTheme.text)
-                Text(title)
-                    .font(ZenTheme.caption)
-                    .foregroundStyle(ZenTheme.textSecondary)
-            }
-            .padding(ZenTheme.Spacing.md)
         }
     }
 }
