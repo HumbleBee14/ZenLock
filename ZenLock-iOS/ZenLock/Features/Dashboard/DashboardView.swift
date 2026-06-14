@@ -20,6 +20,7 @@ struct DashboardView: View {
 
                 ScrollView {
                     VStack(spacing: ZenTheme.Spacing.lg) {
+                        headerRow
                         summarySection
                         quickFocusButton
                         groupsSection
@@ -28,25 +29,7 @@ struct DashboardView: View {
                     .padding(.top, ZenTheme.Spacing.sm)
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("ZenLock")
-                            .font(ZenTheme.title2.weight(.bold))
-                            .foregroundStyle(ZenTheme.text)
-                        Text("Stay focused. Stay present.")
-                            .font(ZenTheme.caption)
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { viewModel.showSettings = true } label: {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $viewModel.showCreateGroup) {
                 CreateGroupView { viewModel.loadGroups(context: modelContext) }
             }
@@ -84,6 +67,27 @@ struct DashboardView: View {
                 } else {
                     activeFocus = fresh
                 }
+            }
+        }
+    }
+
+    private var headerRow: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("ZenLock")
+                    .font(ZenTheme.title.weight(.bold))
+                    .foregroundStyle(ZenTheme.text)
+                Text("Stay focused. Stay present.")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
+            }
+            Spacer(minLength: ZenTheme.Spacing.md)
+            Button { viewModel.showSettings = true } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.title3)
+                    .foregroundStyle(ZenTheme.textSecondary)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(ZenTheme.text.opacity(0.06)))
             }
         }
     }
