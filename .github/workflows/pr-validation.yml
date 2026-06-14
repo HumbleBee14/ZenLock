@@ -64,7 +64,7 @@ jobs:
           COMMIT_MSG: ${{ github.event.pull_request.title }}
         run: |
           set -e
-          GRADLE_FILE="app/build.gradle.kts"
+          GRADLE_FILE="ZenLock-Android/app/build.gradle.kts"
           CURRENT_CODE=$(grep -E "^\s*versionCode\s*=" "$GRADLE_FILE" | grep -oE "[0-9]+")
           CURRENT_NAME=$(grep -E "^\s*versionName\s*=" "$GRADLE_FILE" | grep -oE '"[^"]+"' | tr -d '"')
 
@@ -112,6 +112,8 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+        working-directory: ZenLock-Android
 
       - name: Build both flavors (playstore + sms)
         run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint
+        working-directory: ZenLock-Android

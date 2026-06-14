@@ -61,7 +61,7 @@ jobs:
           MANUAL_BUMP_INPUT: ${{ github.event.inputs.bump_type }}
         run: |
           set -e
-          GRADLE_FILE="app/build.gradle.kts"
+          GRADLE_FILE="ZenLock-Android/app/build.gradle.kts"
           CURRENT_CODE=$(grep -E "^\s*versionCode\s*=" "$GRADLE_FILE" | grep -oE "[0-9]+")
           CURRENT_NAME=$(grep -E "^\s*versionName\s*=" "$GRADLE_FILE" | grep -oE '"[^"]+"' | tr -d '"')
 
@@ -107,6 +107,7 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+        working-directory: ZenLock-Android
 
       # Build both flavor variants as debug APKs (auto-signed with Android's
       # debug keystore so they install via sideload):
@@ -114,20 +115,21 @@ jobs:
       #   - sms flavor: SEND_SMS permission included (optional variant)
       - name: Build debug APKs (playstore + sms flavors)
         run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint
+        working-directory: ZenLock-Android
 
       - name: Rename APKs
         run: |
           mkdir -p release-artifacts
-          cp app/build/outputs/apk/playstore/debug/app-playstore-debug.apk \
+          cp ZenLock-Android/app/build/outputs/apk/playstore/debug/app-playstore-debug.apk \
              "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-debug.apk"
-          cp app/build/outputs/apk/sms/debug/app-sms-debug.apk \
+          cp ZenLock-Android/app/build/outputs/apk/sms/debug/app-sms-debug.apk \
              "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-sms-debug.apk"
 
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/build.gradle.kts
+          git add ZenLock-Android/app/build.gradle.kts
           git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
           git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin main --follow-tags
