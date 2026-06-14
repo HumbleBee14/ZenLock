@@ -94,6 +94,9 @@
     "Daily Screen Time Goal" : {
 
     },
+    "Developer" : {
+
+    },
     "Diagnostics" : {
 
     },
@@ -208,6 +211,9 @@
     "Slow down unlocks with a cool-down + nudges" : {
 
     },
+    "Star on GitHub" : {
+
+    },
     "Start" : {
       "extractionState" : "manual"
     },
@@ -232,6 +238,9 @@
     "The wait between requesting to stop a focus session and apps actually unlocking. Applies everywhere. Strict Mode can't be stopped at all." : {
 
     },
+    "Time by Category" : {
+
+    },
     "Time Limit" : {
 
     },
@@ -253,7 +262,7 @@
     "ZenLock" : {
       "extractionState" : "manual"
     },
-    "ZenLock is free and open source. Your data never leaves your device." : {
+    "ZenLock is free and open source. Show your support!" : {
 
     },
     "ZenLock needs Screen Time permission to block apps. This data never leaves your device." : {

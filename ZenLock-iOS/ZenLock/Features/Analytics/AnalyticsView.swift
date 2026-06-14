@@ -27,8 +27,9 @@ struct AnalyticsView: View {
                 VStack(spacing: ZenTheme.Spacing.md) {
                     streakCard
                     rangePicker
+                    reportContainer(context: "usageTrend", height: 150)
                     reportContainer(context: "totalUsage", height: 130)
-                    reportContainer(context: "perCategory", height: 420)
+                    reportContainer(context: "perCategory", height: 330)
                     historySection
                 }
                 .padding(.horizontal, ZenTheme.Spacing.md)
@@ -41,9 +42,36 @@ struct AnalyticsView: View {
 
     private func reportContainer(context: String, height: CGFloat) -> some View {
         GlassCard {
-            nonInteractiveReport(context: context, height: height)
-                .padding(.horizontal, ZenTheme.Spacing.sm)
-                .padding(.vertical, 6)
+            VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
+                if context == "perCategory" {
+                    Text("Time by Category")
+                        .font(ZenTheme.headline)
+                        .foregroundStyle(ZenTheme.text)
+                }
+                DeviceActivityReport(
+                    DeviceActivityReport.Context(context),
+                    filter: context == "usageTrend" ? trendFilter(for: range) : filter(for: range)
+                )
+                .frame(height: height)
+                .allowsHitTesting(false)
+            }
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    /// Segmented filter for the trend line: hourly buckets for today, daily otherwise.
+    private func trendFilter(for range: Range) -> DeviceActivityFilter {
+        let cal = Calendar.current
+        let now = Date()
+        switch range {
+        case .today:
+            return DeviceActivityFilter(segment: .hourly(during: DateInterval(start: cal.startOfDay(for: now), end: now)))
+        case .week:
+            let start = cal.date(byAdding: .day, value: -7, to: now) ?? now
+            return DeviceActivityFilter(segment: .daily(during: DateInterval(start: start, end: now)))
+        case .month:
+            let start = cal.date(byAdding: .day, value: -30, to: now) ?? now
+            return DeviceActivityFilter(segment: .daily(during: DateInterval(start: start, end: now)))
         }
     }
 
@@ -159,15 +187,6 @@ private func durationLabel(_ seconds: TimeInterval) -> String {
         let m = Int(seconds / 60)
         if m < 60 { return "\(m)m" }
         return "\(m / 60)h \(m % 60)m"
-    }
-
-    private func nonInteractiveReport(context: String, height: CGFloat) -> some View {
-        DeviceActivityReport(
-            DeviceActivityReport.Context(context),
-            filter: filter(for: range)
-        )
-        .frame(height: height)
-        .allowsHitTesting(false)
     }
 
 

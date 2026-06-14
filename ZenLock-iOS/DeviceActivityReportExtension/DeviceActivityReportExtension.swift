@@ -9,5 +9,6 @@ struct ZenLockReportExtension: @preconcurrency DeviceActivityReportExtension {
         PerCategoryScene()
         PerAppScene()
         DashboardSummaryScene()
+        UsageTrendScene()
     }
 }

@@ -95,6 +95,7 @@
 		FBE4FE7E20AFEBFDDFB915C4 /* SessionRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */; };
 		FDB8B09D8028B6EDC2ACE9F9 /* ScheduleToastFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCB7504A05579B5790CD081 /* ScheduleToastFactory.swift */; };
 		FDFAC32768CB1409EAB92AA4 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2B2383DF70EBD52A8E8875 /* ShieldConfigurationExtension.swift */; };
+		FE2A37F13C832020FF31FBFB /* UsageTrendScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0D3910340F2E59EAA6C9655 /* UsageTrendScene.swift */; };
 		FEEC793CC2EC31150A830104 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 /* End PBXBuildFile section */
 
@@ -232,6 +233,7 @@
 		E44D38D937F80C62479ECD3E /* ZenButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenButton.swift; sourceTree = "<group>"; };
 		E568D8A9F39F395C07F6EAE5 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
 		ED69E044C6946091BE87AF38 /* ZenToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenToast.swift; sourceTree = "<group>"; };
+		F0D3910340F2E59EAA6C9655 /* UsageTrendScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrendScene.swift; sourceTree = "<group>"; };
 		F5753251B13D3012A1BD8F71 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F61FB1C1595E3557A2998430 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		F778EC846C0E45E0389556CD /* EntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementManager.swift; sourceTree = "<group>"; };
@@ -497,6 +499,7 @@
 				BC35B4FF2E313FA944734E69 /* PerAppScene.swift */,
 				C12AF19807605F8299C82376 /* PerCategoryScene.swift */,
 				6B63757CB990E8EA6113BA88 /* TotalUsageScene.swift */,
+				F0D3910340F2E59EAA6C9655 /* UsageTrendScene.swift */,
 			);
 			path = DeviceActivityReportExtension;
 			sourceTree = "<group>";
@@ -811,6 +814,7 @@
 				E11F2898454979B27C073EFC /* SharedBlockGroup.swift in Sources */,
 				00874C9EB778C2AA418B6665 /* SharedEnums.swift in Sources */,
 				7CAE18E62AA67DF4C99D4557 /* TotalUsageScene.swift in Sources */,
+				FE2A37F13C832020FF31FBFB /* UsageTrendScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -877,6 +881,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -892,6 +897,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1086,6 +1092,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1107,6 +1114,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

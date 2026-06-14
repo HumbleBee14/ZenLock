@@ -256,9 +256,31 @@ struct SettingsView: View {
                 infoRow(label: "Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                 infoRow(label: "Build", value: Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1")
 
-                Text("ZenLock is free and open source. Your data never leaves your device.")
+                HStack {
+                    Text("Developer")
+                        .font(ZenTheme.body)
+                        .foregroundStyle(ZenTheme.textSecondary)
+                    Spacer()
+                    Link("Dinesh", destination: URL(string: "https://dineshy.com")!)
+                        .font(ZenTheme.body)
+                        .foregroundStyle(ZenTheme.primary)
+                }
+
+                Text("ZenLock is free and open source. Show your support!")
                     .font(ZenTheme.caption)
                     .foregroundStyle(ZenTheme.textSecondary)
+
+                Link(destination: URL(string: "https://github.com/HumbleBee14/ZenLock")!) {
+                    HStack(spacing: ZenTheme.Spacing.sm) {
+                        Image(systemName: "star.fill")
+                        Text("Star on GitHub")
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption)
+                    }
+                    .font(ZenTheme.body)
+                    .foregroundStyle(ZenTheme.primary)
+                }
             }
             .padding(ZenTheme.Spacing.md)
         }
