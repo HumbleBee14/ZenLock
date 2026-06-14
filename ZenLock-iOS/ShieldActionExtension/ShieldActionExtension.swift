@@ -52,12 +52,12 @@ class ShieldActionExtension: ShieldActionDelegate {
                     grantFrictionBypass(for: group.id, seconds: session)
                     completionHandler(.close)
                 } else {
-                    requestUnlock(groupName: group.name)
-                    completionHandler(.defer)
+                    requestUnlock()
+                    completionHandler(.close)
                 }
             } else {
-                requestUnlock(groupName: group?.name)
-                completionHandler(.defer)
+                requestUnlock()
+                completionHandler(.close)
             }
 
         case .firstSecondarySubmenuItemPressed,
@@ -118,21 +118,18 @@ class ShieldActionExtension: ShieldActionDelegate {
         ManagedSettingsStore(named: .init(groupId)).clearAllSettings()
     }
 
-    private func requestUnlock(groupName: String?) {
-        defaults?.set(true, forKey: "zen_unlock_requested")
-        if let groupName {
-            defaults?.set(groupName, forKey: "zen_unlock_requested_group")
-        }
-
+    private func requestUnlock() {
         let content = UNMutableNotificationContent()
-        content.title = "🔓 Unlock Requested"
-        content.body = groupName.map { "Open ZenLock to manage \($0)." } ?? "Open ZenLock to manage your blocking session."
+        content.title = "ZenLock"
+        content.body = "Open ZenLock to unlock."
         content.sound = .default
 
+        // A short interval trigger fires reliably even as the extension is torn
+        // down; a nil trigger from a closing extension can be dropped or delayed.
         let request = UNNotificationRequest(
-            identifier: "unlock_request_\(UUID().uuidString)",
+            identifier: "unlock_request",
             content: content,
-            trigger: nil
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         )
         UNUserNotificationCenter.current().add(request)
     }

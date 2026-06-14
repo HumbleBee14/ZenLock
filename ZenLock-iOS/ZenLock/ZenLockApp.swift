@@ -8,6 +8,7 @@ struct ZenLockApp: App {
     @State private var screenTimeManager = ScreenTimeManager()
     @State private var blockingService = BlockingService()
     @State private var router = DeepLinkRouter()
+    @State private var notificationDelegate = ZenNotificationDelegate()
     @AppStorage(AppThemeStorage.key) private var themeRaw: String = AppTheme.system.rawValue
 
     private let container: ModelContainer = Self.makeContainer()
