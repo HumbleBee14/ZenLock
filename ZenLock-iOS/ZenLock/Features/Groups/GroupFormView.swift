@@ -190,6 +190,10 @@ struct GroupFormView: View {
                         .font(ZenTheme.caption2)
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
+
+                Divider().overlay(ZenTheme.textSecondary.opacity(0.2))
+
+                ZenToggle(isOn: $draft.notifyBeforeStart, label: "Remind me 1 minute before")
             }
             .padding(ZenTheme.Spacing.md)
         }

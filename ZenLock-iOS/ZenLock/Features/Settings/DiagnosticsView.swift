@@ -1,6 +1,7 @@
 import SwiftUI
 import FamilyControls
 import ManagedSettings
+import UserNotifications
 
 struct DiagnosticsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -101,6 +102,43 @@ struct DiagnosticsView: View {
         out.append("Onboarding done: \(defaults.bool(forKey: Constants.Keys.onboardingCompleted))")
 
         lines = out
+        appendNotificationDiagnostics()
+    }
+
+    private func appendNotificationDiagnostics() {
+        Task {
+            let center = UNUserNotificationCenter.current()
+            let settings = await center.notificationSettings()
+            let requests = await center.pendingNotificationRequests()
+
+            var out: [String] = []
+            out.append("")
+            out.append("=== Notifications ===")
+            out.append("Auth: \(notifAuthString(settings.authorizationStatus))")
+            let pending = requests.filter { $0.identifier.hasPrefix("zen_schedule_start_") }
+            out.append("Pending heads-up: \(pending.count)")
+            let f = DateFormatter()
+            f.dateFormat = "MMM d, h:mm a"
+            for r in pending {
+                if let t = r.trigger as? UNCalendarNotificationTrigger {
+                    out.append("  • \(r.content.title) → next \(t.nextTriggerDate().map(f.string(from:)) ?? "?")")
+                } else if let t = r.trigger as? UNTimeIntervalNotificationTrigger {
+                    out.append("  • \(r.content.title) → in \(Int(t.timeInterval))s")
+                }
+            }
+            lines.append(contentsOf: out)
+        }
+    }
+
+    private func notifAuthString(_ s: UNAuthorizationStatus) -> String {
+        switch s {
+        case .notDetermined: return "notDetermined ⚠️"
+        case .denied: return "denied ❌"
+        case .authorized: return "authorized ✅"
+        case .provisional: return "provisional"
+        case .ephemeral: return "ephemeral"
+        @unknown default: return "unknown(\(s.rawValue))"
+        }
     }
 
     private func authString(_ s: AuthorizationStatus) -> String {

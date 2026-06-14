@@ -23,6 +23,9 @@ final class BlockGroup {
     var scheduleDaysOfWeek: [Int]?
     var scheduleRepeats: Bool
 
+    /// Fire a heads-up notification one minute before the schedule starts.
+    var notifyBeforeStart: Bool = false
+
     var deepFocusEnabled: Bool
     var customShieldMessage: String?
 
@@ -48,6 +51,7 @@ final class BlockGroup {
         scheduleEndMinute: Int? = nil,
         scheduleDaysOfWeek: [Int]? = nil,
         scheduleRepeats: Bool = false,
+        notifyBeforeStart: Bool = false,
         deepFocusEnabled: Bool = false,
         customShieldMessage: String? = nil,
         maxOpensPerDay: Int? = nil,
@@ -68,6 +72,7 @@ final class BlockGroup {
         self.scheduleEndMinute = scheduleEndMinute
         self.scheduleDaysOfWeek = scheduleDaysOfWeek
         self.scheduleRepeats = scheduleRepeats
+        self.notifyBeforeStart = notifyBeforeStart
         self.deepFocusEnabled = deepFocusEnabled
         self.customShieldMessage = customShieldMessage
         self.maxOpensPerDay = maxOpensPerDay
@@ -101,6 +106,7 @@ final class BlockGroup {
             scheduleEndMinute: scheduleEndMinute,
             scheduleDaysOfWeek: scheduleDaysOfWeek,
             scheduleRepeats: scheduleRepeats,
+            notifyBeforeStart: notifyBeforeStart,
             deepFocusEnabled: deepFocusEnabled,
             customShieldMessage: customShieldMessage,
             maxOpensPerDay: maxOpensPerDay,

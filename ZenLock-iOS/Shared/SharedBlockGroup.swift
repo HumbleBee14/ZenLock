@@ -19,6 +19,7 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
     var scheduleEndMinute: Int?
     var scheduleDaysOfWeek: [Int]?
     var scheduleRepeats: Bool
+    var notifyBeforeStart: Bool
 
     var deepFocusEnabled: Bool
     var customShieldMessage: String?
@@ -42,6 +43,7 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
         scheduleEndMinute: Int? = nil,
         scheduleDaysOfWeek: [Int]? = nil,
         scheduleRepeats: Bool = false,
+        notifyBeforeStart: Bool = false,
         deepFocusEnabled: Bool = false,
         customShieldMessage: String? = nil,
         maxOpensPerDay: Int? = nil,
@@ -62,6 +64,7 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
         self.scheduleEndMinute = scheduleEndMinute
         self.scheduleDaysOfWeek = scheduleDaysOfWeek
         self.scheduleRepeats = scheduleRepeats
+        self.notifyBeforeStart = notifyBeforeStart
         self.deepFocusEnabled = deepFocusEnabled
         self.customShieldMessage = customShieldMessage
         self.maxOpensPerDay = maxOpensPerDay
@@ -89,6 +92,7 @@ extension SharedBlockGroup {
         self.scheduleEndMinute = try c.decodeIfPresent(Int.self, forKey: .scheduleEndMinute)
         self.scheduleDaysOfWeek = try c.decodeIfPresent([Int].self, forKey: .scheduleDaysOfWeek)
         self.scheduleRepeats = try c.decodeIfPresent(Bool.self, forKey: .scheduleRepeats) ?? false
+        self.notifyBeforeStart = try c.decodeIfPresent(Bool.self, forKey: .notifyBeforeStart) ?? false
         self.deepFocusEnabled = try c.decodeIfPresent(Bool.self, forKey: .deepFocusEnabled) ?? false
         self.customShieldMessage = try c.decodeIfPresent(String.self, forKey: .customShieldMessage)
         self.maxOpensPerDay = try c.decodeIfPresent(Int.self, forKey: .maxOpensPerDay)

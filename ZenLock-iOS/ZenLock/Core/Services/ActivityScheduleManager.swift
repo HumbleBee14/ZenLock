@@ -34,8 +34,10 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
     }
 
     private func scheduleStartBackstop(for group: SharedBlockGroup) {
-        guard let h = group.scheduleStartHour, let m = group.scheduleStartMinute else { return }
-        notifier.scheduleStartNotification(
+        notifier.cancelStartNotification(groupId: group.id)
+        guard group.notifyBeforeStart,
+              let h = group.scheduleStartHour, let m = group.scheduleStartMinute else { return }
+        notifier.scheduleHeadsUpNotification(
             groupId: group.id,
             groupName: group.name,
             hour: h,

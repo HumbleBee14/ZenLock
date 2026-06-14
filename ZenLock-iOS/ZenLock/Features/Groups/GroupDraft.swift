@@ -14,6 +14,7 @@ struct GroupDraft {
     var scheduleEndMinute: Int = 0
     var scheduleRepeats: Bool = true
     var scheduleDays: Set<Int> = Set(1...7)
+    var notifyBeforeStart: Bool = false
 
     var usageLimitMinutes: Int = 60
     var usagePeriod: UsagePeriod = .daily
@@ -43,6 +44,7 @@ extension GroupDraft {
         self.scheduleEndMinute = group.scheduleEndMinute ?? 0
         self.scheduleRepeats = group.scheduleRepeats
         self.scheduleDays = Set(group.scheduleDaysOfWeek ?? Array(1...7))
+        self.notifyBeforeStart = group.notifyBeforeStart
         self.usageLimitMinutes = group.usageLimitMinutes ?? 60
         self.usagePeriod = group.usagePeriod ?? .daily
         self.enableOpenLimit = group.maxOpensPerDay != nil
@@ -64,6 +66,7 @@ extension GroupDraft {
         group.scheduleEndMinute = scheduleEndMinute
         group.scheduleRepeats = scheduleRepeats
         group.scheduleDaysOfWeek = scheduleRepeats ? Array(scheduleDays).sorted() : nil
+        group.notifyBeforeStart = notifyBeforeStart
         group.usageLimitMinutes = usageLimitMinutes
         group.usagePeriod = usagePeriod
         group.maxOpensPerDay = enableOpenLimit ? maxOpensPerDay : nil
