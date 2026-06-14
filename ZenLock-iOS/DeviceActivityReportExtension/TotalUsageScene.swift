@@ -14,10 +14,18 @@ struct TotalUsageScene: @preconcurrency DeviceActivityReportScene {
         var totalDuration: TimeInterval = 0
         var pickupCount = 0
 
+        // Total pickups ≈ per-app opens (numberOfPickups) + bare screen wakes.
+        // The segment-level totalPickupsWithoutApplicationActivity alone only
+        // counts wakes with no app opened, which drastically under-reports.
         for await activity in data {
             for await segment in activity.activitySegments {
                 totalDuration += segment.totalActivityDuration
                 pickupCount += segment.totalPickupsWithoutApplicationActivity
+                for await category in segment.categories {
+                    for await app in category.applications {
+                        pickupCount += app.numberOfPickups
+                    }
+                }
             }
         }
 
