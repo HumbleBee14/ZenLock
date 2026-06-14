@@ -9,10 +9,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
-        if activity.rawValue.hasSuffix("-HB") {
-            reevaluateAllGroups()
-            return
-        }
         // Apply the shield first — the callback can be killed early under the
         // extension's tight memory/time budget, so do the essential work before
         // any bookkeeping writes.
@@ -21,17 +17,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         defaults?.set(Date(), forKey: "schedule_start_\(groupId)")
     }
 
-    override func intervalWillStartWarning(for activity: DeviceActivityName) {
-        if activity.rawValue.hasSuffix("-HB") {
-            reevaluateAllGroups()
-        }
-    }
-
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        if activity.rawValue.hasSuffix("-HB") {
-            reevaluateAllGroups()
-            return
-        }
         let storeName = ManagedSettingsStore.Name(activity.rawValue)
         ManagedSettingsStore(named: storeName).clearAllSettings()
         defaults?.removeObject(forKey: "zen_quick_focus_active")
@@ -63,26 +49,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             trigger: nil
         )
         UNUserNotificationCenter.current().add(request)
-    }
-
-    // MARK: - Heartbeat re-evaluation
-
-    /// Re-assert shields for every active time-based group against its schedule.
-    /// Driven by the repeating heartbeat monitor so locks engage and lift on
-    /// time even with the app killed.
-    private func reevaluateAllGroups() {
-        guard let data = defaults?.data(forKey: Constants.Keys.blockGroups),
-              let groups = try? JSONDecoder().decode([SharedBlockGroup].self, from: data) else {
-            return
-        }
-        for group in groups where group.isActive && group.blockMode == .timeBased {
-            let storeName = ManagedSettingsStore.Name(group.id)
-            if ScheduleEvaluator.isWithinSchedule(group) {
-                applyShield(storeName: storeName, group: group)
-            } else {
-                ManagedSettingsStore(named: storeName).clearAllSettings()
-            }
-        }
     }
 
     // MARK: - Single-path evaluation

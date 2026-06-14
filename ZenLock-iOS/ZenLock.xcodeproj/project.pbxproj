@@ -160,11 +160,11 @@
 		03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeView.swift; sourceTree = "<group>"; };
 		05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		0864C33F0DACB73771F17269 /* CooldownCountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooldownCountdownView.swift; sourceTree = "<group>"; };
-		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FE2FDF98115068FB86C2D92 /* ShieldActionExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		115065C862137FD655BAFFEA /* ShieldConfigurationExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShieldConfigurationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		13707278B6171125FF34B453 /* AccountabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityView.swift; sourceTree = "<group>"; };
 		14EAC45C3BAC2F100D3AAF78 /* ZenLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenLockApp.swift; sourceTree = "<group>"; };
-		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1A7A84D9B847CDA832E428A1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1E2D0D2399C949DC7600E001 /* FocusSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusSession.swift; sourceTree = "<group>"; };
 		21CFD1964ED10CD27A68FECF /* SessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecorder.swift; sourceTree = "<group>"; };
 		223855CB6620CCBF81459D3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -214,7 +214,7 @@
 		C2CAD3E7C1349B58F80E25E1 /* GroupDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDraft.swift; sourceTree = "<group>"; };
 		C48E76B1A8BC3677511D2314 /* AccountabilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityManager.swift; sourceTree = "<group>"; };
 		C5CBA8C07B8331C410BED093 /* ZenAppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenAppPickerSheet.swift; sourceTree = "<group>"; };
-		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9F7B1BE354380D56CE080A3 /* DeviceActivityMonitorExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = DeviceActivityMonitorExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA2B2383DF70EBD52A8E8875 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		CC97810203DA62035C511E67 /* SelectionCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCoder.swift; sourceTree = "<group>"; };
 		CCCB7504A05579B5790CD081 /* ScheduleToastFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleToastFactory.swift; sourceTree = "<group>"; };
@@ -226,7 +226,7 @@
 		DA04357C2A813D332A0AB784 /* PulseCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseCircle.swift; sourceTree = "<group>"; };
 		DA25B42280E7E6E216C478D3 /* BiometricGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricGate.swift; sourceTree = "<group>"; };
 		DAD2BAC9DB917AD1C6F88F0F /* ZenCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenCard.swift; sourceTree = "<group>"; };
-		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCAB16969CCDD9F845E7A9DC /* ZenLock.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ZenLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF0BA8A688D3B38DD2C29687 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		E2726AD82516A5DC3C92E130 /* SharedEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedEnums.swift; sourceTree = "<group>"; };
 		E44D38D937F80C62479ECD3E /* ZenButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenButton.swift; sourceTree = "<group>"; };
@@ -636,7 +636,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2650;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					176E8E813F23EE75B4B5B608 = {
 						DevelopmentTeam = 252N2WS4Y3;
@@ -844,7 +844,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -896,7 +895,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -1053,7 +1051,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1112,7 +1109,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
