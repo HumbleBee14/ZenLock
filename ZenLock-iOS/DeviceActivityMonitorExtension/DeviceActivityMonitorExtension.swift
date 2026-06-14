@@ -15,6 +15,9 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
+        let storeName = ManagedSettingsStore.Name(activity.rawValue)
+        ManagedSettingsStore(named: storeName).clearAllSettings()
+        defaults?.removeObject(forKey: "zen_quick_focus_active")
         evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 

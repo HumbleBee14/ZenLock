@@ -41,9 +41,15 @@ struct WheelDurationPicker: UIViewRepresentable {
         func pickerView(_ pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
             let m = parent.options[row]
             let label: String
-            if m < 60 { label = "\(m) min" }
-            else if m % 60 == 0 { label = "\(m / 60) hr" }
-            else { label = "\(m / 60) hr \(m % 60) min" }
+            if m < 60 {
+                label = "\(m)min"
+            } else if m % 60 == 0 {
+                label = "\(m / 60)h"
+            } else {
+                let h = m / 60
+                let min = m % 60
+                label = "\(h)h,\(min)min"
+            }
             return NSAttributedString(string: label, attributes: [.foregroundColor: UIColor.label])
         }
         func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
@@ -64,15 +70,17 @@ struct QuickFocusSheet: View {
     @State private var cooldownMinutes: Int = 1
     @State private var showExtendPicker = false
     @State private var extendMinutes: Int = 10
+    @State private var showAddAppsPicker = false
+    @State private var addAppsSelection = FamilyActivitySelection()
 
-    static let durationOptions: [Int] = [10, 20, 30, 40, 50, 60, 90, 120, 150, 180]
+    static let durationOptions: [Int] = [10, 20, 30, 40, 50, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480, 510, 540, 570, 600, 630, 660, 690, 720]
     static let cooldownOptions: [Int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     private func durationLabel(_ m: Int) -> String {
-        if m < 60 { return "\(m)m" }
+        if m < 60 { return "\(m)min" }
         let h = m / 60
         let rem = m % 60
-        return rem == 0 ? "\(h)h" : "\(h)h \(rem)m"
+        return rem == 0 ? "\(h)h" : "\(h)h,\(rem)min"
     }
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -85,6 +93,7 @@ struct QuickFocusSheet: View {
                     VStack(spacing: ZenTheme.Spacing.md) {
                         if let active {
                             activeCard(active)
+                                .transition(.opacity)
                         } else {
                             header
                             durationCard
@@ -95,6 +104,7 @@ struct QuickFocusSheet: View {
                     .padding(ZenTheme.Spacing.md)
                     .padding(.bottom, 100)
                 }
+                .animation(.easeInOut(duration: 0.3), value: active)
             }
             .safeAreaInset(edge: .bottom) {
                 if active == nil {
@@ -110,16 +120,27 @@ struct QuickFocusSheet: View {
                 }
             }
             .zenAppPicker(isPresented: $showPicker, selection: $selection, title: "Apps to Block")
+            .zenAppPicker(isPresented: $showAddAppsPicker, selection: $addAppsSelection, title: "Add more apps", onDismiss: {
+                if !addAppsSelection.applicationTokens.isEmpty || !addAppsSelection.categoryTokens.isEmpty {
+                    addMoreApps()
+                }
+            })
             .sheet(isPresented: $showExtendPicker) { extendPickerSheet }
             .alert("Couldn't start", isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })) {
                 Button("OK", role: .cancel) {}
             } message: { Text(startError ?? "") }
-            .onAppear { reload() }
+            .onAppear {
+                reload()
+                checkAndCleanupExpiredSession()
+            }
             .onReceive(timer) { _ in
                 now = Date()
                 if let a = active {
-                    if now >= a.endsAt { stop() }
-                    else if let cd = a.cooldownEndsAt, now >= cd { stop() }
+                    if now >= a.endsAt {
+                        stop()
+                    } else if let cd = a.cooldownEndsAt, now >= cd {
+                        stop()
+                    }
                 }
             }
         }
@@ -145,14 +166,37 @@ struct QuickFocusSheet: View {
             if let cd = a.cooldownEndsAt, now < cd {
                 cooldownActiveCard(endsAt: cd)
             } else {
-                HStack(spacing: ZenTheme.Spacing.sm) {
-                    ZenButton(title: "Stop", icon: "stop.fill", style: .destructive) {
-                        startCooldown(minutes: a.cooldownConfigMinutes)
+                VStack(spacing: ZenTheme.Spacing.sm) {
+                    HStack(spacing: ZenTheme.Spacing.sm) {
+                        ZenButton(title: "Stop", icon: "stop.fill", style: .destructive) {
+                            startCooldown(minutes: a.cooldownConfigMinutes)
+                        }
+                        ZenButton(title: "Extend", icon: "plus.circle.fill", style: .primary) {
+                            extendMinutes = 10
+                            showExtendPicker = true
+                        }
                     }
-                    ZenButton(title: "Extend", icon: "plus.circle.fill", style: .primary) {
-                        extendMinutes = 10
-                        showExtendPicker = true
+                    Button {
+                        addAppsSelection = FamilyActivitySelection()
+                        showAddAppsPicker = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "app.badge.fill")
+                                .font(.body.weight(.semibold))
+                            Text("Add more apps")
+                                .font(ZenTheme.body.weight(.semibold))
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, ZenTheme.Spacing.md)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: ZenTheme.CornerRadius.md, style: .continuous)
+                                .fill(ZenTheme.accent)
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -193,9 +237,9 @@ private var extendPickerSheet: some View {
     }
 
     private func extendLabel(_ m: Int) -> String {
-        if m < 60 { return "\(m) min" }
-        if m % 60 == 0 { return "\(m / 60) hr" }
-        return "\(m / 60) hr \(m % 60) min"
+        if m < 60 { return "\(m)min" }
+        if m % 60 == 0 { return "\(m / 60)h" }
+        return "\(m / 60)h,\(m % 60)min"
     }
 
     private func cooldownActiveCard(endsAt: Date) -> some View {
@@ -238,10 +282,14 @@ private var extendPickerSheet: some View {
     private func extendSession(by minutes: Int) {
         guard var a = active else { return }
         a.endsAt = a.endsAt.addingTimeInterval(TimeInterval(minutes * 60))
-        // Cancel any in-progress cool-down on extend — clear intent to stop.
         a.cooldownEndsAt = nil
         a.save()
         active = a
+
+        let center = DeviceActivityCenter()
+        center.stopMonitoring([DeviceActivityName(Self.storeNameString)])
+        registerDeviceActivitySchedule(endsAt: a.endsAt)
+
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["zen_quick_focus_end"])
         scheduleEndNotification(at: a.endsAt)
     }
@@ -366,6 +414,7 @@ private var extendPickerSheet: some View {
 
     // MARK: - Session lifecycle
 
+    private static let storeNameString = "zen_quick_focus"
     private static let storeName = ManagedSettingsStore.Name("zen_quick_focus")
     private static let sessionKey = "zen_quick_focus_session"
 
@@ -373,6 +422,14 @@ private var extendPickerSheet: some View {
         active = ActiveSession.load()
         // If the saved session already expired, clean up.
         if let a = active, Date() >= a.endsAt { stop() }
+    }
+
+    private func checkAndCleanupExpiredSession() {
+        guard let a = active else { return }
+        if Date() >= a.endsAt {
+            stop()
+            now = Date()
+        }
     }
 
     private func startSession() {
@@ -401,21 +458,80 @@ private var extendPickerSheet: some View {
         session.save()
         active = session
 
+        // Register with DeviceActivity so iOS auto-clears the block when timer expires
+        registerDeviceActivitySchedule(endsAt: endsAt)
+
         // Local notification when the timer ends, so we can clean up even if the app is killed.
         scheduleEndNotification(at: endsAt)
     }
 
     private func stop() {
+        let center = DeviceActivityCenter()
+        center.stopMonitoring([DeviceActivityName(Self.storeNameString)])
         ManagedSettingsStore(named: Self.storeName).clearAllSettings()
         ActiveSession.clear()
         active = nil
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["zen_quick_focus_end"])
     }
 
+    private func registerDeviceActivitySchedule(endsAt: Date) {
+        let now = Date()
+        let startComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+        let endComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: endsAt)
+
+        let schedule = DeviceActivitySchedule(
+            intervalStart: startComponents,
+            intervalEnd: endComponents,
+            repeats: false
+        )
+
+        let center = DeviceActivityCenter()
+        do {
+            try center.startMonitoring(DeviceActivityName(Self.storeNameString), during: schedule)
+        } catch {
+            print("Failed to register DeviceActivity schedule: \(error)")
+        }
+    }
+
+    private func addMoreApps() {
+        guard var a = active else { return }
+        let store = ManagedSettingsStore(named: Self.storeName)
+
+        let newAppTokens = addAppsSelection.applicationTokens
+        let newCatTokens = addAppsSelection.categoryTokens
+
+        a.appCount += newAppTokens.count
+        a.catCount += newCatTokens.count
+
+        if !newAppTokens.isEmpty {
+            if var existing = store.shield.applications {
+                existing.formUnion(newAppTokens)
+                store.shield.applications = existing
+            } else {
+                store.shield.applications = newAppTokens
+            }
+        }
+
+        if !newCatTokens.isEmpty {
+            if case let .specific(cats, except) = store.shield.applicationCategories {
+                var updated = cats
+                updated.formUnion(newCatTokens)
+                store.shield.applicationCategories = .specific(updated, except: except)
+            } else {
+                store.shield.applicationCategories = .specific(newCatTokens)
+            }
+        }
+
+        a.save()
+        active = a
+        addAppsSelection = FamilyActivitySelection()
+        showAddAppsPicker = false
+    }
+
     private func scheduleEndNotification(at date: Date) {
         let content = UNMutableNotificationContent()
-        content.title = "Focus session ended"
-        content.body = "Open ZenLock to confirm and unlock your apps."
+        content.title = "Focus session complete!"
+        content.body = "Apps are now unlocked. Great work staying focused."
         content.sound = .default
         let interval = max(1, date.timeIntervalSinceNow)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
@@ -426,10 +542,10 @@ private var extendPickerSheet: some View {
 
 // MARK: - Active session persistence
 
-struct ActiveSession: Codable {
+struct ActiveSession: Codable, Equatable {
     var endsAt: Date
-    let appCount: Int
-    let catCount: Int
+    var appCount: Int
+    var catCount: Int
     var cooldownEndsAt: Date?
     var cooldownConfigMinutes: Int = 1
 

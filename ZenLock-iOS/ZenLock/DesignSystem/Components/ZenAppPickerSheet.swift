@@ -5,47 +5,47 @@ struct ZenAppPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: FamilyActivitySelection
     var title: String = "Choose Apps"
+    var onDismiss: (() -> Void)?
 
     @State private var working: FamilyActivitySelection
 
-    init(selection: Binding<FamilyActivitySelection>, title: String = "Choose Apps") {
+    init(selection: Binding<FamilyActivitySelection>, title: String = "Choose Apps", onDismiss: (() -> Void)? = nil) {
         self._selection = selection
         self.title = title
+        self.onDismiss = onDismiss
         self._working = State(initialValue: selection.wrappedValue)
     }
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                FamilyActivityPicker(selection: $working)
-                    .frame(maxHeight: .infinity)
-
-                ZenButton(title: "Done", icon: "checkmark") {
-                    selection = working
-                    dismiss()
+            FamilyActivityPicker(selection: $working)
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { dismiss() }
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            selection = working
+                            dismiss()
+                            onDismiss?()
+                        } label: {
+                            Image(systemName: "checkmark")
+                        }
+                        .foregroundStyle(ZenTheme.primary)
+                    }
                 }
-                .padding(.horizontal, ZenTheme.Spacing.md)
-                .padding(.top, ZenTheme.Spacing.sm)
-                .padding(.bottom, ZenTheme.Spacing.sm)
-                .background(ZenTheme.background)
-            }
-            .background(ZenTheme.background)
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-            }
         }
     }
 }
 
 extension View {
     /// Bottom-Done wrapped app picker — replaces `.familyActivityPicker(isPresented:selection:)`.
-    func zenAppPicker(isPresented: Binding<Bool>, selection: Binding<FamilyActivitySelection>, title: String = "Choose Apps") -> some View {
+    func zenAppPicker(isPresented: Binding<Bool>, selection: Binding<FamilyActivitySelection>, title: String = "Choose Apps", onDismiss: (() -> Void)? = nil) -> some View {
         sheet(isPresented: isPresented) {
-            ZenAppPickerSheet(selection: selection, title: title)
+            ZenAppPickerSheet(selection: selection, title: title, onDismiss: onDismiss)
         }
     }
 }
