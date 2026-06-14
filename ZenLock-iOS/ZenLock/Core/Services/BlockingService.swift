@@ -37,6 +37,62 @@ final class BlockingService {
         }
     }
 
+    /// Outcome of arming a group on save, so the UI can show the right toast.
+    enum ArmOutcome {
+        /// Blocking is in effect right now (within window, or usage-based armed).
+        case activeNow
+        /// Registered to fire automatically; `startsAt` is the next start time today (nil = recurring/unknown).
+        case armed(startsAt: Date?)
+        /// A non-repeating time window that has already fully passed today — left off.
+        case windowPassed
+    }
+
+    /// Called on create/edit save. Registers monitoring so iOS auto-activates
+    /// the group at its scheduled time without the user reopening the app.
+    /// For a non-repeating window already fully in the past today, leaves the
+    /// group inactive (the user can still turn it on manually).
+    @discardableResult
+    func armOrActivate(_ group: BlockGroup) throws -> ArmOutcome {
+        let shared = group.toShared()
+
+        // Non-repeating time window fully in the past today → don't arm.
+        if shared.blockMode == .timeBased,
+           !shared.scheduleRepeats,
+           isWindowFullyPastToday(shared) {
+            group.isActive = false
+            group.updatedAt = Date()
+            syncGroupToAppGroups(group)
+            return .windowPassed
+        }
+
+        try activateGroup(group)
+
+        if shared.blockMode == .timeBased {
+            if ScheduleEvaluator.isWithinSchedule(shared) {
+                return .activeNow
+            }
+            return .armed(startsAt: nextStartDate(shared))
+        }
+        return .activeNow
+    }
+
+    private func isWindowFullyPastToday(_ group: SharedBlockGroup, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+        guard let sH = group.scheduleStartHour, let sM = group.scheduleStartMinute,
+              let eH = group.scheduleEndHour, let eM = group.scheduleEndMinute else { return false }
+        // Cross-midnight windows are never "fully past" within the same day.
+        let startMinutes = sH * 60 + sM
+        let endMinutes = eH * 60 + eM
+        if startMinutes > endMinutes { return false }
+        let comps = calendar.dateComponents([.hour, .minute], from: now)
+        let nowMinutes = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        return nowMinutes >= endMinutes
+    }
+
+    private func nextStartDate(_ group: SharedBlockGroup, now: Date = Date(), calendar: Calendar = .current) -> Date? {
+        guard let sH = group.scheduleStartHour, let sM = group.scheduleStartMinute else { return nil }
+        return calendar.date(bySettingHour: sH, minute: sM, second: 0, of: now)
+    }
+
     enum DeactivationError: Error, LocalizedError {
         case deepFocusLocked
 

@@ -47,6 +47,7 @@ struct DashboardView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
+            .zenToast(Bindable(viewModel).toast)
             .onAppear {
                 viewModel.loadGroups(context: modelContext)
                 activeFocus = ActiveSession.load()

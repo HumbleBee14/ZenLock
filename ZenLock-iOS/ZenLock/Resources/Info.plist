@@ -44,6 +44,8 @@
 	</array>
 	<key>NSFamilyControlsUsageDescription</key>
 	<string>ZenLock needs Screen Time access to block distracting apps and help you stay focused.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>ZenLock uses Face ID so only you can stop an active focus session.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

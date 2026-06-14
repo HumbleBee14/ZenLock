@@ -87,7 +87,18 @@ struct EditGroupView: View {
     private func save() {
         draft.apply(to: group)
         try? modelContext.save()
-        BlockingService().syncGroupToAppGroups(group)
+
+        let service = BlockingService()
+        if group.isActive {
+            // Re-register monitoring so edited schedule/apps take effect and
+            // continue to auto-activate without reopening the app.
+            service.removeGroupFromAppGroups(group.id.uuidString)
+            group.isActive = true
+            _ = try? service.armOrActivate(group)
+            try? modelContext.save()
+        } else {
+            service.syncGroupToAppGroups(group)
+        }
         dismiss()
     }
 }

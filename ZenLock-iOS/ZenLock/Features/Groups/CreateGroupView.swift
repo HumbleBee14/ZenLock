@@ -7,6 +7,7 @@ struct CreateGroupView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = GroupDraft()
+    @State private var toast: ZenToastData?
     var onCreated: () -> Void
 
     var body: some View {
@@ -23,7 +24,7 @@ struct CreateGroupView: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle("New Group")
+            .navigationTitle("New Focus Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -31,11 +32,12 @@ struct CreateGroupView: View {
                         .foregroundStyle(ZenTheme.textSecondary)
                 }
             }
+            .zenToast($toast)
         }
     }
 
     private var createButton: some View {
-        ZenButton(title: "Create Group", icon: "checkmark.shield") {
+        ZenButton(title: "Create Focus Session", icon: "checkmark.shield") {
             createGroup()
         }
         .disabled(draft.name.isEmpty || !draft.hasSelectedApps)
@@ -46,8 +48,18 @@ struct CreateGroupView: View {
         let group = draft.makeGroup()
         modelContext.insert(group)
         try? modelContext.save()
-        BlockingService().syncGroupToAppGroups(group)
+
+        let outcome: BlockingService.ArmOutcome
+        do {
+            outcome = try BlockingService().armOrActivate(group)
+        } catch {
+            outcome = .windowPassed
+        }
+        try? modelContext.save()
         onCreated()
-        dismiss()
+
+        toast = ScheduleToastFactory.make(for: outcome, group: group)
+        // Let the toast breathe before dismissing the sheet.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { dismiss() }
     }
 }

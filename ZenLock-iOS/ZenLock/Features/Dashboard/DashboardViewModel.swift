@@ -2,6 +2,7 @@ import SwiftUI
 import FamilyControls
 import SwiftData
 
+@MainActor
 @Observable
 final class DashboardViewModel {
     var groups: [BlockGroup] = []
@@ -27,25 +28,58 @@ final class DashboardViewModel {
         Constants.sharedDefaults?.set(summary.focusScore, forKey: "zen_widget_focus_score")
     }
 
+    var toast: ZenToastData?
+
     func toggleGroup(_ group: BlockGroup, context: ModelContext) {
+        if group.isActive {
+            Task { await deactivate(group, context: context) }
+        } else {
+            activate(group, context: context)
+        }
+    }
+
+    private func activate(_ group: BlockGroup, context: ModelContext) {
         let recorder = SessionRecorder(context: context)
         do {
-            if group.isActive {
-                switch blockingService.deactivateGroup(group) {
-                case .success:
-                    recorder.end(group: group, completed: true)
-                case .failure(let error):
-                    errorMessage = error.errorDescription
-                    return
-                }
-            } else {
-                try blockingService.activateGroup(group)
+            let outcome = try blockingService.armOrActivate(group)
+            if case .activeNow = outcome {
                 recorder.begin(group: group, targetDuration: estimatedDuration(for: group))
             }
             try context.save()
+            toast = ScheduleToastFactory.make(for: outcome, group: group)
         } catch {
             group.isActive = false
             errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func deactivate(_ group: BlockGroup, context: ModelContext) async {
+        // Strict Mode is checked first — a locked session never reaches auth.
+        let shared = group.toShared()
+        if shared.deepFocusEnabled,
+           (shared.blockMode != .timeBased || ScheduleEvaluator.isWithinSchedule(shared)) {
+            toast = ZenToastData(
+                message: "Strict Mode is on — this session can't be stopped until its schedule ends.",
+                kind: .warning
+            )
+            return
+        }
+
+        // Require the device owner (Face ID / Touch ID / passcode) to stop.
+        let ok = await BiometricGate.authenticate(reason: "Stop “\(group.name)” focus session")
+        guard ok else {
+            toast = ZenToastData(message: "Authentication required to stop.", kind: .warning)
+            return
+        }
+
+        let recorder = SessionRecorder(context: context)
+        switch blockingService.deactivateGroup(group) {
+        case .success:
+            recorder.end(group: group, completed: true)
+            try? context.save()
+        case .failure(let error):
+            errorMessage = error.errorDescription
         }
     }
 
