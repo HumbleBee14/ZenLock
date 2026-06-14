@@ -10,17 +10,38 @@ enum BiometricGate {
     /// required, so we allow the action through (`true`) rather than trapping
     /// the user out of their own session.
     static func authenticate(reason: String) async -> Bool {
-        let context = LAContext()
-        context.localizedFallbackTitle = "Enter Passcode"
+        let bioContext = LAContext()
+        bioContext.localizedFallbackTitle = ""
 
-        var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            // No passcode/biometrics configured — nothing to authenticate against.
-            return true
+        var bioError: NSError?
+        if bioContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &bioError) {
+            do {
+                return try await bioContext.evaluatePolicy(
+                    .deviceOwnerAuthenticationWithBiometrics,
+                    localizedReason: reason
+                )
+            } catch let error as LAError {
+                switch error.code {
+                case .userCancel, .appCancel, .systemCancel:
+                    return false
+                case .biometryNotAvailable, .biometryNotEnrolled, .biometryLockout, .userFallback:
+                    break // fall through to passcode
+                default:
+                    return false
+                }
+            } catch {
+                return false
+            }
         }
 
+        let passContext = LAContext()
+        var passError: NSError?
+        // No passcode set → nothing to authenticate against; allow rather than trap the owner out.
+        guard passContext.canEvaluatePolicy(.deviceOwnerAuthentication, error: &passError) else {
+            return true
+        }
         do {
-            return try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
+            return try await passContext.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
         } catch {
             return false
         }
