@@ -7,16 +7,10 @@
     "%@" : {
 
     },
-    "%@ min" : {
-
-    },
     "%@ min per open" : {
 
     },
     "%@ until apps unlock" : {
-
-    },
-    "%@m" : {
 
     },
     "🔒 Deep Focus Mode" : {
@@ -73,12 +67,6 @@
     "Block Groups" : {
       "extractionState" : "manual"
     },
-    "Focus Sessions" : {
-      "extractionState" : "manual"
-    },
-    "No focus sessions yet" : {
-      "extractionState" : "manual"
-    },
     "Block Websites" : {
       "extractionState" : "manual"
     },
@@ -88,13 +76,7 @@
     "Check what's actually stored in App Groups" : {
 
     },
-    "Cool-down" : {
-
-    },
-    "Cool-down ends %@. You'll get a notification when the unlock window opens." : {
-
-    },
-    "Cool-down to stop" : {
+    "Cool-down ends %@. Apps unlock automatically then." : {
 
     },
     "Create Focus Session" : {
@@ -124,6 +106,9 @@
     "Focus Score" : {
 
     },
+    "Focus Sessions" : {
+      "extractionState" : "manual"
+    },
     "Four layers of friction" : {
 
     },
@@ -138,9 +123,6 @@
     },
     "Group Name" : {
       "extractionState" : "manual"
-    },
-    "How long ZenLock makes you wait between requesting an unlock and the shield actually coming down." : {
-
     },
     "Icon & Color" : {
       "extractionState" : "manual"
@@ -170,6 +152,9 @@
 
     },
     "No block groups yet" : {
+      "extractionState" : "manual"
+    },
+    "No focus sessions yet" : {
       "extractionState" : "manual"
     },
     "No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends." : {
@@ -232,6 +217,9 @@
     "Stay focused. Stay present." : {
       "extractionState" : "manual"
     },
+    "Stop Cool-down" : {
+
+    },
     "Strict Mode active. Mode, apps, and schedule are locked until this session ends." : {
 
     },
@@ -239,6 +227,9 @@
 
     },
     "Target time you want to spend on your phone each day. Shown on the Screen Time tab." : {
+
+    },
+    "The wait between requesting to stop a focus session and apps actually unlocking. Applies everywhere. Strict Mode can't be stopped at all." : {
 
     },
     "Time Limit" : {

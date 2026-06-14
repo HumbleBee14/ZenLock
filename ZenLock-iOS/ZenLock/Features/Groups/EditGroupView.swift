@@ -9,6 +9,9 @@ struct EditGroupView: View {
     @Bindable var group: BlockGroup
     @State private var draft: GroupDraft
     @State private var pendingUnlockAt: Date?
+    @State private var now = Date()
+
+    private let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     init(group: BlockGroup) {
         self.group = group
@@ -52,6 +55,11 @@ struct EditGroupView: View {
                         .foregroundStyle(ZenTheme.primary)
                 }
             }
+            .onAppear { pendingUnlockAt = AccountabilityManager().pendingUnlock.flatMap { $0.groupId == group.id.uuidString ? $0.unlocksAt : nil } }
+            .onReceive(countdownTimer) { _ in
+                now = Date()
+                if let end = pendingUnlockAt, now >= end { finalizeUnlock() }
+            }
         }
     }
 
@@ -60,18 +68,49 @@ struct EditGroupView: View {
         // Strict Mode can never be unlocked early. Normal active sessions can,
         // after a Face ID check and the global cool-down.
         if group.isActive && !group.deepFocusEnabled {
-            VStack(spacing: ZenTheme.Spacing.sm) {
-                ZenButton(title: "Stop (cool-down)", icon: "hourglass", style: .secondary) {
+            if let end = pendingUnlockAt, now < end {
+                cooldownCountdownCard(end: end)
+            } else {
+                ZenButton(title: "Stop session", icon: "hourglass", style: .secondary) {
                     Task { await requestUnlock() }
-                }
-                if let pendingUnlockAt {
-                    Text("Cool-down ends \(pendingUnlockAt, style: .relative). Apps unlock automatically then.")
-                        .font(ZenTheme.caption)
-                        .foregroundStyle(ZenTheme.textSecondary)
-                        .multilineTextAlignment(.center)
                 }
             }
         }
+    }
+
+    private func cooldownCountdownCard(end: Date) -> some View {
+        GlassCard {
+            VStack(spacing: ZenTheme.Spacing.sm) {
+                Label("Cooling down", systemImage: "hourglass")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.accent)
+                Text(remaining(until: end))
+                    .font(.system(size: 36, weight: .bold, design: .monospaced))
+                    .foregroundStyle(ZenTheme.accent)
+                Text("Apps unlock automatically when this ends.")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
+                    .multilineTextAlignment(.center)
+                ZenButton(title: "Keep focusing", icon: "arrow.uturn.backward", style: .primary) {
+                    AccountabilityManager().cancelPendingUnlock()
+                    pendingUnlockAt = nil
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(ZenTheme.Spacing.md)
+        }
+    }
+
+    private func remaining(until end: Date) -> String {
+        let s = max(0, Int(end.timeIntervalSince(now)))
+        return String(format: "%02d:%02d", s / 60, s % 60)
+    }
+
+    private func finalizeUnlock() {
+        pendingUnlockAt = nil
+        AccountabilityManager().cancelPendingUnlock()
+        _ = BlockingService().deactivateGroup(group)
+        try? modelContext.save()
     }
 
     private func requestUnlock() async {

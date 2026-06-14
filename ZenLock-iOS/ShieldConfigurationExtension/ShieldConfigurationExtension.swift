@@ -67,7 +67,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         if let msg = group?.customShieldMessage {
             subtitleParts.append(msg)
         } else {
-            subtitleParts.append("This app is blocked by \(groupName).")
+            subtitleParts.append("This app is blocked by ZenLock.")
         }
         if let cap = group?.maxOpensPerDay {
             subtitleParts.append("\(openCount)/\(cap) opens today")
@@ -89,7 +89,14 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             ? ShieldConfiguration.Label(text: secondaryText, color: .white)
             : nil
 
-        let title = capReached ? "🚫 Daily Limit Reached" : (isDeepFocus ? "🔒 Strict Mode" : "🧘 \(groupName)")
+        let title: String
+        if capReached {
+            title = "🚫 Daily Limit Reached"
+        } else if isDeepFocus {
+            title = "🔒 \(groupName)"
+        } else {
+            title = "🧘 \(groupName)"
+        }
 
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterialDark,
