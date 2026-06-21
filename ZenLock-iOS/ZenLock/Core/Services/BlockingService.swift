@@ -107,10 +107,7 @@ final class BlockingService {
     @discardableResult
     func deactivateGroup(_ group: BlockGroup) -> Result<Void, DeactivationError> {
         let shared = group.toShared()
-        if shared.deepFocusEnabled && ScheduleEvaluator.isWithinSchedule(shared) && shared.blockMode == .timeBased {
-            return .failure(.deepFocusLocked)
-        }
-        if shared.deepFocusEnabled && shared.blockMode != .timeBased {
+        if shared.isStrictLocked {
             return .failure(.deepFocusLocked)
         }
 

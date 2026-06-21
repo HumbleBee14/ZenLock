@@ -341,6 +341,8 @@ private struct GroupRow: View {
             Button(role: .destructive) { onDelete() } label: {
                 Label("Delete", systemImage: "trash")
             }
+            // Can't delete a session out from under an active Strict Mode lock.
+            .disabled(group.toShared().isStrictLocked)
         }
     }
 

@@ -21,14 +21,11 @@ struct EditGroupView: View {
         _draft = State(initialValue: GroupDraft(from: group))
     }
 
-    /// Lock structure (mode/apps/schedule) when Deep Focus is enforcing an active session.
+    /// Lock structure (mode/schedule/limits + the Strict Mode toggle) while a
+    /// Strict Mode session is actively enforcing. Routes through the shared
+    /// `isStrictLocked` rule so the editor can't drift from the stop/delete guards.
     private var lockStructure: Bool {
-        guard group.deepFocusEnabled, group.isActive else { return false }
-        let shared = group.toShared()
-        if shared.blockMode == .timeBased {
-            return ScheduleEvaluator.isWithinSchedule(shared)
-        }
-        return true
+        group.toShared().isStrictLocked
     }
 
     var body: some View {
@@ -116,6 +113,9 @@ struct EditGroupView: View {
     }
 
     private func deleteSession() {
+        // Defense in depth: the button is disabled while locked, but never let a
+        // strict-locked session be torn down even if that guard is bypassed.
+        guard !lockStructure else { return }
         modelContext.delete(group)
         try? modelContext.save()
         BlockingService().removeGroupFromAppGroups(group.id.uuidString)

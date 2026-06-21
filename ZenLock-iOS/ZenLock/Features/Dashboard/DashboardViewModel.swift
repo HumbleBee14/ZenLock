@@ -93,6 +93,16 @@ final class DashboardViewModel {
     }
 
     func deleteGroup(_ group: BlockGroup, context: ModelContext) {
+        // Deleting an active Strict Mode session would tear down its shield and
+        // is therefore just another way to stop it early — block it, same as the
+        // stop and deactivate paths.
+        if group.toShared().isStrictLocked {
+            toast = ZenToastData(
+                message: "Strict Mode is on — this session can't be deleted until it ends.",
+                kind: .warning
+            )
+            return
+        }
         blockingService.removeGroupFromAppGroups(group.id.uuidString)
         context.delete(group)
         try? context.save()
