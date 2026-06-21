@@ -1,26 +1,41 @@
 name: iOS Build
 
-# Compiles the iOS app on every PR that touches iOS sources, so Swift changes
-# are actually type-checked in CI (the Android `build` job in pr-validation.yml
-# does not cover them). Build-only: it proves the code compiles, not that it
-# behaves correctly — behavioural changes still need a manual run in Xcode.
+# Compiles the iOS app so Swift changes are type-checked in CI (the Android
+# build doesn't cover them). Build-only: proves it compiles, not that it
+# behaves correctly.
 #
-# Scoped to ZenLock-iOS/** to keep the (pricier) macOS runner minutes down.
+# Why no top-level `paths:` filter? A workflow skipped by a path filter never
+# reports its check, so a *required* check sits "Pending" forever and blocks the
+# PR. Instead the workflow always runs a cheap change-detector job, and the
+# (pricey, macOS) build job is gated with `if:`. A job skipped via `if:` reports
+# as success — so the check is always reported, the PR never hangs, and macOS
+# minutes are only spent when iOS code actually changed.
 
 on:
   pull_request:
-    paths:
-      - "ZenLock-iOS/**"
-      - ".github/workflows/ios-build.yml"
 
-# Cancel an in-flight build when new commits are pushed to the same PR.
 concurrency:
   group: ios-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ios:
+              - 'ZenLock-iOS/**'
+              - '.github/workflows/ios-build.yml'
+
   build:
     name: iOS Build
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
     runs-on: macos-latest
     defaults:
       run:

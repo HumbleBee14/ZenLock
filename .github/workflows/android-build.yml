@@ -1,23 +1,38 @@
 name: Android Build
 
-# Compiles a debug APK to catch build breaks before merge. Split out of
-# pr-validation.yml and scoped to ZenLock-Android/** so it no longer runs on
-# iOS-only (or docs-only) PRs. The iOS app has its own ios-build.yml, scoped to
-# ZenLock-Android's counterpart.
+# Compiles a debug APK to catch build breaks before merge.
+#
+# Same shape as ios-build.yml: no top-level `paths:` filter (which would leave a
+# required check "Pending" forever on PRs that don't touch Android). The workflow
+# always runs a cheap change-detector; the build job is gated with `if:`. A job
+# skipped via `if:` reports as success, so the check is always reported and the
+# PR never hangs — while the build only actually runs when Android code changed.
 
 on:
   pull_request:
-    paths:
-      - "ZenLock-Android/**"
-      - ".github/workflows/android-build.yml"
 
 concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            android:
+              - 'ZenLock-Android/**'
+              - '.github/workflows/android-build.yml'
+
   build:
     name: Android Build
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
