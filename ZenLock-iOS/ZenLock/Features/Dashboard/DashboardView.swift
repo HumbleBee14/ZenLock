@@ -341,6 +341,7 @@ private struct GroupRow: View {
             Button(role: .destructive) { onDelete() } label: {
                 Label("Delete", systemImage: "trash")
             }
+            .disabled(group.toShared().isStrictLocked)
         }
     }
 

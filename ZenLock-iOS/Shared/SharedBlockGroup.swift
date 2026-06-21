@@ -72,6 +72,18 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
     }
 }
 
+// MARK: - Strict Mode
+
+extension SharedBlockGroup {
+    var isStrictLocked: Bool {
+        guard isActive, deepFocusEnabled else { return false }
+        if blockMode == .timeBased {
+            return ScheduleEvaluator.isWithinSchedule(self)
+        }
+        return true
+    }
+}
+
 // MARK: - Forward-compatible decoding
 
 extension SharedBlockGroup {

@@ -1,8 +1,6 @@
 import SwiftUI
 import FamilyControls
 
-/// Shared editor used by both Create and Edit screens.
-/// `lockStructure` disables Mode, Apps, and per-mode config (used when Deep Focus is active mid-session).
 struct GroupFormView: View {
     @Binding var draft: GroupDraft
     var lockStructure: Bool = false
@@ -48,7 +46,7 @@ struct GroupFormView: View {
     private var deepFocusLockBanner: some View {
         HStack(spacing: ZenTheme.Spacing.sm) {
             Image(systemName: "lock.fill").foregroundStyle(ZenTheme.warning)
-            Text("Strict Mode active. Mode, apps, and schedule are locked until this session ends.")
+            Text("Can't make changes while Strict Mode is active.")
                 .font(ZenTheme.caption)
                 .foregroundStyle(ZenTheme.textSecondary)
         }
@@ -327,14 +325,18 @@ struct GroupFormView: View {
         GlassCard {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.sm) {
                 ZenToggle(isOn: $draft.deepFocusEnabled, label: "🔒 Strict Mode")
-                if draft.deepFocusEnabled {
-                    Text("No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends.")
-                        .font(ZenTheme.caption)
-                        .foregroundStyle(ZenTheme.textSecondary)
-                } else {
-                    Text("Locks the group so it can't be disabled mid-session.")
-                        .font(ZenTheme.caption2)
-                        .foregroundStyle(ZenTheme.textSecondary)
+                    .disabled(lockStructure)
+                    .opacity(lockStructure ? 0.5 : 1)
+                if !lockStructure {
+                    if draft.deepFocusEnabled {
+                        Text("No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends.")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    } else {
+                        Text("Locks the group so it can't be disabled mid-session.")
+                            .font(ZenTheme.caption2)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
                 }
             }
             .padding(ZenTheme.Spacing.md)

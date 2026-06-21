@@ -93,6 +93,13 @@ final class DashboardViewModel {
     }
 
     func deleteGroup(_ group: BlockGroup, context: ModelContext) {
+        if group.toShared().isStrictLocked {
+            toast = ZenToastData(
+                message: "Strict Mode is on — this session can't be deleted until it ends.",
+                kind: .warning
+            )
+            return
+        }
         blockingService.removeGroupFromAppGroups(group.id.uuidString)
         context.delete(group)
         try? context.save()

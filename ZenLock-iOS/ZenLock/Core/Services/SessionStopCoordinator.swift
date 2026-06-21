@@ -33,10 +33,7 @@ struct SessionStopCoordinator {
 
     /// Begin stopping: enforce Strict Mode, require Face ID, then start the cool-down.
     func requestStop(_ group: BlockGroup) async -> Result {
-        let shared = group.toShared()
-        let strictLocked = shared.deepFocusEnabled &&
-            (shared.blockMode != .timeBased || ScheduleEvaluator.isWithinSchedule(shared))
-        if strictLocked { return .blockedStrict }
+        if group.toShared().isStrictLocked { return .blockedStrict }
 
         let ok = await BiometricGate.authenticate(reason: "Stop “\(group.name)”")
         guard ok else { return .authFailed }

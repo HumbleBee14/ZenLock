@@ -1,0 +1,56 @@
+name: Android Build
+
+# Compiles a debug APK to catch build breaks before merge.
+#
+# Same shape as ios-build.yml: no top-level `paths:` filter (which would leave a
+# required check "Pending" forever on PRs that don't touch Android). The workflow
+# always runs a cheap change-detector; the build job is gated with `if:`. A job
+# skipped via `if:` reports as success, so the check is always reported and the
+# PR never hangs — while the build only actually runs when Android code changed.
+
+on:
+  pull_request:
+  workflow_dispatch: # allow manual runs from the Actions tab (always builds)
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            android:
+              - 'ZenLock-Android/**'
+              - '.github/workflows/android-build.yml'
+
+  build:
+    name: Android Build
+    needs: changes
+    # Build on a manual dispatch (no PR diff to filter), or when Android files
+    # changed in a PR. A job skipped here reports success, so the check never hangs.
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ZenLock-Android
+
+      - name: Build both flavors (playstore + sms)
+        run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint
+        working-directory: ZenLock-Android

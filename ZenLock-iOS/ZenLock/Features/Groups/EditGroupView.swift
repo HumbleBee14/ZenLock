@@ -21,14 +21,8 @@ struct EditGroupView: View {
         _draft = State(initialValue: GroupDraft(from: group))
     }
 
-    /// Lock structure (mode/apps/schedule) when Deep Focus is enforcing an active session.
     private var lockStructure: Bool {
-        guard group.deepFocusEnabled, group.isActive else { return false }
-        let shared = group.toShared()
-        if shared.blockMode == .timeBased {
-            return ScheduleEvaluator.isWithinSchedule(shared)
-        }
-        return true
+        group.toShared().isStrictLocked
     }
 
     var body: some View {
@@ -116,6 +110,7 @@ struct EditGroupView: View {
     }
 
     private func deleteSession() {
+        guard !lockStructure else { return }
         modelContext.delete(group)
         try? modelContext.save()
         BlockingService().removeGroupFromAppGroups(group.id.uuidString)
@@ -123,7 +118,11 @@ struct EditGroupView: View {
     }
 
     private func save() {
-        draft.apply(to: group)
+        if lockStructure {
+            draft.applyLockedChanges(to: group)
+        } else {
+            draft.apply(to: group)
+        }
         try? modelContext.save()
 
         let service = BlockingService()

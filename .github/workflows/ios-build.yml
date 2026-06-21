@@ -1,0 +1,76 @@
+name: iOS Build
+
+# Compiles the iOS app so Swift changes are type-checked in CI (the Android
+# build doesn't cover them). Build-only: proves it compiles, not that it
+# behaves correctly.
+#
+# Why no top-level `paths:` filter? A workflow skipped by a path filter never
+# reports its check, so a *required* check sits "Pending" forever and blocks the
+# PR. Instead the workflow always runs a cheap change-detector job, and the
+# (pricey, macOS) build job is gated with `if:`. A job skipped via `if:` reports
+# as success — so the check is always reported, the PR never hangs, and macOS
+# minutes are only spent when iOS code actually changed.
+
+on:
+  pull_request:
+  workflow_dispatch: # allow manual runs from the Actions tab (always builds)
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            ios:
+              - 'ZenLock-iOS/**'
+              - '.github/workflows/ios-build.yml'
+
+  build:
+    name: iOS Build
+    needs: changes
+    # Build on a manual dispatch (no PR diff to filter), or when iOS files
+    # changed in a PR. A job skipped here reports success, so the check never hangs.
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.ios == 'true'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ZenLock-iOS
+    steps:
+      - uses: actions/checkout@v6
+
+      # Pin to the Xcode major the project targets (project.yml: xcodeVersion 26.0,
+      # SWIFT_VERSION 6.0). Partial version => latest installed point release of 26.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      # Regenerate the Xcode project from project.yml so CI builds exactly what
+      # the spec describes (catches target/membership drift too).
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # Build for a generic simulator destination with signing disabled — no
+      # certificates or provisioning profiles needed just to compile.
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ZenLock.xcodeproj \
+            -scheme ZenLock \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet

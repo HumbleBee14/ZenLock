@@ -60,12 +60,7 @@ class ShieldActionExtension: ShieldActionDelegate {
                 completionHandler(.close)
             }
 
-        case .firstSecondarySubmenuItemPressed,
-             .secondSecondarySubmenuItemPressed,
-             .thirdSecondarySubmenuItemPressed:
-            completionHandler(.close)
-
-        @unknown default:
+        default:
             completionHandler(.close)
         }
     }

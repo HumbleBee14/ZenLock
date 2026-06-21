@@ -75,6 +75,13 @@ extension GroupDraft {
         group.updatedAt = Date()
     }
 
+    func applyLockedChanges(to group: BlockGroup) {
+        group.name = name
+        group.icon = icon
+        group.colorHex = colorHex
+        group.updatedAt = Date()
+    }
+
     func makeGroup() -> BlockGroup {
         let g = BlockGroup(name: name, icon: icon, colorHex: colorHex, blockMode: blockMode)
         apply(to: g)
