@@ -104,7 +104,9 @@ struct DiagnosticsView: View {
         case .notDetermined: return "notDetermined"
         case .denied: return "denied"
         case .approved: return "approved"
-        @unknown default: return "unknown(\(s.rawValue))"
+        // Plain `default` (not `@unknown default`) so the switch stays exhaustive
+        // across SDKs that add cases like `.approvedWithDataAccess`.
+        default: return "unknown(\(s.rawValue))"
         }
     }
 }

@@ -204,9 +204,11 @@ struct OnboardingView: View {
                 return ("Invalid request to Screen Time. Restart the app and try again.", false)
             case .authenticationMethodUnavailable:
                 return ("Screen Time authentication isn't available. In Settings → Screen Time, enable a passcode or biometric and try again.", true)
-            @unknown default:
-                // Also covers `.unauthorized` (present in newer SDKs only): point
-                // the user at Screen Time's app-access settings as a safe default.
+            // Plain `default` (not `@unknown default`) so the switch stays
+            // exhaustive across SDKs whose FamilyControlsError case sets differ
+            // (e.g. `.unauthorized`, which isn't in every SDK). Points the user
+            // at Screen Time's app-access settings as a safe catch-all.
+            default:
                 return ("Couldn't authorize Screen Time right now (code \(code)). In Settings → Screen Time → Apps with Screen Time Access, allow ZenLock, then try again or restart the device.", true)
             }
         }
