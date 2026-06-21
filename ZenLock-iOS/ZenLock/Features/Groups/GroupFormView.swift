@@ -1,13 +1,6 @@
 import SwiftUI
 import FamilyControls
 
-/// Shared editor used by both Create and Edit screens.
-///
-/// `lockStructure` is set while a Strict Mode session is actively enforcing.
-/// In that state the session structure is frozen so it can't be edited away
-/// mid-session: apps, Mode, schedule/limits, and the Strict Mode toggle itself
-/// are all locked. The only change allowed is renaming (cosmetic), which can't
-/// be used to escape the block.
 struct GroupFormView: View {
     @Binding var draft: GroupDraft
     var lockStructure: Bool = false
@@ -334,7 +327,6 @@ struct GroupFormView: View {
                 ZenToggle(isOn: $draft.deepFocusEnabled, label: "🔒 Strict Mode")
                     .disabled(lockStructure)
                     .opacity(lockStructure ? 0.5 : 1)
-                // While locked, the top banner already explains why; keep this clean.
                 if !lockStructure {
                     if draft.deepFocusEnabled {
                         Text("No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends.")

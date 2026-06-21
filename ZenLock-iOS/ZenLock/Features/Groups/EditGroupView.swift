@@ -21,9 +21,6 @@ struct EditGroupView: View {
         _draft = State(initialValue: GroupDraft(from: group))
     }
 
-    /// Lock structure (mode/schedule/limits + the Strict Mode toggle) while a
-    /// Strict Mode session is actively enforcing. Routes through the shared
-    /// `isStrictLocked` rule so the editor can't drift from the stop/delete guards.
     private var lockStructure: Bool {
         group.toShared().isStrictLocked
     }
@@ -113,8 +110,6 @@ struct EditGroupView: View {
     }
 
     private func deleteSession() {
-        // Defense in depth: the button is disabled while locked, but never let a
-        // strict-locked session be torn down even if that guard is bypassed.
         guard !lockStructure else { return }
         modelContext.delete(group)
         try? modelContext.save()
@@ -123,10 +118,6 @@ struct EditGroupView: View {
     }
 
     private func save() {
-        // While Strict Mode is enforcing, only additive/cosmetic edits are
-        // persisted — structure and the Strict Mode flag stay frozen so the
-        // session can't be edited into a stoppable state. Outside that window
-        // all fields apply normally.
         if lockStructure {
             draft.applyLockedChanges(to: group)
         } else {

@@ -75,14 +75,6 @@ extension GroupDraft {
         group.updatedAt = Date()
     }
 
-    /// Applies only the changes that are safe to make while a Strict Mode
-    /// session is actively enforcing. This is the real enforcement boundary —
-    /// the UI also disables these controls, but a frozen session must never be
-    /// editable away even if the UI is bypassed.
-    ///
-    /// Allowed: rename + cosmetic (icon/color) only.
-    /// Preserved (untouched): apps, mode, schedule, limits, and the Strict Mode
-    /// flag — so nothing about the active block can be changed until it ends.
     func applyLockedChanges(to group: BlockGroup) {
         group.name = name
         group.icon = icon

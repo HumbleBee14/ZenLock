@@ -61,10 +61,6 @@ class ShieldActionExtension: ShieldActionDelegate {
             }
 
         default:
-            // Covers any other ShieldAction (e.g. submenu items, which exist
-            // only on some SDKs): dismiss the shield without granting a bypass.
-            // Plain `default` (not `@unknown default`) keeps this exhaustive
-            // across SDK versions whose ShieldAction case sets differ.
             completionHandler(.close)
         }
     }

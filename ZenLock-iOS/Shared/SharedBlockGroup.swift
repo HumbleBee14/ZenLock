@@ -75,14 +75,6 @@ struct SharedBlockGroup: Codable, Identifiable, Sendable {
 // MARK: - Strict Mode
 
 extension SharedBlockGroup {
-    /// Single source of truth for "Strict Mode is actively enforcing right now,
-    /// so this session must not be stoppable, deletable, or editable-away."
-    ///
-    /// True when the session is on, Strict Mode is enabled, and — for time-based
-    /// sessions — the schedule window is currently live. Usage-based strict
-    /// sessions stay locked for the whole time they're active. Every guard
-    /// (stop, deactivate, delete, structure-edit) routes through this so the
-    /// rule can never drift between call sites.
     var isStrictLocked: Bool {
         guard isActive, deepFocusEnabled else { return false }
         if blockMode == .timeBased {
