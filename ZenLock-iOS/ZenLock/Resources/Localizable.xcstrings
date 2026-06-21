@@ -73,6 +73,9 @@
     "Blocking Mode" : {
       "extractionState" : "manual"
     },
+    "Can't make changes while Strict Mode is active." : {
+
+    },
     "Check what's actually stored in App Groups" : {
 
     },
@@ -206,9 +209,6 @@
       "extractionState" : "manual"
     },
     "Stop Cool-down" : {
-
-    },
-    "Strict Mode active. Mode, apps, and schedule are locked until this session ends." : {
 
     },
     "Take control of your screen time.\nStay focused. Stay present." : {
