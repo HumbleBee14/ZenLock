@@ -1,0 +1,56 @@
+name: iOS Build
+
+# Compiles the iOS app on every PR that touches iOS sources, so Swift changes
+# are actually type-checked in CI (the Android `build` job in pr-validation.yml
+# does not cover them). Build-only: it proves the code compiles, not that it
+# behaves correctly — behavioural changes still need a manual run in Xcode.
+#
+# Scoped to ZenLock-iOS/** to keep the (pricier) macOS runner minutes down.
+
+on:
+  pull_request:
+    paths:
+      - "ZenLock-iOS/**"
+      - ".github/workflows/ios-build.yml"
+
+# Cancel an in-flight build when new commits are pushed to the same PR.
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ZenLock-iOS
+    steps:
+      - uses: actions/checkout@v6
+
+      # Pin to the Xcode major the project targets (project.yml: xcodeVersion 26.0,
+      # SWIFT_VERSION 6.0). Partial version => latest installed point release of 26.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      # Regenerate the Xcode project from project.yml so CI builds exactly what
+      # the spec describes (catches target/membership drift too).
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # Build for a generic simulator destination with signing disabled — no
+      # certificates or provisioning profiles needed just to compile.
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ZenLock.xcodeproj \
+            -scheme ZenLock \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
