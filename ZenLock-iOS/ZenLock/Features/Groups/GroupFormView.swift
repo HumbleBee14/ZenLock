@@ -5,9 +5,9 @@ import FamilyControls
 ///
 /// `lockStructure` is set while a Strict Mode session is actively enforcing.
 /// In that state the session structure is frozen so it can't be edited away
-/// mid-session: Mode, schedule/limits, and the Strict Mode toggle itself are
-/// all locked. The only changes allowed are the ones that can't be used to
-/// escape the block — renaming (cosmetic) and *adding* more apps to block.
+/// mid-session: apps, Mode, schedule/limits, and the Strict Mode toggle itself
+/// are all locked. The only change allowed is renaming (cosmetic), which can't
+/// be used to escape the block.
 struct GroupFormView: View {
     @Binding var draft: GroupDraft
     var lockStructure: Bool = false
@@ -53,7 +53,7 @@ struct GroupFormView: View {
     private var deepFocusLockBanner: some View {
         HStack(spacing: ZenTheme.Spacing.sm) {
             Image(systemName: "lock.fill").foregroundStyle(ZenTheme.warning)
-            Text("Strict Mode is active. You can rename this session and add more apps, but the mode, schedule, and Strict Mode itself stay locked until the session ends.")
+            Text("Can't make changes while Strict Mode is active.")
                 .font(ZenTheme.caption)
                 .foregroundStyle(ZenTheme.textSecondary)
         }
@@ -121,19 +121,12 @@ struct GroupFormView: View {
                 }
                 SelectionPreview(selection: draft.selection)
 
-                // Adding apps is allowed even while a Strict Mode session is
-                // locked — it only ever broadens the block. Removals are
-                // ignored on save (see GroupDraft.applyLockedChanges).
-                ZenButton(title: draft.hasSelectedApps ? (lockStructure ? "Add More Apps" : "Edit Selection") : "Select Apps",
+                ZenButton(title: draft.hasSelectedApps ? "Edit Selection" : "Select Apps",
                           icon: "plus.app", style: .secondary) {
                     showAppPicker = true
                 }
-
-                if lockStructure {
-                    Text("You can add apps while Strict Mode is active, but apps already being blocked can't be removed until the session ends.")
-                        .font(ZenTheme.caption2)
-                        .foregroundStyle(ZenTheme.textSecondary)
-                }
+                .disabled(lockStructure)
+                .opacity(lockStructure ? 0.5 : 1)
             }
             .padding(ZenTheme.Spacing.md)
         }
@@ -341,20 +334,17 @@ struct GroupFormView: View {
                 ZenToggle(isOn: $draft.deepFocusEnabled, label: "🔒 Strict Mode")
                     .disabled(lockStructure)
                     .opacity(lockStructure ? 0.5 : 1)
-                if lockStructure {
-                    // The whole point of Strict Mode is that it can't be turned
-                    // off mid-session — otherwise it's a one-tap bypass.
-                    Text("Strict Mode can't be turned off while the session is active. It unlocks automatically when the session ends.")
-                        .font(ZenTheme.caption2)
-                        .foregroundStyle(ZenTheme.warning)
-                } else if draft.deepFocusEnabled {
-                    Text("No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends.")
-                        .font(ZenTheme.caption)
-                        .foregroundStyle(ZenTheme.textSecondary)
-                } else {
-                    Text("Locks the group so it can't be disabled mid-session.")
-                        .font(ZenTheme.caption2)
-                        .foregroundStyle(ZenTheme.textSecondary)
+                // While locked, the top banner already explains why; keep this clean.
+                if !lockStructure {
+                    if draft.deepFocusEnabled {
+                        Text("No-escape mode. The shield hides the \"Open Anyway\" button and you can't disable this group while it's active. For time-based groups, it unlocks only when the schedule ends.")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    } else {
+                        Text("Locks the group so it can't be disabled mid-session.")
+                            .font(ZenTheme.caption2)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
                 }
             }
             .padding(ZenTheme.Spacing.md)

@@ -80,25 +80,13 @@ extension GroupDraft {
     /// the UI also disables these controls, but a frozen session must never be
     /// editable away even if the UI is bypassed.
     ///
-    /// Allowed: rename + cosmetic (icon/color), and *adding* apps.
-    /// Preserved (ignored): mode, schedule, limits, and the Strict Mode flag.
-    /// The new selection is accepted only when it's a superset of what's already
-    /// blocked; any attempt to remove apps is dropped and the existing block is
-    /// kept intact, so the block can only ever widen mid-session.
+    /// Allowed: rename + cosmetic (icon/color) only.
+    /// Preserved (untouched): apps, mode, schedule, limits, and the Strict Mode
+    /// flag — so nothing about the active block can be changed until it ends.
     func applyLockedChanges(to group: BlockGroup) {
         group.name = name
         group.icon = icon
         group.colorHex = colorHex
-
-        let existing = group.decodedSelection ?? FamilyActivitySelection()
-        let isAdditive =
-            existing.applicationTokens.isSubset(of: selection.applicationTokens) &&
-            existing.categoryTokens.isSubset(of: selection.categoryTokens) &&
-            existing.webDomainTokens.isSubset(of: selection.webDomainTokens)
-        if isAdditive {
-            group.decodedSelection = selection
-        }
-
         group.updatedAt = Date()
     }
 
