@@ -10,6 +10,7 @@ name: Android Build
 
 on:
   pull_request:
+  workflow_dispatch: # allow manual runs from the Actions tab (always builds)
 
 concurrency:
   group: android-build-${{ github.ref }}
@@ -23,6 +24,7 @@ jobs:
     steps:
       - uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name == 'pull_request'
         with:
           filters: |
             android:
@@ -32,7 +34,9 @@ jobs:
   build:
     name: Android Build
     needs: changes
-    if: needs.changes.outputs.android == 'true'
+    # Build on a manual dispatch (no PR diff to filter), or when Android files
+    # changed in a PR. A job skipped here reports success, so the check never hangs.
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

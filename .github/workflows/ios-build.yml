@@ -13,6 +13,7 @@ name: iOS Build
 
 on:
   pull_request:
+  workflow_dispatch: # allow manual runs from the Actions tab (always builds)
 
 concurrency:
   group: ios-build-${{ github.ref }}
@@ -26,6 +27,7 @@ jobs:
     steps:
       - uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name == 'pull_request'
         with:
           filters: |
             ios:
@@ -35,7 +37,9 @@ jobs:
   build:
     name: iOS Build
     needs: changes
-    if: needs.changes.outputs.ios == 'true'
+    # Build on a manual dispatch (no PR diff to filter), or when iOS files
+    # changed in a PR. A job skipped here reports success, so the check never hangs.
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.ios == 'true'
     runs-on: macos-latest
     defaults:
       run:
