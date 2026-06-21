@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   build:
+    name: iOS Build
     runs-on: macos-latest
     defaults:
       run:
