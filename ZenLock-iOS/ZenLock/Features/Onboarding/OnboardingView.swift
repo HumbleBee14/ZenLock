@@ -204,10 +204,10 @@ struct OnboardingView: View {
                 return ("Invalid request to Screen Time. Restart the app and try again.", false)
             case .authenticationMethodUnavailable:
                 return ("Screen Time authentication isn't available. In Settings → Screen Time, enable a passcode or biometric and try again.", true)
-            case .unauthorized:
-                return ("ZenLock isn't authorized for Screen Time. In Settings → Screen Time → Apps with Screen Time Access, allow ZenLock and try again.", true)
             @unknown default:
-                return ("Couldn't authorize Screen Time right now (code \(code)). Try again or restart the device.", true)
+                // Also covers `.unauthorized` (present in newer SDKs only): point
+                // the user at Screen Time's app-access settings as a safe default.
+                return ("Couldn't authorize Screen Time right now (code \(code)). In Settings → Screen Time → Apps with Screen Time Access, allow ZenLock, then try again or restart the device.", true)
             }
         }
         let ns = error as NSError
