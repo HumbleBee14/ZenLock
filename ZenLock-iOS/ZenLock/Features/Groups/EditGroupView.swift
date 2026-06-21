@@ -123,7 +123,15 @@ struct EditGroupView: View {
     }
 
     private func save() {
-        draft.apply(to: group)
+        // While Strict Mode is enforcing, only additive/cosmetic edits are
+        // persisted — structure and the Strict Mode flag stay frozen so the
+        // session can't be edited into a stoppable state. Outside that window
+        // all fields apply normally.
+        if lockStructure {
+            draft.applyLockedChanges(to: group)
+        } else {
+            draft.apply(to: group)
+        }
         try? modelContext.save()
 
         let service = BlockingService()
