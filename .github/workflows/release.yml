@@ -3,6 +3,8 @@ name: Auto Release
 on:
   push:
     branches: [main]
+    paths:
+      - "ZenLock-Android/**"
   workflow_dispatch:
     inputs:
       bump_type:
