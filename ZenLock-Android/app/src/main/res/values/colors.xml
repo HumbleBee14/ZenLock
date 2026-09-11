@@ -26,26 +26,26 @@
     <color name="accentDanger">#DC2626</color>      <!-- Professional error red -->
     
     <!-- Background Colors (Balanced Dark Theme) -->
-<!--    <color name="backgroundPrimary">#1F2937</color>     &lt;!&ndash; Softer dark background &ndash;&gt;-->
-    <color name="backgroundPrimary">#111827</color>     <!-- Darker background for better contrast -->
-    <color name="backgroundSecondary">#374151</color>   <!-- Card/surface background -->
-    <color name="backgroundTertiary">#4B5563</color>    <!-- Elevated surfaces -->
+<!--    <color name="backgroundPrimary">#121416</color>     &lt;!&ndash; Softer dark background &ndash;&gt;-->
+    <color name="backgroundPrimary">#121416</color>     <!-- Darker background for better contrast -->
+    <color name="backgroundSecondary">#1C1F23</color>   <!-- Card/surface background -->
+    <color name="backgroundTertiary">#30353B</color>    <!-- Elevated surfaces -->
     
     <!-- Text Colors (Professional Hierarchy) -->
-    <color name="textPrimary">#F8FAFC</color>       <!-- Main text - near white -->
-    <color name="textSecondary">#CBD5E1</color>     <!-- Secondary text - light gray -->
-    <color name="textTertiary">#64748B</color>      <!-- Tertiary text - medium gray -->
-    <color name="textHint">#475569</color>          <!-- Hint text - darker gray -->
+    <color name="textPrimary">#F4F5F7</color>       <!-- Main text - near white -->
+    <color name="textSecondary">#BBC1CA</color>     <!-- Secondary text - light gray -->
+    <color name="textTertiary">#939CA8</color>      <!-- Tertiary text - medium gray -->
+    <color name="textHint">#939CA8</color>          <!-- Hint text - darker gray -->
     
     <!-- Surface Colors (Cards & Components) -->
-    <color name="surface">#1E293B</color>           <!-- Card backgrounds -->
-    <color name="surfaceElevated">#334155</color>   <!-- Elevated cards -->
-    <color name="surfaceHighlight">#475569</color>  <!-- Highlighted surfaces -->
+    <color name="surface">#1C1F23</color>           <!-- Card backgrounds -->
+    <color name="surfaceElevated">#25292E</color>   <!-- Elevated cards -->
+    <color name="surfaceHighlight">#343A41</color>  <!-- Highlighted surfaces -->
     
     <!-- Border & Divider Colors -->
-    <color name="border">#374151</color>            <!-- Subtle borders -->
-    <color name="borderLight">#4B5563</color>       <!-- Lighter borders -->
-    <color name="divider">#374151</color>           <!-- Section dividers -->
+    <color name="border">#343A41</color>            <!-- Subtle borders -->
+    <color name="borderLight">#444B54</color>       <!-- Lighter borders -->
+    <color name="divider">#343A41</color>           <!-- Section dividers -->
     
     <!-- Status Colors -->
     <color name="success">#10B981</color>           <!-- Success states -->
@@ -57,7 +57,7 @@
     <color name="warningBackground">#FEF3C7</color> <!-- Warning banner background -->
     
     <!-- Card Background -->
-    <color name="card_background">#1E293B</color>   <!-- Card backgrounds for permissions -->
+    <color name="card_background">#1C1F23</color>   <!-- Card backgrounds for permissions -->
     
     <!-- Legacy Compatibility (Gradually Remove) -->
     <color name="primaryTeal">@color/primary</color>
@@ -78,7 +78,7 @@
     <color name="dark_gray">#404040</color>
     <color name="green">#4CAF50</color>
     <color name="background_light">#F5F5F5</color>
-    <color name="surface_dark">#0F172A</color>
+    <color name="surface_dark">#121416</color>
 
     <!-- Premium Accent Colors -->
     <color name="primaryGlow">#406366F1</color>         <!-- Soft glow behind key elements -->

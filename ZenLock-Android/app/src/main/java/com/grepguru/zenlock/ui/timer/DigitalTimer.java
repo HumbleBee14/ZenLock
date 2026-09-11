@@ -29,6 +29,10 @@ public class DigitalTimer implements TimerType {
         if (timerTextView == null) {
             timerTextView = new TextView(context);
             timerTextView.setTextSize(72);
+            timerTextView.setMaxLines(1);
+            timerTextView.setAutoSizeTextTypeUniformWithConfiguration(24, 72, 1,
+                    android.util.TypedValue.COMPLEX_UNIT_SP);
+            timerTextView.setGravity(android.view.Gravity.CENTER);
             timerTextView.setTextColor(context.getColor(R.color.textPrimary));
             timerTextView.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.BOLD));
             timerTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

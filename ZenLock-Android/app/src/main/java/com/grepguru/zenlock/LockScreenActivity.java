@@ -214,8 +214,8 @@ public class LockScreenActivity extends AppCompatActivity {
         LinearLayout noAppsContainer = findViewById(R.id.noAppsContainer);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
 
-        // Use GridLayoutManager for better organization - 3 apps per row
-        androidx.recyclerview.widget.GridLayoutManager layoutManager = new androidx.recyclerview.widget.GridLayoutManager(this, 3);
+        // Row adapter owns the four-column layout and centers incomplete rows.
+        androidx.recyclerview.widget.LinearLayoutManager layoutManager = new androidx.recyclerview.widget.LinearLayoutManager(this);
         appsRecycler.setLayoutManager(layoutManager);
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
@@ -255,6 +255,10 @@ public class LockScreenActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        java.util.Comparator<AppModel> byName = (a, b) -> a.getAppName().compareToIgnoreCase(b.getAppName());
+        java.util.Collections.sort(defaultAppModels, byName);
+        java.util.Collections.sort(additionalAppModels, byName);
 
         // Debug logging
         Log.d("LockScreen", "Default apps count: " + defaultAppModels.size());
@@ -328,61 +332,13 @@ public class LockScreenActivity extends AppCompatActivity {
                     noAppsContainer.setVisibility(View.GONE);
                 }
                 
-                // Animate arrow to bottom of main content container (above the apps)
-                // Get the parent apps container and calculate the exact position
-                View parentAppsContainer = findViewById(R.id.parentAppsContainer);
-                parentAppsContainer.post(() -> {
-                    int[] parentContainerLocation = new int[2];
-                    parentAppsContainer.getLocationInWindow(parentContainerLocation);
-                    int parentContainerTop = parentContainerLocation[1];
-                    
-                    int[] arrowLocation = new int[2];
-                    expandButtonContainer.getLocationInWindow(arrowLocation);
-                    int arrowCurrentY = arrowLocation[1];
-                    
-                    // Move arrow to just above the parent container (with 20dp buffer)
-                    int bufferPixels = (int) (20 * getResources().getDisplayMetrics().density);
-                    int targetY = parentContainerTop - bufferPixels;
-                    int distanceToMove = arrowCurrentY - targetY;
-                    
-                    expandButtonContainer.animate()
-                        .translationY(-distanceToMove)
-                        .setDuration(300)
-                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
-                        .start();
-                });
-                
-                // Scroll to show all apps from the beginning after a short delay
-                appsRecycler.postDelayed(() -> {
-                    layoutManager.scrollToPosition(0);
-                }, 100);
             } else {
-                // Collapse: Hide all apps
-                currentAppModels.clear();
-                appsAdapter.notifyDataSetChanged();
-                
-                // Hide both the RecyclerView and noAppsContainer with smooth animation
-                appsRecycler.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> appsRecycler.setVisibility(View.GONE))
-                    .start();
-                
-                noAppsContainer.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> noAppsContainer.setVisibility(View.GONE))
-                    .start();
-                
-                // Animate arrow back to bottom position
-                expandButtonContainer.animate()
-                    .translationY(0f)
-                    .setDuration(300)
-                    .setInterpolator(new android.view.animation.OvershootInterpolator(0.8f))
-                    .start();
+                appsRecycler.setVisibility(View.GONE);
+                noAppsContainer.setVisibility(View.GONE);
             }
 
             isExpanded = !isExpanded;
+            expandAppsButton.setContentDescription(getString(isExpanded ? R.string.hide_allowed_apps : R.string.show_allowed_apps));
 
             // Rotate the expand icon (0° for expanded pointing down, 180° for collapsed pointing up)
             expandAppsButton.animate()
@@ -865,19 +821,16 @@ public class LockScreenActivity extends AppCompatActivity {
         if (timerContainer != null && timerContainer instanceof android.widget.FrameLayout) {
             android.widget.FrameLayout frameLayout = (android.widget.FrameLayout) timerContainer;
             frameLayout.removeAllViews();
-            frameLayout.addView(currentTimer.getTimerView());
+            frameLayout.addView(currentTimer.getTimerView(), new android.widget.FrameLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 
-            // Adjust container size based on timer type
-            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) frameLayout.getLayoutParams();
-            if ("circular".equals(timerStyle)) {
-                // Circular timer needs more space
-                params.width = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
-                params.height = (int) (350 * getResources().getDisplayMetrics().density); // Convert dp to px
-            } else {
-                // Digital timer needs even less space to reduce gap with quotes
-                params.width = (int) (300 * getResources().getDisplayMetrics().density); // Convert dp to px
-                params.height = (int) (100 * getResources().getDisplayMetrics().density); // Reduced from 120dp to 100dp
-            }
+            // Bound the timer to available width, including narrow and split-screen windows.
+            android.view.ViewGroup.LayoutParams params = frameLayout.getLayoutParams();
+            float density = getResources().getDisplayMetrics().density;
+            int availableWidth = getResources().getDisplayMetrics().widthPixels - (int) (48 * density);
+            params.width = Math.min((int) (280 * density), availableWidth);
+            params.height = "circular".equals(timerStyle) ? params.width : (int) (100 * density);
             frameLayout.setLayoutParams(params);
         }
 

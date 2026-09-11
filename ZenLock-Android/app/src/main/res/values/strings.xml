@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">ZenLock</string>
+    <string name="allowed_apps_title">Allowed apps</string>
+    <string name="save_allowed_apps">Save apps · %1$d/%2$d</string>
+    <string name="remove_allowed_app">Remove %1$s</string>
+    <string name="search_allowed_apps">Search apps</string>
+    <string name="close_app_search">Close search</string>
+    <string name="allowed_apps_saved">Allowed apps updated</string>
+    <string name="allowed_apps_summary">Choose up to 8 additional apps to use during focus sessions.</string>
+    <string name="cannot_open_app">Cannot open %1$s</string>
+    <string name="show_allowed_apps">Show allowed apps</string>
+    <string name="hide_allowed_apps">Hide allowed apps</string>
 </resources>

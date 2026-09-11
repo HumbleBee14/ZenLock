@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,7 +34,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -314,18 +312,10 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        try {
-            Field selectorWheelPaintField = NumberPicker.class.getDeclaredField("mSelectorWheelPaint");
-            selectorWheelPaintField.setAccessible(true);
-            Paint selectorWheelPaint = (Paint) selectorWheelPaintField.get(startDelayPicker);
-            selectorWheelPaint.setTextSize(textSizePx);
-            selectorWheelPaint.setColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
-            Field dividerHeightField = NumberPicker.class.getDeclaredField("mSelectionDividerHeight");
-            dividerHeightField.setAccessible(true);
-            dividerHeightField.set(startDelayPicker, 0);
-            startDelayPicker.invalidate();
-        } catch (Exception ignored) {
-            // Best-effort styling for platform NumberPicker internals.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startDelayPicker.setTextSize(textSizePx);
+            startDelayPicker.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
+            startDelayPicker.setSelectionDividerHeight(0);
         }
     }
 
