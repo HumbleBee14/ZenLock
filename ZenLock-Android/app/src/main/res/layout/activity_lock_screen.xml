@@ -8,12 +8,17 @@
     android:fillViewport="true">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:paddingHorizontal="24dp"
         android:paddingTop="24dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="16dp"
+        android:animateLayoutChanges="true">
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
         <LinearLayout
             android:id="@+id/mainContentContainer"
             android:layout_width="match_parent"
@@ -166,24 +171,10 @@
                     android:elevation="8dp" />
             </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/expandButtonContainer"
+        <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:paddingTop="12dp"
-            android:paddingBottom="16dp">
-            <ImageView
-                android:id="@+id/expandAppsButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_expand_more"
-                android:background="@drawable/circular_button"
-                android:padding="10dp"
-                android:contentDescription="@string/show_allowed_apps"
-                android:alpha="0.9" />
-        </LinearLayout>
+            android:layout_height="0dp"
+            android:layout_weight="1" />
         <LinearLayout
             android:id="@+id/parentAppsContainer"
             android:layout_width="match_parent"
@@ -199,7 +190,7 @@
                 android:paddingEnd="0dp"
                 android:nestedScrollingEnabled="false"
                 android:visibility="gone"
-                android:layout_marginTop="0dp" />
+                android:layout_marginTop="8dp" />
             <LinearLayout
                 android:id="@+id/noAppsContainer"
                 android:layout_width="match_parent"
@@ -236,6 +227,25 @@
                     android:gravity="center"
                     android:lineSpacingExtra="2dp" />
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/expandButtonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="12dp"
+            android:paddingBottom="0dp">
+            <ImageView
+                android:id="@+id/expandAppsButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_expand_more"
+                android:rotation="180"
+                android:background="@drawable/circular_button"
+                android:padding="10dp"
+                android:contentDescription="@string/show_allowed_apps"
+                android:alpha="0.9" />
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

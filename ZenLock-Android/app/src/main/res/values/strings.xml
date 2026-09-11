@@ -12,4 +12,5 @@
     <string name="hide_allowed_apps">Hide allowed apps</string>
     <string name="schedule_future_time">Choose a later time for a one-time schedule.</string>
     <string name="unlock_accessible_wait">Start five-second unlock wait. Activate again to cancel.</string>
+    <string name="play_store_sms_note"><![CDATA[Not available in the Play Store build due to Google\'s SMS policy. Get the APK from <a href="https://github.com/HumbleBee14/ZenLock/releases/latest">GitHub</a>.]]></string>
 </resources>

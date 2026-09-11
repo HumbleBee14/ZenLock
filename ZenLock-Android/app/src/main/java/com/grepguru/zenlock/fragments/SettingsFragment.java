@@ -197,7 +197,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupListeners(View view) {
-        Button whitelistButton = view.findViewById(R.id.whitelistButton);
+        View whitelistButton = view.findViewById(R.id.whitelistButton);
 
         // Feedback and Support Card Listeners
         View feedbackCard = view.findViewById(R.id.feedbackCard);
