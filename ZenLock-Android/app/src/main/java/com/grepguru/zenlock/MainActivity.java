@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
+        applyContentInsets();
 
         setupPermissionLauncher();
         cleanupStaleSessionState();
@@ -68,6 +69,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     
+    /** Keep all tabs below the status bar and cutouts with consistent breathing room. */
+    private void applyContentInsets() {
+        android.view.View content = findViewById(R.id.fragmentContainer);
+        int topGutter = Math.round(12 * getResources().getDisplayMetrics().density);
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
+            androidx.core.graphics.Insets safeArea = windowInsets.getInsets(
+                    androidx.core.view.WindowInsetsCompat.Type.systemBars()
+                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(safeArea.left, safeArea.top + topGutter, safeArea.right, 0);
+            // Preserve dispatch to BottomNavigationView, including on Android 9 and 10.
+            return windowInsets;
+        });
+        androidx.core.view.ViewCompat.requestApplyInsets(content);
+    }
+
     /**
      * Setup permission request launcher
      */

@@ -46,7 +46,10 @@ import java.util.Set;
 
 public class LockScreenActivity extends AppCompatActivity {
 
+    private com.grepguru.zenlock.ui.interaction.UnlockHoldController unlockHold;
     private static volatile boolean isLockScreenActive = false;
+
+    public static boolean isActive() { return isLockScreenActive; }
     private EditText pinInput;
     private SharedPreferences preferences;
     private boolean isLaunchingWhitelistedApp = false;
@@ -95,6 +98,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Dismiss blocker notification if it was used to launch us (MIUI fallback)
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm != null) {
+            nm.cancel(LockScreenService.NOTIFICATION_ID);
             nm.cancel(9999); // BLOCKER_NOTIFICATION_ID from LockScreenLauncher
         }
 
@@ -369,9 +373,13 @@ public class LockScreenActivity extends AppCompatActivity {
             }
         });
 
-        unlockPromptButton.setOnClickListener(v -> {
-            // Show enhanced unlock dialog
-            unlockManager.showUnlockDialog();
+        unlockHold = new com.grepguru.zenlock.ui.interaction.UnlockHoldController(unlockPromptButton, () -> {
+            if (autoHideHandler != null && autoHideRunnable != null) autoHideHandler.removeCallbacks(autoHideRunnable);
+        }, () -> unlockManager.showUnlockDialog(), () -> {
+            if (autoHideHandler != null && autoHideRunnable != null) {
+                autoHideHandler.removeCallbacks(autoHideRunnable);
+                autoHideHandler.postDelayed(autoHideRunnable, 5000);
+            }
         });
 
         // Set up unlock arrow click listener
@@ -419,7 +427,15 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) manager.cancel(LockScreenService.NOTIFICATION_ID);
+    }
+
+    @Override
     protected void onPause() {
+        if (unlockHold != null) unlockHold.cancel();
         super.onPause();
 
         // If we're launching a whitelisted app, don't restart the lock screen immediately
@@ -591,6 +607,7 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus && unlockHold != null) unlockHold.cancel();
 
         // Remove automatic restart on focus change to prevent loops
         // The onPause/onStop methods will handle legitimate cases where user tries to leave
@@ -639,6 +656,7 @@ public class LockScreenActivity extends AppCompatActivity {
      * Hide unlock button and show arrow
      */
     private void hideUnlockButton() {
+        if (unlockHold != null) unlockHold.cancel();
         Button unlockPromptButton = findViewById(R.id.unlockPromptButton);
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
         LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
@@ -666,6 +684,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (unlockHold != null) unlockHold.cancel();
         super.onDestroy();
         // Always reset the flag when activity is destroyed
         isLockScreenActive = false;

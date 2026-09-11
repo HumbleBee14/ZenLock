@@ -88,6 +88,33 @@ public class AppBlockerService extends AccessibilityService {
     private long lastForegroundCheckTime = 0;
     private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 100; // Reduced debounce for instant response
     private AnalyticsManager analyticsManager;
+    private SharedPreferences sessionPreferences;
+    private final android.os.Handler sessionHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable activateSession = () -> {
+        if (sessionPreferences == null) return;
+        if (!sessionPreferences.getString("current_session_source", "").startsWith("schedule:")) return;
+        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "Wait for device unlock before presenting a scheduled session")) return;
+        if (sessionPreferences.getBoolean("isLocked", false)
+                && sessionPreferences.getLong("lockEndTime", 0) > System.currentTimeMillis()) {
+            analyticsManager = new AnalyticsManager(this);
+            if (!LockScreenActivity.isActive()) {
+                Intent launch = new Intent(this, LockScreenActivity.class);
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                try {
+                    startActivity(launch);
+                } catch (RuntimeException blocked) {
+                    LockScreenLauncher.launchFromBlocker(this);
+                }
+            }
+        }
+    };
+    private final SharedPreferences.OnSharedPreferenceChangeListener sessionListener = (prefs, key) -> {
+        if ("isLocked".equals(key)) {
+            sessionHandler.removeCallbacks(activateSession);
+            sessionHandler.post(activateSession);
+        }
+    };
+
     
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -280,5 +307,17 @@ public class AppBlockerService extends AccessibilityService {
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.notificationTimeout = 100;
         setServiceInfo(info);
+        if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);
+        sessionPreferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        sessionPreferences.registerOnSharedPreferenceChangeListener(sessionListener);
+        sessionHandler.removeCallbacks(activateSession);
+        sessionHandler.post(activateSession);
+    }
+    @Override
+    public void onDestroy() {
+        sessionHandler.removeCallbacks(activateSession);
+        if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);
+        sessionPreferences = null;
+        super.onDestroy();
     }
 }

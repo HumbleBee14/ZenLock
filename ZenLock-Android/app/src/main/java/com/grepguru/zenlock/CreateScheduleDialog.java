@@ -360,6 +360,18 @@ public class CreateScheduleDialog extends DialogFragment {
             repeatType = ScheduleModel.RepeatType.ONCE;
         }
         
+        if (repeatType == ScheduleModel.RepeatType.ONCE) {
+            java.util.Calendar selected = java.util.Calendar.getInstance();
+            selected.set(java.util.Calendar.HOUR_OF_DAY, selectedHour);
+            selected.set(java.util.Calendar.MINUTE, selectedMinute);
+            selected.set(java.util.Calendar.SECOND, 0);
+            selected.set(java.util.Calendar.MILLISECOND, 0);
+            if (selected.getTimeInMillis() <= System.currentTimeMillis()) {
+                Toast.makeText(requireContext(), R.string.schedule_future_time, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         // Get weekly days
         Set<Integer> repeatDays = new HashSet<>();
         if (repeatType == ScheduleModel.RepeatType.WEEKLY) {

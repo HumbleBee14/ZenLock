@@ -10,4 +10,6 @@
     <string name="cannot_open_app">Cannot open %1$s</string>
     <string name="show_allowed_apps">Show allowed apps</string>
     <string name="hide_allowed_apps">Hide allowed apps</string>
+    <string name="schedule_future_time">Choose a later time for a one-time schedule.</string>
+    <string name="unlock_accessible_wait">Start five-second unlock wait. Activate again to cancel.</string>
 </resources>
