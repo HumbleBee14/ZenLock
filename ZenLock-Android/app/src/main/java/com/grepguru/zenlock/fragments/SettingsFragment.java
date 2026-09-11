@@ -275,9 +275,6 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
-        Button batteryExemptionButton = view.findViewById(R.id.batteryExemptionButton);
-        batteryExemptionButton.setOnClickListener(v ->
-                com.grepguru.zenlock.utils.BatteryOptimizationManager.requestExemption(requireContext()));
         updateBatteryExemptionState(view);
 
         // PIN Unlock Toggle
@@ -421,20 +418,27 @@ public class SettingsFragment extends Fragment {
     }
 
     private void updateBatteryExemptionState(View view) {
-        Button batteryExemptionButton = view.findViewById(R.id.batteryExemptionButton);
-        android.widget.TextView statusText = view.findViewById(R.id.batteryExemptionStatus);
-        if (batteryExemptionButton == null || statusText == null) {
-            return;
-        }
+        SwitchCompat toggle = view.findViewById(R.id.batteryExemptionToggle);
+        if (toggle == null) return;
         boolean exempt = com.grepguru.zenlock.utils.BatteryOptimizationManager.isExempt(requireContext());
-        if (exempt) {
-            batteryExemptionButton.setText("Unrestricted Battery Enabled");
-            batteryExemptionButton.setEnabled(false);
-            statusText.setText("ZenLock is excluded from battery optimization — schedules will run reliably");
-        } else {
-            batteryExemptionButton.setText("Allow Unrestricted Battery");
-            batteryExemptionButton.setEnabled(true);
-            statusText.setText("Exclude ZenLock from battery optimization so scheduled sessions always start on time");
+        toggle.setOnCheckedChangeListener(null);
+        toggle.setChecked(exempt);
+        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                com.grepguru.zenlock.utils.BatteryOptimizationManager.requestExemption(requireContext());
+            } else {
+                openBatteryOptimizationSettings();
+            }
+        });
+    }
+
+    private void openBatteryOptimizationSettings() {
+        try {
+            startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+        } catch (Exception e) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(android.net.Uri.parse("package:" + requireContext().getPackageName()));
+            startActivity(intent);
         }
     }
 

@@ -46,23 +46,16 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.tabs.TabLayout;
 
 public class AnalyticsFragment extends Fragment {
 
     // Today's stats views
-    private TextView todaySessions, todayTime, todayFocusScore;
+    private TextView todaySessions, todayTime;
     private TextView todayTrendIndicator, todayMobileUsage, todayTimeSaved;
-    private ProgressBar sessionsProgress, timeProgress, focusScoreProgress;
+    private ProgressBar sessionsProgress, timeProgress;
 
     // Expandable sections
-    private LinearLayout focusTrendsHeader, focusTrendsContent;
-    private ImageView focusTrendsExpandIcon;
-    private boolean isFocusTrendsExpanded = false;
-
-    private LinearLayout monthlyTrendsHeader, monthlyTrendsContent;
-    private ImageView monthlyTrendsExpandIcon;
-    private boolean isMonthlyTrendsExpanded = false;
-
     private LinearLayout recentSessionsHeader, recentSessionsContent;
     private ImageView recentSessionsExpandIcon;
     private boolean isRecentSessionsExpanded = false;
@@ -76,25 +69,21 @@ public class AnalyticsFragment extends Fragment {
     // Usage permission banner
     private TextView usagePermissionBanner;
     
-    // Weekly stats UI elements
-    private TextView thisWeekFocusTime;
-    private TextView lastWeekFocusTime;
-    private TextView thisWeekPhoneUsage;
-    private TextView lastWeekPhoneUsage;
-    private TextView weeklyFocusChange;
-    private TextView weeklyMobileChange;
-    
-    // Monthly stats UI elements
-    private TextView thisMonthFocusTime;
-    private TextView lastMonthFocusTime;
-    private TextView thisMonthPhoneUsage;
-    private TextView lastMonthPhoneUsage;
-    private TextView monthlyFocusChange;
-    private TextView monthlyMobileChange;
+    private TabLayout trendsTabs;
+    private TextView currentFocusTime, previousFocusTime, currentMobileUsage, previousMobileUsage;
+    private TextView focusChange, mobileChange;
+    private TextView currentFocusLabel, previousFocusLabel, currentMobileLabel, previousMobileLabel, chartCaption;
+    private CombinedChart trendsChart;
+    private boolean showingMonthly = false;
+    private final PeriodData weeklyData = new PeriodData();
+    private final PeriodData monthlyData = new PeriodData();
 
-    // Charts
-    private CombinedChart weeklyCombinedChart;
-    private CombinedChart monthlyCombinedChart;
+    private static class PeriodData {
+        long currentFocusMs, previousFocusMs, currentMobileMs, previousMobileMs;
+        boolean statsLoaded;
+        CombinedData chartData;
+        List<String> chartLabels;
+    }
 
     public AnalyticsFragment() {}
 
@@ -119,6 +108,7 @@ public class AnalyticsFragment extends Fragment {
 
         // Setup expandable sections
         setupExpandableSections();
+        setupTrendsTabs();
         
         // Setup usage permission banner
         setupUsagePermissionBanner();
@@ -159,7 +149,6 @@ public class AnalyticsFragment extends Fragment {
         // Today's stats
         todaySessions = view.findViewById(R.id.todaySessions);
         todayTime = view.findViewById(R.id.todayTime);
-        todayFocusScore = view.findViewById(R.id.todayFocusScore);
         todayTrendIndicator = view.findViewById(R.id.todayTrendIndicator);
         todayMobileUsage = view.findViewById(R.id.todayMobileUsage);
         todayTimeSaved = view.findViewById(R.id.todayTimeSaved);
@@ -167,18 +156,7 @@ public class AnalyticsFragment extends Fragment {
         // Progress bars
         sessionsProgress = view.findViewById(R.id.sessionsProgress);
         timeProgress = view.findViewById(R.id.timeProgress);
-        focusScoreProgress = view.findViewById(R.id.focusScoreProgress);
 
-
-        // Focus trends expandable section
-        focusTrendsHeader = view.findViewById(R.id.focusTrendsHeader);
-        focusTrendsContent = view.findViewById(R.id.focusTrendsContent);
-        focusTrendsExpandIcon = view.findViewById(R.id.focusTrendsExpandIcon);
-
-        // Monthly trends expandable section
-        monthlyTrendsHeader = view.findViewById(R.id.monthlyTrendsHeader);
-        monthlyTrendsContent = view.findViewById(R.id.monthlyTrendsContent);
-        monthlyTrendsExpandIcon = view.findViewById(R.id.monthlyTrendsExpandIcon);
 
         // Recent sessions expandable section
         recentSessionsHeader = view.findViewById(R.id.recentSessionsHeader);
@@ -192,91 +170,83 @@ public class AnalyticsFragment extends Fragment {
         // Usage permission banner
         usagePermissionBanner = view.findViewById(R.id.usagePermissionBanner);
         
-        // Weekly stats views
-        thisWeekFocusTime = view.findViewById(R.id.thisWeekFocusTime);
-        lastWeekFocusTime = view.findViewById(R.id.lastWeekFocusTime);
-        thisWeekPhoneUsage = view.findViewById(R.id.thisWeekMobileUsage);
-        lastWeekPhoneUsage = view.findViewById(R.id.lastWeekMobileUsage);
-        weeklyFocusChange = view.findViewById(R.id.weeklyFocusChange);
-        weeklyMobileChange = view.findViewById(R.id.weeklyMobileChange);
-    weeklyCombinedChart = view.findViewById(R.id.weeklyCombinedChart);
-        
-        // Monthly stats views
-        thisMonthFocusTime = view.findViewById(R.id.thisMonthFocusTime);
-        lastMonthFocusTime = view.findViewById(R.id.lastMonthFocusTime);
-        thisMonthPhoneUsage = view.findViewById(R.id.thisMonthMobileUsage);
-        lastMonthPhoneUsage = view.findViewById(R.id.lastMonthMobileUsage);
-        monthlyFocusChange = view.findViewById(R.id.monthlyFocusChange);
-        monthlyMobileChange = view.findViewById(R.id.monthlyMobileChange);
-    monthlyCombinedChart = view.findViewById(R.id.monthlyCombinedChart);
+        trendsTabs = view.findViewById(R.id.trendsTabs);
+        currentFocusTime = view.findViewById(R.id.currentFocusTime);
+        previousFocusTime = view.findViewById(R.id.previousFocusTime);
+        currentMobileUsage = view.findViewById(R.id.currentMobileUsage);
+        previousMobileUsage = view.findViewById(R.id.previousMobileUsage);
+        focusChange = view.findViewById(R.id.focusChange);
+        mobileChange = view.findViewById(R.id.mobileChange);
+        currentFocusLabel = view.findViewById(R.id.currentFocusLabel);
+        previousFocusLabel = view.findViewById(R.id.previousFocusLabel);
+        currentMobileLabel = view.findViewById(R.id.currentMobileLabel);
+        previousMobileLabel = view.findViewById(R.id.previousMobileLabel);
+        chartCaption = view.findViewById(R.id.chartCaption);
+        trendsChart = view.findViewById(R.id.trendsChart);
 
-    setupChart(weeklyCombinedChart, /*maxLabels*/8);
-    setupChart(monthlyCombinedChart, /*maxLabels*/31);
+        setupChart(trendsChart, 8);
     }
 
     private void setupExpandableSections() {
-        // Focus Trends expandable (Weekly Insights)
-        focusTrendsHeader.setOnClickListener(v -> toggleFocusTrends());
-
-        // Monthly Trends expandable
-        monthlyTrendsHeader.setOnClickListener(v -> toggleMonthlyTrends());
-
         // Recent Sessions expandable
         recentSessionsHeader.setOnClickListener(v -> toggleRecentSessions());
     }
 
-    private void toggleFocusTrends() {
-        isFocusTrendsExpanded = !isFocusTrendsExpanded;
+    private void setupTrendsTabs() {
+        trendsTabs.addTab(trendsTabs.newTab().setText("Weekly"));
+        trendsTabs.addTab(trendsTabs.newTab().setText("Monthly"));
+        trendsTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                showingMonthly = tab.getPosition() == 1;
+                bindActivePeriod();
+            }
 
-        if (isFocusTrendsExpanded) {
-            // Expand
-            focusTrendsContent.setVisibility(View.VISIBLE);
-            focusTrendsContent.setAlpha(0f);
-            focusTrendsContent.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .start();
-        } else {
-            // Collapse
-            focusTrendsContent.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> focusTrendsContent.setVisibility(View.GONE))
-                    .start();
-        }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
 
-        // Rotate icon
-        ObjectAnimator rotation = ObjectAnimator.ofFloat(focusTrendsExpandIcon, "rotation",
-                isFocusTrendsExpanded ? 180f : 0f, isFocusTrendsExpanded ? 0f : 180f);
-        rotation.setDuration(300);
-        rotation.start();
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+        bindActivePeriod();
     }
 
-    private void toggleMonthlyTrends() {
-        isMonthlyTrendsExpanded = !isMonthlyTrendsExpanded;
+    private void bindActivePeriod() {
+        if (!isAdded()) return;
+        PeriodData data = showingMonthly ? monthlyData : weeklyData;
+        String current = showingMonthly ? "THIS MONTH" : "THIS WEEK";
+        String previous = showingMonthly ? "LAST MONTH" : "LAST WEEK";
+        currentFocusLabel.setText(current);
+        previousFocusLabel.setText(previous);
+        currentMobileLabel.setText(current);
+        previousMobileLabel.setText(previous);
+        chartCaption.setText(showingMonthly ? "Last 30 days" : "Last 7 days");
 
-        if (isMonthlyTrendsExpanded) {
-            // Expand
-            monthlyTrendsContent.setVisibility(View.VISIBLE);
-            monthlyTrendsContent.setAlpha(0f);
-            monthlyTrendsContent.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .start();
+        if (data.statsLoaded) {
+            currentFocusTime.setText(formatTime(data.currentFocusMs / (60 * 1000)));
+            previousFocusTime.setText(formatTime(data.previousFocusMs / (60 * 1000)));
+            currentMobileUsage.setText(formatTime(data.currentMobileMs / (60 * 1000)));
+            previousMobileUsage.setText(formatTime(data.previousMobileMs / (60 * 1000)));
+            int currentDays = showingMonthly ? getDaysElapsedThisMonth() : getDaysElapsedThisWeek();
+            int previousDays = showingMonthly ? getDaysInLastMonth() : 7;
+            applyChangeLabel(focusChange, computeNormalizedChange(data.currentFocusMs, currentDays, data.previousFocusMs, previousDays), true);
+            applyChangeLabel(mobileChange, computeNormalizedChange(data.currentMobileMs, currentDays, data.previousMobileMs, previousDays), false);
         } else {
-            // Collapse
-            monthlyTrendsContent.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> monthlyTrendsContent.setVisibility(View.GONE))
-                    .start();
+            currentFocusTime.setText("0m");
+            previousFocusTime.setText("0m");
+            currentMobileUsage.setText("0m");
+            previousMobileUsage.setText("0m");
+            focusChange.setText("--");
+            mobileChange.setText("--");
         }
 
-        // Rotate icon
-        ObjectAnimator rotation = ObjectAnimator.ofFloat(monthlyTrendsExpandIcon, "rotation",
-                isMonthlyTrendsExpanded ? 180f : 0f, isMonthlyTrendsExpanded ? 0f : 180f);
-        rotation.setDuration(300);
-        rotation.start();
+        if (data.chartData != null) {
+            trendsChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(data.chartLabels));
+            trendsChart.setData(data.chartData);
+            trendsChart.invalidate();
+        } else {
+            trendsChart.clear();
+        }
     }
 
     private void toggleRecentSessions() {
@@ -371,7 +341,7 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void loadWeeklyChart() {
-        if (weeklyCombinedChart == null) return;
+        if (trendsChart == null) return;
         new Thread(() -> {
             try {
                 // Rolling window: today (index 0) back to previous 7 days => total 8 points
@@ -427,19 +397,17 @@ public class AnalyticsFragment extends Fragment {
 
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (weeklyCombinedChart != null && isAdded()) {
-                            weeklyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-                            weeklyCombinedChart.setData(combinedData);
-                            weeklyCombinedChart.invalidate();
-                        }
+                        weeklyData.chartData = combinedData;
+                        weeklyData.chartLabels = labels;
+                        if (!showingMonthly) bindActivePeriod();
                     });
                 }
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error loading weekly chart", e);
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (weeklyCombinedChart != null && isAdded()) {
-                            weeklyCombinedChart.setNoDataText("No data yet");
+                        if (trendsChart != null && isAdded()) {
+                            trendsChart.setNoDataText("No data yet");
                         }
                     });
                 }
@@ -448,7 +416,7 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void loadMonthlyChart() {
-        if (monthlyCombinedChart == null) return;
+        if (trendsChart == null) return;
         new Thread(() -> {
             try {
                 // Rolling window: today back 30 days => 31 points
@@ -504,19 +472,17 @@ public class AnalyticsFragment extends Fragment {
 
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (monthlyCombinedChart != null && isAdded()) {
-                            monthlyCombinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-                            monthlyCombinedChart.setData(combinedData);
-                            monthlyCombinedChart.invalidate();
-                        }
+                        monthlyData.chartData = combinedData;
+                        monthlyData.chartLabels = labels;
+                        if (showingMonthly) bindActivePeriod();
                     });
                 }
             } catch (Exception e) {
                 Log.e("AnalyticsFragment", "Error loading monthly chart", e);
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (monthlyCombinedChart != null && isAdded()) {
-                            monthlyCombinedChart.setNoDataText("No data yet");
+                        if (trendsChart != null && isAdded()) {
+                            trendsChart.setNoDataText("No data yet");
                         }
                     });
                 }
@@ -571,54 +537,22 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void loadWeeklyStats() {
-        // Load this week's stats
         new Thread(() -> {
             try {
-                // Get this week's focus time from database
                 long thisWeekFocusMs = analyticsManager.getThisWeekFocusTime();
-                
-                // Get this week's mobile usage from UsageStatsManager
                 long thisWeekMobileMs = analyticsManager.getThisWeekMobileUsage();
-                
-                // Get last week's stats for comparison
                 long lastWeekFocusMs = analyticsManager.getLastWeekFocusTime();
                 long lastWeekMobileMs = analyticsManager.getLastWeekMobileUsage();
 
-                // Consolidated debug log so we can verify values even if UI views are null
-                // if (BuildConfig.DEBUG) {
-                //     Log.d("AnalyticsFragment", "Weekly values -> thisWeekFocusMs=" + thisWeekFocusMs
-                //             + ", lastWeekFocusMs=" + lastWeekFocusMs
-                //             + ", thisWeekMobileMs=" + thisWeekMobileMs
-                //             + ", lastWeekMobileMs=" + lastWeekMobileMs);
-                // }
-                
-                // Update UI on main thread
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (!isAdded()) return; // Double check fragment is still attached
-                        // Update this week's focus time
-                        if (thisWeekFocusTime != null) {
-                            thisWeekFocusTime.setText(formatTime(thisWeekFocusMs / (60 * 1000)));
-                        }
-                        
-                        // Update last week's focus time
-                        if (lastWeekFocusTime != null) {
-                            lastWeekFocusTime.setText(formatTime(lastWeekFocusMs / (60 * 1000)));
-                        }
-                        
-                        // Update this week's phone usage
-                        if (thisWeekPhoneUsage != null) {
-                            thisWeekPhoneUsage.setText(formatTime(thisWeekMobileMs / (60 * 1000)));
-                        }
-                        
-                        // Update last week's phone usage
-                        if (lastWeekPhoneUsage != null) {
-                            lastWeekPhoneUsage.setText(formatTime(lastWeekMobileMs / (60 * 1000)));
-                        }
-                        
-                        // Update weekly comparisons
-                        updateWeeklyFocusChange(thisWeekFocusMs, lastWeekFocusMs);
-                        updateWeeklyMobileChange(thisWeekMobileMs, lastWeekMobileMs);
+                        if (!isAdded()) return;
+                        weeklyData.currentFocusMs = thisWeekFocusMs;
+                        weeklyData.previousFocusMs = lastWeekFocusMs;
+                        weeklyData.currentMobileMs = thisWeekMobileMs;
+                        weeklyData.previousMobileMs = lastWeekMobileMs;
+                        weeklyData.statsLoaded = true;
+                        if (!showingMonthly) bindActivePeriod();
                     });
                 }
             } catch (Exception e) {
@@ -626,48 +560,24 @@ public class AnalyticsFragment extends Fragment {
             }
         }).start();
     }
-    
+
     private void loadMonthlyStats() {
-        // Load this month's stats
         new Thread(() -> {
             try {
-                // Get this month's focus time from database
                 long thisMonthFocusMs = analyticsManager.getThisMonthFocusTime();
-                
-                // Get this month's mobile usage from UsageStatsManager
                 long thisMonthMobileMs = analyticsManager.getThisMonthMobileUsage();
-                
-                // Get last month's stats for comparison
                 long lastMonthFocusMs = analyticsManager.getLastMonthFocusTime();
                 long lastMonthMobileMs = analyticsManager.getLastMonthMobileUsage();
-                
-                // Update UI on main thread
+
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        if (!isAdded()) return; // Double check fragment is still attached
-                        // Update this month's focus time
-                        if (thisMonthFocusTime != null) {
-                            thisMonthFocusTime.setText(formatTime(thisMonthFocusMs / (60 * 1000)));
-                        }
-                        
-                        // Update last month's focus time
-                        if (lastMonthFocusTime != null) {
-                            lastMonthFocusTime.setText(formatTime(lastMonthFocusMs / (60 * 1000)));
-                        }
-                        
-                        // Update this month's phone usage
-                        if (thisMonthPhoneUsage != null) {
-                            thisMonthPhoneUsage.setText(formatTime(thisMonthMobileMs / (60 * 1000)));
-                        }
-                        
-                        // Update last month's phone usage
-                        if (lastMonthPhoneUsage != null) {
-                            lastMonthPhoneUsage.setText(formatTime(lastMonthMobileMs / (60 * 1000)));
-                        }
-                        
-                        // Update monthly comparisons
-                        updateMonthlyFocusChange(thisMonthFocusMs, lastMonthFocusMs);
-                        updateMonthlyMobileChange(thisMonthMobileMs, lastMonthMobileMs);
+                        if (!isAdded()) return;
+                        monthlyData.currentFocusMs = thisMonthFocusMs;
+                        monthlyData.previousFocusMs = lastMonthFocusMs;
+                        monthlyData.currentMobileMs = thisMonthMobileMs;
+                        monthlyData.previousMobileMs = lastMonthMobileMs;
+                        monthlyData.statsLoaded = true;
+                        if (showingMonthly) bindActivePeriod();
                     });
                 }
             } catch (Exception e) {
@@ -716,17 +626,7 @@ public class AnalyticsFragment extends Fragment {
             }
         }
 
-        if (todayFocusScore != null) {
-            // If we have usage stats permission, show calculated focus score
-            // Otherwise, show percentage of target reached
-            if (analyticsManager.hasUsageStatsPermission()) {
-            todayFocusScore.setText(String.valueOf(focusScore));
-            } else {
-                // Show focus time as percentage of 8-hour goal
-                int percentage = (int) Math.min((focusTimeMinutes * 100) / 480, 100);
-                todayFocusScore.setText(String.valueOf(percentage));
-            }
-        }
+
 
         // Update progress bars
         if (sessionsProgress != null) {
@@ -735,14 +635,7 @@ public class AnalyticsFragment extends Fragment {
         if (timeProgress != null) {
             timeProgress.setProgress((int) Math.min(focusTimeMinutes, 480)); // Goal: 8 hours
         }
-        if (focusScoreProgress != null) {
-            if (analyticsManager.hasUsageStatsPermission()) {
-            focusScoreProgress.setProgress(focusScore);
-            } else {
-                int percentage = (int) Math.min((focusTimeMinutes * 100) / 480, 100);
-                focusScoreProgress.setProgress(percentage);
-            }
-        }
+
 
         // Update trend indicator with today vs yesterday comparison
         if (todayTrendIndicator != null) {
@@ -866,48 +759,6 @@ public class AnalyticsFragment extends Fragment {
 
     
     
-    private void updateWeeklyFocusChange(long thisWeekFocusMs, long lastWeekFocusMs) {
-        // Log before the null-guard so we always see debug output
-        int daysThisWeek = getDaysElapsedThisWeek();
-        int daysLastWeek = 7;
-        Double changePercentage = computeNormalizedChange(thisWeekFocusMs, daysThisWeek, lastWeekFocusMs, daysLastWeek);
-        // if (BuildConfig.DEBUG) {
-        //     Log.d("AnalyticsFragment", "This week total focus ms: " + thisWeekFocusMs);
-        //     Log.d("AnalyticsFragment", "Days elapsed this week: " + daysThisWeek);
-        //     Log.d("AnalyticsFragment", "Last week total focus ms: " + lastWeekFocusMs);
-        //     Log.d("AnalyticsFragment", "Days last week: " + daysLastWeek);
-        //     Log.d("AnalyticsFragment", "This week focus hours: " + (thisWeekFocusMs / (1000 * 60 * 60)));
-        //     Log.d("AnalyticsFragment", "Last week focus hours: " + (lastWeekFocusMs / (1000 * 60 * 60)));
-        // }
-        
-        if (weeklyFocusChange == null) return;
-        applyChangeLabel(weeklyFocusChange, changePercentage, /*higherIsGood=*/true);
-    }
-    
-    private void updateWeeklyMobileChange(long thisWeekMobileMs, long lastWeekMobileMs) {
-        if (weeklyMobileChange == null) return;
-    int daysThisWeek = getDaysElapsedThisWeek();
-    int daysLastWeek = 7;
-    Double changePercentage = computeNormalizedChange(thisWeekMobileMs, daysThisWeek, lastWeekMobileMs, daysLastWeek);
-    applyChangeLabel(weeklyMobileChange, changePercentage, /*higherIsGood=*/false);
-    }
-    
-    private void updateMonthlyFocusChange(long thisMonthFocusMs, long lastMonthFocusMs) {
-        if (monthlyFocusChange == null) return;
-        int daysElapsedThisMonth = getDaysElapsedThisMonth();
-        int daysInLastMonth = getDaysInLastMonth();
-        Double changePercentage = computeNormalizedChange(thisMonthFocusMs, daysElapsedThisMonth, lastMonthFocusMs, daysInLastMonth);
-        applyChangeLabel(monthlyFocusChange, changePercentage, /*higherIsGood=*/true);
-    }
-    
-    private void updateMonthlyMobileChange(long thisMonthMobileMs, long lastMonthMobileMs) {
-        if (monthlyMobileChange == null) return;
-        int daysElapsedThisMonth = getDaysElapsedThisMonth();
-        int daysInLastMonth = getDaysInLastMonth();
-        Double changePercentage = computeNormalizedChange(thisMonthMobileMs, daysElapsedThisMonth, lastMonthMobileMs, daysInLastMonth);
-        applyChangeLabel(monthlyMobileChange, changePercentage, /*higherIsGood=*/false);
-    }
-
     // ---- Helpers for normalized comparisons ----
     private int getDaysElapsedThisWeek() {
         java.util.Calendar cal = java.util.Calendar.getInstance();

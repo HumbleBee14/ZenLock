@@ -1174,17 +1174,14 @@ public class HomeFragment extends Fragment {
             enableLockButton.setText("Focus Scheduled");
             if (startFocusHint != null) {
                 startFocusHint.setText(getPendingStartHint());
+                startFocusHint.setVisibility(View.VISIBLE);
             }
             return;
         }
 
         enableLockButton.setText("Start Focus");
         if (startFocusHint != null) {
-            if (selectedStartDelayMinutes > 0) {
-                startFocusHint.setText("Long press to schedule");
-            } else {
-                startFocusHint.setText("Long press to begin");
-            }
+            startFocusHint.setVisibility(View.GONE);
         }
 
         boolean canStart = isLockUntilMode ? lockUntilHour != -1 : selectedMinutes > 0;
