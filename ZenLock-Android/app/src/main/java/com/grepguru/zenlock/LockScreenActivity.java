@@ -174,6 +174,14 @@ public class LockScreenActivity extends AppCompatActivity {
         // -----------------------------------------------------------
         // Setting up UI
         setContentView(R.layout.activity_lock_screen);
+        View lockRoot = findViewById(R.id.lockRoot);
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(lockRoot, (v, windowInsets) -> {
+            androidx.core.graphics.Insets bars = windowInsets.getInsets(
+                    androidx.core.view.WindowInsetsCompat.Type.systemBars()
+                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return windowInsets;
+        });
 
         // Initializing UI Components
         pinInput = findViewById(R.id.pinInput);
