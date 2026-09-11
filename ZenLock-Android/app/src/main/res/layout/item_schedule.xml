@@ -139,47 +139,42 @@
 
                 <Button
                     android:id="@+id/toggleButton"
+                    style="@style/ModernButton.Secondary"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:minHeight="40dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:text="Disable"
                     android:textSize="13sp"
-                    android:background="@drawable/rounded_button"
-                    android:textColor="@color/white"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="8dp"
-                    android:gravity="center"
-                    android:minHeight="52dp" />
+                    android:layout_marginEnd="8dp" />
 
                 <Button
                     android:id="@+id/editButton"
+                    style="@style/ModernButton.Secondary"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:minHeight="40dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:text="Edit"
                     android:textSize="13sp"
-                    android:background="@drawable/rounded_button"
-                    android:textColor="@color/white"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="8dp"
-                    android:gravity="center"
-                    android:minHeight="52dp" />
+                    android:layout_marginEnd="8dp" />
 
                 <Button
                     android:id="@+id/deleteButton"
+                    style="@style/ModernButton.Text"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:minHeight="40dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:text="Delete"
                     android:textSize="13sp"
-                    android:background="@drawable/rounded_button"
-                    android:textColor="@color/white"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="8dp"
-                    android:gravity="center"
-                    android:minHeight="52dp" />
+                    android:textColor="@color/error" />
 
             </LinearLayout>
 

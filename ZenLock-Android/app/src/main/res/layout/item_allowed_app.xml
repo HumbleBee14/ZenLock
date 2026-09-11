@@ -1,40 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/surface">
-
-    <LinearLayout
+    android:minHeight="88dp"
+    android:orientation="vertical"
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="8dp"
+    android:gravity="center_horizontal"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+    <ImageView
+        android:id="@+id/appIcon"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:scaleType="fitCenter"
+        android:importantForAccessibility="no"
+        android:layout_marginBottom="8dp" />
+    <TextView
+        android:id="@+id/appName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp"
+        android:textColor="@color/textPrimary"
+        android:textSize="12sp"
         android:gravity="center"
-        android:minWidth="80dp">
-
-        <ImageView
-            android:id="@+id/appIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="centerCrop"
-            android:background="@drawable/circle_background"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/appName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/textPrimary"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-medium"/>
-
-    </LinearLayout>
-
-</androidx.cardview.widget.CardView>
+        android:maxLines="2"
+        android:minLines="2"
+        android:ellipsize="end"
+        android:importantForAccessibility="no"
+        android:fontFamily="sans-serif" />
+</LinearLayout>

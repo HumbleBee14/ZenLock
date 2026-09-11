@@ -1,310 +1,251 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundPrimary"
-    android:paddingTop="60dp"
-    android:paddingBottom="40dp"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    tools:context=".LockScreenActivity">
-
-    <!-- Main Content Container -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mainContentContainer"
+    android:fillViewport="true">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/parentAppsContainer"
-        app:layout_constraintHeight_percent="0.65">
-
-        <!-- Timer Container with Glow -->
-        <FrameLayout
-            android:id="@+id/timerContainer"
-            android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="16dp"
+        android:animateLayoutChanges="true">
+        <Space
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintWidth_max="280dp"
-            app:layout_constraintWidth_percent="0.7"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/timer_glow_background">
-
-            <!-- Default Timer (fallback) -->
-            <TextView
-                android:id="@+id/timerCountdown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="00:25"
-                android:textSize="64sp"
-                android:textStyle="bold"
-                android:textColor="@color/textPrimary"
-                android:fontFamily="sans-serif-thin"
-                android:maxLines="1"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="36sp"
-                android:autoSizeMaxTextSize="64sp"/>
-
-        </FrameLayout>
-
-        <!-- Motivational Quote / Message -->
-        <TextView
-            android:id="@+id/lockscreenMessage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Stay focused, stay productive!"
-            android:textSize="20sp"
-            android:textColor="@color/textSecondary"
-            android:fontFamily="sans-serif-light"
-            android:lineSpacingMultiplier="1.3"
-            android:gravity="center"
-            android:maxLines="3"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintTop_toBottomOf="@id/timerContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <!-- Hidden Unlock Arrow -->
-        <ImageView
-            android:id="@+id/unlockArrow"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_expand_more"
-            android:background="@drawable/glass_card_inner"
-            android:padding="8dp"
-            android:contentDescription="Show unlock options"
-            android:alpha="0.5"
-            app:layout_constraintTop_toBottomOf="@id/lockscreenMessage"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="32dp"/>
-
-        <!-- Unlock & Extend Buttons (Initially Hidden) -->
+            android:layout_weight="1" />
         <LinearLayout
-            android:id="@+id/unlockExtendButtonContainer"
-            android:layout_width="wrap_content"
+            android:id="@+id/mainContentContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/unlockArrow"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            android:alpha="0.0">
-
-            <Button
-                android:id="@+id/unlockPromptButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Unlock"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:background="@drawable/glass_button_background"
-                android:textColor="@color/white"
-                android:elevation="8dp" />
-
-            <Space
-                android:layout_width="16dp"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:id="@+id/extendLockButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Extend"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:background="@drawable/glass_button_background"
-                android:textColor="@color/white"
-                android:elevation="8dp" />
-        </LinearLayout>
-
-        <!-- PIN Input (Initially Hidden) -->
-        <LinearLayout
-            android:id="@+id/unlockInputsContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
             android:orientation="vertical"
-            android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/unlockArrow"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="24dp">
-
-            <!-- PIN Input with Eye Toggle -->
-            <LinearLayout
+            android:gravity="center_horizontal">
+            <FrameLayout
+                android:id="@+id/timerContainer"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/pin_input_background"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:layout_marginBottom="20dp">
-
-                <EditText
-                    android:id="@+id/pinInput"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:hint="Enter 4-digit PIN"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/textHint"
-                    android:inputType="numberPassword"
-                    android:maxLength="4"
-                    android:background="@null"
-                    android:padding="0dp"
-                    android:textSize="24sp"
-                    android:gravity="center"
-                    android:textCursorDrawable="@null"
-                    android:letterSpacing="0.15"/>
-
-                <ImageView
-                    android:id="@+id/pinVisibilityToggle"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_eye"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
-                    android:contentDescription="Toggle PIN visibility"
-                    android:alpha="0.8"/>
-
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/unlockButton"
-                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_marginTop="16dp">
+                <TextView
+                    android:id="@+id/timerCountdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="00:25"
+                    android:textSize="64sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:fontFamily="sans-serif-thin"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="36sp"
+                    android:autoSizeMaxTextSize="64sp" />
+            </FrameLayout>
+            <TextView
+                android:id="@+id/lockscreenMessage"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Confirm Unlock"
+                android:text="Stay focused, stay productive!"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:background="@drawable/glass_button_background"
-                android:textColor="@color/white"
-                android:elevation="8dp"/>
-
-        </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Parent Apps Container with Buffer Space for Arrow -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/parentAppsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/mainContentContainer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.35">
-
-        <!-- Apps RecyclerView (Initially Hidden) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/defaultAppsRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:minHeight="140dp"
-            android:nestedScrollingEnabled="true"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="40dp"/>
-
-        <!-- No Apps Message (Hidden by default) -->
-        <LinearLayout
-            android:id="@+id/noAppsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="24dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="20dp">
-
+                android:textColor="@color/textSecondary"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingMultiplier="1.3"
+                android:gravity="center"
+                android:maxLines="3"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
             <ImageView
+                android:id="@+id/unlockArrow"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/ic_apps"
-                android:alpha="0.4"
-                app:tint="@color/textSecondary"
-                android:layout_marginBottom="16dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
+                android:src="@drawable/ic_expand_more"
+                android:background="@drawable/glass_card_inner"
+                android:padding="8dp"
+                android:contentDescription="Show unlock options"
+                android:alpha="1"
+                android:layout_marginTop="16dp" />
+            <LinearLayout
+                android:id="@+id/unlockExtendButtonContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No Apps Allowed"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/textPrimary"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="All apps are currently blocked.\nConfigure allowed apps in Settings."
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
+                android:orientation="horizontal"
                 android:gravity="center"
-                android:lineSpacingExtra="2dp"/>
-
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                android:alpha="0.0">
+                <Button
+                    android:id="@+id/unlockPromptButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Unlock"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:background="@drawable/glass_button_background"
+                    android:textColor="@color/white"
+                    android:elevation="0dp"
+                    android:layout_weight="1" />
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content" />
+                <Button
+                    android:id="@+id/extendLockButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Extend"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:background="@drawable/glass_button_background"
+                    android:textColor="@color/white"
+                    android:elevation="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/unlockInputsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginTop="24dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/pin_input_background"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:layout_marginBottom="20dp">
+                    <EditText
+                        android:id="@+id/pinInput"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:hint="Enter 4-digit PIN"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/textHint"
+                        android:inputType="numberPassword"
+                        android:maxLength="4"
+                        android:background="@null"
+                        android:padding="0dp"
+                        android:textSize="24sp"
+                        android:gravity="center"
+                        android:textCursorDrawable="@null"
+                        android:letterSpacing="0.15" />
+                    <ImageView
+                        android:id="@+id/pinVisibilityToggle"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_eye"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="4dp"
+                        android:contentDescription="Toggle PIN visibility"
+                        android:alpha="0.8" />
+                </LinearLayout>
+                <Button
+                    android:id="@+id/unlockButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Confirm Unlock"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:background="@drawable/glass_button_background"
+                    android:textColor="@color/white"
+                    android:elevation="8dp" />
+            </LinearLayout>
         </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Expand Button - Independent, Always Visible at Bottom Center -->
-    <LinearLayout
-        android:id="@+id/expandButtonContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="12dp"
-        android:paddingBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/expandAppsButton"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/ic_expand_more"
-            android:background="@drawable/circular_button"
-            android:padding="10dp"
-            android:contentDescription="Show apps"
-            android:alpha="0.9"/>
-
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <LinearLayout
+            android:id="@+id/parentAppsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/defaultAppsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"
+                android:layout_marginTop="8dp" />
+            <LinearLayout
+                android:id="@+id/noAppsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:layout_marginTop="20dp">
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_apps"
+                    android:alpha="0.4"
+                    app:tint="@color/textSecondary"
+                    android:layout_marginBottom="16dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No Apps Allowed"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginBottom="8dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All apps are currently blocked.\nConfigure allowed apps in Settings."
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/expandButtonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="12dp"
+            android:paddingBottom="0dp">
+            <ImageView
+                android:id="@+id/expandAppsButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_expand_more"
+                android:rotation="180"
+                android:background="@drawable/circular_button"
+                android:padding="10dp"
+                android:contentDescription="@string/show_allowed_apps"
+                android:alpha="0.9" />
+        </LinearLayout>
     </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

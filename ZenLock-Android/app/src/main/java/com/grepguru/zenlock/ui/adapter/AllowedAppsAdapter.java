@@ -2,21 +2,25 @@ package com.grepguru.zenlock.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.model.AppModel;
+import com.grepguru.zenlock.ui.layout.AllowedAppsGrid;
 import java.util.List;
 
+/** Each recycled item is a centered row of up to four equal-width app buttons. */
 public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.ViewHolder> {
-    private List<AppModel> allowedApps;
-    private Context context;
+    private final List<AppModel> allowedApps;
+    private final Context context;
     private OnAppLaunchListener onAppLaunchListener;
 
     public interface OnAppLaunchListener {
@@ -35,42 +39,65 @@ public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_allowed_app, parent, false);
-        return new ViewHolder(view);
+        LinearLayout row = new LinearLayout(parent.getContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.TOP);
+        row.setWeightSum(AllowedAppsGrid.COLUMNS);
+        row.setLayoutParams(new RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return new ViewHolder(row);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        AppModel app = allowedApps.get(position);
-        holder.appIcon.setImageDrawable(app.getIcon());
-        holder.appName.setText(app.getAppName());
+    public void onBindViewHolder(@NonNull ViewHolder holder, int row) {
+        int count = AllowedAppsGrid.itemsInRow(allowedApps.size(), row);
+        float sideWeight = AllowedAppsGrid.sideWeight(allowedApps.size(), row);
+        holder.leading.setLayoutParams(new LinearLayout.LayoutParams(0, 0, sideWeight));
+        holder.trailing.setLayoutParams(new LinearLayout.LayoutParams(0, 0, sideWeight));
+        for (int column = 0; column < AllowedAppsGrid.COLUMNS; column++) {
+            View cell = holder.cells[column];
+            cell.setVisibility(column < count ? View.VISIBLE : View.GONE);
+            cell.setOnClickListener(null);
+            if (column >= count) continue;
+            AppModel app = allowedApps.get(row * AllowedAppsGrid.COLUMNS + column);
+            ((ImageView) cell.findViewById(R.id.appIcon)).setImageDrawable(app.getIcon());
+            ((TextView) cell.findViewById(R.id.appName)).setText(app.getAppName());
+            cell.setContentDescription(app.getAppName());
+            cell.setOnClickListener(v -> launch(app));
+        }
+    }
 
-        holder.itemView.setOnClickListener(v -> {
-            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
-            if (launchIntent != null) {
-                if (onAppLaunchListener != null) {
-                    onAppLaunchListener.onAppLaunching();
-                }
-                context.startActivity(launchIntent);
-            } else {
-                Toast.makeText(context, "Cannot open " + app.getAppName(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void launch(AppModel app) {
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(app.getPackageName());
+        try {
+            if (intent == null) throw new ActivityNotFoundException();
+            context.startActivity(intent);
+            if (onAppLaunchListener != null) onAppLaunchListener.onAppLaunching();
+        } catch (ActivityNotFoundException | SecurityException e) {
+            Toast.makeText(context, context.getString(R.string.cannot_open_app, app.getAppName()), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public int getItemCount() {
-        return allowedApps.size();
+        return AllowedAppsGrid.rowCount(allowedApps.size());
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView appIcon;
-        TextView appName;
+        final View leading;
+        final View trailing;
+        final View[] cells = new View[AllowedAppsGrid.COLUMNS];
 
-        public ViewHolder(View itemView) {
-            super(itemView);
-            appIcon = itemView.findViewById(R.id.appIcon);
-            appName = itemView.findViewById(R.id.appName);
+        ViewHolder(LinearLayout row) {
+            super(row);
+            leading = new View(row.getContext());
+            trailing = new View(row.getContext());
+            row.addView(leading, new LinearLayout.LayoutParams(0, 0));
+            for (int i = 0; i < cells.length; i++) {
+                cells[i] = LayoutInflater.from(row.getContext()).inflate(R.layout.item_allowed_app, row, false);
+                row.addView(cells[i], new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            }
+            row.addView(trailing, new LinearLayout.LayoutParams(0, 0));
         }
     }
 }

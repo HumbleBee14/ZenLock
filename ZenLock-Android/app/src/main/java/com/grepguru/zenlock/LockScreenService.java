@@ -21,7 +21,7 @@ public class LockScreenService extends Service {
     
     private static final String TAG = "LockScreenService";
     private static final String CHANNEL_ID = "LOCK_SCREEN_SERVICE_CHANNEL";
-    private static final int NOTIFICATION_ID = 1001;
+    public static final int NOTIFICATION_ID = 1002;
     
     // Intent extras
     public static final String EXTRA_SCHEDULE_NAME = "schedule_name";
@@ -55,6 +55,8 @@ public class LockScreenService extends Service {
                 
                 // Launch LockScreenActivity using full screen intent
                 launchLockScreenActivity(scheduleName, scheduleId, durationMinutes);
+                // Keep a tappable fallback when Android suppresses a background launch.
+                stopForeground(STOP_FOREGROUND_DETACH);
                 
             } catch (SecurityException e) {
                 Log.e(TAG, "SecurityException starting foreground service: " + e.getMessage());
@@ -111,7 +113,7 @@ public class LockScreenService extends Service {
     private Notification createFocusSessionNotification(String scheduleName, int scheduleId, int durationMinutes) {
         // Create intent to launch LockScreenActivity
         Intent lockIntent = new Intent(this, LockScreenActivity.class);
-        lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         lockIntent.putExtra("from_schedule", true);
         lockIntent.putExtra("schedule_name", scheduleName);
         lockIntent.putExtra("schedule_id", scheduleId);
@@ -140,6 +142,7 @@ public class LockScreenService extends Service {
             .setContentText(scheduleName + " - " + durationMinutes + " minutes")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setTimeoutAfter(Math.max(1, durationMinutes * 60_000L))
             .setAutoCancel(false)
             .setOngoing(true)
             .setContentIntent(contentPendingIntent)
@@ -155,7 +158,7 @@ public class LockScreenService extends Service {
     private void launchLockScreenActivity(String scheduleName, int scheduleId, int durationMinutes) {
         try {
             Intent lockIntent = new Intent(this, LockScreenActivity.class);
-            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             lockIntent.putExtra("from_schedule", true);
             lockIntent.putExtra("schedule_name", scheduleName);
             lockIntent.putExtra("schedule_id", scheduleId);

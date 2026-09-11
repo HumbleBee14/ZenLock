@@ -52,16 +52,10 @@ public class WhitelistAdapter extends RecyclerView.Adapter<WhitelistAdapter.View
         holder.appIcon.setImageDrawable(app.getIcon());
         holder.appName.setText(app.getAppName());
         
-        // Show package name for system apps
-        if (app.getPackageName().startsWith("com.android.") || 
-            app.getPackageName().startsWith("com.google.android.") ||
-            app.getPackageName().startsWith("com.samsung.")) {
-            holder.appPackage.setText(app.getPackageName());
-            holder.appPackage.setVisibility(View.VISIBLE);
-        } else {
-            holder.appPackage.setVisibility(View.GONE);
-        }
-        
+        holder.appPackage.setVisibility(View.GONE);
+        holder.appCheckBox.setContentDescription(app.getAppName());
+        holder.itemView.setOnClickListener(v -> holder.appCheckBox.toggle());
+
         holder.appCheckBox.setOnCheckedChangeListener(null);
         
         boolean isCurrentlySelected = selectedApps.contains(app.getPackageName());

@@ -30,12 +30,18 @@ public class ScheduleTriggerReceiver extends BroadcastReceiver {
         Log.d(TAG, "Schedule trigger received");
         
         // Get schedule details from intent
+        if (intent == null) return;
         int scheduleId = intent.getIntExtra(EXTRA_SCHEDULE_ID, -1);
         String scheduleName = intent.getStringExtra(EXTRA_SCHEDULE_NAME);
         int durationMinutes = intent.getIntExtra(EXTRA_DURATION_MINUTES, 0);
 
         ScheduleManager scheduleManager = new ScheduleManager(context);
         ScheduleModel schedule = scheduleId != -1 ? scheduleManager.getScheduleById(scheduleId) : null;
+
+        if (schedule == null || !schedule.isEnabled()) return;
+        // Read the saved schedule instead of potentially stale PendingIntent extras.
+        scheduleName = schedule.getName();
+        durationMinutes = schedule.getFocusDurationMinutes();
 
         // Re-arm the next occurrence FIRST so no early return below can break the chain
         if (schedule != null && schedule.isEnabled()

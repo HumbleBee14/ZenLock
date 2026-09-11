@@ -84,6 +84,10 @@ public class PartnerContactActivity extends AppCompatActivity {
         countryCodeInput = findViewById(R.id.countryCodeInput);
         partnerEmailInput = findViewById(R.id.partnerEmailInput);
         saveButton = findViewById(R.id.saveButton);
+        TextView playStoreSmsNote = findViewById(R.id.playStoreSmsNote);
+        playStoreSmsNote.setText(androidx.core.text.HtmlCompat.fromHtml(getString(R.string.play_store_sms_note), androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY));
+        playStoreSmsNote.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        playStoreSmsNote.setVisibility("playstore".equals(BuildConfig.FLAVOR) ? View.VISIBLE : View.GONE);
         testOtpButton = findViewById(R.id.testOtpButton);
         permissionWarning = findViewById(R.id.permissionWarning);
 

@@ -15,7 +15,10 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp"
+            android:paddingTop="8dp"
+    android:paddingBottom="24dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
             tools:context=".fragments.HomeFragment">
 
     <!-- Welcome Section -->
@@ -23,23 +26,13 @@
         android:id="@+id/welcomeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Focus Time"
+        android:text="Time to focus"
         style="@style/ModernText.PageTitle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="0dp"/>
 
-    <TextView
-        android:id="@+id/welcomeSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set your focus duration and lock distractions"
-        style="@style/ModernText.Caption"
-        app:layout_constraintTop_toBottomOf="@id/welcomeTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="6dp"/>
 
     <!-- Timer Selection Card -->
     <androidx.cardview.widget.CardView
@@ -49,8 +42,8 @@
         android:layout_marginTop="32dp"
         app:cardBackgroundColor="@color/surface"
         app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@id/welcomeSubtitle">
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/welcomeTitle">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -84,7 +77,7 @@
                     android:text="00:30"
                     android:textSize="64sp"
                     android:textColor="@color/primary"
-                    android:fontFamily="sans-serif-thin"
+                    android:fontFamily="sans-serif"
                     android:letterSpacing="-0.02"
                     android:layout_gravity="center"
                     android:maxLines="1"
@@ -396,15 +389,16 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/enableLockButton"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="56dp"
         android:text="Start Focus"
         android:textSize="17sp"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.04"
         android:textAllCaps="false"
-        android:background="@drawable/glassmorphic_button"
-        android:elevation="6dp"
+        app:backgroundTint="@color/primary"
+        app:cornerRadius="14dp"
+        android:elevation="0dp"
         app:icon="@drawable/ic_lock"
         app:iconGravity="textStart"
         app:iconTint="@color/white"
@@ -416,16 +410,15 @@
         android:layout_marginEnd="16dp"
         app:layout_constraintTop_toBottomOf="@id/startDelaySection"/>
 
-    <!-- Subtle hint text -->
     <TextView
         android:id="@+id/startFocusHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Long press to begin"
+        android:visibility="gone"
         android:textSize="12sp"
         android:textColor="@color/textSecondary"
         android:fontFamily="sans-serif"
-        android:alpha="0.7"
+        android:alpha="1"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/enableLockButton"
         app:layout_constraintStart_toStartOf="parent"

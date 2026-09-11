@@ -30,7 +30,7 @@ public class WhitelistManager {
         }
 
         // Always allow the ZenLock app itself
-        if ("com.grepguru.zenlock".equals(packageName)) {
+        if (context.getPackageName().equals(packageName)) {
             return true;
         }
         

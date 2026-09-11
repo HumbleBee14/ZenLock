@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import com.google.android.material.chip.Chip;
+import com.grepguru.zenlock.utils.WhitelistManager;
+import java.util.Locale;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
@@ -45,7 +46,7 @@ import java.util.Set;
 public class WhitelistActivity extends AppCompatActivity {
 
     // Configuration - Easy to modify
-    private static final int MAX_ADDITIONAL_APPS = 4;
+    private static final int MAX_ADDITIONAL_APPS = 8;
     
     // UI Components
     private RecyclerView recyclerView;
@@ -61,11 +62,9 @@ public class WhitelistActivity extends AppCompatActivity {
     private ImageView searchCloseIcon;
     private boolean isSearchVisible = false;
     
-    // Selected Apps Bar Components
-    private ImageView[] appIcons = new ImageView[4];
-    private CardView[] appSlots = new CardView[4];
-    private String[] selectedAppPackages = new String[4]; // Track which app is in which slot
-    
+    private LinearLayout selectedAppsContainer;
+    private boolean appsLoaded;
+
     // Data Collections
     private List<SelectableAppModel> systemApps = new ArrayList<>();
     private List<SelectableAppModel> userApps = new ArrayList<>();
@@ -88,6 +87,7 @@ public class WhitelistActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         if (isLockActive(this)) {
             Intent lockIntent = new Intent(this, LockScreenActivity.class);
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -96,7 +96,6 @@ public class WhitelistActivity extends AppCompatActivity {
             return;
         }
 
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_whitelist);
 
         initializeViews();
@@ -113,7 +112,11 @@ public class WhitelistActivity extends AppCompatActivity {
         if (clockPkg != null) deviceDefaultAppPackages.add(clockPkg);
 
         defaultApps = AppUtils.getMainDefaultApps(this); // This is still used for lock screen logic
-        loadUserSelections();
+        if (savedInstanceState != null && savedInstanceState.containsKey("selected_apps")) {
+            selectedApps.addAll(savedInstanceState.getStringArrayList("selected_apps"));
+        } else {
+            loadUserSelections();
+        }
 
         // Setup tabs
         setupTabs();
@@ -193,45 +196,13 @@ public class WhitelistActivity extends AppCompatActivity {
     }
 
     private void setupSelectedAppsBar() {
-        // Initialize app icon views and slots
-        appIcons[0] = findViewById(R.id.appIcon1);
-        appIcons[1] = findViewById(R.id.appIcon2);
-        appIcons[2] = findViewById(R.id.appIcon3);
-        appIcons[3] = findViewById(R.id.appIcon4);
-        
-        appSlots[0] = findViewById(R.id.appSlot1);
-        appSlots[1] = findViewById(R.id.appSlot2);
-        appSlots[2] = findViewById(R.id.appSlot3);
-        appSlots[3] = findViewById(R.id.appSlot4);
-        
-        // Set click listeners for app slots - clicking removes the app
-        for (int i = 0; i < 4; i++) {
-            final int index = i;
-            appSlots[i].setOnClickListener(v -> removeAppFromSlot(index));
-        }
+        selectedAppsContainer = findViewById(R.id.selectedAppsContainer);
     }
 
-    private void removeAppFromSlot(int slotIndex) {
-        String packageName = selectedAppPackages[slotIndex];
-        if (packageName != null) {
-            // Remove from selected apps
-            selectedApps.remove(packageName);
-            
-            // Clear the slot
-            selectedAppPackages[slotIndex] = null;
-            
-            // Update UI
-            updateSelectedAppsBar();
-            updateSaveButtonText();
-            
-            // Update the RecyclerView to reflect the change
-            WhitelistAdapter adapter = (WhitelistAdapter) recyclerView.getAdapter();
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-            }
-            
-            Toast.makeText(this, "App removed from whitelist", Toast.LENGTH_SHORT).show();
-        }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putStringArrayList("selected_apps", new ArrayList<>(selectedApps));
+        super.onSaveInstanceState(outState);
     }
 
     private void setupSearch() {
@@ -309,10 +280,10 @@ public class WhitelistActivity extends AppCompatActivity {
             filteredAppList.addAll(currentAppList);
         } else {
             // Filter apps based on search query
-            String lowerQuery = query.toLowerCase().trim();
+            String lowerQuery = query.toLowerCase(Locale.ROOT).trim();
             for (SelectableAppModel app : currentAppList) {
-                if (app.getAppName().toLowerCase().contains(lowerQuery) || 
-                    app.getPackageName().toLowerCase().contains(lowerQuery)) {
+                if (app.getAppName().toLowerCase(Locale.ROOT).contains(lowerQuery) ||
+                    app.getPackageName().toLowerCase(Locale.ROOT).contains(lowerQuery)) {
                     filteredAppList.add(app);
                 }
             }
@@ -326,55 +297,35 @@ public class WhitelistActivity extends AppCompatActivity {
     }
 
     private void updateSelectedAppsBar() {
-        View selectedAppsCard = findViewById(R.id.selectedAppsCard);
-        
-        // Show/hide the container with smooth animation
-        if (selectedApps.isEmpty()) {
-            if (selectedAppsCard.getVisibility() == View.VISIBLE) {
-                // Animate out
-                ObjectAnimator.ofFloat(selectedAppsCard, "alpha", 1f, 0f).setDuration(200).start();
-                selectedAppsCard.postDelayed(() -> selectedAppsCard.setVisibility(View.GONE), 200);
-            }
-        } else {
-            if (selectedAppsCard.getVisibility() == View.GONE) {
-                // Animate in
-                selectedAppsCard.setVisibility(View.VISIBLE);
-                selectedAppsCard.setAlpha(0f);
-                ObjectAnimator.ofFloat(selectedAppsCard, "alpha", 0f, 1f).setDuration(300).start();
-            }
-        }
-        
-        // Clear all slots first - reset to placeholder state
-        for (int i = 0; i < 4; i++) {
-            selectedAppPackages[i] = null;
-            appIcons[i].setImageResource(R.drawable.ic_add_placeholder);
-            appIcons[i].setPadding(12, 12, 12, 12);
-            appIcons[i].setScaleType(ImageView.ScaleType.CENTER);
-            appSlots[i].setCardBackgroundColor(getColor(R.color.darkBackground)); // Show placeholder background
-            appSlots[i].setClickable(false); // Make non-clickable when empty
-        }
-        
-        // Fill slots with selected apps (max 4 apps using all 4 slots)
-        int slotIndex = 0;
-        for (String packageName : selectedApps) {
-            if (slotIndex >= 4) break; // Safety check (max 4 apps)
-            
-            SelectableAppModel appModel = appModelMap.get(packageName);
-            if (appModel != null) {
-                selectedAppPackages[slotIndex] = packageName;
-                appIcons[slotIndex].setImageDrawable(appModel.getIcon());
-                appIcons[slotIndex].setPadding(4, 4, 4, 4); // Small padding to show full icon
-                appIcons[slotIndex].setScaleType(ImageView.ScaleType.FIT_CENTER);
-                appSlots[slotIndex].setCardBackgroundColor(android.graphics.Color.TRANSPARENT); // Hide placeholder background
-                appSlots[slotIndex].setClickable(true); // Make clickable when has app
-                slotIndex++;
-            }
+        findViewById(R.id.selectedAppsCard).setVisibility(selectedApps.isEmpty() ? View.GONE : View.VISIBLE);
+        selectedAppsContainer.removeAllViews();
+        List<String> packages = new ArrayList<>(selectedApps);
+        Collections.sort(packages);
+        for (String packageName : packages) {
+            SelectableAppModel model = appModelMap.get(packageName);
+            Chip chip = new Chip(this);
+            chip.setText(model == null ? packageName : model.getAppName());
+            chip.setTextColor(getColor(R.color.textPrimary));
+            chip.setChipBackgroundColorResource(R.color.surface);
+            chip.setCloseIconTintResource(R.color.textSecondary);
+            if (model != null) chip.setChipIcon(model.getIcon());
+            chip.setChipIconVisible(model != null);
+            chip.setCloseIconVisible(true);
+            chip.setCloseIconContentDescription(getString(R.string.remove_allowed_app, chip.getText()));
+            chip.setOnCloseIconClickListener(v -> {
+                selectedApps.remove(packageName);
+                updateSelectedAppsBar();
+                updateSaveButtonText();
+                RecyclerView.Adapter<?> adapter = recyclerView.getAdapter();
+                if (adapter != null) adapter.notifyDataSetChanged();
+            });
+            selectedAppsContainer.addView(chip);
         }
     }
 
     private void setupTabs() {
         appTabs.addTab(appTabs.newTab().setText("System"));
-        appTabs.addTab(appTabs.newTab().setText("User"));
+        appTabs.addTab(appTabs.newTab().setText("Installed"));
         
         appTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -420,102 +371,67 @@ public class WhitelistActivity extends AppCompatActivity {
         loadingContainer.setVisibility(android.view.View.VISIBLE);
         recyclerView.setVisibility(android.view.View.GONE);
         
-        // Load apps in background thread to prevent UI blocking
+        saveButton.setEnabled(false);
         new Thread(() -> {
-            loadAndOrganizeApps();
-            
-            // Update UI on main thread
-            runOnUiThread(() -> {
-                // Hide loading animation and show app list
-                loadingContainer.setVisibility(android.view.View.GONE);
-                recyclerView.setVisibility(android.view.View.VISIBLE);
-                
-                // Initialize filtered list with current tab
-                filteredAppList.clear();
-                filteredAppList.addAll(currentAppList);
-                adapter.notifyDataSetChanged();
-                
-                // Update selected apps bar after loading
-                updateSelectedAppsBar();
-                
-                // Optional: Show completion message
-                Toast.makeText(this, "Loaded " + (systemApps.size() + userApps.size()) + " apps", Toast.LENGTH_SHORT).show();
-            });
-        }).start();
-    }
-    
-    private void loadAndOrganizeApps() {
-        PackageManager pm = getPackageManager();
-        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> resolvedApps = pm.queryIntentActivities(mainIntent, 0);
-        
-        // Clear existing lists
-        userApps.clear();
-        systemApps.clear();
-        appModelMap.clear();
-
-        for (ResolveInfo resolveInfo : resolvedApps) {
-            String packageName = resolveInfo.activityInfo.packageName;
-            
-            // Skip default apps (Phone, Calendar, Clock) - they don't count toward quota
-            if (isDefaultApp(packageName) || "com.grepguru.zenlock".equals(packageName)) {
-                continue;
-            }
-
-            try {
-                ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
-                String appName = resolveInfo.activityInfo.loadLabel(pm).toString();
-                boolean isSelected = selectedApps.contains(packageName);
-                
-                Drawable icon;
+            // Build local collections; the worker never mutates UI-owned lists or selections.
+            List<SelectableAppModel> loadedSystem = new ArrayList<>();
+            List<SelectableAppModel> loadedUser = new ArrayList<>();
+            Map<String, SelectableAppModel> loadedModels = new HashMap<>();
+            PackageManager pm = getPackageManager();
+            Intent mainIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+            for (ResolveInfo info : pm.queryIntentActivities(mainIntent, 0)) {
+                String packageName = info.activityInfo.packageName;
+                if (isDefaultApp(packageName) || getPackageName().equals(packageName)
+                        || WhitelistManager.isSecurityRisk(packageName)
+                        || AppUtils.isLauncherPackage(this, packageName)
+                        || loadedModels.containsKey(packageName)) continue;
                 try {
-                    icon = pm.getApplicationIcon(packageName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    icon = getDrawable(R.drawable.default_app_icon);
+                    ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+                    SelectableAppModel model = new SelectableAppModel(packageName,
+                            pm.getApplicationLabel(appInfo).toString(), false, false,
+                            pm.getApplicationIcon(appInfo));
+                    loadedModels.put(packageName, model);
+                    ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ? loadedUser : loadedSystem).add(model);
+                } catch (PackageManager.NameNotFoundException ignored) {
+                    // An app may be removed while the picker is loading.
                 }
-
-                SelectableAppModel appModel = new SelectableAppModel(packageName, appName, false, isSelected, icon);
-                appModelMap.put(packageName, appModel); // Store for quick lookup
-                
-                // Categorize: User-installed vs System apps
-                if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    userApps.add(appModel);
-                } else {
-                    systemApps.add(appModel);
-                }
-                
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
             }
-        }
-
-        // Sort both lists alphabetically
-        Comparator<SelectableAppModel> alphabetical = (a, b) -> a.getAppName().compareToIgnoreCase(b.getAppName());
-        Collections.sort(userApps, alphabetical);
-        Collections.sort(systemApps, alphabetical);
-
-        // Initialize current list with system apps (default tab)
-        currentAppList.clear();
-        currentAppList.addAll(systemApps);
+            Comparator<SelectableAppModel> alphabetical = (a, b) -> a.getAppName().compareToIgnoreCase(b.getAppName());
+            Collections.sort(loadedUser, alphabetical);
+            Collections.sort(loadedSystem, alphabetical);
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                userApps = loadedUser;
+                systemApps = loadedSystem;
+                appModelMap = loadedModels;
+                selectedApps.retainAll(loadedModels.keySet());
+                appsLoaded = true;
+                loadingContainer.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                switchTab(appTabs.getSelectedTabPosition());
+                updateSelectedAppsBar();
+                updateSaveButtonText();
+                saveButton.setEnabled(true);
+            });
+        }, "allowed-app-loader").start();
     }
-    
+
     private boolean isDefaultApp(String packageName) {
         return deviceDefaultAppPackages.contains(packageName);
     }
     
     private void updateSaveButtonText() {
-        int selectedCount = selectedApps.size();
-        if (selectedCount == 0) {
-            saveButton.setText("Save (0/" + MAX_ADDITIONAL_APPS + ")");
-        } else {
-            saveButton.setText("Save (" + selectedCount + "/" + MAX_ADDITIONAL_APPS + ")");
-        }
+        saveButton.setText(getString(R.string.save_allowed_apps, selectedApps.size(), MAX_ADDITIONAL_APPS));
     }
 
 
     private void saveWhitelist() {
+        if (!appsLoaded || selectedApps.size() > MAX_ADDITIONAL_APPS) return;
+        if (isLockActive(this)) {
+            startActivity(new Intent(this, LockScreenActivity.class));
+            finish();
+            return;
+        }
         Set<String> finalWhitelist = new HashSet<>();
         finalWhitelist.addAll(defaultApps);
         finalWhitelist.addAll(selectedApps);
@@ -525,7 +441,7 @@ public class WhitelistActivity extends AppCompatActivity {
         editor.putStringSet("whitelisted_apps", finalWhitelist);
         editor.apply();
 
-        Toast.makeText(this, "Whitelist Updated! Selected " + selectedApps.size() + " additional apps.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.allowed_apps_saved), Toast.LENGTH_SHORT).show();
         finish();
     }
 }
