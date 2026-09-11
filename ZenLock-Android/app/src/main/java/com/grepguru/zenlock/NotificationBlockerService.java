@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import android.app.Notification;
 import android.content.SharedPreferences;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -45,6 +46,8 @@ public class NotificationBlockerService extends NotificationListenerService {
         String packageName = sbn.getPackageName();
         if (packageName == null) return;
 
+        if (isCallNotification(sbn)) return;
+
         if (!shouldBlockNotification(packageName)) return;
 
         try {
@@ -65,6 +68,7 @@ public class NotificationBlockerService extends NotificationListenerService {
             if (activeNotifications == null) return;
 
             for (StatusBarNotification sbn : activeNotifications) {
+                if (isCallNotification(sbn)) continue;
                 String pkg = sbn.getPackageName();
                 if (pkg != null && shouldBlockNotification(pkg)) {
                     cancelNotification(sbn.getKey());
@@ -91,12 +95,29 @@ public class NotificationBlockerService extends NotificationListenerService {
 
         if ("android".equals(packageName) || "com.android.systemui".equals(packageName)) return false;
 
+        if (isTelephonyPackage(packageName)) return false;
+
         if (isEssentialApp(packageName, prefs)) return false;
 
         Set<String> whitelistedApps = prefs.getStringSet("whitelisted_apps", null);
         if (whitelistedApps != null && whitelistedApps.contains(packageName)) return false;
 
         return true;
+    }
+
+    private boolean isCallNotification(StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
+        if (notification == null) return false;
+        if (Notification.CATEGORY_CALL.equals(notification.category)) return true;
+        return notification.fullScreenIntent != null;
+    }
+
+    private boolean isTelephonyPackage(String packageName) {
+        return packageName.equals("com.android.phone") ||
+            packageName.contains("dialer") ||
+            packageName.contains("incallui") ||
+            packageName.contains("telecom") ||
+            packageName.contains("telephony");
     }
 
     private boolean isEssentialApp(String packageName, SharedPreferences prefs) {
