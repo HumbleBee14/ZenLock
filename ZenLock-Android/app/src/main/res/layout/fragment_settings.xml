@@ -114,6 +114,42 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/permissionsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_accessibility"
+                        app:tint="@color/textSecondary"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Permissions" />
+
+                    <TextView
+                        style="@style/ModernText.Body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Permissions"
+                        android:textColor="@color/textPrimary" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/textSecondary"
+                        android:contentDescription="Open" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Background Reliability Section -->

@@ -27,6 +27,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
+import com.grepguru.zenlock.permissions.FeaturePermissions;
+import com.grepguru.zenlock.permissions.PermissionGate;
+
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.WhitelistActivity;
 
@@ -179,8 +182,8 @@ public class SettingsFragment extends Fragment {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("block_notifications", isChecked);
             editor.apply();
-            if (isChecked && !isNotificationListenerEnabled()) {
-                promptNotificationAccess();
+            if (isChecked) {
+                PermissionGate.ensure(requireActivity(), FeaturePermissions.notificationBlocking(), null);
             }
         });
 
@@ -198,6 +201,7 @@ public class SettingsFragment extends Fragment {
 
     private void setupListeners(View view) {
         View whitelistButton = view.findViewById(R.id.whitelistButton);
+        view.findViewById(R.id.permissionsRow).setOnClickListener(v -> PermissionGate.review(requireActivity()));
 
         // Feedback and Support Card Listeners
         View feedbackCard = view.findViewById(R.id.feedbackCard);
@@ -460,13 +464,6 @@ public class SettingsFragment extends Fragment {
             updateBatteryExemptionState(getView());
         }
 
-        // Check if notification blocking is enabled but permission not granted (prompt once)
-        if (preferences.getBoolean("block_notifications", true)
-                && !isNotificationListenerEnabled()
-                && !preferences.getBoolean("notification_access_prompted", false)) {
-            preferences.edit().putBoolean("notification_access_prompted", true).apply();
-            promptNotificationAccess();
-        }
     }
     
     private void showPinSetupDialog() {
@@ -600,29 +597,7 @@ public class SettingsFragment extends Fragment {
     }
     
 
-    /**
-     * Check if ZenLock has notification listener access
-     */
-    private boolean isNotificationListenerEnabled() {
-        String enabledListeners = android.provider.Settings.Secure.getString(
-                requireContext().getContentResolver(), "enabled_notification_listeners");
-        return enabledListeners != null && enabledListeners.contains(requireContext().getPackageName());
-    }
 
-    /**
-     * Prompt user to enable notification access for ZenLock
-     */
-    private void promptNotificationAccess() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Notification Access Required")
-                .setMessage("To block notifications from other apps during focus sessions, ZenLock needs Notification Access permission.\n\nPlease enable ZenLock in the next screen.")
-                .setPositiveButton("Open Settings", (dialog, which) -> {
-                    Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
 
     /**
      * Opens email app for sending feedback to developer

@@ -29,6 +29,8 @@ import com.grepguru.zenlock.utils.ScheduleManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
 import com.grepguru.zenlock.CreateScheduleDialog;
+import com.grepguru.zenlock.permissions.FeaturePermissions;
+import com.grepguru.zenlock.permissions.PermissionGate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,40 +93,48 @@ public class ScheduleFragment extends Fragment {
         scheduleAdapter = new ScheduleAdapter(schedules, new ScheduleAdapter.ScheduleListener() {
             @Override
             public void onToggleSchedule(ScheduleModel schedule) {
-                boolean wasEnabled = schedule.isEnabled();
-                scheduleManager.toggleSchedule(schedule.getId());
-                
-                // Get updated schedule
-                ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
-                if (updatedSchedule != null) {
-                    if (updatedSchedule.isEnabled()) {
-                        // Schedule was enabled, activate it
-                        scheduleActivator.scheduleSchedule(updatedSchedule);
-                        Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
-                        com.grepguru.zenlock.utils.BatteryOptimizationManager.showScheduleReliabilityDialogIfNeeded(requireContext());
-                    } else {
-                        // Schedule was disabled, cancel it
-                        scheduleActivator.cancelSchedule(updatedSchedule);
-                        Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
-                    }
+                if (schedule.isEnabled()) {
+                    toggleSchedule(schedule);
+                } else {
+                    PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+                        if (isAdded()) toggleSchedule(schedule);
+                    });
                 }
-                
-                loadSchedules();
             }
-            
+
             @Override
             public void onEditSchedule(ScheduleModel schedule) {
                 showEditScheduleDialog(schedule);
             }
-            
+
             @Override
             public void onDeleteSchedule(ScheduleModel schedule) {
                 showDeleteConfirmation(schedule);
             }
         });
-        
+
         schedulesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         schedulesRecyclerView.setAdapter(scheduleAdapter);
+    }
+
+    private void toggleSchedule(ScheduleModel schedule) {
+        scheduleManager.toggleSchedule(schedule.getId());
+        
+        // Get updated schedule
+        ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
+        if (updatedSchedule != null) {
+            if (updatedSchedule.isEnabled()) {
+                // Schedule was enabled, activate it
+                scheduleActivator.scheduleSchedule(updatedSchedule);
+                Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+            } else {
+                // Schedule was disabled, cancel it
+                scheduleActivator.cancelSchedule(updatedSchedule);
+                Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+            }
+        }
+        
+        loadSchedules();
     }
     
     private void setupCreateButton() {
@@ -166,11 +176,12 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void showCreateScheduleDialog() {
-        // Check permissions before allowing schedule creation
-        if (!checkSchedulePermissions()) {
-            return; // Don't show dialog if permissions not granted
-        }
-        
+        PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+            if (isAdded()) openCreateScheduleDialog();
+        });
+    }
+
+    private void openCreateScheduleDialog() {
         CreateScheduleDialog dialog = new CreateScheduleDialog();
         dialog.setScheduleListener(new CreateScheduleDialog.ScheduleListener() {
             @Override
@@ -201,7 +212,6 @@ public class ScheduleFragment extends Fragment {
                 if (newSchedule.isEnabled()) {
                     scheduleActivator.scheduleSchedule(newSchedule);
                     Toast.makeText(requireContext(), "Schedule created and activated: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
-                    com.grepguru.zenlock.utils.BatteryOptimizationManager.showScheduleReliabilityDialogIfNeeded(requireContext());
                 } else {
                     Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
                 }
@@ -258,64 +268,6 @@ public class ScheduleFragment extends Fragment {
         loadSchedules(); // Refresh when returning to fragment
     }
 
-    private boolean checkSchedulePermissions() {
-        // Check accessibility permission first (most critical)
-        if (!isAccessibilityPermissionGranted()) {
-            showSchedulePermissionBanner("Accessibility Service", "ZenLock needs Accessibility Service permission to enforce screen locking during focus sessions. Without this, users can bypass the lock screen.");
-            return false;
-        }
-        
-        // Check overlay permission (Display over other apps)
-        if (!Settings.canDrawOverlays(requireContext())) {
-            showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to display the lock screen over other apps during scheduled focus sessions.");
-            return false;
-        }
-        
-        // Check exact alarm permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            android.app.AlarmManager alarmManager = (android.app.AlarmManager) requireContext().getSystemService(android.content.Context.ALARM_SERVICE);
-            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                showSchedulePermissionBanner("Exact alarms", "ZenLock needs this permission to ensure your focus sessions begin at the scheduled time.");
-                return false;
-            }
-        }
-        
-        return true;
-    }
     
-    private boolean isAccessibilityPermissionGranted() {
-        android.view.accessibility.AccessibilityManager am = (android.view.accessibility.AccessibilityManager) requireContext().getSystemService(android.content.Context.ACCESSIBILITY_SERVICE);
-        if (am != null) {
-            for (android.accessibilityservice.AccessibilityServiceInfo service : am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
-                if (service.getId().contains(requireContext().getPackageName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     
-    private void showSchedulePermissionBanner(String permissionName, String reason) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Permission Required for Schedules")
-                .setMessage(permissionName + " permission is required for scheduled focus sessions.\n\n" + reason)
-                .setPositiveButton("Grant Permission", (dialog, which) -> {
-                    if (permissionName.contains("Accessibility Service")) {
-                        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                        startActivity(intent);
-                        Toast.makeText(requireContext(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
-                    } else if (permissionName.contains("Display over other apps")) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
-                        startActivity(intent);
-                    } else if (permissionName.contains("Exact alarms")) {
-                        // Open exact alarm permission settings
-                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 }
