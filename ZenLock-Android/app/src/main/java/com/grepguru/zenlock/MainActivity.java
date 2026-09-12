@@ -16,7 +16,6 @@ import com.grepguru.zenlock.utils.NotificationPermissionManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.utils.AlarmPermissionManager;
 import com.grepguru.zenlock.utils.AnalyticsManager;
-import com.grepguru.zenlock.utils.ForegroundServicePermissionManager;
 
 public class MainActivity extends AppCompatActivity {
     

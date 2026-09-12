@@ -233,7 +233,6 @@ public class LockScreenActivity extends AppCompatActivity {
         appsRecycler.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(
                 this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
         appsRecycler.setNestedScrollingEnabled(false);
-        appsRecycler.setHasFixedSize(true);
         appsRecycler.setItemViewCacheSize(12);
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);

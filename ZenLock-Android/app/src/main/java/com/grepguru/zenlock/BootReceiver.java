@@ -47,7 +47,15 @@ public class BootReceiver extends BroadcastReceiver {
                 // Bring up lock screen activity
                 Intent lockIntent = new Intent(context, LockScreenActivity.class);
                 lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                context.startActivity(lockIntent);
+                if (!com.grepguru.zenlock.utils.MiuiUtils.canStartActivityFromBackground(context)) {
+                    LockScreenLauncher.launchFromBlocker(context);
+                } else {
+                    try {
+                        context.startActivity(lockIntent);
+                    } catch (RuntimeException blocked) {
+                        LockScreenLauncher.launchFromBlocker(context);
+                    }
+                }
                 Log.d(TAG, "Lock session active after boot: started lock screen");
             } else if (isLocked && !autoRestart) {
                 // Clear lock if auto-restart is disabled

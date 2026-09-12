@@ -125,7 +125,6 @@ public class AppUtils {
         addIfInstalled(pm, allAllowed, "com.nubia.launcher"); // Nubia Launcher
         
         // Google Play Services (needed for core Android functionality)
-        addIfInstalled(pm, allAllowed, "com.android.vending"); // Google Play Store
         addIfInstalled(pm, allAllowed, "com.google.android.gms"); // Google Play Services
         
         // Keyboard apps (essential for any text input in allowed apps)
