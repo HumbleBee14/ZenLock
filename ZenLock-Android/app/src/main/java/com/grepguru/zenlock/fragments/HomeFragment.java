@@ -61,7 +61,6 @@ public class HomeFragment extends Fragment {
     private MaterialButton enableLockButton;
     private TextView selectedTimeDisplay;
     private TextView startFocusHint;
-    private TextView homeQuote;
     private TextView startDelayValue;
     private TextView startDelayLabel;
     private View rootContentView;
@@ -126,7 +125,6 @@ public class HomeFragment extends Fragment {
         // Initialize UI elements
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
         startFocusHint = view.findViewById(R.id.startFocusHint);
-        homeQuote = view.findViewById(R.id.homeQuote);
         startDelayValue = view.findViewById(R.id.startDelayValue);
         startDelayLabel = view.findViewById(R.id.startDelayLabel);
         timeDisplayContainer = view.findViewById(R.id.timeDisplayContainer);
@@ -1059,10 +1057,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        boolean quotesOn = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE).getBoolean("show_quotes", true);
-        String quote = quotesOn ? com.grepguru.zenlock.quotes.QuoteStore.random(requireContext()) : null;
-        homeQuote.setText(quote);
-        homeQuote.setVisibility(quote == null ? View.GONE : View.VISIBLE);
         // Enforce lock: if locked, redirect to lock screen
         SharedPreferences preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         boolean isLocked = preferences.getBoolean("isLocked", false);

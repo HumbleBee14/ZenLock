@@ -208,15 +208,6 @@
         <item name="android:tint">@color/textTertiary</item>
     </style>
 
-    <style name="Zen.NavLabel" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="android:textSize">11sp</item>
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-
-    <style name="Zen.NavLabel.Active">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-
     <style name="Zen.FactCard" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
