@@ -37,7 +37,7 @@ This project is open source to ensure transparency, encourage community contribu
 
 ### Platform-Specific Highlights
 - **Android**: SMS-based OTP accountability, long-press session activation, Android 9+ support
-- **iOS**: Apple Screen Time API (FamilyControls, ManagedSettings, DeviceActivity) for system-level blocking, custom shield UI, Home Screen widget, iOS 17+
+- **iOS**: Apple Screen Time API (FamilyControls, ManagedSettings, DeviceActivity) for system-level blocking, custom shield UI, Strict Mode, Face ID + cool-down early exit, iOS 17+
 
 ## Platforms
 
@@ -46,7 +46,7 @@ Java + Android Accessibility Service. Published on Google Play.
 <a href="https://play.google.com/store/apps/details?id=com.grepguru.zenlock" target="_blank">Get it on Google Play</a>.
 
 ### iOS
-Swift 6 + SwiftUI + Screen Time API. Built with native shields, friction screens, custom block UI, and a Home Screen widget.
+Swift 6 + SwiftUI + Screen Time API. Built with native shields, custom block UI, Quick Focus, and scheduled sessions.
 <a href="https://apps.apple.com/us/app/zenlock-focus-app-blocker/id6774016090" target="_blank">Get it on App Store</a>.
 
 
@@ -60,7 +60,7 @@ Swift 6 + SwiftUI + Screen Time API. Built with native shields, friction screens
 ### Early Unlock
 1. Request an early unlock from inside the app
 2. **Android**: your accountability partner receives an SMS with a verification code; enter the code to unlock
-3. **iOS**: a cool-down timer runs with your partner's name on screen and notifications during the wait
+3. **iOS**: confirm with Face ID, then a cool-down timer runs before apps unlock; Strict Mode sessions can't be ended early at all
 
 ## Contributing
 

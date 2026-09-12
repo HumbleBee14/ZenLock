@@ -25,7 +25,6 @@ struct SettingsView: View {
                         dailyGoalSection
                         cooldownSection
                         bypassPreventionSection
-                        diagnosticsSection
                         aboutSection
                     }
                     .padding(.horizontal, ZenTheme.Spacing.md)
@@ -49,28 +48,6 @@ struct SettingsView: View {
                 DiagnosticsView()
             }
         }
-    }
-
-    private var diagnosticsSection: some View {
-        Button { showDiagnostics = true } label: {
-            GlassCard {
-                HStack(spacing: ZenTheme.Spacing.md) {
-                    GroupIcon(systemName: "stethoscope", color: ZenTheme.warning)
-                    VStack(alignment: .leading) {
-                        Text("Diagnostics")
-                            .font(ZenTheme.body)
-                            .foregroundStyle(ZenTheme.text)
-                        Text("Check what's actually stored in App Groups")
-                            .font(ZenTheme.caption)
-                            .foregroundStyle(ZenTheme.textSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right").foregroundStyle(ZenTheme.textSecondary)
-                }
-                .padding(ZenTheme.Spacing.md)
-            }
-        }
-        .buttonStyle(.plain)
     }
 
     private var bypassPreventionSection: some View {
@@ -254,6 +231,21 @@ struct SettingsView: View {
                     .font(ZenTheme.body)
                     .foregroundStyle(ZenTheme.primary)
                 }
+
+                Divider().overlay(ZenTheme.textSecondary.opacity(0.2))
+
+                Button { showDiagnostics = true } label: {
+                    HStack {
+                        Text("Diagnostics")
+                            .font(ZenTheme.caption)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(ZenTheme.textSecondary)
+                    }
+                }
+                .buttonStyle(.plain)
             }
             .padding(ZenTheme.Spacing.md)
         }

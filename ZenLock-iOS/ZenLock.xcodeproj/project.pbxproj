@@ -40,6 +40,8 @@
 		689457F9BA91CB517D358113 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */; };
 		6DC75C1A5435F55FDBB22CC9 /* ScreenTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */; };
 		6EF3E5F09034FDBA433921CF /* QuickFocusSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37ADB4CD575F50AEBFDEE3AE /* QuickFocusSheet.swift */; };
+		7A11D2E4B9C0F3A5D6E7F801 /* ReviewPrompter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */; };
+		7A11D2E4B9C0F3A5D6E7F803 /* SessionLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */; };
 		7CAE18E62AA67DF4C99D4557 /* TotalUsageScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B63757CB990E8EA6113BA88 /* TotalUsageScene.swift */; };
 		7DE98BB9D2B63CC515C9D697 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21EDEB20C0158FF35BB68 /* ShimmerEffect.swift */; };
 		820053237EC677A54783F22E /* BlockGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230074094AF16E766D7DD09E /* BlockGroup.swift */; };
@@ -190,6 +192,8 @@
 		742E2FB138DA8CCAB6AFFF8D /* EditGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupView.swift; sourceTree = "<group>"; };
 		74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedBlockGroup.swift; sourceTree = "<group>"; };
 		79DF186E8ECD25F234E7972F /* GroupFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupFormView.swift; sourceTree = "<group>"; };
+		7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPrompter.swift; sourceTree = "<group>"; };
+		7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLedger.swift; sourceTree = "<group>"; };
 		7DD0C4009777D862A37B9BBB /* SelectionPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionPreview.swift; sourceTree = "<group>"; };
 		81A58B46F150FEBD0B240169 /* ZenNotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenNotificationDelegate.swift; sourceTree = "<group>"; };
 		8478883EBA61B7089072B764 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -274,6 +278,8 @@
 				DA25B42280E7E6E216C478D3 /* BiometricGate.swift */,
 				88407A534BE54012983883BE /* BlockingService.swift */,
 				BC70E214EEC7737F201478B9 /* CooldownService.swift */,
+				7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */,
+				7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */,
 				6E2FD9952A9E60558D838D6B /* DeepLinkRouter.swift */,
 				F778EC846C0E45E0389556CD /* EntitlementManager.swift */,
 				FE8280FAFAD080C479C9B257 /* NotificationManager.swift */,
@@ -628,7 +634,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					176E8E813F23EE75B4B5B608 = {
 						DevelopmentTeam = 252N2WS4Y3;
@@ -706,6 +712,8 @@
 				29A7FC7126029071BCCE0F77 /* ContentView.swift in Sources */,
 				0C41787BAB7EEF958DC703CA /* CooldownCountdownView.swift in Sources */,
 				C6B8E91E3B89A6EFFD15ED6E /* CooldownService.swift in Sources */,
+				7A11D2E4B9C0F3A5D6E7F801 /* ReviewPrompter.swift in Sources */,
+				7A11D2E4B9C0F3A5D6E7F803 /* SessionLedger.swift in Sources */,
 				D08AB3F0AE298C3F7ECF7D6F /* CooldownSlider.swift in Sources */,
 				95F07BA27B32D01C6F35210C /* CreateGroupView.swift in Sources */,
 				866E04FC274093C2A064BA28 /* DashboardView.swift in Sources */,
@@ -836,6 +844,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -868,7 +877,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -884,11 +893,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -1045,6 +1055,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1077,7 +1088,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1099,12 +1110,13 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

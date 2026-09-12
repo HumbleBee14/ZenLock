@@ -8,31 +8,39 @@ final class SessionRecorder {
         self.context = context
     }
 
-    /// Create and return a new session record.
-    @discardableResult
-    func begin(group: BlockGroup, targetDuration: TimeInterval) -> FocusSession {
+    func beginQuickFocus(endsAt: Date) {
+        endQuickFocus()
+        let now = Date()
         let session = FocusSession(
-            groupId: group.id,
-            groupName: group.name,
-            startedAt: Date(),
-            targetDuration: targetDuration
+            groupId: nil,
+            groupName: SessionLedger.quickFocusName,
+            startedAt: now,
+            targetDuration: endsAt.timeIntervalSince(now)
         )
         context.insert(session)
         try? context.save()
-        return session
     }
 
-    /// End the open session for a group.
-    func end(group: BlockGroup, completed: Bool) {
-        let groupId = group.id
+    func extendQuickFocus(endsAt: Date) {
+        guard let open = openQuickFocus() else { return }
+        open.targetDuration = endsAt.timeIntervalSince(open.startedAt)
+        try? context.save()
+    }
+
+    func endQuickFocus(now: Date = Date()) {
+        guard let open = openQuickFocus() else { return }
+        let plannedEnd = open.startedAt.addingTimeInterval(open.targetDuration)
+        open.endedAt = min(now, plannedEnd)
+        open.wasCompleted = now >= plannedEnd
+        try? context.save()
+    }
+
+    private func openQuickFocus() -> FocusSession? {
         var descriptor = FetchDescriptor<FocusSession>(
-            predicate: #Predicate { $0.groupId == groupId && $0.endedAt == nil },
+            predicate: #Predicate { $0.groupId == nil && $0.endedAt == nil },
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
         )
         descriptor.fetchLimit = 1
-        guard let open = (try? context.fetch(descriptor))?.first else { return }
-        open.endedAt = Date()
-        open.wasCompleted = completed
-        try? context.save()
+        return (try? context.fetch(descriptor))?.first
     }
 }

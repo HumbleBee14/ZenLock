@@ -36,6 +36,7 @@ struct ZenLockApp: App {
         let descriptor = FetchDescriptor<BlockGroup>()
         guard let groups = try? context.fetch(descriptor) else { return }
         blockingService.evaluateActiveGroups(groups)
+        SessionLedger.reconcile(context: context)
     }
 
     /// Open the SwiftData store; if it fails (typically a schema mismatch during dev),

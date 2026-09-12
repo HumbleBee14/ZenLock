@@ -136,6 +136,7 @@ struct EditGroupView: View {
         } else {
             service.syncGroupToAppGroups(group)
         }
+        SessionLedger.reconcile(context: modelContext)
         dismiss()
     }
 }

@@ -7,14 +7,14 @@
     "%@" : {
 
     },
-    "%@ min per open" : {
-
-    },
     "%@ until apps unlock" : {
 
     },
     "🔒 Deep Focus Mode" : {
       "extractionState" : "manual"
+    },
+    "A few numbers worth knowing." : {
+
     },
     "About" : {
       "extractionState" : "manual"
@@ -76,9 +76,6 @@
     "Can't make changes while Strict Mode is active." : {
 
     },
-    "Check what's actually stored in App Groups" : {
-
-    },
     "Create Focus Session" : {
       "extractionState" : "manual"
     },
@@ -103,6 +100,9 @@
     "End" : {
       "extractionState" : "manual"
     },
+    "Everything you need. Nothing that pulls you back." : {
+
+    },
     "Focus" : {
       "extractionState" : "manual"
     },
@@ -111,6 +111,9 @@
     },
     "Focus Sessions" : {
       "extractionState" : "manual"
+    },
+    "Focus, your way" : {
+
     },
     "Friction Type" : {
       "extractionState" : "manual"
@@ -136,9 +139,6 @@
     "Make it hard to bypass" : {
       "extractionState" : "manual"
     },
-    "Max %@ opens / day" : {
-
-    },
     "Name" : {
 
     },
@@ -157,6 +157,9 @@
     "Not Authorized" : {
       "extractionState" : "manual"
     },
+    "One permission" : {
+
+    },
     "over the last 7 days" : {
 
     },
@@ -168,6 +171,9 @@
     },
     "Progressive Delay" : {
       "extractionState" : "manual"
+    },
+    "Put the phone down.\nKeep the day." : {
+
     },
     "Quick Focus Session" : {
       "extractionState" : "manual"
@@ -186,9 +192,6 @@
     },
     "Screen Time" : {
       "extractionState" : "manual"
-    },
-    "Screen Time Access" : {
-
     },
     "Select Apps" : {
       "extractionState" : "manual"
@@ -209,9 +212,6 @@
       "extractionState" : "manual"
     },
     "Stop Cool-down" : {
-
-    },
-    "Take control of your screen time.\nStay focused. Stay present." : {
 
     },
     "Target time you want to spend on your phone each day. Shown on the Screen Time tab." : {
@@ -247,13 +247,16 @@
     "Use this if a scheduled session should be blocking but isn't." : {
 
     },
+    "Where attention goes" : {
+
+    },
     "ZenLock" : {
       "extractionState" : "manual"
     },
     "ZenLock is free and open source. Show your support!" : {
 
     },
-    "ZenLock needs Screen Time permission to block apps. This data never leaves your device." : {
+    "ZenLock uses Apple's Screen Time to block the apps you pick.\nEverything stays on your iPhone." : {
 
     }
   },

@@ -42,7 +42,7 @@ enum StreakCalculator {
 
         let totalMinutes = lastWeek.reduce(0) { $0 + Int($1.actualDuration / 60) }
         let completed = lastWeek.filter(\.wasCompleted).count
-        let attempted = lastWeek.count
+        let attempted = lastWeek.filter { $0.endedAt != nil }.count
 
         let completionRate = attempted > 0 ? Double(completed) / Double(attempted) : 0
         let minuteScore = min(1.0, Double(totalMinutes) / 600.0)

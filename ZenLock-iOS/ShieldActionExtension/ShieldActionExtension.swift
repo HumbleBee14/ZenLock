@@ -58,7 +58,7 @@ class ShieldActionExtension: ShieldActionDelegate {
                   let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) else { continue }
             if predicate(selection) { return group }
         }
-        return groups.first
+        return nil
     }
 
     private func loadGroups() -> [SharedBlockGroup] {
