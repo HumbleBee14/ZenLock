@@ -236,16 +236,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="visible"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="8dp">
 
                     <!-- Focus Time Card — Indigo accent -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/stat_accent_left_indigo"
-                        android:padding="16dp"
-                        android:layout_marginBottom="12dp">
+                        android:paddingTop="4dp"
+                        android:paddingBottom="14dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -274,13 +273,13 @@
                                 android:layout_height="wrap_content"
                                 android:text="--"
                                 android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/gradient_accent_badge"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/tag_background"
                                 android:paddingStart="8dp"
                                 android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"/>
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
 
                         </LinearLayout>
 
@@ -346,13 +345,17 @@
                     </LinearLayout>
 
                     <!-- Phone Usage Card — Amber accent -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/dividerSubtle" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/stat_accent_left_amber"
-                        android:padding="16dp"
-                        android:layout_marginBottom="16dp">
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -381,13 +384,13 @@
                                 android:layout_height="wrap_content"
                                 android:text="--"
                                 android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/gradient_accent_badge"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/tag_background"
                                 android:paddingStart="8dp"
                                 android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"/>
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
 
                         </LinearLayout>
 
@@ -453,19 +456,24 @@
                     </LinearLayout>
 
                     <!-- Chart Section -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/dividerSubtle" />
+
                     <TextView
                         android:id="@+id/chartCaption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last 7 days"
-                        style="@style/ModernText.SectionTitle"
-                        android:layout_marginBottom="8dp"/>
+                        style="@style/ModernText.MetricLabel"
+                        android:layout_marginTop="14dp"/>
 
                     <com.github.mikephil.charting.charts.CombinedChart
                         android:id="@+id/trendsChart"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:layout_marginTop="4dp"/>
+                        android:layout_marginTop="8dp"/>
 
                 </LinearLayout>
 

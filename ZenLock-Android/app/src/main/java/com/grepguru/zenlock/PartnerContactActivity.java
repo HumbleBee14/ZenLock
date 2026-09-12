@@ -1,7 +1,6 @@
 package com.grepguru.zenlock;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -69,8 +68,8 @@ public class PartnerContactActivity extends AppCompatActivity {
         // Handle system bar insets
         View rootView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
-            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            v.setPadding(0, 0, 0, bottomInset);
+            androidx.core.graphics.Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, bars.top, 0, bars.bottom);
             return insets;
         });
 
@@ -309,7 +308,7 @@ public class PartnerContactActivity extends AppCompatActivity {
             // Show permission warning
             if (permissionWarning != null) {
                 permissionWarning.setVisibility(View.VISIBLE);
-                permissionWarning.setText("⚠️ SMS permission required to send OTP. Click here to grant permission.");
+                permissionWarning.setText("SMS permission needed. Tap to grant.");
                 permissionWarning.setOnClickListener(v -> requestSmsPermission());
             }
             
@@ -329,15 +328,15 @@ public class PartnerContactActivity extends AppCompatActivity {
     }
     
     private void showSmsDisclosure() {
-        // Show disclosure dialog first
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_sms_disclosure, null);
-        
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_sms_disclosure, null);
         Button agreeButton = dialogView.findViewById(R.id.agreeButton);
         Button declineButton = dialogView.findViewById(R.id.declineButton);
-        
-        AlertDialog dialog = builder.setView(dialogView).create();
+
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(dialogView);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         
         agreeButton.setOnClickListener(v -> {
             userConsentedToSms = true;

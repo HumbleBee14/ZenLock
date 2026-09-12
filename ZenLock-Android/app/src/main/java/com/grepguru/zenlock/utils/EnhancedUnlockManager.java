@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.guards.PinUnlock;
 import com.grepguru.zenlock.model.UnlockMethod;
 
 /**
@@ -349,7 +350,7 @@ public class EnhancedUnlockManager {
         
         switch (method) {
             case PIN_UNLOCK:
-                String pin = preferences.getString("unlock_pin", "");
+                String pin = PinUnlock.activePin(context);
                 if (pin.isEmpty()) {
                     showPinError(pinInput, statusText, "PIN not configured");
                     return false;
@@ -406,8 +407,7 @@ public class EnhancedUnlockManager {
     }
     
     private boolean isPinConfigured() {
-        String pin = preferences.getString("unlock_pin", "");
-        return !pin.isEmpty();
+        return PinUnlock.isEnabled(context);
     }
     
     private boolean isAccountabilityPartnerConfigured() {

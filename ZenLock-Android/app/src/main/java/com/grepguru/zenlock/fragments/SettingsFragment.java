@@ -1,11 +1,8 @@
 package com.grepguru.zenlock.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,12 +10,9 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +27,10 @@ import com.grepguru.zenlock.permissions.AppPermission;
 import com.grepguru.zenlock.permissions.FeaturePermissions;
 import com.grepguru.zenlock.utils.NotificationPermissionManager;
 import com.grepguru.zenlock.permissions.PermissionGate;
+import com.grepguru.zenlock.guards.PinUnlock;
 import com.grepguru.zenlock.quotes.QuotesSheet;
+import com.grepguru.zenlock.ui.ConfirmSheet;
+import com.grepguru.zenlock.ui.Sheets;
 
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.WhitelistActivity;
@@ -47,14 +44,6 @@ public class SettingsFragment extends Fragment {
     // Individual default app toggles
     private SwitchCompat phoneAppToggle, calendarAppToggle, clockAppToggle;
     
-    private RadioGroup securityLevelGroup;
-    private RadioButton basicSecurity, enhancedSecurity, maximumSecurity;
-    
-    // Expandable UI elements
-    private LinearLayout lockProtectionHeader, lockProtectionContent;
-    private ImageView lockProtectionExpandIcon;
-    private TextView lockProtectionSummary;
-    
     // Default Apps expandable UI elements
     private LinearLayout defaultAppsHeader, defaultAppsExpandableContent;
     private ImageView defaultAppsExpandIcon;
@@ -66,9 +55,9 @@ public class SettingsFragment extends Fragment {
                 syncNotificationToggle();
             });
     
-    // Enhanced unlock UI elements
-    private Button accountabilityPartnerButton;
+    private TextView partnerConfigValue;
     private SwitchCompat pinUnlockToggle, partnerUnlockToggle;
+    private com.google.android.material.button.MaterialButton clearPinButton;
     private LinearLayout partnerConfigSection;
     private LinearLayout noUnlockMethodsWarning;
 
@@ -92,28 +81,16 @@ public class SettingsFragment extends Fragment {
             editor.apply();
         });
 
-        // Security settings
-        securityLevelGroup = view.findViewById(R.id.securityLevelGroup);
-        basicSecurity = view.findViewById(R.id.basicSecurity);
-        enhancedSecurity = view.findViewById(R.id.enhancedSecurity);
-        maximumSecurity = view.findViewById(R.id.maximumSecurity);
-        
-        // Expandable UI elements
-        lockProtectionHeader = view.findViewById(R.id.lockProtectionHeader);
-        lockProtectionContent = view.findViewById(R.id.lockProtectionContent);
-        lockProtectionExpandIcon = view.findViewById(R.id.lockProtectionExpandIcon);
-        lockProtectionSummary = view.findViewById(R.id.lockProtectionSummary);
-
         // Default Apps expandable UI elements
         defaultAppsHeader = view.findViewById(R.id.defaultAppsHeader);
         defaultAppsExpandableContent = view.findViewById(R.id.defaultAppsExpandableContent);
         defaultAppsExpandIcon = view.findViewById(R.id.defaultAppsExpandIcon);
 
-        // Enhanced unlock UI elements
-        accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
+        partnerConfigValue = view.findViewById(R.id.partnerConfigValue);
         
         // Toggle switches for unlock methods
         pinUnlockToggle = view.findViewById(R.id.pinUnlockToggle);
+        clearPinButton = view.findViewById(R.id.clearPinButton);
         partnerUnlockToggle = view.findViewById(R.id.partnerUnlockToggle);
         
         // Individual default app toggles
@@ -152,23 +129,6 @@ public class SettingsFragment extends Fragment {
         // Load auto-restart setting
         autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
         
-        // Load security level
-        int securityLevel = preferences.getInt("security_level", 1); // Default to enhanced
-        switch (securityLevel) {
-            case 0:
-                basicSecurity.setChecked(true);
-                lockProtectionSummary.setText("Basic Security");
-                break;
-            case 1:
-                enhancedSecurity.setChecked(true);
-                lockProtectionSummary.setText("Enhanced Security");
-                break;
-            case 2:
-                maximumSecurity.setChecked(true);
-                lockProtectionSummary.setText("Maximum Security");
-                break;
-        }
-
         // Initialize toggle states based on existing configuration
         initializeToggleStates();
         
@@ -205,10 +165,29 @@ public class SettingsFragment extends Fragment {
         allowLauncherToggle = view.findViewById(R.id.allowLauncherToggle);
         allowLauncherToggle.setChecked(preferences.getBoolean("allow_launcher_during_lock", false));
         allowLauncherToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("allow_launcher_during_lock", isChecked);
-            editor.apply();
+            if (!isChecked) {
+                preferences.edit().putBoolean("allow_launcher_during_lock", false).apply();
+                return;
+            }
+            if (preferences.getBoolean("allow_launcher_during_lock", false)) return;
+            allowLauncherToggle.setChecked(false);
+            ConfirmSheet.show(requireActivity(), "Allow home screen?",
+                    "Not recommended. Reaching the launcher makes it easy to slip into other apps mid-session.",
+                    "Keep off", "Allow anyway", () -> {
+                        if (!isAdded()) return;
+                        preferences.edit().putBoolean("allow_launcher_during_lock", true).apply();
+                        allowLauncherToggle.setChecked(true);
+                    });
         });
+
+        TextView versionText = view.findViewById(R.id.versionText);
+        try {
+            String versionName = requireContext().getPackageManager()
+                    .getPackageInfo(requireContext().getPackageName(), 0).versionName;
+            versionText.setText("ZenLock " + versionName);
+        } catch (Exception e) {
+            versionText.setVisibility(View.GONE);
+        }
 
         return view;
     }
@@ -266,25 +245,6 @@ public class SettingsFragment extends Fragment {
             preferences.edit().putBoolean("persistent_notification", isChecked).apply();
         });
 
-        // Security level selection
-        securityLevelGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            int securityLevel = 1; // Default to enhanced
-            if (checkedId == R.id.basicSecurity) {
-                securityLevel = 0;
-                lockProtectionSummary.setText("Basic Security");
-            } else if (checkedId == R.id.enhancedSecurity) {
-                securityLevel = 1;
-                lockProtectionSummary.setText("Enhanced Security");
-            } else if (checkedId == R.id.maximumSecurity) {
-                securityLevel = 2;
-                lockProtectionSummary.setText("Maximum Security");
-            }
-            
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putInt("security_level", securityLevel);
-            editor.apply();
-        });
-        
         // Setup expandable functionality
         setupExpandableSections();
 
@@ -298,11 +258,15 @@ public class SettingsFragment extends Fragment {
 
         // PIN Unlock Toggle
         pinUnlockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                if (preferences.getString("unlock_pin", "").isEmpty()) showPinSheet();
+            if (isChecked && !PinUnlock.isConfigured(requireContext())) {
+                showPinSheet();
                 return;
             }
-            preferences.edit().remove("unlock_pin").apply();
+            PinUnlock.setEnabled(requireContext(), isChecked);
+            updateUnlockMethodStates();
+        });
+        clearPinButton.setOnClickListener(v -> {
+            PinUnlock.clear(requireContext());
             updateUnlockMethodStates();
         });
 
@@ -324,27 +288,20 @@ public class SettingsFragment extends Fragment {
 
         // PIN Configuration Listeners
         // Partner Contact Configuration
-        accountabilityPartnerButton.setOnClickListener(v -> {
+        partnerConfigSection.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), com.grepguru.zenlock.PartnerContactActivity.class);
             startActivity(intent);
         });
     }
 
     private void initializeToggleStates() {
-        // Set initial toggle states based on existing configuration
-        String existingPin = preferences.getString("unlock_pin", "");
-        boolean pinConfigured = !existingPin.isEmpty();
-        
-        // Set toggle state based on PIN existence (only on initial load)
-        pinUnlockToggle.setChecked(pinConfigured);
+        pinUnlockToggle.setChecked(PinUnlock.isEnabled(requireContext()));
     }
 
     private void updateUnlockMethodStates() {
-        // Check PIN status
-        String existingPin = preferences.getString("unlock_pin", "");
-        boolean pinConfigured = !existingPin.isEmpty();
-        
+        boolean pinConfigured = PinUnlock.isEnabled(requireContext());
         pinUnlockToggle.setChecked(pinConfigured);
+        clearPinButton.setVisibility(PinUnlock.isConfigured(requireContext()) ? View.VISIBLE : View.GONE);
 
         // Check Partner status
         String partnerPhone = preferences.getString("partner_phone", "");
@@ -353,11 +310,7 @@ public class SettingsFragment extends Fragment {
         partnerUnlockToggle.setChecked(partnerConfigured);
         partnerConfigSection.setVisibility(partnerConfigured ? View.VISIBLE : View.GONE);
         
-        if (partnerConfigured) {
-            accountabilityPartnerButton.setText("Update");
-        } else {
-            accountabilityPartnerButton.setText("Configure");
-        }
+        partnerConfigValue.setText(partnerConfigured ? "Update" : "Configure");
         
         // Show/hide warning message based on unlock method availability
         boolean hasAnyUnlockMethod = pinConfigured || partnerConfigured;
@@ -365,27 +318,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupExpandableSections() {
-        // Lock Protection expandable section
-        lockProtectionHeader.setOnClickListener(v -> {
-            boolean isExpanded = lockProtectionContent.getVisibility() == View.VISIBLE;
-            
-            if (isExpanded) {
-                // Collapse
-                lockProtectionContent.setVisibility(View.GONE);
-                lockProtectionExpandIcon.animate()
-                    .rotation(0)
-                    .setDuration(200)
-                    .start();
-            } else {
-                // Expand
-                lockProtectionContent.setVisibility(View.VISIBLE);
-                lockProtectionExpandIcon.animate()
-                    .rotation(180)
-                    .setDuration(200)
-                    .start();
-            }
-        });
-
         // Default Apps expandable section
         defaultAppsHeader.setOnClickListener(v -> {
             boolean isExpanded = defaultAppsExpandableContent.getVisibility() == View.VISIBLE;
@@ -491,11 +423,10 @@ public class SettingsFragment extends Fragment {
 
         setupPinSetupInputWatcher(newPinInput, confirmPinInput, pinStatusText);
 
-        String existingPin = preferences.getString("unlock_pin", "");
-        if (!existingPin.isEmpty()) {
-            instructionText.setText("⚠️ PIN already configured.\n\nTo change it, enter a new PIN twice below.");
+        if (PinUnlock.isConfigured(requireContext())) {
+            instructionText.setText("Enter a new PIN twice to replace the current one.");
         } else {
-            instructionText.setText("💡 Tip: Consider asking a trusted friend to set this PIN for you to increase accountability.");
+            instructionText.setText("Ask someone you trust to set it so you can't undo it on a whim.");
         }
 
         dialogView.findViewById(R.id.pinCancelButton).setOnClickListener(v -> dialog.dismiss());
@@ -503,14 +434,15 @@ public class SettingsFragment extends Fragment {
             String newPin = newPinInput.getText().toString().trim();
             String confirmPin = confirmPinInput.getText().toString().trim();
             if (validatePinSetup(newPin, confirmPin, newPinInput, confirmPinInput, pinStatusText)) {
-                preferences.edit().putString("unlock_pin", newPin).apply();
+                PinUnlock.save(requireContext(), newPin);
                 updateUnlockMethodStates();
                 dialog.dismiss();
-                showPinSetupSuccessDialog();
+                Toast.makeText(requireContext(), "PIN set", Toast.LENGTH_SHORT).show();
             }
         });
 
         dialog.setOnDismissListener(d -> updateUnlockMethodStates());
+        dialog.setOnShowListener(d -> Sheets.expandAboveKeyboard(dialog));
         dialog.show();
     }
 
@@ -533,23 +465,17 @@ public class SettingsFragment extends Fragment {
     }
     
     private void resetPinSetupInputState(EditText newPinInput, EditText confirmPinInput, TextView statusText) {
-        // Reset input field colors to normal
-        ColorStateList normalColor = ColorStateList.valueOf(Color.parseColor("#808080"));
-        newPinInput.setBackgroundTintList(normalColor);
-        confirmPinInput.setBackgroundTintList(normalColor);
-        
-        // Hide status text
         statusText.setVisibility(View.GONE);
     }
     
     private boolean validatePinSetup(String newPin, String confirmPin, EditText newPinInput, EditText confirmPinInput, TextView statusText) {
         if (newPin.isEmpty() || confirmPin.isEmpty()) {
-            showPinSetupError("Please fill both PIN fields", newPinInput, confirmPinInput, statusText);
+            showPinSetupError("Enter the PIN in both fields", newPinInput, confirmPinInput, statusText);
             return false;
         }
         
         if (newPin.length() != 4 || !newPin.matches("\\d{4}")) {
-            showPinSetupError("PIN must be exactly 4 digits", newPinInput, confirmPinInput, statusText);
+            showPinSetupError("PIN must be 4 digits", newPinInput, confirmPinInput, statusText);
             return false;
         }
         
@@ -562,27 +488,8 @@ public class SettingsFragment extends Fragment {
     }
     
     private void showPinSetupError(String message, EditText newPinInput, EditText confirmPinInput, TextView statusText) {
-        // Set input field colors to red
-        ColorStateList errorColor = ColorStateList.valueOf(Color.parseColor("#FF6B6B"));
-        newPinInput.setBackgroundTintList(errorColor);
-        confirmPinInput.setBackgroundTintList(errorColor);
-        
-        // Show error message in status text
         statusText.setText(message);
-        statusText.setTextColor(Color.parseColor("#FF6B6B"));
         statusText.setVisibility(View.VISIBLE);
-    }
-    
-    private void showPinSetupSuccessDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_pin_success, null);
-        
-        builder.setView(dialogView)
-               .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-               .setCancelable(false);
-        
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
     
 
@@ -608,7 +515,7 @@ public class SettingsFragment extends Fragment {
             emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"idineshy@gmail.com"});
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "ZenLock - Feedback & Suggestions");
             emailIntent.putExtra(Intent.EXTRA_TEXT, 
-                "Hi! I'd like to share some feedback about ZenLock:\n\n" +
+                "Hi Dinesh! I'd like to share some feedback about ZenLock:\n\n" +
                 "App Version: " + appVersion + "\n" +
                 "Android Version: " + android.os.Build.VERSION.RELEASE + "\n" +
                 "Device: " + android.os.Build.MODEL + "\n\n" +

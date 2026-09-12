@@ -15,8 +15,7 @@ public final class UnlockMethodGuard {
     private UnlockMethodGuard() {}
 
     public static boolean isConfigured(Context context) {
-        SharedPreferences prefs = prefs(context);
-        return !prefs.getString("unlock_pin", "").isEmpty() || !prefs.getString("partner_phone", "").isEmpty();
+        return PinUnlock.isEnabled(context) || !prefs(context).getString("partner_phone", "").isEmpty();
     }
 
     public static boolean isSatisfied(Context context) {

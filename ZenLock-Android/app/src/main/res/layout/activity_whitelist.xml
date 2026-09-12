@@ -16,7 +16,7 @@
         android:text="@string/allowed_apps_title"
         android:textSize="20sp"
         android:textColor="@color/textPrimary"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -43,7 +43,7 @@
         android:id="@+id/searchBarContainer"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:background="@drawable/modern_input_background"
+        android:background="@drawable/zen_field_background"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="12dp"
@@ -163,9 +163,9 @@
             android:id="@+id/loadingText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Loading apps..."
-            android:textColor="@color/white"
-            android:textSize="16sp"
+            android:text="Loading apps"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp"
             android:layout_marginTop="16dp"/>
 
     </LinearLayout>
