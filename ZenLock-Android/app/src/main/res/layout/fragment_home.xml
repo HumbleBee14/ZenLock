@@ -9,7 +9,6 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/backgroundPrimary"
         android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +20,6 @@
     android:paddingEnd="24dp"
             tools:context=".fragments.HomeFragment">
 
-    <!-- Welcome Section -->
     <TextView
         android:id="@+id/welcomeTitle"
         android:layout_width="wrap_content"
@@ -412,6 +410,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <TextView
+        android:id="@+id/homeQuote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="13sp"
+        android:textColor="@color/textTertiary"
+        android:fontFamily="sans-serif-light"
+        android:lineSpacingMultiplier="1.3"
+        android:gravity="center"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/startFocusHint"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

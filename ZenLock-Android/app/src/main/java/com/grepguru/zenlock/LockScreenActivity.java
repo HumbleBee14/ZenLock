@@ -407,8 +407,6 @@ public class LockScreenActivity extends AppCompatActivity {
             
             @Override
             public void onUnlockCancelled() {
-                // User cancelled unlock, stay in lock screen
-                Toast.makeText(LockScreenActivity.this, "Unlock cancelled", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -1087,7 +1085,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
         Dialog dialog = new Dialog(themed);
         dialog.setContentView(dialogView);
-        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        com.grepguru.zenlock.ui.Popups.size(dialog);
 
         dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.extendButton).setOnClickListener(v -> {

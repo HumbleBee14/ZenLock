@@ -334,9 +334,7 @@ public class PartnerContactActivity extends AppCompatActivity {
 
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(dialogView);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
+        com.grepguru.zenlock.ui.Popups.size(dialog);
         
         agreeButton.setOnClickListener(v -> {
             userConsentedToSms = true;

@@ -2,450 +2,214 @@ package com.grepguru.zenlock.utils;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.os.CountDownTimer;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.guards.PinUnlock;
 import com.grepguru.zenlock.model.UnlockMethod;
 
-/**
- * Enhanced unlock manager that handles multiple unlock methods
- * including basic PIN, trusted person PIN, and accountability partner OTP
- */
 public class EnhancedUnlockManager {
-    
-    private static final String TAG = "EnhancedUnlockManager";
-    private static final String PREFS_NAME = "FocusLockPrefs";
-    
-    private Context context;
-    private SharedPreferences preferences;
-    private OTPManager otpManager;
+
+    private static final int SMS_PERMISSION_REQUEST = 1000;
+    private static final long RESEND_DELAY_MS = 20_000L;
+
+    private final Context context;
+    private final OTPManager otpManager;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
     private OnUnlockListener unlockListener;
-    private AlertDialog currentDialog;
-    private CountDownTimer otpTimer;
-    
+    private Dialog currentDialog;
+    private UnlockMethod method = UnlockMethod.PIN_UNLOCK;
+
+    private TextView hint;
+    private View partnerRow;
+    private MaterialButton sendCodeButton;
+    private TextView sendStatus;
+    private EditText pinInput;
+    private TextView errorText;
+
     public interface OnUnlockListener {
         void onUnlockSuccess(UnlockMethod method);
         void onUnlockCancelled();
     }
-    
+
     public EnhancedUnlockManager(Context context) {
         this.context = context;
-        this.preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         this.otpManager = new OTPManager(context);
     }
-    
+
     public void setOnUnlockListener(OnUnlockListener listener) {
         this.unlockListener = listener;
     }
-    
-    /**
-     * Shows the unlock options dialog
-     */
+
     public void showUnlockDialog() {
-        if (!(context instanceof Activity)) {
-            Toast.makeText(context, "Unlock not available in this context", Toast.LENGTH_SHORT).show();
+        if (!(context instanceof Activity)) return;
+        cleanup();
+
+        Context themed = new ContextThemeWrapper(context, R.style.Theme_ZenLock);
+        View view = LayoutInflater.from(themed).inflate(R.layout.dialog_unlock, null);
+        hint = view.findViewById(R.id.methodHint);
+        partnerRow = view.findViewById(R.id.partnerRow);
+        sendCodeButton = view.findViewById(R.id.sendCodeButton);
+        sendStatus = view.findViewById(R.id.sendStatus);
+        pinInput = view.findViewById(R.id.pinInput);
+        errorText = view.findViewById(R.id.errorText);
+        View chips = view.findViewById(R.id.methodChips);
+        Chip pinChip = view.findViewById(R.id.pinChip);
+        Chip partnerChip = view.findViewById(R.id.partnerChip);
+        View codeField = view.findViewById(R.id.codeField);
+        MaterialButton unlockButton = view.findViewById(R.id.unlockButton);
+        MaterialButton cancelButton = view.findViewById(R.id.cancelButton);
+
+        boolean hasPin = PinUnlock.isEnabled(context);
+        boolean hasPartner = otpManager.isSmsConfigured();
+
+        currentDialog = new Dialog(themed);
+        currentDialog.setContentView(view);
+        currentDialog.setCancelable(false);
+        com.grepguru.zenlock.ui.Popups.size(currentDialog);
+
+        if (!hasPin && !hasPartner) {
+            hint.setText("No unlock method set. Add a PIN or a partner in Settings.");
+            chips.setVisibility(View.GONE);
+            codeField.setVisibility(View.GONE);
+            unlockButton.setVisibility(View.GONE);
+            cancelButton.setText("Close");
+        } else {
+            chips.setVisibility(hasPin && hasPartner ? View.VISIBLE : View.GONE);
+            pinChip.setOnClickListener(v -> selectMethod(UnlockMethod.PIN_UNLOCK, pinChip, partnerChip));
+            partnerChip.setOnClickListener(v -> selectMethod(UnlockMethod.ACCOUNTABILITY_PARTNER_OTP, pinChip, partnerChip));
+            selectMethod(hasPin ? UnlockMethod.PIN_UNLOCK : UnlockMethod.ACCOUNTABILITY_PARTNER_OTP, pinChip, partnerChip);
+        }
+
+        setupVisibilityToggle(view.findViewById(R.id.pinVisibilityToggle));
+        pinInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { errorText.setVisibility(View.GONE); }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        pinInput.setOnEditorActionListener((v, actionId, event) -> {
+            unlockButton.performClick();
+            return true;
+        });
+        sendCodeButton.setOnClickListener(v -> sendCode());
+
+        cancelButton.setOnClickListener(v -> {
+            cleanup();
+            if (unlockListener != null) unlockListener.onUnlockCancelled();
+        });
+        unlockButton.setOnClickListener(v -> {
+            String entered = pinInput.getText().toString().trim();
+            if (!validate(entered)) return;
+            UnlockMethod used = method;
+            cleanup();
+            if (unlockListener != null) unlockListener.onUnlockSuccess(used);
+        });
+
+        currentDialog.show();
+    }
+
+    private void selectMethod(UnlockMethod selected, Chip pinChip, Chip partnerChip) {
+        method = selected;
+        boolean partner = selected == UnlockMethod.ACCOUNTABILITY_PARTNER_OTP;
+        pinChip.setChecked(!partner);
+        partnerChip.setChecked(partner);
+        partnerRow.setVisibility(partner ? View.VISIBLE : View.GONE);
+        errorText.setVisibility(View.GONE);
+        pinInput.setText("");
+        pinInput.setHint(partner ? "Code" : "••••");
+        if (!partner) {
+            hint.setText("Enter your PIN.");
             return;
         }
-        
-        Activity activity = (Activity) context;
-        
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View dialogView = inflater.inflate(R.layout.dialog_unlock_options, null);
-        
-        // Get UI elements
-        CardView pinUnlockCard = dialogView.findViewById(R.id.pinUnlockCard);
-        CardView accountabilityPartnerCard = dialogView.findViewById(R.id.accountabilityPartnerCard);
-        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
-        
-        TextView pinStatus = dialogView.findViewById(R.id.pinStatus);
-        TextView partnerStatus = dialogView.findViewById(R.id.partnerStatus);
-        TextView otpStatus = dialogView.findViewById(R.id.otpStatus);
-        
-        // Update status texts
-        updateUnlockOptionsStatus(pinStatus, partnerStatus, otpStatus);
-        
-        // Create dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.ModernAlertDialog);
-        builder.setView(dialogView);
-        builder.setCancelable(false);
-        
-        currentDialog = builder.create();
-        
-        // Set up click listeners
-        pinUnlockCard.setOnClickListener(v -> {
-            if (isPinConfigured()) {
-                currentDialog.dismiss();
-                showPinInputDialog(UnlockMethod.PIN_UNLOCK);
-            } else {
-                Toast.makeText(context, "PIN not configured. Please set a PIN in settings.", Toast.LENGTH_SHORT).show();
-            }
-        });
-        
-        accountabilityPartnerCard.setOnClickListener(v -> {
-            if (isAccountabilityPartnerConfigured()) {
-                currentDialog.dismiss();
-                showPinInputDialog(UnlockMethod.ACCOUNTABILITY_PARTNER_OTP);
-            } else {
-                Toast.makeText(context, "Accountability partner not configured", Toast.LENGTH_SHORT).show();
-            }
-        });
-        
-        cancelButton.setOnClickListener(v -> {
-            currentDialog.dismiss();
-            if (unlockListener != null) {
-                unlockListener.onUnlockCancelled();
-            }
-        });
-        
-        currentDialog.show();
+        hint.setText("Your partner gets a code by SMS. Enter it here.");
+        refreshSendState();
     }
-    
-    /**
-     * Shows PIN input dialog for the selected unlock method
-     */
-    private void showPinInputDialog(UnlockMethod method) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View dialogView = inflater.inflate(R.layout.dialog_pin_input, null);
-        
-        // Get UI elements
-        TextView titleText = dialogView.findViewById(R.id.unlockMethodTitle);
-        TextView descriptionText = dialogView.findViewById(R.id.unlockMethodDescription);
-        LinearLayout otpRequestSection = dialogView.findViewById(R.id.otpRequestSection);
-        Button requestOtpButton = dialogView.findViewById(R.id.requestOtpButton);
-        Button sendOtpAgainButton = dialogView.findViewById(R.id.sendOtpAgainButton);
-        TextView otpStatusText = dialogView.findViewById(R.id.otpStatusText);
-        EditText pinInput = dialogView.findViewById(R.id.pinInput);
-        ImageView pinVisibilityToggle = dialogView.findViewById(R.id.pinVisibilityToggle);
-        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
-        Button confirmButton = dialogView.findViewById(R.id.confirmButton);
-        
-        // Configure dialog based on unlock method
-        configureDialogForMethod(method, titleText, descriptionText, otpRequestSection, 
-                               requestOtpButton, sendOtpAgainButton, otpStatusText);
-        
-        // Create dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.ModernAlertDialog);
-        builder.setView(dialogView);
-        builder.setCancelable(false);
-        
-        currentDialog = builder.create();
-        
-        // Set up PIN visibility toggle
-        setupPinVisibilityToggle(pinInput, pinVisibilityToggle);
-        
-        // Set up PIN input text watcher to reset error state
-        setupPinInputWatcher(pinInput, otpStatusText, method);
-        
-        // Set up OTP request (for accountability partner)
-        if (method == UnlockMethod.ACCOUNTABILITY_PARTNER_OTP) {
-            setupOTPRequest(requestOtpButton, sendOtpAgainButton, otpStatusText);
-        }
-        
-        // Set up action buttons
-        cancelButton.setOnClickListener(v -> {
-            cleanupTimers();
-            currentDialog.dismiss();
-            showUnlockDialog(); // Go back to options
-        });
-        
-        confirmButton.setOnClickListener(v -> {
-            String enteredPin = pinInput.getText().toString().trim();
-            if (validatePin(enteredPin, method, pinInput, otpStatusText)) {
-                cleanupTimers();
-                currentDialog.dismiss();
-                if (unlockListener != null) {
-                    unlockListener.onUnlockSuccess(method);
-                }
-            }
-        });
-        
-        currentDialog.show();
-    }
-    
-    private void configureDialogForMethod(UnlockMethod method, TextView titleText, 
-                                        TextView descriptionText, LinearLayout otpRequestSection,
-                                        Button requestOtpButton, Button sendOtpAgainButton, TextView otpStatusText) {
-        switch (method) {
-            case PIN_UNLOCK:
-                titleText.setText("PIN Unlock");
-                descriptionText.setText("Enter your configured PIN");
-                otpRequestSection.setVisibility(View.GONE);
-                // Initialize status text for PIN unlock error messages
-                otpStatusText.setText("");
-                otpStatusText.setVisibility(View.GONE); // Hidden by default, shown on error
-                break;
-                
-            case ACCOUNTABILITY_PARTNER_OTP:
-                titleText.setText("Partner Unlock");
-                descriptionText.setText("Send unlock code to your accountability partner, then enter the code they receive");
-                otpRequestSection.setVisibility(View.VISIBLE);
-                
-                // Keep it simple - just one button
-                requestOtpButton.setText("Send Unlock Code");
-                
-                // Check if everything is properly configured
-                boolean hasSmsPermission = otpManager.hasSmsPermission();
-                boolean isPartnerConfigured = otpManager.isSmsConfigured();
-                
-                if (!hasSmsPermission) {
-                    requestOtpButton.setEnabled(false);
-                    requestOtpButton.setText("SMS Permission Required");
-                    otpStatusText.setText("⚠️ SMS permission required to send unlock codes");
-                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
-                } else if (!isPartnerConfigured) {
-                    requestOtpButton.setEnabled(false);
-                    requestOtpButton.setText("Partner Not Configured");
-                    otpStatusText.setText("⚠️ No partner contact configured. Set up in settings.");
-                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
-                } else {
-                    requestOtpButton.setEnabled(true);
-                    otpStatusText.setText("Code valid for 5 minutes only");
-                    otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-                }
-                
-                sendOtpAgainButton.setVisibility(View.GONE);
-                otpStatusText.setVisibility(View.VISIBLE);
-                break;
-        }
-    }
-    
-    private void setupOTPRequest(Button requestOtpButton, Button sendOtpAgainButton, TextView otpStatusText) {
-        // Simple send unlock code button
-        requestOtpButton.setOnClickListener(v -> {
-            // Check SMS permission first
-            if (!otpManager.hasSmsPermission()) {
-                otpStatusText.setText("✗ SMS permission required to send unlock code");
-                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-                otpStatusText.setVisibility(View.VISIBLE);
-                
-                // Show permission request if this is an Activity context
-                if (context instanceof Activity) {
-                    showPermissionDialog((Activity) context);
-                }
-                return;
-            }
-            
-            // Check if partner contact is configured
-            if (!otpManager.isSmsConfigured()) {
-                otpStatusText.setText("✗ SMS not enabled or partner not configured. Check settings.");
-                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-                otpStatusText.setVisibility(View.VISIBLE);
-                return;
-            }
-            
-            // Disable button temporarily to prevent multiple clicks
-            requestOtpButton.setEnabled(false);
-            requestOtpButton.setText("Sending...");
-            otpStatusText.setText("📤 Sending unlock code to partner...");
-            otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-            
-            // Send OTP using the robust method
-            if (otpManager.requestOTPFromPartner()) {
-                otpStatusText.setText("✓ Unlock code sent successfully!");
-                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
-                Toast.makeText(context, "Unlock code sent to your partner", Toast.LENGTH_SHORT).show();
-            } else {
-                otpStatusText.setText("✗ Failed to send unlock code - check settings");
-                otpStatusText.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-            }
-            
-            // Re-enable button
-            requestOtpButton.setEnabled(true);
-            requestOtpButton.setText("Send Unlock Code");
-        });
-        
-        // Hide the send again button - we don't need it
-        sendOtpAgainButton.setVisibility(View.GONE);
-    }
-    
-    private void setupPinInputWatcher(EditText pinInput, TextView statusText, UnlockMethod method) {
-        pinInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Reset PIN input to normal color when user types
-                resetPinInputState(pinInput, statusText, method);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-    
-    private void resetPinInputState(EditText pinInput, TextView statusText, UnlockMethod method) {
-        // Reset PIN input background to normal
-        pinInput.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4B5563"))); // Normal gray
-        
-        // Clear or reset status text based on method
-        String currentText = statusText.getText().toString();
-        if (currentText.contains("Invalid") || currentText.contains("Incorrect") || currentText.contains("wrong") || 
-            currentText.contains("Wrong") || currentText.contains("Check again") || currentText.contains("not configured")) {
-            
-            if (method == UnlockMethod.ACCOUNTABILITY_PARTNER_OTP) {
-                statusText.setText("Code valid for 5 minutes only");
-                statusText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-            } else {
-                // For PIN unlock, just hide the status text
-                statusText.setText("");
-                statusText.setVisibility(View.GONE);
-            }
+    private void refreshSendState() {
+        if (!otpManager.hasSmsPermission()) {
+            sendCodeButton.setText("Allow SMS");
+            sendCodeButton.setEnabled(true);
+            sendStatus.setText("SMS permission needed");
+        } else if (otpManager.hasValidOTP()) {
+            sendCodeButton.setText("Send again");
+            sendCodeButton.setEnabled(true);
+            sendStatus.setText("Code sent · valid " + remainingMinutes() + " min");
+        } else {
+            sendCodeButton.setText("Send code");
+            sendCodeButton.setEnabled(true);
+            sendStatus.setText("Valid for 5 minutes");
         }
     }
-    
-    private void showPinError(EditText pinInput, TextView statusText, String errorMessage) {
-        // Make PIN input red
-        pinInput.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EF4444"))); // Red color
-        
-        // Show error in status text
-        statusText.setText(errorMessage);
-        statusText.setTextColor(Color.parseColor("#FF6B6B")); // Red color for error
-        statusText.setVisibility(View.VISIBLE); // Make sure it's visible
+
+    private void sendCode() {
+        if (!otpManager.hasSmsPermission()) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_REQUEST);
+            return;
+        }
+        sendCodeButton.setEnabled(false);
+        sendCodeButton.setText("Sending");
+        boolean sent = otpManager.requestOTPFromPartner();
+        if (sent) {
+            sendCodeButton.setText("Sent");
+            sendStatus.setText("Code sent · valid 5 min");
+            handler.postDelayed(() -> {
+                if (currentDialog != null && currentDialog.isShowing()) refreshSendState();
+            }, RESEND_DELAY_MS);
+        } else {
+            sendCodeButton.setEnabled(true);
+            sendCodeButton.setText("Send code");
+            sendStatus.setText("Could not send. Check partner settings.");
+        }
     }
-    
-    private void setupPinVisibilityToggle(EditText pinInput, ImageView toggleButton) {
-        toggleButton.setOnClickListener(v -> {
-            if (pinInput.getInputType() == (android.text.InputType.TYPE_CLASS_NUMBER | 
-                                         android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)) {
-                // Show PIN
-                pinInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-                toggleButton.setImageResource(R.drawable.ic_eye_off);
-            } else {
-                // Hide PIN
-                pinInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | 
-                                    android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                toggleButton.setImageResource(R.drawable.ic_eye);
-            }
-            // Move cursor to end
+
+    private String remainingMinutes() {
+        long remaining = otpManager.getRemainingOTPTime();
+        return String.valueOf(Math.max(1, (remaining + 59_000) / 60_000));
+    }
+
+    private boolean validate(String entered) {
+        if (entered.length() != 4) return fail("Enter the 4 digits.");
+        if (method == UnlockMethod.PIN_UNLOCK) {
+            String pin = PinUnlock.activePin(context);
+            if (pin.isEmpty()) return fail("PIN not set.");
+            return pin.equals(entered) || fail("Wrong PIN.");
+        }
+        return otpManager.verifyOTP(entered) || fail("Wrong or expired code.");
+    }
+
+    private boolean fail(String message) {
+        errorText.setText(message);
+        errorText.setVisibility(View.VISIBLE);
+        return false;
+    }
+
+    private void setupVisibilityToggle(ImageView toggle) {
+        toggle.setOnClickListener(v -> {
+            boolean hidden = pinInput.getInputType() == (InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+            pinInput.setInputType(hidden ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+            toggle.setImageResource(hidden ? R.drawable.ic_eye_off : R.drawable.ic_eye);
             pinInput.setSelection(pinInput.getText().length());
         });
     }
-    
-    private boolean validatePin(String enteredPin, UnlockMethod method, EditText pinInput, TextView statusText) {
-        if (enteredPin == null || enteredPin.length() != 4) {
-            showPinError(pinInput, statusText, "Please enter a 4-digit PIN");
-            return false;
-        }
-        
-        switch (method) {
-            case PIN_UNLOCK:
-                String pin = PinUnlock.activePin(context);
-                if (pin.isEmpty()) {
-                    showPinError(pinInput, statusText, "PIN not configured");
-                    return false;
-                }
-                if (pin.equals(enteredPin)) {
-                    return true;
-                } else {
-                    showPinError(pinInput, statusText, "Wrong PIN! Check again.");
-                    return false;
-                }
-                
-            case ACCOUNTABILITY_PARTNER_OTP:
-                // Simple validation - let backend handle OTP logic
-                if (otpManager.verifyOTP(enteredPin)) {
-                    return true;
-                } else {
-                    showPinError(pinInput, statusText, "Wrong unlock code! Check again.");
-                    return false;
-                }
-                
-            default:
-                return false;
-        }
-    }
-    
-    private void updateUnlockOptionsStatus(TextView pinStatus, TextView partnerStatus, TextView otpStatus) {
-        // Update PIN status - only show "Not configured" when not configured
-        if (isPinConfigured()) {
-            pinStatus.setVisibility(View.GONE); // Hide status when configured
-        } else {
-            pinStatus.setText("Not configured");
-            pinStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-            pinStatus.setVisibility(View.VISIBLE);
-        }
-        
-        // Update accountability partner status with detailed checks
-        boolean hasSmsPermission = otpManager.hasSmsPermission();
-        boolean isPartnerConfigured = isAccountabilityPartnerConfigured();
-        
-        if (isPartnerConfigured && hasSmsPermission) {
-            partnerStatus.setVisibility(View.GONE); // Hide status when fully configured
-        } else if (!hasSmsPermission) {
-            partnerStatus.setText("SMS permission required");
-            partnerStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_orange_dark));
-            partnerStatus.setVisibility(View.VISIBLE);
-        } else if (!isPartnerConfigured) {
-            partnerStatus.setText("Not configured");
-            partnerStatus.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
-            partnerStatus.setVisibility(View.VISIBLE);
-        }
-        
-        // Always hide OTP status - keep it simple
-        otpStatus.setVisibility(View.GONE);
-    }
-    
-    private boolean isPinConfigured() {
-        return PinUnlock.isEnabled(context);
-    }
-    
-    private boolean isAccountabilityPartnerConfigured() {
-        return otpManager.isSmsConfigured();
-    }
-    
-    private void cleanupTimers() {
-        if (otpTimer != null) {
-            otpTimer.cancel();
-            otpTimer = null;
-        }
-    }
-    
-    /**
-     * Show permission dialog to user
-     */
-    private void showPermissionDialog(Activity activity) {
-        new AlertDialog.Builder(context)
-            .setTitle("SMS Permission Required")
-            .setMessage("ZenLock needs SMS permission to send unlock codes to your accountability partner. Would you like to grant this permission?")
-            .setPositiveButton("Grant Permission", (dialog, which) -> {
-                ActivityCompat.requestPermissions(activity, 
-                    new String[]{Manifest.permission.SEND_SMS}, 
-                    1000); // Request code for SMS permission
-            })
-            .setNegativeButton("Cancel", (dialog, which) -> {
-                Toast.makeText(context, "SMS permission is required to send unlock codes", Toast.LENGTH_LONG).show();
-            })
-            .show();
-    }
-    
-    /**
-     * Cleanup method to be called when manager is no longer needed
-     */
+
     public void cleanup() {
-        cleanupTimers();
-        if (currentDialog != null && currentDialog.isShowing()) {
-            currentDialog.dismiss();
-        }
+        handler.removeCallbacksAndMessages(null);
+        if (currentDialog != null && currentDialog.isShowing()) currentDialog.dismiss();
+        currentDialog = null;
     }
 }

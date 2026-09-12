@@ -175,8 +175,7 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
 
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(dialogView);
-        Window window = dialog.getWindow();
-        if (window != null) window.setBackgroundDrawableResource(android.R.color.transparent);
+        com.grepguru.zenlock.ui.Popups.size(dialog);
 
         dialogView.findViewById(R.id.durationCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.durationSet).setOnClickListener(v -> {
