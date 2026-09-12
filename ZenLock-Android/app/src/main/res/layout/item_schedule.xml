@@ -1,185 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scheduleCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="4dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="6dp"
-    app:cardBackgroundColor="@color/surface">
+    android:layout_marginBottom="8dp"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:background="@drawable/tile_ripple"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- Main Schedule Info (Always Visible) -->
         <LinearLayout
-            android:id="@+id/scheduleCard"
-            android:layout_width="match_parent"
+            android:id="@+id/scheduleInfo"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="6dp"
-            android:gravity="center_vertical"
-            android:background="?android:attr/selectableItemBackground">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <!-- Schedule Info -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/scheduleName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Morning Focus"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/textPrimary" />
-
-                <TextView
-                    android:id="@+id/scheduleTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="06:00"
-                    android:textSize="15sp"
-                    android:textColor="@color/textSecondary"
-                    android:layout_marginTop="3dp" />
-
-            </LinearLayout>
-
-            <!-- Status and Expand Icon -->
-            <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/scheduleStatus"
+                    android:id="@+id/scheduleName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Active"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/green"
-                    android:layout_marginEnd="12dp" />
+                    android:text="Morning Focus"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/textPrimary"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-                <ImageView
-                    android:id="@+id/expandIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_expand"
-                    android:rotation="0"
-                    android:contentDescription="Expand" />
+                <TextView
+                    android:id="@+id/scheduleTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/tag_background"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="7dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:text="Daily"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/primaryLight" />
 
             </LinearLayout>
 
-        </LinearLayout>
-
-        <!-- Expanded Content (Hidden by default) -->
-        <LinearLayout
-            android:id="@+id/expandedContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="18dp"
-            android:background="@color/surface_dark"
-            android:visibility="gone">
-
-            <!-- Schedule Details -->
-            <TextView
-                android:id="@+id/scheduleDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="3 hr focus session"
-                android:textSize="15sp"
-                android:textColor="@color/textPrimary"
-                android:layout_marginBottom="10dp" />
-
-            <!-- Repeat Info -->
-            <TextView
-                android:id="@+id/repeatInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Repeat: Mon, Tue, Wed, Thu, Fri"
-                android:textSize="15sp"
-                android:textColor="@color/textSecondary"
-                android:layout_marginBottom="10dp" />
-
-            <!-- Notification Info -->
-            <TextView
-                android:id="@+id/notificationInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Notify: 5 min before"
-                android:textSize="15sp"
-                android:textColor="@color/textSecondary"
-                android:layout_marginBottom="10dp" />
-
-            <!-- End Time Info -->
-            <TextView
-                android:id="@+id/endTimeInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ends at: 09:00"
-                android:textSize="15sp"
-                android:textColor="@color/textSecondary"
-                android:layout_marginBottom="18dp" />
-
-            <!-- Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="3">
+                android:layout_marginTop="3dp"
+                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/toggleButton"
-                    style="@style/ModernButton.Secondary"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:minHeight="40dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:text="Disable"
-                    android:textSize="13sp"
-                    android:layout_marginEnd="8dp" />
+                <TextView
+                    android:id="@+id/scheduleTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="9:00 AM"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/primaryLight" />
 
-                <Button
-                    android:id="@+id/editButton"
-                    style="@style/ModernButton.Secondary"
+                <TextView
+                    android:id="@+id/scheduleMeta"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:minHeight="40dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:text="Edit"
-                    android:textSize="13sp"
-                    android:layout_marginEnd="8dp" />
-
-                <Button
-                    android:id="@+id/deleteButton"
-                    style="@style/ModernButton.Text"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:minHeight="40dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:text="Delete"
-                    android:textSize="13sp"
-                    android:textColor="@color/error" />
+                    android:layout_marginStart="4dp"
+                    android:text="– 10:30 AM · 1h 30m"
+                    android:textSize="12sp"
+                    android:textColor="@color/textSecondary"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/scheduleSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:theme="@style/AppTheme.Switch" />
+
     </LinearLayout>
 
-</androidx.cardview.widget.CardView> 
+    <LinearLayout
+        android:id="@+id/expandedContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/editButton"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:minHeight="36dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="13sp"
+            android:layout_marginEnd="8dp"
+            android:text="Edit" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteButton"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:minHeight="36dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="13sp"
+            android:text="Delete" />
+
+    </LinearLayout>
+
+</LinearLayout>

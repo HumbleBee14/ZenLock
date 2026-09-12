@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">ZenLock</string>
+    <string name="accessibility_disclosure_title">Accessibility for app blocking</string>
+    <string name="accessibility_disclosure_message">During a session, ZenLock uses Android’s Accessibility Service to detect which app and screen is open, and app interaction events such as taps. This lets ZenLock show the lock screen when you open a blocked app and keep allowed apps available.\n\nApp-access statistics are stored on your device for Insights. ZenLock does not read message contents or typed text, or send this accessibility data to its servers.\n\nDo you agree to this use?</string>
+    <string name="accessibility_disclosure_agree">Agree and open settings</string>
+    <string name="accessibility_disclosure_decline">Not now</string>
+    <string name="accessibility_settings_hint">Turn on ZenLock in the list</string>
     <string name="allowed_apps_title">Allowed apps</string>
     <string name="save_allowed_apps">Save apps · %1$d/%2$d</string>
     <string name="remove_allowed_app">Remove %1$s</string>

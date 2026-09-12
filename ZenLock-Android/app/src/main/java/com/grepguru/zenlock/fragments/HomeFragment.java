@@ -45,9 +45,13 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.grepguru.zenlock.LockScreenActivity;
 import com.grepguru.zenlock.R;
-import com.grepguru.zenlock.utils.AlarmPermissionManager;
+import com.grepguru.zenlock.guards.UnlockMethodGuard;
+import com.grepguru.zenlock.permissions.FeaturePermissions;
+import com.grepguru.zenlock.permissions.PermissionGate;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.ManualStartDelayScheduler;
 
@@ -58,6 +62,7 @@ public class HomeFragment extends Fragment {
     private TextView selectedTimeDisplay;
     private TextView startFocusHint;
     private TextView startDelayValue;
+    private TextView startDelayLabel;
     private View rootContentView;
     private View timeDisplayContainer;
     private View startDelayValueContainer;
@@ -121,6 +126,7 @@ public class HomeFragment extends Fragment {
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
         startFocusHint = view.findViewById(R.id.startFocusHint);
         startDelayValue = view.findViewById(R.id.startDelayValue);
+        startDelayLabel = view.findViewById(R.id.startDelayLabel);
         timeDisplayContainer = view.findViewById(R.id.timeDisplayContainer);
         startDelayValueContainer = view.findViewById(R.id.startDelayValueContainer);
         startDelayChevron = view.findViewById(R.id.startDelayChevron);
@@ -317,6 +323,8 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
             startDelayPicker.setSelectionDividerHeight(0);
         }
+        startDelayPicker.setVerticalFadingEdgeEnabled(true);
+        startDelayPicker.setFadingEdgeLength(dpToPx(56));
     }
 
     private void toggleStartDelayPicker() {
@@ -472,18 +480,21 @@ public class HomeFragment extends Fragment {
         int hour = lockUntilHour != -1 ? lockUntilHour : Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1;
         int minute = lockUntilMinute != -1 ? lockUntilMinute : 0;
 
-        android.app.TimePickerDialog picker = new android.app.TimePickerDialog(
-                requireContext(),
-                (view, selectedHour, selectedMinute) -> {
-                    lockUntilHour = selectedHour;
-                    lockUntilMinute = selectedMinute;
-                    updateLockUntilDisplay();
-                    updateLockButtonState();
-                },
-                hour, minute, false
-        );
-        picker.setTitle("Lock until");
-        picker.show();
+        MaterialTimePicker picker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(hour % 24)
+                .setMinute(minute)
+                .setTitleText("Lock until")
+                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+                .setTheme(R.style.ZenTimePicker)
+                .build();
+        picker.addOnPositiveButtonClickListener(v -> {
+            lockUntilHour = picker.getHour();
+            lockUntilMinute = picker.getMinute();
+            updateLockUntilDisplay();
+            updateLockButtonState();
+        });
+        picker.show(getChildFragmentManager(), "lockUntilPicker");
     }
 
     private void updateLockUntilDisplay() {
@@ -649,6 +660,7 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         }
         startDelayValue.setText(formatStartDelayLabel(selectedStartDelayMinutes));
+        startDelayLabel.setText(selectedStartDelayMinutes > 0 ? "Starts in" : "Starts");
     }
 
     private String formatStartDelayLabel(int minutes) {
@@ -774,10 +786,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void startZenActivation() {
-        startZenActivation(false);
-    }
-
-    private void startZenActivation(boolean unlockWarningAcknowledged) {
         if (isLongPressing) return;
         hideStartDelayPicker();
         if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
@@ -785,17 +793,10 @@ public class HomeFragment extends Fragment {
             Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // Check accessibility permission first
-        if (!isAccessibilityPermissionGranted()) {
-            showAccessibilityDisclosureDialog();
-            return;
-        }
-
-        // Same rule as SettingsFragment.updateUnlockMethodStates(): pin OR partner phone configured.
-        // Show a warning before locking if neither is set, so users know they may get locked out.
-        if (!unlockWarningAcknowledged && !hasAnyUnlockMethodConfigured()) {
-            showNoUnlockMethodWarning();
+        if (!UnlockMethodGuard.isSatisfied(requireContext())) {
+            UnlockMethodGuard.ensure(requireActivity(), "Got it", () -> {
+                if (isAdded()) Toast.makeText(requireContext(), "Hold Start Focus to begin", Toast.LENGTH_SHORT).show();
+            });
             return;
         }
 
@@ -837,21 +838,7 @@ public class HomeFragment extends Fragment {
         longPressHandler.postDelayed(longPressRunnable, ZEN_ACTIVATION_DURATION);
     }
 
-    private boolean hasAnyUnlockMethodConfigured() {
-        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        boolean pinConfigured = !prefs.getString("unlock_pin", "").isEmpty();
-        boolean partnerConfigured = !prefs.getString("partner_phone", "").isEmpty();
-        return pinConfigured || partnerConfigured;
-    }
 
-    private void showNoUnlockMethodWarning() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("⚠️ No unlock method configured")
-                .setMessage("No unlock methods configured! You may get locked out during focus sessions. Please enable at least one unlock method.")
-                .setPositiveButton("Continue anyway", (dialog, which) -> startZenActivation(true))
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 
     private void cancelZenActivation() {
         if (!isLongPressing) return;
@@ -944,30 +931,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void checkAndStartLockService() {
-        // Check overlay permission
-        if (!Settings.canDrawOverlays(getActivity())) {
-            showOverlayPermissionBanner();
-            return;
-        }
-
-        // Check notification blocking permission (non-blocking, just prompts)
-        SharedPreferences preferences = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        if (preferences.getBoolean("block_notifications", true) && !isNotificationListenerEnabled()) {
-            new android.app.AlertDialog.Builder(getActivity())
-                    .setTitle("Notification Access")
-                    .setMessage("Block Notifications is enabled but ZenLock doesn't have Notification Access yet.\n\nWithout this, app notifications can still appear and be used to bypass the lock.\n\nGrant access now?")
-                    .setPositiveButton("Grant", (dialog, which) -> {
-                        startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-                    })
-                    .setNegativeButton("Skip", (dialog, which) -> {
-                        // Continue with session start without notification blocking
-                        proceedWithLockSession(preferences);
-                    })
-                    .setCancelable(false)
-                    .show();
-            return;
-        }
-        proceedWithLockSession(preferences);
+        SharedPreferences preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+        PermissionGate.ensure(requireActivity(),
+                FeaturePermissions.focusSession(requireContext(), selectedStartDelayMinutes > 0),
+                () -> {
+                    if (isAdded()) proceedWithLockSession(preferences);
+                });
     }
 
     private void proceedWithLockSession(SharedPreferences preferences) {
@@ -1021,13 +990,6 @@ public class HomeFragment extends Fragment {
         if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
             updateLockButtonState();
             Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!AlarmPermissionManager.canScheduleExactAlarms(requireContext())) {
-            if (requireActivity() instanceof AppCompatActivity) {
-                AlarmPermissionManager.requestExactAlarmPermission((AppCompatActivity) requireActivity());
-            }
             return;
         }
 
@@ -1087,65 +1049,10 @@ public class HomeFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void showOverlayPermissionBanner() {
-        new AlertDialog.Builder(getActivity())
-                .setTitle("Permission Required")
-                .setMessage("ZenLock needs 'Display over other apps' permission to show the lock screen.\n\nThis allows the app to block access to other apps during focus sessions.")
-                .setPositiveButton("Grant Permission", (dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                    intent.setData(android.net.Uri.fromParts("package", getActivity().getPackageName(), null));
-                    startActivity(intent);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 
-    private void showAccessibilityDisclosureDialog() {
-        SharedPreferences prefs = getActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        boolean hasShownDisclosure = prefs.getBoolean("accessibility_disclosure_shown", false);
 
-        if (!hasShownDisclosure) {
-            new AlertDialog.Builder(getActivity())
-                    .setTitle("Accessibility Permission Required")
-                    .setMessage("ZenLock needs Accessibility Service permission to lock your screen during focus sessions.\n\n" +
-                            "This permission allows the app to:\n" +
-                            "• Prevent access to your device until the timer ends\n" +
-                            "• Enable complete screen lockdown functionality\n\n" +
-                            "No personal data is collected, stored, or transmitted. All data remains on your device.\n\n" +
-                            "You'll be taken to Android Settings to enable this permission.")
-                    .setPositiveButton("Continue", (dialog, which) -> {
-                        prefs.edit().putBoolean("accessibility_disclosure_shown", true).apply();
-                        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-                        Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> {
-                        Toast.makeText(getActivity(), "Accessibility permission is required for screen locking", Toast.LENGTH_LONG).show();
-                    })
-                    .setCancelable(false)
-                    .show();
-        } else {
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-            Toast.makeText(getActivity(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    private boolean isNotificationListenerEnabled() {
-        String enabledListeners = android.provider.Settings.Secure.getString(
-                requireContext().getContentResolver(), "enabled_notification_listeners");
-        return enabledListeners != null && enabledListeners.contains(requireContext().getPackageName());
-    }
 
-    private boolean isAccessibilityPermissionGranted() {
-        AccessibilityManager am = (AccessibilityManager) requireContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
-        if (am != null) {
-            for (AccessibilityServiceInfo service : am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
-                if (service.getId().contains(requireContext().getPackageName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     @Override
     public void onResume() {

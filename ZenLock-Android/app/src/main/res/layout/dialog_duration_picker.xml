@@ -2,39 +2,83 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:padding="24dp"
-    android:background="@color/surface">
-
-    <NumberPicker
-        android:id="@+id/hoursPicker"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:theme="@style/NumberPickerStyle" />
+    android:orientation="vertical"
+    android:background="@drawable/popup_background"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="16dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="hrs"
-        android:textSize="16sp"
-        android:textColor="@color/textPrimary"
-        android:layout_marginHorizontal="16dp" />
+        android:text="Duration"
+        android:textSize="19sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/textPrimary" />
 
-    <NumberPicker
-        android:id="@+id/minutesPicker"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:theme="@style/NumberPickerStyle" />
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
+        <NumberPicker
+            android:id="@+id/hoursPicker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:theme="@style/NumberPickerStyle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="h"
+            android:textSize="15sp"
+            android:textColor="@color/textSecondary"
+            android:layout_marginEnd="16dp" />
+
+        <NumberPicker
+            android:id="@+id/minutesPicker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:theme="@style/NumberPickerStyle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m"
+            android:textSize="15sp"
+            android:textColor="@color/textSecondary" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="min"
-        android:textSize="16sp"
-        android:textColor="@color/textPrimary"
-        android:layout_marginHorizontal="16dp" />
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:gravity="end">
 
-</LinearLayout> 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/durationCancel"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:layout_marginEnd="8dp"
+            android:text="Cancel" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/durationSet"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:text="Set" />
+
+    </LinearLayout>
+
+</LinearLayout>

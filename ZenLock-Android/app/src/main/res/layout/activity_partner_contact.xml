@@ -8,305 +8,132 @@
     android:fillViewport="true"
     android:clipToPadding="false">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         tools:context=".PartnerContactActivity">
 
-        <!-- Header Section -->
         <TextView
             android:id="@+id/headerTitle"
+            style="@style/ModernText.PageTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Accountability Partner"
-            style="@style/ModernText.Heading"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="32dp"/>
+            android:layout_gravity="center_horizontal"
+            android:text="Accountability Partner" />
 
-        <TextView
-            android:id="@+id/headerSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set up trusted contact for emergency unlock"
-            style="@style/ModernText.Caption"
-            app:layout_constraintTop_toBottomOf="@id/headerTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+        <TextView style="@style/Zen.SectionLabel" android:text="Partner" />
 
-        <!-- SMS Option Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/smsCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:layout_constraintTop_toBottomOf="@id/headerSubtitle">
+        <LinearLayout style="@style/Zen.Group">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <!-- SMS Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="SMS Contact"
-                        style="@style/ModernText.Subheading"
-                        android:textColor="@color/textPrimary"/>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/smsToggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch"/>
-
-                </LinearLayout>
-
-                <!-- SMS Description -->
-                <TextView
+            <LinearLayout style="@style/Zen.Row">
+                <TextView style="@style/Zen.RowLabel" android:text="SMS Contact" />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/smsToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Send OTP via SMS to trusted contact"
-                    style="@style/ModernText.Caption"
-                    android:textColor="@color/textSecondary"
-                    android:layout_marginBottom="16dp"/>
-
-                <!-- SMS Warning -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/modern_input_background"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚠️"
-                        android:textSize="16sp"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="SMS charges will apply. OTP valid for 1 hour."
-                        style="@style/ModernText.Caption"
-                        android:textColor="@color/textSecondary"
-                        android:textSize="12sp"/>
-
-                </LinearLayout>
-
-                <!-- Phone Number Input -->
-                <LinearLayout
-                    android:id="@+id/smsInputContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Partner's Phone Number"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textPrimary"
-                        android:layout_marginBottom="8dp"/>
-
-                    <!-- Country Code and Phone Number -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
-
-                        <EditText
-                            android:id="@+id/countryCodeInput"
-                            android:layout_width="80dp"
-                            android:layout_height="48dp"
-                            android:hint="+1"
-                            android:inputType="phone"
-                            android:background="@drawable/modern_input_background"
-                            android:textColor="@color/textPrimary"
-                            android:textColorHint="@color/textHint"
-                            android:padding="12dp"
-                            android:textSize="16sp"
-                            android:gravity="center"
-                            android:layout_marginEnd="8dp"/>
-
-                        <EditText
-                            android:id="@+id/partnerPhoneInput"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:hint="9876543210"
-                            android:inputType="phone"
-                            android:background="@drawable/modern_input_background"
-                            android:textColor="@color/textPrimary"
-                            android:textColorHint="@color/textHint"
-                            android:padding="12dp"
-                            android:textSize="16sp"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="💡 Example: +1 for US, +44 for UK"
-                        style="@style/ModernText.Caption"
-                        android:textColor="@color/textSecondary"
-                        android:layout_marginBottom="12dp"/>
-
-                    <!-- Permission Warning (moved here to be visible above keyboard) -->
-                    <TextView
-                        android:id="@+id/permissionWarning"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="⚠️ SMS permission required. Click here to grant permission."
-                        android:textSize="14sp"
-                        android:textColor="@android:color/holo_orange_dark"
-                        android:background="@drawable/modern_input_background"
-                        android:padding="12dp"
-                        android:layout_marginBottom="12dp"
-                        android:visibility="gone"
-                        android:clickable="true"
-                        android:focusable="true"/>
-
-                    <!-- Test OTP Button -->
-                    <Button
-                        android:id="@+id/testOtpButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="48dp"
-                        android:text="Send Test OTP"
-                        style="@style/ModernButton.Secondary"
-                        android:layout_marginTop="12dp"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:layout_gravity="center_horizontal"
-                        android:visibility="gone"/>
-
-                </LinearLayout>
-
+                    android:theme="@style/AppTheme.Switch" />
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
-
-        <!-- Email Option Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/emailCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:layout_constraintTop_toBottomOf="@id/smsCard">
-
             <LinearLayout
+                android:id="@+id/smsInputContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
 
-                <!-- Email Header -->
+                <View style="@style/Zen.RowDivider" android:layout_marginStart="0dp" android:layout_marginBottom="14dp" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Email Contact"
-                        style="@style/ModernText.Subheading"
-                        android:textColor="@color/textPrimary"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Coming Soon"
-                        style="@style/ModernText.Caption"
-                        android:textColor="@color/accent"
-                        android:background="@drawable/modern_input_background"
-                        android:padding="8dp"
-                        android:textSize="12sp"/>
-
-                </LinearLayout>
-
-                <!-- Email Description -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Send OTP via email to trusted contact"
-                    style="@style/ModernText.Caption"
-                    android:textColor="@color/textSecondary"
-                    android:layout_marginBottom="16dp"/>
-
-                <!-- Email Input -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Partner's Email Address"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textPrimary"
-                        android:layout_marginBottom="8dp"/>
+                    android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/partnerEmailInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:hint="partner@example.com"
-                        android:inputType="textEmailAddress"
-                        android:background="@drawable/modern_input_background"
+                        android:id="@+id/countryCodeInput"
+                        android:layout_width="72dp"
+                        android:layout_height="46dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/zen_field_background"
+                        android:hint="+1"
+                        android:inputType="phone"
+                        android:gravity="center"
+                        android:textSize="15sp"
                         android:textColor="@color/textPrimary"
-                        android:textColorHint="@color/textHint"
-                        android:padding="12dp"
-                        android:textSize="16sp"/>
+                        android:textColorHint="@color/textHint" />
+
+                    <EditText
+                        android:id="@+id/partnerPhoneInput"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/zen_field_background"
+                        android:hint="Phone number"
+                        android:inputType="phone"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:textSize="15sp"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textHint" />
 
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/permissionWarning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:drawableStart="@drawable/ic_warning"
+                    android:drawablePadding="6dp"
+                    android:drawableTint="@color/warning"
+                    android:gravity="center_vertical"
+                    android:textSize="12sp"
+                    android:textColor="@color/textSecondary"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/testOtpButton"
+                    style="@style/ModernButton.Pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minHeight="40dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_gravity="end"
+                    android:text="Send Test OTP"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
-        <!-- Action Buttons -->
-        <Button
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="SMS charges apply. Codes stay valid for 1 hour."
+            android:textSize="12sp"
+            android:textColor="@color/textTertiary" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
+            style="@style/ModernButton.Pill"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="Save"
-            style="@style/ModernButton.Primary"
-            android:layout_marginTop="32dp"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            app:layout_constraintTop_toBottomOf="@id/emailCard"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_height="44dp"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="end"
+            android:text="Save" />
 
         <TextView
             android:id="@+id/playStoreSmsNote"
@@ -317,10 +144,7 @@
             android:textColorLink="@color/primary"
             android:textSize="12sp"
             android:textColor="@color/textSecondary"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/saveButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:visibility="gone" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView> 
+    </LinearLayout>
+</ScrollView>

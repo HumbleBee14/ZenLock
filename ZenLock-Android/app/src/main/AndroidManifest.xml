@@ -64,9 +64,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Permissions Onboarding Activity (First Launch) -->
         <activity
-            android:name=".PermissionsOnboardingActivity"
+            android:name=".WelcomeActivity"
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 

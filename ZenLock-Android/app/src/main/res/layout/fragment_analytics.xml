@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundPrimary"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -66,15 +65,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="20dp">
 
-                <!-- Card Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginBottom="14dp">
 
                     <ImageView
                         android:layout_width="22dp"
@@ -90,205 +88,103 @@
                         android:text="Today's Focus"
                         style="@style/ModernText.SectionTitle"/>
 
-                    <TextView
-                        android:id="@+id/todayTrendIndicator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="vs Yesterday"
-                        android:textSize="11sp"
-                        android:textColor="@color/white"
-                        android:background="@drawable/gradient_accent_badge"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"/>
-
                 </LinearLayout>
 
-                <!-- Stats Row: Sessions + Focus Time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
+                    android:gravity="center_vertical">
 
-                    <!-- Sessions -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@drawable/glass_card_inner"
-                        android:padding="16dp"
-                        android:layout_marginEnd="6dp">
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:id="@+id/todayTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            style="@style/ModernText.MetricLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="FOCUS TIME" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="@color/dividerSubtle"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:id="@+id/todayMobileUsage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/textPrimary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            style="@style/ModernText.MetricLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="PHONE USAGE" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="@color/dividerSubtle"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
 
                         <TextView
                             android:id="@+id/todaySessions"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="28sp"
+                            android:textSize="22sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/textSecondary"
+                            android:fontFamily="sans-serif-medium" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="SESSIONS"
                             style="@style/ModernText.MetricLabel"
-                            android:layout_marginTop="4dp"/>
-
-                    </LinearLayout>
-
-                    <!-- Focus Time -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@drawable/glass_card_inner"
-                        android:padding="16dp"
-                        android:layout_marginStart="6dp">
-
-                        <TextView
-                            android:id="@+id/todayTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0m"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primaryLight"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:ellipsize="end"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="FOCUS TIME"
-                            style="@style/ModernText.MetricLabel"
-                            android:layout_marginTop="4dp"/>
+                            android:layout_marginTop="2dp"
+                            android:text="SESSIONS" />
 
                     </LinearLayout>
 
                 </LinearLayout>
-
-                <!-- Phone Usage / Time Saved Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_inner"
-                    android:padding="14dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_phone"
-                            app:tint="@color/textTertiary"
-                            android:layout_marginEnd="6dp"/>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:id="@+id/todayMobileUsage"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0m"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/textPrimary"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PHONE USAGE"
-                                style="@style/ModernText.MetricLabel"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/dividerSubtle"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_timer"
-                            app:tint="@color/success"
-                            android:layout_marginEnd="6dp"/>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:id="@+id/todayTimeSaved"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0m"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/success"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="TIME SAVED"
-                                style="@style/ModernText.MetricLabel"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Hidden progress bars (keep IDs for Java compatibility) -->
-                <ProgressBar
-                    android:id="@+id/sessionsProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    android:progress="0"
-                    android:max="10"/>
-
-                <ProgressBar
-                    android:id="@+id/timeProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    android:progress="0"
-                    android:max="480"/>
 
             </LinearLayout>
 
@@ -312,12 +208,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingTop="8dp"
+                android:paddingBottom="20dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp">
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/trendsTabs"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="40dp"
                     android:background="@android:color/transparent"
                     app:tabMode="fixed"
                     app:tabGravity="fill"
@@ -336,16 +235,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="visible"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="8dp">
 
                     <!-- Focus Time Card — Indigo accent -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/stat_accent_left_indigo"
-                        android:padding="16dp"
-                        android:layout_marginBottom="12dp">
+                        android:paddingTop="4dp"
+                        android:paddingBottom="14dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -374,13 +272,13 @@
                                 android:layout_height="wrap_content"
                                 android:text="--"
                                 android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/gradient_accent_badge"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/tag_background"
                                 android:paddingStart="8dp"
                                 android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"/>
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
 
                         </LinearLayout>
 
@@ -446,13 +344,17 @@
                     </LinearLayout>
 
                     <!-- Phone Usage Card — Amber accent -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/dividerSubtle" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/stat_accent_left_amber"
-                        android:padding="16dp"
-                        android:layout_marginBottom="16dp">
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -481,13 +383,13 @@
                                 android:layout_height="wrap_content"
                                 android:text="--"
                                 android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/gradient_accent_badge"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="@color/textSecondary"
+                                android:background="@drawable/tag_background"
                                 android:paddingStart="8dp"
                                 android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"/>
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
 
                         </LinearLayout>
 
@@ -553,19 +455,24 @@
                     </LinearLayout>
 
                     <!-- Chart Section -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/dividerSubtle" />
+
                     <TextView
                         android:id="@+id/chartCaption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last 7 days"
-                        style="@style/ModernText.SectionTitle"
-                        android:layout_marginBottom="8dp"/>
+                        style="@style/ModernText.MetricLabel"
+                        android:layout_marginTop="14dp"/>
 
                     <com.github.mikephil.charting.charts.CombinedChart
                         android:id="@+id/trendsChart"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:layout_marginTop="4dp"/>
+                        android:layout_marginTop="8dp"/>
 
                 </LinearLayout>
 
@@ -577,6 +484,70 @@
         <!-- RECENT SESSIONS — Expandable Card  -->
         <!-- ═══════════════════════════════════ -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/mostUsedCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/trendsCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="20dp"
+                android:paddingBottom="12dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Most Used Apps"
+                    style="@style/ModernText.SectionTitle" />
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/mostUsedTabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@android:color/transparent"
+                    app:tabMode="fixed"
+                    app:tabGravity="fill"
+                    app:tabTextColor="@color/textSecondary"
+                    app:tabSelectedTextColor="@color/textPrimary"
+                    app:tabIndicatorColor="@color/primary"
+                    app:tabIndicatorHeight="3dp"
+                    app:tabPaddingStart="0dp"
+                    app:tabPaddingEnd="0dp"
+                    app:tabPaddingTop="0dp"
+                    app:tabPaddingBottom="0dp" />
+
+                <LinearLayout
+                    android:id="@+id/mostUsedList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/mostUsedEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No usage yet"
+                    style="@style/ModernText.Caption"
+                    android:textColor="@color/textTertiary"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
             android:id="@+id/recentSessionsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -585,7 +556,7 @@
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/trendsCard">
+            app:layout_constraintTop_toBottomOf="@id/mostUsedCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -626,7 +597,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         android:id="@+id/recentSessionsText"

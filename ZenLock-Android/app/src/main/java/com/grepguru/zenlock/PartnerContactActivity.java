@@ -1,7 +1,6 @@
 package com.grepguru.zenlock;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,7 +37,7 @@ public class PartnerContactActivity extends AppCompatActivity {
     
     private SwitchCompat smsToggle;
     private LinearLayout smsInputContainer;
-    private EditText partnerPhoneInput, countryCodeInput, partnerEmailInput;
+    private EditText partnerPhoneInput, countryCodeInput;
     private Button saveButton, testOtpButton;
     private TextView permissionWarning;
     private SharedPreferences preferences;
@@ -69,8 +68,8 @@ public class PartnerContactActivity extends AppCompatActivity {
         // Handle system bar insets
         View rootView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
-            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            v.setPadding(0, 0, 0, bottomInset);
+            androidx.core.graphics.Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, bars.top, 0, bars.bottom);
             return insets;
         });
 
@@ -82,7 +81,6 @@ public class PartnerContactActivity extends AppCompatActivity {
         smsInputContainer = findViewById(R.id.smsInputContainer);
         partnerPhoneInput = findViewById(R.id.partnerPhoneInput);
         countryCodeInput = findViewById(R.id.countryCodeInput);
-        partnerEmailInput = findViewById(R.id.partnerEmailInput);
         saveButton = findViewById(R.id.saveButton);
         TextView playStoreSmsNote = findViewById(R.id.playStoreSmsNote);
         playStoreSmsNote.setText(androidx.core.text.HtmlCompat.fromHtml(getString(R.string.play_store_sms_note), androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -119,17 +117,10 @@ public class PartnerContactActivity extends AppCompatActivity {
         boolean smsEnabled = preferences.getBoolean("enable_sms_notifications", false);
         String partnerPhone = preferences.getString("partner_phone", "");
         String countryCode = preferences.getString("partner_country_code", "");
-        String partnerEmail = preferences.getString("partner_email", "");
         
         smsToggle.setChecked(smsEnabled);
         partnerPhoneInput.setText(partnerPhone);
         countryCodeInput.setText(countryCode);
-        partnerEmailInput.setText(partnerEmail);
-        
-        // Disable email input as it's a future feature
-        partnerEmailInput.setEnabled(false);
-        partnerEmailInput.setAlpha(0.5f);
-        partnerEmailInput.setHint("Email feature coming soon...");
         
         // Set default country code if empty
         if (countryCode.isEmpty()) {
@@ -235,7 +226,6 @@ public class PartnerContactActivity extends AppCompatActivity {
         boolean smsEnabled = smsToggle.isChecked();
         String partnerPhone = partnerPhoneInput.getText().toString().trim();
         String countryCode = countryCodeInput.getText().toString().trim();
-        String partnerEmail = partnerEmailInput.getText().toString().trim();
 
         // First check SMS permission if SMS is enabled
         if (smsEnabled && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -259,18 +249,11 @@ public class PartnerContactActivity extends AppCompatActivity {
             return;
         }
 
-        // Validate email if provided
-        if (!partnerEmail.isEmpty() && !isValidEmail(partnerEmail)) {
-            Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         // Save to preferences
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("enable_sms_notifications", smsEnabled);
         editor.putString("partner_phone", partnerPhone);
         editor.putString("partner_country_code", countryCode);
-        editor.putString("partner_email", partnerEmail);
         editor.apply();
 
         // Show success message
@@ -325,7 +308,7 @@ public class PartnerContactActivity extends AppCompatActivity {
             // Show permission warning
             if (permissionWarning != null) {
                 permissionWarning.setVisibility(View.VISIBLE);
-                permissionWarning.setText("⚠️ SMS permission required to send OTP. Click here to grant permission.");
+                permissionWarning.setText("SMS permission needed. Tap to grant.");
                 permissionWarning.setOnClickListener(v -> requestSmsPermission());
             }
             
@@ -345,15 +328,13 @@ public class PartnerContactActivity extends AppCompatActivity {
     }
     
     private void showSmsDisclosure() {
-        // Show disclosure dialog first
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_sms_disclosure, null);
-        
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_sms_disclosure, null);
         Button agreeButton = dialogView.findViewById(R.id.agreeButton);
         Button declineButton = dialogView.findViewById(R.id.declineButton);
-        
-        AlertDialog dialog = builder.setView(dialogView).create();
+
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(dialogView);
+        com.grepguru.zenlock.ui.Popups.size(dialog);
         
         agreeButton.setOnClickListener(v -> {
             userConsentedToSms = true;
@@ -413,13 +394,4 @@ public class PartnerContactActivity extends AppCompatActivity {
         return countryCodePattern.matcher(cleaned).matches();
     }
     
-    private boolean isValidEmail(String email) {
-        // Basic email validation
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-        
-        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-        return emailPattern.matcher(email.trim()).matches();
-    }
 }

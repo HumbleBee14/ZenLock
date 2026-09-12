@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/popup_background"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="16dp">
+
+    <TextView
+        android:id="@+id/unlockTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Unlock"
+        android:textSize="19sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/textPrimary" />
+
+    <LinearLayout
+        android:id="@+id/methodChips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:paddingVertical="4dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="horizontal">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/pinChip"
+            style="@style/ZenChip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="PIN" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/partnerChip"
+            style="@style/ZenChip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Partner" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/methodHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Enter your PIN."
+        android:textSize="13sp"
+        android:lineSpacingExtra="2dp"
+        android:textColor="@color/textSecondary" />
+
+    <LinearLayout
+        android:id="@+id/partnerRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sendCodeButton"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:text="Send code" />
+
+        <TextView
+            android:id="@+id/sendStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:textSize="12sp"
+            android:textColor="@color/textTertiary" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/codeField"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/zen_field_background"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <EditText
+            android:id="@+id/pinInput"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:hint="••••"
+            android:inputType="numberPassword"
+            android:maxLength="4"
+            android:imeOptions="actionDone"
+            android:background="@null"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:letterSpacing="0.4"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textHint" />
+
+        <ImageView
+            android:id="@+id/pinVisibilityToggle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_eye"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Toggle PIN visibility"
+            app:tint="@color/textSecondary" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="12sp"
+        android:textColor="@color/error"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cancelButton"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:layout_marginEnd="8dp"
+            android:text="Cancel" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/unlockButton"
+            style="@style/ModernButton.Pill"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:text="Unlock" />
+
+    </LinearLayout>
+
+</LinearLayout>

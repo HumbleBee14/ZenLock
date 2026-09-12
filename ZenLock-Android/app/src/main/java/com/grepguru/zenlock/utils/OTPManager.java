@@ -198,25 +198,6 @@ public class OTPManager {
         }
     }
 
-    /**
-     * Placeholder for sending OTP via Email.
-     * @param otp The OTP to send.
-     * @return false, as email is not yet implemented.
-     */
-    public boolean sendOTPviaEmail(String otp) { // Removed unused 'email' parameter
-        Toast.makeText(context, "📧 Email support coming soon! Using SMS if available.", Toast.LENGTH_LONG).show();
-        
-        // Fallback to SMS if partner phone is available (as per original logic)
-        String partnerPhone = preferences.getString("partner_phone", "");
-        String countryCode = preferences.getString("partner_country_code", "");
-        
-        if (!partnerPhone.isEmpty()) {
-            Log.d(TAG, "Falling back to SMS for OTP delivery as email is not implemented.");
-            return sendOTPviaSMS(partnerPhone, otp, countryCode);
-        }
-        Log.w(TAG, "Email not implemented and no partner phone for SMS fallback.");
-        return false;
-    }
 
     private String formatPhoneNumber(String phoneNumber, String countryCode) {
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
@@ -377,13 +358,11 @@ public class OTPManager {
      */
     public boolean requestOTPFromPartner() {
         boolean smsEnabled = preferences.getBoolean("enable_sms_notifications", false);
-        // boolean emailEnabled = preferences.getBoolean("enable_email_notifications", false); // Kept for future use
 
         String partnerPhone = preferences.getString("partner_phone", "");
-        // String partnerEmail = preferences.getString("partner_email", ""); // Kept for future use
         String countryCode = preferences.getString("partner_country_code", "");
 
-        if (!smsEnabled) { // Currently, only SMS is fully implemented
+        if (!smsEnabled) {
             Toast.makeText(context, "⚠️ SMS notifications not enabled. Configure in settings.", Toast.LENGTH_LONG).show();
             Log.w(TAG, "OTP request failed: SMS notifications not enabled.");
             return false;
@@ -400,9 +379,6 @@ public class OTPManager {
                 anySuccess = sendOTPviaSMS(partnerPhone, otp, countryCode);
             }
         }
-
-        // Future: Add email logic here if emailEnabled and !anySuccess
-        // if (emailEnabled && !anySuccess) { ... }
 
         if (!anySuccess) {
             clearOTP(); // Clear OTP if all sending attempts failed

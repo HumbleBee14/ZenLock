@@ -8,6 +8,8 @@
     <!-- Modern Minimal Color Palette -->
     <!-- Primary Colors (Refined Slate-Blue — calm, confident, SaaS-grade) -->
     <color name="primary">#4263EB</color>           <!-- Slate-blue, less candy than indigo -->
+    <color name="primaryTonal">#334263EB</color>
+    <color name="primaryRipple">#404263EB</color>
     <color name="primaryDark">#364FC7</color>       <!-- Deeper slate for pressed states -->
     <color name="primaryLight">#5C7CFA</color>      <!-- Soft slate-blue for highlights -->
 
@@ -38,6 +40,7 @@
     <color name="textHint">#939CA8</color>          <!-- Hint text - darker gray -->
     
     <!-- Surface Colors (Cards & Components) -->
+    <color name="navBackground">#EB121416</color>
     <color name="surface">#1C1F23</color>           <!-- Card backgrounds -->
     <color name="surfaceElevated">#25292E</color>   <!-- Elevated cards -->
     <color name="surfaceHighlight">#343A41</color>  <!-- Highlighted surfaces -->

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp">
+
+    <FrameLayout
+        android:id="@+id/welcomeHero"
+        android:layout_width="260dp"
+        android:layout_height="260dp">
+
+        <View
+            android:id="@+id/welcomeGlow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/welcome_glow" />
+
+        <ImageView
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher_foreground"
+            android:contentDescription="ZenLock" />
+
+    </FrameLayout>
+
+    <TextView
+        style="@style/ModernText.Display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="ZenLock" />
+
+    <TextView
+        style="@style/ModernText.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Put the phone down. Keep the day."
+        android:textColor="@color/textSecondary" />
+
+</LinearLayout>

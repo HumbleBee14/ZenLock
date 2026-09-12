@@ -5,9 +5,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundPrimary"
     tools:context=".MainActivity">
 
-    <!-- FrameLayout for Loading Fragments -->
+    <ImageView
+        android:id="@+id/ambientMark"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:src="@mipmap/ic_launcher_monochrome"
+        android:alpha="0.09"
+        android:translationY="64dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
@@ -20,12 +32,12 @@
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bottom_nav_background_premium"
+        android:background="@drawable/bottom_nav_background"
         android:elevation="0dp"
-        app:labelVisibilityMode="labeled"
-        app:itemIconSize="24dp"
+        app:labelVisibilityMode="unlabeled"
+        app:itemIconSize="28dp"
+        app:itemRippleColor="@color/primaryRipple"
         app:itemIconTint="@drawable/navigation_item_selector"
-        app:itemTextColor="@drawable/navigation_item_selector"
         app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

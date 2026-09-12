@@ -22,11 +22,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/sessionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Focus"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:textAllCaps="true"
+                android:letterSpacing="0.12"
+                android:textColor="@color/textTertiary"
+                android:maxLines="1"
+                android:ellipsize="end" />
             <FrameLayout
                 android:id="@+id/timerContainer"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="4dp">
                 <TextView
                     android:id="@+id/timerCountdown"
                     android:layout_width="wrap_content"
@@ -42,18 +55,39 @@
                     android:autoSizeMinTextSize="36sp"
                     android:autoSizeMaxTextSize="64sp" />
             </FrameLayout>
+            <FrameLayout
+                android:id="@+id/timerProgressTrack"
+                android:layout_width="200dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/hairline_track"
+                android:visibility="gone">
+                <View
+                    android:id="@+id/timerProgressFill"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/hairline_fill" />
+            </FrameLayout>
+            <TextView
+                android:id="@+id/endsAtText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Ends at 10:30 AM"
+                android:textSize="13sp"
+                android:textColor="@color/textSecondary" />
             <TextView
                 android:id="@+id/lockscreenMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Stay focused, stay productive!"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textColor="@color/textSecondary"
                 android:fontFamily="sans-serif-light"
                 android:lineSpacingMultiplier="1.3"
                 android:gravity="center"
                 android:maxLines="3"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp" />
             <ImageView
@@ -77,37 +111,19 @@
                 android:alpha="0.0">
                 <Button
                     android:id="@+id/unlockPromptButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Unlock"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="0dp"
-                    android:layout_weight="1" />
+                    style="@style/ModernButton.Pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="Unlock" />
                 <Space
-                    android:layout_width="16dp"
+                    android:layout_width="12dp"
                     android:layout_height="wrap_content" />
                 <Button
                     android:id="@+id/extendLockButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Extend"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="0dp"
-                    android:layout_weight="1" />
+                    style="@style/ModernButton.Pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="Extend" />
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/unlockInputsContainer"
@@ -154,18 +170,10 @@
                 </LinearLayout>
                 <Button
                     android:id="@+id/unlockButton"
+                    style="@style/ModernButton.Pill"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Confirm Unlock"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="8dp" />
+                    android:layout_height="44dp"
+                    android:text="Confirm Unlock" />
             </LinearLayout>
         </LinearLayout>
         <Space
@@ -176,18 +184,20 @@
             android:id="@+id/parentAppsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/defaultAppsRecycler"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="vertical"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/group_background"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
                 android:clipToPadding="false"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone"
-                android:layout_marginTop="8dp" />
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:visibility="gone" />
             <LinearLayout
                 android:id="@+id/noAppsContainer"
                 android:layout_width="match_parent"
@@ -197,32 +207,22 @@
                 android:visibility="gone"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="24dp"
-                android:layout_marginTop="20dp">
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:layout_marginTop="12dp">
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:src="@drawable/ic_apps"
-                    android:alpha="0.4"
+                    android:alpha="0.5"
                     app:tint="@color/textSecondary"
-                    android:layout_marginBottom="16dp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No Apps Allowed"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/textPrimary"
                     android:layout_marginBottom="8dp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All apps are currently blocked.\nConfigure allowed apps in Settings."
+                    android:text="No apps allowed"
                     android:textSize="14sp"
-                    android:textColor="@color/textSecondary"
-                    android:gravity="center"
-                    android:lineSpacingExtra="2dp" />
+                    android:textColor="@color/textSecondary" />
             </LinearLayout>
         </LinearLayout>
         <LinearLayout

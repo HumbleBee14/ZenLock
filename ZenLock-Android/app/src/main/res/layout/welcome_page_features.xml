@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="28dp"
+    android:paddingEnd="28dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Focus, your way"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/textPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="16dp"
+        android:text="Everything you need. Nothing that pulls you back."
+        android:textSize="14sp"
+        android:gravity="center"
+        android:textColor="@color/textSecondary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <LinearLayout
+            style="@style/Zen.FeatureTile"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="0dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_lock"
+                app:tint="@color/primaryLight"
+                android:contentDescription="@null" />
+
+            <TextView
+                style="@style/Zen.FeatureTitle"
+                android:text="Lock it" />
+
+            <TextView
+                style="@style/Zen.FeatureText"
+                android:text="For 25 minutes, or every weekday morning on a schedule." />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Zen.FeatureTile"
+            android:layout_marginEnd="0dp"
+            android:layout_marginStart="6dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_phone"
+                app:tint="@color/primaryLight"
+                android:contentDescription="@null" />
+
+            <TextView
+                style="@style/Zen.FeatureTitle"
+                android:text="Essentials stay" />
+
+            <TextView
+                style="@style/Zen.FeatureText"
+                android:text="Phone, Clock and Calendar, plus up to 8 apps you pick." />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <LinearLayout
+            style="@style/Zen.FeatureTile"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="0dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_person"
+                app:tint="@color/primaryLight"
+                android:contentDescription="@null" />
+
+            <TextView
+                style="@style/Zen.FeatureTitle"
+                android:text="No easy exit" />
+
+            <TextView
+                style="@style/Zen.FeatureText"
+                android:text="A PIN or a trusted partner decides when you end early." />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Zen.FeatureTile"
+            android:layout_marginEnd="0dp"
+            android:layout_marginStart="6dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_heart"
+                app:tint="@color/primaryLight"
+                android:contentDescription="@null" />
+
+            <TextView
+                style="@style/Zen.FeatureTitle"
+                android:text="Free, always" />
+
+            <TextView
+                style="@style/Zen.FeatureText"
+                android:text="Open source. No ads, no tracking, no upsell." />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

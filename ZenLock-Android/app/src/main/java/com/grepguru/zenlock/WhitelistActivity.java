@@ -296,6 +296,15 @@ public class WhitelistActivity extends AppCompatActivity {
         }
     }
 
+    private float dp(int value) {
+        return value * getResources().getDisplayMetrics().density;
+    }
+
+    private static android.graphics.drawable.Drawable ownCopy(android.graphics.drawable.Drawable icon) {
+        if (icon == null || icon.getConstantState() == null) return icon;
+        return icon.getConstantState().newDrawable().mutate();
+    }
+
     private void updateSelectedAppsBar() {
         findViewById(R.id.selectedAppsCard).setVisibility(selectedApps.isEmpty() ? View.GONE : View.VISIBLE);
         selectedAppsContainer.removeAllViews();
@@ -305,10 +314,15 @@ public class WhitelistActivity extends AppCompatActivity {
             SelectableAppModel model = appModelMap.get(packageName);
             Chip chip = new Chip(this);
             chip.setText(model == null ? packageName : model.getAppName());
+            chip.setTextSize(13f);
             chip.setTextColor(getColor(R.color.textPrimary));
-            chip.setChipBackgroundColorResource(R.color.surface);
+            chip.setChipBackgroundColorResource(R.color.backgroundTertiary);
+            chip.setChipStrokeWidth(0f);
+            chip.setChipCornerRadius(dp(18));
+            chip.setChipIconSize(dp(22));
+            chip.setEnsureMinTouchTargetSize(false);
             chip.setCloseIconTintResource(R.color.textSecondary);
-            if (model != null) chip.setChipIcon(model.getIcon());
+            if (model != null) chip.setChipIcon(ownCopy(model.getIcon()));
             chip.setChipIconVisible(model != null);
             chip.setCloseIconVisible(true);
             chip.setCloseIconContentDescription(getString(R.string.remove_allowed_app, chip.getText()));
@@ -319,7 +333,10 @@ public class WhitelistActivity extends AppCompatActivity {
                 RecyclerView.Adapter<?> adapter = recyclerView.getAdapter();
                 if (adapter != null) adapter.notifyDataSetChanged();
             });
-            selectedAppsContainer.addView(chip);
+            LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            chipParams.setMarginEnd((int) dp(8));
+            selectedAppsContainer.addView(chip, chipParams);
         }
     }
 

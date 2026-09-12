@@ -22,13 +22,21 @@ public class MainActivity extends AppCompatActivity {
     
     private static final String TAG = "MainActivity";
     private ActivityResultLauncher<String> notificationPermissionLauncher;
+    private android.view.View ambientMark;
+    private final android.os.Handler ambientHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final java.util.Random ambientRandom = new java.util.Random();
+    private final Runnable ambientBreath = this::breatheAmbientMark;
+    private static final float AMBIENT_ALPHA = 0.09f;
+    private float touchDownX;
+    private float touchDownY;
+    private final Runnable reviewCheck = () -> com.grepguru.zenlock.utils.ReviewPrompter.showIfDue(this);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        if (!PermissionsOnboardingActivity.hasSeenOnboarding(this)) {
-            startActivity(new Intent(this, PermissionsOnboardingActivity.class));
+        if (WelcomeActivity.shouldShow(this)) {
+            startActivity(new Intent(this, WelcomeActivity.class));
             finish();
             return;
         }
@@ -42,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         initializeAnalytics();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        ambientMark = findViewById(R.id.ambientMark);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new HomeFragment()).commit();
@@ -69,7 +78,58 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     
-    /** Keep all tabs below the status bar and cutouts with consistent breathing room. */
+    @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent event) {
+        if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+            touchDownX = event.getRawX();
+            touchDownY = event.getRawY();
+        } else if (event.getActionMasked() == android.view.MotionEvent.ACTION_UP && ambientMark != null) {
+            float slop = android.view.ViewConfiguration.get(this).getScaledTouchSlop();
+            boolean tap = Math.abs(event.getRawX() - touchDownX) < slop && Math.abs(event.getRawY() - touchDownY) < slop;
+            if (tap && isOverAmbientMark(event.getRawX(), event.getRawY())) glowAmbientMark(0.4f, 450, 1500);
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    private boolean isOverAmbientMark(float rawX, float rawY) {
+        int[] location = new int[2];
+        ambientMark.getLocationOnScreen(location);
+        float insetX = ambientMark.getWidth() * 0.22f;
+        float insetY = ambientMark.getHeight() * 0.18f;
+        return rawX > location[0] + insetX && rawX < location[0] + ambientMark.getWidth() - insetX
+                && rawY > location[1] + insetY && rawY < location[1] + ambientMark.getHeight() - insetY;
+    }
+
+    private void scheduleAmbientBreath() {
+        ambientHandler.removeCallbacks(ambientBreath);
+        ambientHandler.postDelayed(ambientBreath, 6000 + ambientRandom.nextInt(14000));
+    }
+
+    private void breatheAmbientMark() {
+        glowAmbientMark(0.18f + ambientRandom.nextFloat() * 0.08f, 1800, 2600);
+        scheduleAmbientBreath();
+    }
+
+    private void glowAmbientMark(float peak, long riseMs, long fallMs) {
+        if (ambientMark == null) return;
+        ambientMark.animate().cancel();
+        ambientMark.animate().alpha(peak).setDuration(riseMs)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .withEndAction(() -> ambientMark.animate().alpha(AMBIENT_ALPHA).setDuration(fallMs)
+                        .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator()).start())
+                .start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ambientHandler.removeCallbacksAndMessages(null);
+        if (ambientMark != null) {
+            ambientMark.animate().cancel();
+            ambientMark.setAlpha(AMBIENT_ALPHA);
+        }
+    }
+
     private void applyContentInsets() {
         android.view.View content = findViewById(R.id.fragmentContainer);
         int topGutter = Math.round(12 * getResources().getDisplayMetrics().density);
@@ -140,10 +200,6 @@ public class MainActivity extends AppCompatActivity {
             
             scheduleActivator.scheduleAllSchedules();
             Log.d(TAG, "Schedule activation process completed");
-
-            if (new com.grepguru.zenlock.utils.ScheduleManager(this).hasEnabledSchedules()) {
-                com.grepguru.zenlock.utils.BatteryOptimizationManager.showScheduleReliabilityDialogIfNeeded(this);
-            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to activate schedules", e);
         }
@@ -168,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (ambientMark != null) scheduleAmbientBreath();
         // Enforce lock: if locked, redirect to lock screen and prevent access
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         boolean isLocked = preferences.getBoolean("isLocked", false);
@@ -176,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(lockIntent);
             finish();
+            return;
         }
+        ambientHandler.postDelayed(reviewCheck, 2000);
     }
 }

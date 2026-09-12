@@ -29,9 +29,19 @@ import com.grepguru.zenlock.utils.ScheduleManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
 import com.grepguru.zenlock.CreateScheduleDialog;
+import com.grepguru.zenlock.guards.UnlockMethodGuard;
+import com.grepguru.zenlock.permissions.FeaturePermissions;
+import com.grepguru.zenlock.permissions.PermissionGate;
+
+import com.grepguru.zenlock.utils.ScheduleTimes;
+import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Schedule Fragment - Manages zen lock schedules
@@ -53,6 +63,14 @@ public class ScheduleFragment extends Fragment {
     // Empty state
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
+    private LinearLayout templateList;
+    private TextView upNextName;
+    private TextView upNextTime;
+    private TextView upNextCountdown;
+    private LinearLayout weekStrip;
+    private final android.os.Handler ticker = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable tick = this::refreshOverview;
+    private static final String[] DAY_LETTERS = {"S", "M", "T", "W", "T", "F", "S"};
     
     @Nullable
     @Override
@@ -81,9 +99,133 @@ public class ScheduleFragment extends Fragment {
         // RecyclerView
         schedulesRecyclerView = view.findViewById(R.id.schedulesRecyclerView);
         
-        // Empty state
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
         emptyStateText = view.findViewById(R.id.emptyStateText);
+        templateList = view.findViewById(R.id.templateList);
+        upNextName = view.findViewById(R.id.upNextName);
+        upNextTime = view.findViewById(R.id.upNextTime);
+        upNextCountdown = view.findViewById(R.id.upNextCountdown);
+        weekStrip = view.findViewById(R.id.weekStrip);
+        buildWeekStrip();
+        buildTemplates();
+    }
+
+    private void buildWeekStrip() {
+        weekStrip.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (int day = Calendar.MONDAY; day <= Calendar.MONDAY + 6; day++) {
+            int dayOfWeek = ((day - 1) % 7) + 1;
+            View item = inflater.inflate(R.layout.item_week_day, weekStrip, false);
+            ((TextView) item.findViewById(R.id.dayLabel)).setText(DAY_LETTERS[dayOfWeek - 1]);
+            item.setTag(dayOfWeek);
+            weekStrip.addView(item);
+        }
+    }
+
+    private void buildTemplates() {
+        templateList.removeAllViews();
+        Set<Integer> weekdays = new HashSet<>(Arrays.asList(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY));
+        ScheduleModel[] templates = {
+                template("Morning deep work", 9, 0, 120, ScheduleModel.RepeatType.WEEKLY, weekdays),
+                template("Lunch break", 13, 0, 45, ScheduleModel.RepeatType.WEEKLY, weekdays),
+                template("Wind down", 22, 0, 60, ScheduleModel.RepeatType.DAILY, new HashSet<>())};
+        for (ScheduleModel model : templates) {
+            Chip chip = new Chip(requireContext(), null, R.style.ZenChip);
+            chip.setChipBackgroundColorResource(R.color.backgroundTertiary);
+            chip.setChipStrokeWidth(0f);
+            chip.setTextColor(requireContext().getColor(R.color.textPrimary));
+            chip.setCheckable(false);
+            chip.setEnsureMinTouchTargetSize(false);
+            chip.setText(model.getName() + "  ·  " + model.getFormattedStartTime() + "  ·  " + model.getFormattedDuration());
+            chip.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(38));
+            params.bottomMargin = dp(8);
+            chip.setLayoutParams(params);
+            chip.setOnClickListener(v -> showCreateScheduleDialog(model));
+            templateList.addView(chip);
+        }
+    }
+
+    private ScheduleModel template(String name, int hour, int minute, int duration, ScheduleModel.RepeatType repeat, Set<Integer> days) {
+        ScheduleModel model = new ScheduleModel();
+        model.setName(name);
+        model.setStartHour(hour);
+        model.setStartMinute(minute);
+        model.setFocusDurationMinutes(duration);
+        model.setRepeatType(repeat);
+        model.setRepeatDays(days);
+        return model;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private void refreshOverview() {
+        ticker.removeCallbacks(tick);
+        if (!isAdded()) return;
+        Calendar now = Calendar.getInstance();
+        ScheduleModel nextSchedule = null;
+        Calendar nextTime = null;
+        Set<Integer> activeDays = new HashSet<>();
+        for (ScheduleModel schedule : schedules) {
+            if (!schedule.isEnabled()) continue;
+            Calendar trigger = ScheduleTimes.next(schedule, now);
+            if (trigger == null) continue;
+            if (nextTime == null || trigger.before(nextTime)) {
+                nextTime = trigger;
+                nextSchedule = schedule;
+            }
+            switch (schedule.getRepeatType()) {
+                case DAILY: for (int d = 1; d <= 7; d++) activeDays.add(d); break;
+                case WEEKLY: activeDays.addAll(schedule.getRepeatDays()); break;
+                default: activeDays.add(trigger.get(Calendar.DAY_OF_WEEK));
+            }
+        }
+
+        if (nextSchedule == null) {
+            upNextName.setText("Nothing scheduled");
+            upNextCountdown.setVisibility(View.GONE);
+            upNextTime.setVisibility(View.GONE);
+        } else {
+            upNextName.setText(nextSchedule.getName());
+            upNextCountdown.setVisibility(View.VISIBLE);
+            upNextTime.setVisibility(View.VISIBLE);
+            upNextCountdown.setText(countdown(nextTime.getTimeInMillis() - now.getTimeInMillis()));
+            upNextTime.setText(dayLabel(now, nextTime) + " · " + nextSchedule.getFormattedStartTime() + " · " + nextSchedule.getFormattedDuration());
+            long untilNextMinute = 60000 - (now.getTimeInMillis() % 60000);
+            ticker.postDelayed(tick, untilNextMinute + 50);
+        }
+
+        int today = now.get(Calendar.DAY_OF_WEEK);
+        for (int i = 0; i < weekStrip.getChildCount(); i++) {
+            View item = weekStrip.getChildAt(i);
+            int dayOfWeek = (Integer) item.getTag();
+            TextView label = item.findViewById(R.id.dayLabel);
+            label.setTextColor(requireContext().getColor(dayOfWeek == today ? R.color.textPrimary : R.color.textTertiary));
+            item.findViewById(R.id.dayDot).setVisibility(activeDays.contains(dayOfWeek) ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    private static String countdown(long millis) {
+        long minutes = Math.max(0, millis / 60000);
+        if (minutes < 60) return "in " + Math.max(1, minutes) + "m";
+        long hours = minutes / 60;
+        if (hours < 24) return "in " + hours + "h " + (minutes % 60) + "m";
+        long days = hours / 24;
+        return "in " + days + "d " + (hours % 24) + "h";
+    }
+
+    private static String dayLabel(Calendar now, Calendar target) {
+        Calendar tomorrow = (Calendar) now.clone();
+        tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+        if (sameDay(now, target)) return "Today";
+        if (sameDay(tomorrow, target)) return "Tomorrow";
+        return new java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault()).format(target.getTime());
+    }
+
+    private static boolean sameDay(Calendar a, Calendar b) {
+        return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR);
     }
     
     private void setupRecyclerView() {
@@ -91,40 +233,49 @@ public class ScheduleFragment extends Fragment {
         scheduleAdapter = new ScheduleAdapter(schedules, new ScheduleAdapter.ScheduleListener() {
             @Override
             public void onToggleSchedule(ScheduleModel schedule) {
-                boolean wasEnabled = schedule.isEnabled();
-                scheduleManager.toggleSchedule(schedule.getId());
-                
-                // Get updated schedule
-                ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
-                if (updatedSchedule != null) {
-                    if (updatedSchedule.isEnabled()) {
-                        // Schedule was enabled, activate it
-                        scheduleActivator.scheduleSchedule(updatedSchedule);
-                        Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
-                        com.grepguru.zenlock.utils.BatteryOptimizationManager.showScheduleReliabilityDialogIfNeeded(requireContext());
-                    } else {
-                        // Schedule was disabled, cancel it
-                        scheduleActivator.cancelSchedule(updatedSchedule);
-                        Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
-                    }
+                if (schedule.isEnabled()) {
+                    toggleSchedule(schedule);
+                } else {
+                    UnlockMethodGuard.ensure(requireActivity(), "Enable anyway", () ->
+                            PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+                                if (isAdded()) toggleSchedule(schedule);
+                            }));
                 }
-                
-                loadSchedules();
             }
-            
+
             @Override
             public void onEditSchedule(ScheduleModel schedule) {
                 showEditScheduleDialog(schedule);
             }
-            
+
             @Override
             public void onDeleteSchedule(ScheduleModel schedule) {
                 showDeleteConfirmation(schedule);
             }
         });
-        
+
         schedulesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         schedulesRecyclerView.setAdapter(scheduleAdapter);
+    }
+
+    private void toggleSchedule(ScheduleModel schedule) {
+        scheduleManager.toggleSchedule(schedule.getId());
+        
+        // Get updated schedule
+        ScheduleModel updatedSchedule = scheduleManager.getScheduleById(schedule.getId());
+        if (updatedSchedule != null) {
+            if (updatedSchedule.isEnabled()) {
+                // Schedule was enabled, activate it
+                scheduleActivator.scheduleSchedule(updatedSchedule);
+                Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+            } else {
+                // Schedule was disabled, cancel it
+                scheduleActivator.cancelSchedule(updatedSchedule);
+                Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+            }
+        }
+        
+        loadSchedules();
     }
     
     private void setupCreateButton() {
@@ -147,7 +298,7 @@ public class ScheduleFragment extends Fragment {
             scheduleAdapter.notifyDataSetChanged();
             
             updateEmptyState();
-            Log.d(TAG, "Schedules loaded: " + schedules.size());
+            refreshOverview();
         } catch (Exception e) {
             Log.e(TAG, "Error loading schedules", e);
             Toast.makeText(requireContext(), "Error loading schedules: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -158,7 +309,7 @@ public class ScheduleFragment extends Fragment {
         if (schedules.isEmpty()) {
             emptyStateLayout.setVisibility(View.VISIBLE);
             schedulesRecyclerView.setVisibility(View.GONE);
-            emptyStateText.setText("No schedules created yet.\nTap 'Create Schedule' to get started!");
+            emptyStateText.setText("No schedules yet");
         } else {
             emptyStateLayout.setVisibility(View.GONE);
             schedulesRecyclerView.setVisibility(View.VISIBLE);
@@ -166,12 +317,19 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void showCreateScheduleDialog() {
-        // Check permissions before allowing schedule creation
-        if (!checkSchedulePermissions()) {
-            return; // Don't show dialog if permissions not granted
-        }
-        
+        showCreateScheduleDialog(null);
+    }
+
+    private void showCreateScheduleDialog(ScheduleModel template) {
+        UnlockMethodGuard.ensure(requireActivity(), "Create anyway", () ->
+                PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+                    if (isAdded()) openCreateScheduleDialog(template);
+                }));
+    }
+
+    private void openCreateScheduleDialog(ScheduleModel template) {
         CreateScheduleDialog dialog = new CreateScheduleDialog();
+        dialog.setTemplate(template);
         dialog.setScheduleListener(new CreateScheduleDialog.ScheduleListener() {
             @Override
             public void onScheduleCreated(ScheduleModel schedule) {
@@ -201,7 +359,6 @@ public class ScheduleFragment extends Fragment {
                 if (newSchedule.isEnabled()) {
                     scheduleActivator.scheduleSchedule(newSchedule);
                     Toast.makeText(requireContext(), "Schedule created and activated: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
-                    com.grepguru.zenlock.utils.BatteryOptimizationManager.showScheduleReliabilityDialogIfNeeded(requireContext());
                 } else {
                     Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
                 }
@@ -255,67 +412,15 @@ public class ScheduleFragment extends Fragment {
             return;
         }
 
-        loadSchedules(); // Refresh when returning to fragment
+        loadSchedules();
     }
 
-    private boolean checkSchedulePermissions() {
-        // Check accessibility permission first (most critical)
-        if (!isAccessibilityPermissionGranted()) {
-            showSchedulePermissionBanner("Accessibility Service", "ZenLock needs Accessibility Service permission to enforce screen locking during focus sessions. Without this, users can bypass the lock screen.");
-            return false;
-        }
-        
-        // Check overlay permission (Display over other apps)
-        if (!Settings.canDrawOverlays(requireContext())) {
-            showSchedulePermissionBanner("Display over other apps", "ZenLock needs this permission to display the lock screen over other apps during scheduled focus sessions.");
-            return false;
-        }
-        
-        // Check exact alarm permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            android.app.AlarmManager alarmManager = (android.app.AlarmManager) requireContext().getSystemService(android.content.Context.ALARM_SERVICE);
-            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                showSchedulePermissionBanner("Exact alarms", "ZenLock needs this permission to ensure your focus sessions begin at the scheduled time.");
-                return false;
-            }
-        }
-        
-        return true;
+    @Override
+    public void onPause() {
+        super.onPause();
+        ticker.removeCallbacks(tick);
     }
+
     
-    private boolean isAccessibilityPermissionGranted() {
-        android.view.accessibility.AccessibilityManager am = (android.view.accessibility.AccessibilityManager) requireContext().getSystemService(android.content.Context.ACCESSIBILITY_SERVICE);
-        if (am != null) {
-            for (android.accessibilityservice.AccessibilityServiceInfo service : am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
-                if (service.getId().contains(requireContext().getPackageName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     
-    private void showSchedulePermissionBanner(String permissionName, String reason) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Permission Required for Schedules")
-                .setMessage(permissionName + " permission is required for scheduled focus sessions.\n\n" + reason)
-                .setPositiveButton("Grant Permission", (dialog, which) -> {
-                    if (permissionName.contains("Accessibility Service")) {
-                        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                        startActivity(intent);
-                        Toast.makeText(requireContext(), "Please enable Accessibility for ZenLock", Toast.LENGTH_SHORT).show();
-                    } else if (permissionName.contains("Display over other apps")) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
-                        startActivity(intent);
-                    } else if (permissionName.contains("Exact alarms")) {
-                        // Open exact alarm permission settings
-                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                        intent.setData(android.net.Uri.fromParts("package", requireContext().getPackageName(), null));
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 }

@@ -52,8 +52,7 @@ public class AnalyticsFragment extends Fragment {
 
     // Today's stats views
     private TextView todaySessions, todayTime;
-    private TextView todayTrendIndicator, todayMobileUsage, todayTimeSaved;
-    private ProgressBar sessionsProgress, timeProgress;
+    private TextView todayMobileUsage;
 
     // Expandable sections
     private LinearLayout recentSessionsHeader, recentSessionsContent;
@@ -70,6 +69,10 @@ public class AnalyticsFragment extends Fragment {
     private TextView usagePermissionBanner;
     
     private TabLayout trendsTabs;
+    private TabLayout mostUsedTabs;
+    private LinearLayout mostUsedList;
+    private TextView mostUsedEmpty;
+    private int mostUsedPeriod = com.grepguru.zenlock.utils.TopAppsUsage.TODAY;
     private TextView currentFocusTime, previousFocusTime, currentMobileUsage, previousMobileUsage;
     private TextView focusChange, mobileChange;
     private TextView currentFocusLabel, previousFocusLabel, currentMobileLabel, previousMobileLabel, chartCaption;
@@ -109,8 +112,7 @@ public class AnalyticsFragment extends Fragment {
         // Setup expandable sections
         setupExpandableSections();
         setupTrendsTabs();
-        
-        // Setup usage permission banner
+        setupMostUsedTabs();
         setupUsagePermissionBanner();
 
         // Pre-populate recent mobile usage data and store yesterday's data
@@ -140,8 +142,65 @@ public class AnalyticsFragment extends Fragment {
         // Check if user granted permission while away
         checkPermissionStatusOnResume();
         
-        // Force refresh mobile usage data every time analytics page is opened
         refreshMobileUsageData();
+        loadMostUsed();
+    }
+
+    private void setupMostUsedTabs() {
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Today"));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Week"));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Month"));
+        mostUsedTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                mostUsedPeriod = tab.getPosition();
+                loadMostUsed();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    private void loadMostUsed() {
+        if (!analyticsManager.hasUsageStatsPermission()) {
+            showMostUsed(java.util.Collections.emptyList(), "Allow usage access to see your most used apps");
+            return;
+        }
+        int period = mostUsedPeriod;
+        new Thread(() -> {
+            List<com.grepguru.zenlock.utils.TopAppsUsage.Entry> entries =
+                    com.grepguru.zenlock.utils.TopAppsUsage.top(requireContext(), period, 10);
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
+                if (isAdded() && period == mostUsedPeriod) showMostUsed(entries, "No usage yet");
+            });
+        }).start();
+    }
+
+    private void showMostUsed(List<com.grepguru.zenlock.utils.TopAppsUsage.Entry> entries, String emptyText) {
+        mostUsedList.removeAllViews();
+        if (entries.isEmpty()) {
+            mostUsedEmpty.setText(emptyText);
+            mostUsedEmpty.setVisibility(View.VISIBLE);
+            return;
+        }
+        mostUsedEmpty.setVisibility(View.GONE);
+        long max = entries.get(0).timeMs;
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (com.grepguru.zenlock.utils.TopAppsUsage.Entry entry : entries) {
+            View row = inflater.inflate(R.layout.item_top_app, mostUsedList, false);
+            ((ImageView) row.findViewById(R.id.topAppIcon)).setImageDrawable(entry.icon);
+            ((TextView) row.findViewById(R.id.topAppName)).setText(entry.label);
+            ((TextView) row.findViewById(R.id.topAppTime)).setText(formatTime(entry.timeMs / 60000));
+            View bar = row.findViewById(R.id.topAppBar);
+            bar.setPivotX(0f);
+            bar.setScaleX(max > 0 ? Math.max(0.02f, (float) entry.timeMs / max) : 0f);
+            mostUsedList.addView(row);
+        }
     }
 
     private void initializeViews(View view) {
@@ -149,13 +208,8 @@ public class AnalyticsFragment extends Fragment {
         // Today's stats
         todaySessions = view.findViewById(R.id.todaySessions);
         todayTime = view.findViewById(R.id.todayTime);
-        todayTrendIndicator = view.findViewById(R.id.todayTrendIndicator);
         todayMobileUsage = view.findViewById(R.id.todayMobileUsage);
-        todayTimeSaved = view.findViewById(R.id.todayTimeSaved);
 
-        // Progress bars
-        sessionsProgress = view.findViewById(R.id.sessionsProgress);
-        timeProgress = view.findViewById(R.id.timeProgress);
 
 
         // Recent sessions expandable section
@@ -171,6 +225,9 @@ public class AnalyticsFragment extends Fragment {
         usagePermissionBanner = view.findViewById(R.id.usagePermissionBanner);
         
         trendsTabs = view.findViewById(R.id.trendsTabs);
+        mostUsedTabs = view.findViewById(R.id.mostUsedTabs);
+        mostUsedList = view.findViewById(R.id.mostUsedList);
+        mostUsedEmpty = view.findViewById(R.id.mostUsedEmpty);
         currentFocusTime = view.findViewById(R.id.currentFocusTime);
         previousFocusTime = view.findViewById(R.id.previousFocusTime);
         currentMobileUsage = view.findViewById(R.id.currentMobileUsage);
@@ -521,16 +578,7 @@ public class AnalyticsFragment extends Fragment {
         // Observe today's stats with LiveData
         analyticsManager.getTodayStatsLive().observe(getViewLifecycleOwner(), todayStats -> {
             if (todayStats != null) {
-                // Get yesterday's stats for comparison
-                DailyStatsEntity yesterdayStats = analyticsManager.getYesterdayStats();
-                
-                // Update today's stats with real data
-        updateTodayStats(
-                    todayStats.totalSessions,
-                    todayStats.totalFocusTime / (1000 * 60), // Convert to minutes
-                    (int) todayStats.avgFocusScore,
-                    yesterdayStats
-                );
+                updateTodayStats(todayStats.totalSessions, todayStats.totalFocusTime / (1000 * 60));
             }
             // Don't show default values - let the UI show existing data until real data loads
         });
@@ -613,7 +661,7 @@ public class AnalyticsFragment extends Fragment {
         return (int) Math.min((actualMinutes * 100) / weeklyGoalMinutes, 100);
     }
 
-    private void updateTodayStats(int sessions, long focusTimeMinutes, int focusScore, DailyStatsEntity yesterdayStats) {
+    private void updateTodayStats(int sessions, long focusTimeMinutes) {
         if (todaySessions != null) todaySessions.setText(String.valueOf(sessions));
 
         if (todayTime != null) {
@@ -628,22 +676,7 @@ public class AnalyticsFragment extends Fragment {
 
 
 
-        // Update progress bars
-        if (sessionsProgress != null) {
-            sessionsProgress.setProgress(Math.min(sessions, 10)); // Goal: 10 sessions
-        }
-        if (timeProgress != null) {
-            timeProgress.setProgress((int) Math.min(focusTimeMinutes, 480)); // Goal: 8 hours
-        }
-
-
-        // Update trend indicator with today vs yesterday comparison
-        if (todayTrendIndicator != null) {
-            updateTrendIndicator(sessions, focusTimeMinutes, focusScore, yesterdayStats);
-        }
-        
-        // Update mobile usage and time saved
-        updateMobileUsageDisplay(focusTimeMinutes);
+        updateMobileUsageDisplay();
     }
     
     private void refreshMobileUsageData() {
@@ -674,7 +707,7 @@ public class AnalyticsFragment extends Fragment {
         }).start();
     }
     
-    private void updateMobileUsageDisplay(long focusTimeMinutes) {
+    private void updateMobileUsageDisplay() {
         // Get real mobile usage data using DailyMobileUsageManager for efficiency
         new Thread(() -> {
             try {
@@ -695,17 +728,6 @@ public class AnalyticsFragment extends Fragment {
                                 todayMobileUsage.setText("0m");
                             }
                         }
-                        
-                        // Calculate and update time saved in hours
-                        if (todayTimeSaved != null) {
-                            // Time saved = focus time (actual hours focused)
-                            // If no sessions, show 0
-                            if (focusTimeMinutes > 0) {
-                                todayTimeSaved.setText(formatTime(focusTimeMinutes));
-                            } else {
-                                todayTimeSaved.setText("0m");
-                            }
-                        }
                     });
                 }
             } catch (Exception e) {
@@ -723,39 +745,6 @@ public class AnalyticsFragment extends Fragment {
         }).start();
     }
     
-    private void updateTrendIndicator(int todaySessions, long todayFocusTime, int todayFocusScore, DailyStatsEntity yesterdayStats) {
-        if (yesterdayStats == null) {
-            // No comparison data available
-            todayTrendIndicator.setText("📊 First Day");
-            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-            return;
-        }
-        
-        // Calculate percentage change in focus time
-        long yesterdayFocusTime = yesterdayStats.totalFocusTime / (1000 * 60); // Convert to minutes
-        double changePercentage = 0;
-        
-        if (yesterdayFocusTime > 0) {
-            changePercentage = ((double) (todayFocusTime - yesterdayFocusTime) / yesterdayFocusTime) * 100;
-        } else if (todayFocusTime > 0) {
-            changePercentage = 100; // 100% increase from 0
-        }
-        
-        // Update trend indicator with proper color coding
-        if (changePercentage > 10) {
-            // Increase in focus time (good) - show in green
-            todayTrendIndicator.setText(String.format("↗️ +%.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
-        } else if (changePercentage > -10) {
-            // Similar performance
-            todayTrendIndicator.setText("→ Similar");
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-            } else {
-            // Decrease in focus time (bad) - show in red
-            todayTrendIndicator.setText(String.format("↘️ %.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
-        }
-    }
 
     
     
@@ -837,14 +826,6 @@ public class AnalyticsFragment extends Fragment {
         }
     }
     
-    private View createSessionView(SessionEntity session) {
-        // Create a simple session item view
-        // For now, return null to keep existing mock data
-        // This would be implemented with proper session item layout
-        return null;
-    }
-
-    
     private String formatTime(long minutes) {
         if (minutes < 60) {
             return minutes + "m";
@@ -859,91 +840,10 @@ public class AnalyticsFragment extends Fragment {
         }
     }
     
-    private void updateRecentSessions() {
-        List<AnalyticsModels.FocusSession> recentSessions = analyticsManager.getRecentSessions(10);
-        
-        if (recentSessions.isEmpty()) {
-            if (recentSessionsText != null) {
-                recentSessionsText.setText("No sessions yet. Start your first focus session!");
-                recentSessionsText.setVisibility(View.VISIBLE);
-            }
-            if (recentSessionsContainer != null) {
-                recentSessionsContainer.setVisibility(View.GONE);
-            }
-        } else {
-            if (recentSessionsText != null) {
-                recentSessionsText.setVisibility(View.GONE);
-            }
-            if (recentSessionsContainer != null) {
-                recentSessionsContainer.setVisibility(View.VISIBLE);
-                displayRecentSessions(recentSessions);
-            }
-        }
-    }
-    
-    private void displayRecentSessions(List<AnalyticsModels.FocusSession> sessions) {
-        if (recentSessionsContainer == null) return;
-        
-        recentSessionsContainer.removeAllViews();
-        
-        for (AnalyticsModels.FocusSession session : sessions) {
-            View sessionView = createSessionView(session);
-            recentSessionsContainer.addView(sessionView);
-        }
-    }
-    
     private int dpToPx(int dp) {
         return (int) (dp * requireContext().getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    private View createSessionView(AnalyticsModels.FocusSession session) {
-        LinearLayout sessionItem = new LinearLayout(requireContext());
-        sessionItem.setOrientation(LinearLayout.HORIZONTAL);
-        sessionItem.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12));
-        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
-        
-        // Session info
-        LinearLayout infoLayout = new LinearLayout(requireContext());
-        infoLayout.setOrientation(LinearLayout.VERTICAL);
-        infoLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        
-        // Session time
-        TextView timeText = new TextView(requireContext());
-        timeText.setText(formatSessionTime(session.getStartTime()));
-        timeText.setTextSize(16);
-        timeText.setTextColor(requireContext().getColor(R.color.textPrimary));
-        timeText.setTypeface(null, android.graphics.Typeface.BOLD);
-        
-        // Session duration
-        TextView durationText = new TextView(requireContext());
-        durationText.setText(formatDuration(session.getActualDuration()));
-        durationText.setTextSize(14);
-        durationText.setTextColor(requireContext().getColor(R.color.textSecondary));
-        
-        // Status indicator
-        TextView statusText = new TextView(requireContext());
-        statusText.setText(session.isCompleted() ? "✓ Completed" : "✗ Interrupted");
-        statusText.setTextSize(12);
-        statusText.setTextColor(requireContext().getColor(session.isCompleted() ? R.color.success : R.color.error));
-        statusText.setTypeface(null, android.graphics.Typeface.BOLD);
-
-        infoLayout.addView(timeText);
-        infoLayout.addView(durationText);
-        infoLayout.addView(statusText);
-
-        sessionItem.addView(infoLayout);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(0, 0, 0, dpToPx(8));
-        sessionItem.setLayoutParams(params);
-
-        return sessionItem;
-    }
-    
-    
     private String formatDuration(long milliseconds) {
         long minutes = milliseconds / (1000 * 60);
         if (minutes < 60) {
@@ -985,87 +885,68 @@ public class AnalyticsFragment extends Fragment {
     
     
     private View createRealSessionView(SessionEntity session) {
-        // Create a session item view using the existing layout pattern
-        LinearLayout sessionItem = new LinearLayout(requireContext());
-        sessionItem.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-        sessionItem.setOrientation(LinearLayout.HORIZONTAL);
-        sessionItem.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        sessionItem.setBackgroundResource(R.drawable.glass_card_inner);
-        sessionItem.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+        int statusColor = requireContext().getColor(
+                session.completed ? R.color.success : session.isPartial() ? R.color.secondary : R.color.warning);
 
-        LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) sessionItem.getLayoutParams();
-        marginParams.bottomMargin = dpToPx(8);
-        sessionItem.setLayoutParams(marginParams);
-        
-        // Session status icon
-        TextView statusIcon = new TextView(requireContext());
-        statusIcon.setText(session.completed ? "✓" : (session.isPartial() ? "~" : "✗"));
-        statusIcon.setTextSize(16);
-        statusIcon.setTextColor(requireContext().getColor(
-            session.completed ? R.color.success : 
-            session.isPartial() ? R.color.secondary : R.color.warning
-        ));
-        statusIcon.setGravity(android.view.Gravity.CENTER);
-        statusIcon.setLayoutParams(new LinearLayout.LayoutParams(dpToPx(24), dpToPx(24)));
-        LinearLayout.LayoutParams iconParams = (LinearLayout.LayoutParams) statusIcon.getLayoutParams();
-        iconParams.rightMargin = dpToPx(12);
-        statusIcon.setLayoutParams(iconParams);
-        sessionItem.addView(statusIcon);
-        
-        // Session info section
-        LinearLayout infoLayout = new LinearLayout(requireContext());
-        infoLayout.setOrientation(LinearLayout.VERTICAL);
-        infoLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        row.setPadding(dpToPx(4), dpToPx(10), dpToPx(4), dpToPx(10));
+        row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        View dot = new View(requireContext());
+        android.graphics.drawable.GradientDrawable dotShape = new android.graphics.drawable.GradientDrawable();
+        dotShape.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        dotShape.setColor(statusColor);
+        dot.setBackground(dotShape);
+        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dpToPx(8), dpToPx(8));
+        dotParams.rightMargin = dpToPx(12);
+        row.addView(dot, dotParams);
+
+        LinearLayout info = new LinearLayout(requireContext());
+        info.setOrientation(LinearLayout.VERTICAL);
         TextView timeText = new TextView(requireContext());
         timeText.setText(formatSessionTime(session.startTime));
-        timeText.setTextSize(16);
+        timeText.setTextSize(14);
         timeText.setTextColor(requireContext().getColor(R.color.textPrimary));
-        infoLayout.addView(timeText);
-        
+        info.addView(timeText);
         TextView sourceText = new TextView(requireContext());
-        sourceText.setText(session.source.startsWith("schedule:") ? 
-            session.source.substring(9) : "Focus Session");
+        sourceText.setText(session.source.startsWith("schedule:") ? session.source.substring(9) : "Focus Session");
         sourceText.setTextSize(12);
         sourceText.setTextColor(requireContext().getColor(R.color.textSecondary));
-        infoLayout.addView(sourceText);
-        
-        sessionItem.addView(infoLayout);
-        
-        // Duration and status section
-        LinearLayout durationLayout = new LinearLayout(requireContext());
-        durationLayout.setOrientation(LinearLayout.VERTICAL);
-        durationLayout.setGravity(android.view.Gravity.END);
-        durationLayout.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-        
+        sourceText.setMaxLines(1);
+        sourceText.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        info.addView(sourceText);
+        row.addView(info, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+        LinearLayout right = new LinearLayout(requireContext());
+        right.setOrientation(LinearLayout.VERTICAL);
+        right.setGravity(android.view.Gravity.END);
         TextView durationText = new TextView(requireContext());
         durationText.setText(session.getFormattedDuration());
-        durationText.setTextSize(16);
-        durationText.setTypeface(null, android.graphics.Typeface.BOLD);
+        durationText.setTextSize(14);
+        durationText.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         durationText.setTextColor(requireContext().getColor(R.color.textPrimary));
-        durationLayout.addView(durationText);
-        
+        right.addView(durationText);
         TextView statusText = new TextView(requireContext());
-        statusText.setText(session.completed ? "Completed" : 
-            session.isPartial() ? "Partial" : "Interrupted");
-        statusText.setTextSize(12);
-        statusText.setTextColor(requireContext().getColor(
-            session.completed ? R.color.success : 
-            session.isPartial() ? R.color.secondary : R.color.warning
-        ));
-        durationLayout.addView(statusText);
-        
-        sessionItem.addView(durationLayout);
-        
-        return sessionItem;
+        statusText.setText(session.completed ? "Completed" : session.isPartial() ? "Partial" : "Interrupted");
+        statusText.setTextSize(11);
+        statusText.setTextColor(statusColor);
+        right.addView(statusText);
+        LinearLayout.LayoutParams rightParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rightParams.leftMargin = dpToPx(12);
+        row.addView(right, rightParams);
+
+        LinearLayout wrapper = new LinearLayout(requireContext());
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+        wrapper.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        wrapper.addView(row);
+        View divider = new View(requireContext());
+        divider.setBackgroundColor(requireContext().getColor(R.color.dividerSubtle));
+        wrapper.addView(divider, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(1)));
+        return wrapper;
     }
-    
+
     private String formatSessionTime(long timestamp) {
         Date date = new Date(timestamp);
         Date today = new Date();
