@@ -53,20 +53,22 @@ public class LockScreenLauncher {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
             
-            // Build notification
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            boolean fullScreenAllowed = notificationManager != null
+                && (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE || notificationManager.canUseFullScreenIntent());
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_lock)
                 .setContentTitle("Focus Session Started")
                 .setContentText("Tap to open " + scheduleName + " (" + durationMinutes + " min)")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setAutoCancel(true)
+                .setAutoCancel(fullScreenAllowed)
+                .setOngoing(!fullScreenAllowed)
                 .setContentIntent(contentPendingIntent)
-                .setFullScreenIntent(fullScreenPendingIntent, true) // This should launch the activity automatically
+                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            
-            // Show notification
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
             if (notificationManager != null) {
                 notificationManager.notify(scheduleId, builder.build());
                 Log.d(TAG, "Focus session notification shown for: " + scheduleName);
@@ -115,20 +117,32 @@ public class LockScreenLauncher {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(
+                context,
+                BLOCKER_NOTIFICATION_ID + 1,
+                lockIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            boolean fullScreenAllowed = notificationManager != null
+                && (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE || notificationManager.canUseFullScreenIntent());
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_lock)
                 .setContentTitle("ZenLock Active")
-                .setContentText("Focus session in progress")
+                .setContentText(fullScreenAllowed ? "Focus session in progress" : "Tap to return to your focus session")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(true)
+                .setOngoing(!fullScreenAllowed)
+                .setContentIntent(contentPendingIntent)
                 .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
                 notificationManager.notify(BLOCKER_NOTIFICATION_ID, builder.build());
-                Log.d(TAG, "Blocker notification with full-screen intent shown");
+                Log.d(TAG, "Blocker notification shown, fullScreenAllowed=" + fullScreenAllowed);
             }
         } catch (Exception e) {
             Log.e(TAG, "Failed to launch blocker notification fallback", e);

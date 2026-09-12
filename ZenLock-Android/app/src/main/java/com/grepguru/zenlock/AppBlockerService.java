@@ -90,6 +90,11 @@ public class AppBlockerService extends AccessibilityService {
     private AnalyticsManager analyticsManager;
     private SharedPreferences sessionPreferences;
     private final android.os.Handler sessionHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable verifyLockScreen = () -> {
+        if (LockScreenActivity.isActive()) return;
+        if (!getSharedPreferences("FocusLockPrefs", MODE_PRIVATE).getBoolean("isLocked", false)) return;
+        LockScreenLauncher.launchFromBlocker(this);
+    };
     private final Runnable activateSession = () -> {
         if (sessionPreferences == null) return;
         if (!sessionPreferences.getString("current_session_source", "").startsWith("schedule:")) return;
@@ -100,10 +105,14 @@ public class AppBlockerService extends AccessibilityService {
             if (!LockScreenActivity.isActive()) {
                 Intent launch = new Intent(this, LockScreenActivity.class);
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                try {
-                    startActivity(launch);
-                } catch (RuntimeException blocked) {
+                if (!MiuiUtils.canStartActivityFromBackground(this)) {
                     LockScreenLauncher.launchFromBlocker(this);
+                } else {
+                    try {
+                        startActivity(launch);
+                    } catch (RuntimeException blocked) {
+                        LockScreenLauncher.launchFromBlocker(this);
+                    }
                 }
             }
         }
@@ -206,8 +215,6 @@ public class AppBlockerService extends AccessibilityService {
         }
         
         if (!isAllowed) {
-            // Aggressively show overlay and lock screen
-            OverlayLockService.showOverlay(this); // Ensure overlay is shown instantly
             launchLockScreen();
         } else {
             // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting
@@ -227,9 +234,6 @@ public class AppBlockerService extends AccessibilityService {
                 return;
             }
 
-            // Always show overlay first — this works even when startActivity is blocked
-            OverlayLockService.showOverlay(this);
-
             // On MIUI/HyperOS, startActivity() from background is silently blocked
             // unless "Display pop-up windows while running in background" is enabled.
             // Use full-screen intent notification as fallback which MIUI does NOT block.
@@ -242,6 +246,8 @@ public class AppBlockerService extends AccessibilityService {
             Intent intent = new Intent(this, LockScreenActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            sessionHandler.removeCallbacks(verifyLockScreen);
+            sessionHandler.postDelayed(verifyLockScreen, 1500);
         } catch (Exception e) {
             Log.e("AppBlockerService", "Failed to launch LockScreenActivity, trying notification fallback", e);
             // Fallback for any OEM that silently blocks without throwing

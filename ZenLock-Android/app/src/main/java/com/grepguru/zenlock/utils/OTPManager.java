@@ -90,8 +90,7 @@ public class OTPManager {
 
         boolean isValid = storedOTP.equals(otpToVerify);
         if (isValid) {
-            // Security: Don't log actual OTP values
-            // Log.d(TAG, "OTP verified successfully: " + otpToVerify);
+            clearOTP();
         } else {
             // Security: Don't log actual OTP values in production
             // Log.w(TAG, "Verification failed: OTP mismatch. Expected: " + storedOTP + ", Got: " + otpToVerify);
@@ -216,7 +215,7 @@ public class OTPManager {
 
 
         if (!cleaned.matches("^\\+?\\d+$") && !cleaned.matches("^\\d+$")) { // Allows optional plus at start, then digits
-             Log.e(TAG, "Phone number contains invalid characters after cleaning: " + cleaned + " (Original: " + phoneNumber + ")");
+             Log.e(TAG, "Phone number contains invalid characters after cleaning: " + maskPhoneNumber(cleaned) + " (Original: " + maskPhoneNumber(phoneNumber) + ")");
              return null;
         }
         
@@ -224,11 +223,11 @@ public class OTPManager {
         String checkableNumber = cleaned.startsWith("+") ? cleaned.substring(1) : cleaned;
 
         if (checkableNumber.length() < 7 && !startsWithPlus) { // Stricter for local, bit more lenient for full intl numbers
-            Log.e(TAG, "Phone number too short: " + checkableNumber.length() + " digits. Original: " + phoneNumber);
+            Log.e(TAG, "Phone number too short: " + checkableNumber.length() + " digits. Original: " + maskPhoneNumber(phoneNumber));
             return null;
         }
         if (checkableNumber.length() > 15) {
-            Log.e(TAG, "Phone number too long: " + checkableNumber.length() + " digits. Original: " + phoneNumber);
+            Log.e(TAG, "Phone number too long: " + checkableNumber.length() + " digits. Original: " + maskPhoneNumber(phoneNumber));
             return null;
         }
 

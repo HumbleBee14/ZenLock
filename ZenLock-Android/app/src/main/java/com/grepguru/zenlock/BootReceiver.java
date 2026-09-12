@@ -33,7 +33,7 @@ public class BootReceiver extends BroadcastReceiver {
             // Check if there was an active lock session before restart
             SharedPreferences prefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
             boolean isLocked = prefs.getBoolean("isLocked", false);
-            boolean autoRestart = prefs.getBoolean("auto_restart", false);
+            boolean autoRestart = prefs.getBoolean("auto_restart", true);
             long lockEndTime = prefs.getLong("lockEndTime", 0);
             long currentTime = System.currentTimeMillis();
             
@@ -44,18 +44,19 @@ public class BootReceiver extends BroadcastReceiver {
             
             // Only restart lock if it was active, auto-restart is enabled, and time hasn't expired
             if (isLocked && autoRestart && lockEndTime > currentTime) {
-                // Start overlay lock service
-                Intent overlayIntent = new Intent(context, OverlayLockService.class);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    context.startForegroundService(overlayIntent);
-                } else {
-                    context.startService(overlayIntent);
-                }
                 // Bring up lock screen activity
                 Intent lockIntent = new Intent(context, LockScreenActivity.class);
                 lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                context.startActivity(lockIntent);
-                Log.d(TAG, "Lock session active after boot: started overlay and lock screen");
+                if (!com.grepguru.zenlock.utils.MiuiUtils.canStartActivityFromBackground(context)) {
+                    LockScreenLauncher.launchFromBlocker(context);
+                } else {
+                    try {
+                        context.startActivity(lockIntent);
+                    } catch (RuntimeException blocked) {
+                        LockScreenLauncher.launchFromBlocker(context);
+                    }
+                }
+                Log.d(TAG, "Lock session active after boot: started lock screen");
             } else if (isLocked && !autoRestart) {
                 // Clear lock if auto-restart is disabled
                 SharedPreferences.Editor editor = prefs.edit();
