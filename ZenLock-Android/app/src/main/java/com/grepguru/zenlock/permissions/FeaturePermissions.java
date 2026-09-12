@@ -9,9 +9,9 @@ public final class FeaturePermissions {
 
     public static PermissionRequest focusSession(Context context, boolean delayedStart) {
         PermissionRequest.Builder builder = PermissionRequest.titled("To start a focus session")
+                .action("Start session")
                 .require(AppPermission.ACCESSIBILITY)
-                .require(AppPermission.OVERLAY)
-                .require(AppPermission.NOTIFICATIONS);
+                .require(AppPermission.OVERLAY);
         if (delayedStart) builder.require(AppPermission.EXACT_ALARM);
         if (blocksNotifications(context)) builder.recommend(AppPermission.NOTIFICATION_ACCESS);
         builder.recommend(AppPermission.XIAOMI_BACKGROUND_POPUP);
@@ -20,9 +20,9 @@ public final class FeaturePermissions {
 
     public static PermissionRequest schedule(Context context) {
         PermissionRequest.Builder builder = PermissionRequest.titled("To run scheduled sessions")
+                .action("Create schedule")
                 .require(AppPermission.ACCESSIBILITY)
                 .require(AppPermission.OVERLAY)
-                .require(AppPermission.NOTIFICATIONS)
                 .require(AppPermission.EXACT_ALARM)
                 .require(AppPermission.XIAOMI_BACKGROUND_POPUP)
                 .recommend(AppPermission.UNRESTRICTED_BATTERY);
@@ -32,6 +32,7 @@ public final class FeaturePermissions {
 
     public static PermissionRequest notificationBlocking() {
         return PermissionRequest.titled("To block notifications")
+                .action("Turn on")
                 .require(AppPermission.NOTIFICATION_ACCESS)
                 .build();
     }

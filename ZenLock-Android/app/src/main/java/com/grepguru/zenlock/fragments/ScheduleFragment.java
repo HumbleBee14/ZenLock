@@ -29,6 +29,7 @@ import com.grepguru.zenlock.utils.ScheduleManager;
 import com.grepguru.zenlock.utils.ScheduleActivator;
 import com.grepguru.zenlock.ui.adapter.ScheduleAdapter;
 import com.grepguru.zenlock.CreateScheduleDialog;
+import com.grepguru.zenlock.guards.UnlockMethodGuard;
 import com.grepguru.zenlock.permissions.FeaturePermissions;
 import com.grepguru.zenlock.permissions.PermissionGate;
 
@@ -96,9 +97,10 @@ public class ScheduleFragment extends Fragment {
                 if (schedule.isEnabled()) {
                     toggleSchedule(schedule);
                 } else {
-                    PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
-                        if (isAdded()) toggleSchedule(schedule);
-                    });
+                    UnlockMethodGuard.ensure(requireActivity(), "Enable anyway", () ->
+                            PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+                                if (isAdded()) toggleSchedule(schedule);
+                            }));
                 }
             }
 
@@ -168,7 +170,7 @@ public class ScheduleFragment extends Fragment {
         if (schedules.isEmpty()) {
             emptyStateLayout.setVisibility(View.VISIBLE);
             schedulesRecyclerView.setVisibility(View.GONE);
-            emptyStateText.setText("No schedules created yet.\nTap 'Create Schedule' to get started!");
+            emptyStateText.setText("No schedules yet");
         } else {
             emptyStateLayout.setVisibility(View.GONE);
             schedulesRecyclerView.setVisibility(View.VISIBLE);
@@ -176,9 +178,10 @@ public class ScheduleFragment extends Fragment {
     }
     
     private void showCreateScheduleDialog() {
-        PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
-            if (isAdded()) openCreateScheduleDialog();
-        });
+        UnlockMethodGuard.ensure(requireActivity(), "Create anyway", () ->
+                PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
+                    if (isAdded()) openCreateScheduleDialog();
+                }));
     }
 
     private void openCreateScheduleDialog() {

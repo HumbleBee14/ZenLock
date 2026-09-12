@@ -9,8 +9,8 @@
 
     <NumberPicker
         android:id="@+id/startDelayPicker"
-        android:layout_width="82dp"
-        android:layout_height="148dp"
+        android:layout_width="96dp"
+        android:layout_height="168dp"
         android:descendantFocusability="blocksDescendants"
         android:theme="@style/NumberPickerDarkTheme" />
 

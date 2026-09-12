@@ -25,10 +25,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
+import com.grepguru.zenlock.permissions.AppPermission;
 import com.grepguru.zenlock.permissions.FeaturePermissions;
+import com.grepguru.zenlock.utils.NotificationPermissionManager;
 import com.grepguru.zenlock.permissions.PermissionGate;
+import com.grepguru.zenlock.quotes.QuotesSheet;
 
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.WhitelistActivity;
@@ -37,6 +42,7 @@ public class SettingsFragment extends Fragment {
 
     private SwitchCompat autoRestartToggle, vibrationToggle, blockNotificationsToggle;
     private SwitchCompat quotesToggle, circularTimerToggle, persistentNotificationToggle;
+    private ImageView addQuoteButton;
 
     // Individual default app toggles
     private SwitchCompat phoneAppToggle, calendarAppToggle, clockAppToggle;
@@ -54,12 +60,16 @@ public class SettingsFragment extends Fragment {
     private ImageView defaultAppsExpandIcon;
     
     private SharedPreferences preferences;
+    private final ActivityResultLauncher<String> notificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) preferences.edit().putBoolean("persistent_notification", true).apply();
+                syncNotificationToggle();
+            });
     
     // Enhanced unlock UI elements
-    private Button configurePinButton, clearPinButton;
     private Button accountabilityPartnerButton;
     private SwitchCompat pinUnlockToggle, partnerUnlockToggle;
-    private LinearLayout pinConfigSection, partnerConfigSection;
+    private LinearLayout partnerConfigSection;
     private LinearLayout noUnlockMethodsWarning;
 
     // Allow Launcher/Home Screen during Lock toggle
@@ -100,8 +110,6 @@ public class SettingsFragment extends Fragment {
         defaultAppsExpandIcon = view.findViewById(R.id.defaultAppsExpandIcon);
 
         // Enhanced unlock UI elements
-        configurePinButton = view.findViewById(R.id.configurePinButton);
-        clearPinButton = view.findViewById(R.id.clearPinButton);
         accountabilityPartnerButton = view.findViewById(R.id.accountabilityPartnerButton);
         
         // Toggle switches for unlock methods
@@ -114,7 +122,6 @@ public class SettingsFragment extends Fragment {
         clockAppToggle = view.findViewById(R.id.clockAppToggle);
         
         // Expandable sections
-        pinConfigSection = view.findViewById(R.id.pinConfigSection);
         partnerConfigSection = view.findViewById(R.id.partnerConfigSection);
         
         // Warning message
@@ -127,6 +134,9 @@ public class SettingsFragment extends Fragment {
         // Load existing settings
         quotesToggle = view.findViewById(R.id.quotesToggle);
         quotesToggle.setChecked(preferences.getBoolean("show_quotes", true));
+        addQuoteButton = view.findViewById(R.id.addQuoteButton);
+        addQuoteButton.setVisibility(quotesToggle.isChecked() ? View.VISIBLE : View.GONE);
+        addQuoteButton.setOnClickListener(v -> QuotesSheet.show(requireActivity()));
         circularTimerToggle = view.findViewById(R.id.circularTimerToggle);
         circularTimerToggle.setChecked("circular".equals(preferences.getString("timer_style", "digital")));
         
@@ -137,7 +147,7 @@ public class SettingsFragment extends Fragment {
         
         // Load security settings
         persistentNotificationToggle = view.findViewById(R.id.persistentNotificationToggle);
-        persistentNotificationToggle.setChecked(preferences.getBoolean("persistent_notification", true));
+        syncNotificationToggle();
         
         // Load auto-restart setting
         autoRestartToggle.setChecked(preferences.getBoolean("auto_restart", true));
@@ -177,14 +187,18 @@ public class SettingsFragment extends Fragment {
 
         // Block Notifications toggle (default ON)
         blockNotificationsToggle = view.findViewById(R.id.blockNotificationsToggle);
-        blockNotificationsToggle.setChecked(preferences.getBoolean("block_notifications", true));
+        syncBlockNotificationsToggle();
         blockNotificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("block_notifications", isChecked);
-            editor.apply();
-            if (isChecked) {
-                PermissionGate.ensure(requireActivity(), FeaturePermissions.notificationBlocking(), null);
+            if (isChecked && !AppPermission.NOTIFICATION_ACCESS.isGranted(requireContext())) {
+                blockNotificationsToggle.setChecked(false);
+                PermissionGate.ensure(requireActivity(), FeaturePermissions.notificationBlocking(), () -> {
+                    if (!isAdded()) return;
+                    preferences.edit().putBoolean("block_notifications", true).apply();
+                    syncBlockNotificationsToggle();
+                });
+                return;
             }
+            preferences.edit().putBoolean("block_notifications", isChecked).apply();
         });
 
         // Allow Launcher/Home Screen during Lock toggle
@@ -213,9 +227,8 @@ public class SettingsFragment extends Fragment {
 
         // Toggle Motivational Quotes
         quotesToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("show_quotes", isChecked);
-            editor.apply();
+            preferences.edit().putBoolean("show_quotes", isChecked).apply();
+            addQuoteButton.setVisibility(isChecked ? View.VISIBLE : View.GONE);
         });
 
         // Toggle Circular Timer
@@ -246,9 +259,11 @@ public class SettingsFragment extends Fragment {
         
         // Security settings listeners
         persistentNotificationToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("persistent_notification", isChecked);
-            editor.apply();
+            if (isChecked && !NotificationPermissionManager.hasNotificationPermission(requireContext())) {
+                requestNotificationPermission();
+                return;
+            }
+            preferences.edit().putBoolean("persistent_notification", isChecked).apply();
         });
 
         // Security level selection
@@ -284,17 +299,11 @@ public class SettingsFragment extends Fragment {
         // PIN Unlock Toggle
         pinUnlockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                pinConfigSection.setVisibility(View.VISIBLE);
-                // Update button states when section becomes visible
-                updateUnlockMethodStates();
-            } else {
-                pinConfigSection.setVisibility(View.GONE);
-                // Clear PIN when disabled
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.remove("unlock_pin");
-                editor.apply();
-                updateUnlockMethodStates();
+                if (preferences.getString("unlock_pin", "").isEmpty()) showPinSheet();
+                return;
             }
+            preferences.edit().remove("unlock_pin").apply();
+            updateUnlockMethodStates();
         });
 
         // Partner Unlock Toggle
@@ -307,25 +316,13 @@ public class SettingsFragment extends Fragment {
                 // Clear partner settings when disabled
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.remove("partner_phone");
-                editor.remove("partner_email");
                 editor.remove("enable_sms_notifications");
-                editor.remove("enable_email_notifications");
                 editor.apply();
                 updateUnlockMethodStates();
             }
         });
 
         // PIN Configuration Listeners
-        configurePinButton.setOnClickListener(v -> showPinSetupDialog());
-        
-        clearPinButton.setOnClickListener(v -> {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.remove("unlock_pin");
-            editor.apply();
-            updateUnlockMethodStates();
-            Toast.makeText(requireContext(), "PIN cleared", Toast.LENGTH_SHORT).show();
-        });
-
         // Partner Contact Configuration
         accountabilityPartnerButton.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), com.grepguru.zenlock.PartnerContactActivity.class);
@@ -347,18 +344,8 @@ public class SettingsFragment extends Fragment {
         String existingPin = preferences.getString("unlock_pin", "");
         boolean pinConfigured = !existingPin.isEmpty();
         
-        // Update section visibility based on toggle state, not PIN existence
-        boolean toggleEnabled = pinUnlockToggle.isChecked();
-        pinConfigSection.setVisibility(toggleEnabled ? View.VISIBLE : View.GONE);
-        
-        if (pinConfigured) {
-            configurePinButton.setVisibility(View.GONE);
-            clearPinButton.setVisibility(View.VISIBLE);
-        } else {
-            configurePinButton.setVisibility(View.VISIBLE);
-            clearPinButton.setVisibility(View.GONE);
-        }
-        
+        pinUnlockToggle.setChecked(pinConfigured);
+
         // Check Partner status
         String partnerPhone = preferences.getString("partner_phone", "");
         boolean partnerConfigured = !partnerPhone.isEmpty();
@@ -421,6 +408,28 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    private void syncBlockNotificationsToggle() {
+        boolean enabled = preferences.getBoolean("block_notifications", true)
+                && AppPermission.NOTIFICATION_ACCESS.isGranted(requireContext());
+        blockNotificationsToggle.setChecked(enabled);
+    }
+
+    private void syncNotificationToggle() {
+        boolean enabled = preferences.getBoolean("persistent_notification", true)
+                && NotificationPermissionManager.hasNotificationPermission(requireContext());
+        persistentNotificationToggle.setChecked(enabled);
+    }
+
+    private void requestNotificationPermission() {
+        if (NotificationPermissionManager.isPermissionPermanentlyDenied(requireActivity())) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
+            startActivity(intent);
+            return;
+        }
+        notificationPermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION);
+    }
+
     private void updateBatteryExemptionState(View view) {
         SwitchCompat toggle = view.findViewById(R.id.batteryExemptionToggle);
         if (toggle == null) return;
@@ -460,71 +469,51 @@ public class SettingsFragment extends Fragment {
             return;
         }
         updateUnlockMethodStates();
+        syncNotificationToggle();
+        syncBlockNotificationsToggle();
         if (getView() != null) {
             updateBatteryExemptionState(getView());
         }
 
     }
     
-    private void showPinSetupDialog() {
-        // Always show PIN setup dialog (user can clear existing PIN first if needed)
-        showActualPinDialog();
-    }
     
-    private void showActualPinDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+    private void showPinSheet() {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_trusted_pin_setup, null);
-        
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+        dialog.setContentView(dialogView);
+
         EditText newPinInput = dialogView.findViewById(R.id.newPinInput);
         EditText confirmPinInput = dialogView.findViewById(R.id.confirmPinInput);
         TextView instructionText = dialogView.findViewById(R.id.instructionText);
         TextView pinStatusText = dialogView.findViewById(R.id.pinStatusText);
-        
-        // Setup input watchers for visual feedback
+
         setupPinSetupInputWatcher(newPinInput, confirmPinInput, pinStatusText);
-        
-        // Check if PIN already exists
+
         String existingPin = preferences.getString("unlock_pin", "");
         if (!existingPin.isEmpty()) {
             instructionText.setText("⚠️ PIN already configured.\n\nTo change it, enter a new PIN twice below.");
         } else {
             instructionText.setText("💡 Tip: Consider asking a trusted friend to set this PIN for you to increase accountability.");
         }
-        
-        builder.setView(dialogView)
-//               .setTitle("PIN Setup")
-               .setPositiveButton("Set PIN", null) // Set to null initially
-               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        
-        AlertDialog dialog = builder.create();
-        
-        // Override positive button to validate before closing
-        dialog.setOnShowListener(dialogInterface -> {
-            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            button.setOnClickListener(view -> {
-                String newPin = newPinInput.getText().toString().trim();
-                String confirmPin = confirmPinInput.getText().toString().trim();
-                
-                if (validatePinSetup(newPin, confirmPin, newPinInput, confirmPinInput, pinStatusText)) {
-                    // Save PIN
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString("unlock_pin", newPin);
-                    editor.apply();
-                    
-                    updateUnlockMethodStates();
-                    
-                    // Close current dialog immediately
-                    dialog.dismiss();
-                    
-                    // Show success dialog
-                    showPinSetupSuccessDialog();
-                }
-            });
+
+        dialogView.findViewById(R.id.pinCancelButton).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.pinSaveButton).setOnClickListener(v -> {
+            String newPin = newPinInput.getText().toString().trim();
+            String confirmPin = confirmPinInput.getText().toString().trim();
+            if (validatePinSetup(newPin, confirmPin, newPinInput, confirmPinInput, pinStatusText)) {
+                preferences.edit().putString("unlock_pin", newPin).apply();
+                updateUnlockMethodStates();
+                dialog.dismiss();
+                showPinSetupSuccessDialog();
+            }
         });
-        
+
+        dialog.setOnDismissListener(d -> updateUnlockMethodStates());
         dialog.show();
     }
-    
+
     private void setupPinSetupInputWatcher(EditText newPinInput, EditText confirmPinInput, TextView statusText) {
         TextWatcher inputWatcher = new TextWatcher() {
             @Override
@@ -640,11 +629,11 @@ public class SettingsFragment extends Fragment {
      */
     private void openSupportPage() {
         try {
-            String supportUrl = "https://buymeacoffee.com/humblebee";
+            String supportUrl = "https://github.com/sponsors/HumbleBee14";
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supportUrl));
             startActivity(browserIntent);
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Unable to open browser. Please visit: buymeacoffee.com/humblebee", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Unable to open browser. Please visit: github.com/sponsors/HumbleBee14", Toast.LENGTH_LONG).show();
         }
     }
 }

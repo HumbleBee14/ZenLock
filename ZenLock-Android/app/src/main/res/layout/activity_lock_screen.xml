@@ -77,37 +77,19 @@
                 android:alpha="0.0">
                 <Button
                     android:id="@+id/unlockPromptButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Unlock"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="0dp"
-                    android:layout_weight="1" />
+                    style="@style/ModernButton.Pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="Unlock" />
                 <Space
-                    android:layout_width="16dp"
+                    android:layout_width="12dp"
                     android:layout_height="wrap_content" />
                 <Button
                     android:id="@+id/extendLockButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Extend"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="0dp"
-                    android:layout_weight="1" />
+                    style="@style/ModernButton.Pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="Extend" />
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/unlockInputsContainer"
@@ -154,18 +136,10 @@
                 </LinearLayout>
                 <Button
                     android:id="@+id/unlockButton"
+                    style="@style/ModernButton.Pill"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Confirm Unlock"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:background="@drawable/glass_button_background"
-                    android:textColor="@color/white"
-                    android:elevation="8dp" />
+                    android:layout_height="44dp"
+                    android:text="Confirm Unlock" />
             </LinearLayout>
         </LinearLayout>
         <Space

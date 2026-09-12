@@ -48,7 +48,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/permissionEnable"
-        style="@style/ModernButton.Primary"
+        style="@style/ModernButton.Pill"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:minHeight="30dp"
@@ -57,7 +57,7 @@
         android:paddingEnd="10dp"
         android:text="Enable"
         android:textSize="12sp"
-        app:cornerRadius="10dp" />
+ />
 
     <ImageView
         android:id="@+id/permissionGranted"

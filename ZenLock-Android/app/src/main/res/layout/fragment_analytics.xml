@@ -66,15 +66,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="20dp">
 
-                <!-- Card Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginBottom="14dp">
 
                     <ImageView
                         android:layout_width="22dp"
@@ -90,205 +89,103 @@
                         android:text="Today's Focus"
                         style="@style/ModernText.SectionTitle"/>
 
-                    <TextView
-                        android:id="@+id/todayTrendIndicator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="vs Yesterday"
-                        android:textSize="11sp"
-                        android:textColor="@color/white"
-                        android:background="@drawable/gradient_accent_badge"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"/>
-
                 </LinearLayout>
 
-                <!-- Stats Row: Sessions + Focus Time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
+                    android:gravity="center_vertical">
 
-                    <!-- Sessions -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@drawable/glass_card_inner"
-                        android:padding="16dp"
-                        android:layout_marginEnd="6dp">
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:id="@+id/todayTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            style="@style/ModernText.MetricLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="FOCUS TIME" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="@color/dividerSubtle"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:id="@+id/todayMobileUsage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/textPrimary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            style="@style/ModernText.MetricLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="PHONE USAGE" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="@color/dividerSubtle"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
 
                         <TextView
                             android:id="@+id/todaySessions"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="28sp"
+                            android:textSize="22sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:fontFamily="sans-serif-medium"/>
+                            android:textColor="@color/textSecondary"
+                            android:fontFamily="sans-serif-medium" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="SESSIONS"
                             style="@style/ModernText.MetricLabel"
-                            android:layout_marginTop="4dp"/>
-
-                    </LinearLayout>
-
-                    <!-- Focus Time -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@drawable/glass_card_inner"
-                        android:padding="16dp"
-                        android:layout_marginStart="6dp">
-
-                        <TextView
-                            android:id="@+id/todayTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0m"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primaryLight"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:ellipsize="end"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="FOCUS TIME"
-                            style="@style/ModernText.MetricLabel"
-                            android:layout_marginTop="4dp"/>
+                            android:layout_marginTop="2dp"
+                            android:text="SESSIONS" />
 
                     </LinearLayout>
 
                 </LinearLayout>
-
-                <!-- Phone Usage / Time Saved Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_inner"
-                    android:padding="14dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_phone"
-                            app:tint="@color/textTertiary"
-                            android:layout_marginEnd="6dp"/>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:id="@+id/todayMobileUsage"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0m"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/textPrimary"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PHONE USAGE"
-                                style="@style/ModernText.MetricLabel"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/dividerSubtle"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_timer"
-                            app:tint="@color/success"
-                            android:layout_marginEnd="6dp"/>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:id="@+id/todayTimeSaved"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0m"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/success"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="TIME SAVED"
-                                style="@style/ModernText.MetricLabel"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Hidden progress bars (keep IDs for Java compatibility) -->
-                <ProgressBar
-                    android:id="@+id/sessionsProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    android:progress="0"
-                    android:max="10"/>
-
-                <ProgressBar
-                    android:id="@+id/timeProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    android:progress="0"
-                    android:max="480"/>
 
             </LinearLayout>
 
@@ -312,12 +209,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingTop="8dp"
+                android:paddingBottom="20dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp">
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/trendsTabs"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="40dp"
                     android:background="@android:color/transparent"
                     app:tabMode="fixed"
                     app:tabGravity="fill"
@@ -336,7 +236,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="visible"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="12dp">
 
                     <!-- Focus Time Card — Indigo accent -->
                     <LinearLayout

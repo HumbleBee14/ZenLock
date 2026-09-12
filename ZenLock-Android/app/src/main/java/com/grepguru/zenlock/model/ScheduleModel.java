@@ -131,31 +131,31 @@ public class ScheduleModel {
     
     // Utility methods
     public String getFormattedStartTime() {
-        return String.format("%02d:%02d", startHour, startMinute);
+        return formatTime(startHour, startMinute);
     }
-    
+
     public String getFormattedEndTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, startHour);
         calendar.set(Calendar.MINUTE, startMinute);
         calendar.add(Calendar.MINUTE, focusDurationMinutes);
-        
-        return String.format("%02d:%02d", 
-            calendar.get(Calendar.HOUR_OF_DAY), 
-            calendar.get(Calendar.MINUTE));
+        return formatTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
     }
-    
+
     public String getFormattedDuration() {
         int hours = focusDurationMinutes / 60;
         int minutes = focusDurationMinutes % 60;
-        
-        if (hours > 0) {
-            return String.format("%d hr %d min", hours, minutes);
-        } else {
-            return String.format("%d min", minutes);
-        }
+        if (hours > 0 && minutes > 0) return hours + "h " + minutes + "m";
+        if (hours > 0) return hours + "h";
+        return minutes + "m";
     }
-    
+
+    private static String formatTime(int hour, int minute) {
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+        return String.format("%d:%02d %s", displayHour, minute, hour >= 12 ? "PM" : "AM");
+    }
+
     public String getRepeatDescription() {
         switch (repeatType) {
             case ONCE:

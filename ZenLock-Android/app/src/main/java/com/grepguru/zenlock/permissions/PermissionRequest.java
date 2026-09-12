@@ -19,10 +19,12 @@ public final class PermissionRequest {
     }
 
     public final String title;
+    public final String actionLabel;
     private final List<Requirement> requirements;
 
-    private PermissionRequest(String title, List<Requirement> requirements) {
+    private PermissionRequest(String title, String actionLabel, List<Requirement> requirements) {
         this.title = title;
+        this.actionLabel = actionLabel;
         this.requirements = Collections.unmodifiableList(requirements);
     }
 
@@ -47,10 +49,16 @@ public final class PermissionRequest {
 
     public static final class Builder {
         private final String title;
+        private String actionLabel = "Continue";
         private final List<Requirement> requirements = new ArrayList<>();
 
         private Builder(String title) {
             this.title = title;
+        }
+
+        public Builder action(String label) {
+            actionLabel = label;
+            return this;
         }
 
         public Builder require(AppPermission permission) {
@@ -64,7 +72,7 @@ public final class PermissionRequest {
         }
 
         public PermissionRequest build() {
-            return new PermissionRequest(title, requirements);
+            return new PermissionRequest(title, actionLabel, requirements);
         }
     }
 }

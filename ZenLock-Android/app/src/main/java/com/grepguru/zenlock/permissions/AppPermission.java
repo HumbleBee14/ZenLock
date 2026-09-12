@@ -1,9 +1,8 @@
 package com.grepguru.zenlock.permissions;
 
-import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -11,12 +10,12 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
-import androidx.core.content.ContextCompat;
 
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.utils.AlarmPermissionManager;
 import com.grepguru.zenlock.utils.BatteryOptimizationManager;
 import com.grepguru.zenlock.utils.MiuiUtils;
+import com.grepguru.zenlock.utils.UsageStatsPermissionManager;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 
@@ -33,8 +32,8 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            open(host, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), "Turn on ZenLock in the list");
+        public void request(Activity activity) {
+            open(activity, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), "Turn on ZenLock in the list");
         }
     },
     OVERLAY("Display over other apps", "Shows the lock screen over blocked apps", R.drawable.ic_overlay) {
@@ -44,24 +43,8 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            open(host, packageIntent(host, Settings.ACTION_MANAGE_OVERLAY_PERMISSION), null);
-        }
-    },
-    NOTIFICATIONS("Notifications", "Shows the session timer", R.drawable.ic_message) {
-        @Override
-        public boolean appliesTo(Context context) {
-            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
-        }
-
-        @Override
-        public boolean isGranted(Context context) {
-            return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
-        }
-
-        @Override
-        public void request(PermissionHost host) {
-            host.requestRuntimePermission(Manifest.permission.POST_NOTIFICATIONS);
+        public void request(Activity activity) {
+            open(activity, packageIntent(activity, Settings.ACTION_MANAGE_OVERLAY_PERMISSION), null);
         }
     },
     NOTIFICATION_ACCESS("Notification access", "Hides notifications from blocked apps", R.drawable.ic_message) {
@@ -72,8 +55,8 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            open(host, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), "Turn on ZenLock in the list");
+        public void request(Activity activity) {
+            open(activity, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), "Turn on ZenLock in the list");
         }
     },
     EXACT_ALARM("Exact alarms", "Starts schedules on time", R.drawable.ic_alarm) {
@@ -88,8 +71,8 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            open(host, packageIntent(host, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM), null);
+        public void request(Activity activity) {
+            open(activity, packageIntent(activity, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM), null);
         }
     },
     UNRESTRICTED_BATTERY("Unrestricted battery", "Keeps schedules running while asleep", R.drawable.ic_battery_protect) {
@@ -99,8 +82,19 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            BatteryOptimizationManager.requestExemption(host.activity());
+        public void request(Activity activity) {
+            BatteryOptimizationManager.requestExemption(activity);
+        }
+    },
+    USAGE_ACCESS("Usage access", "Shows phone usage in Insights", R.drawable.ic_usage_new) {
+        @Override
+        public boolean isGranted(Context context) {
+            return UsageStatsPermissionManager.hasUsageStatsPermission(context);
+        }
+
+        @Override
+        public void request(Activity activity) {
+            open(activity, new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), "Turn on ZenLock in the list");
         }
     },
     XIAOMI_BACKGROUND_POPUP("Background pop-ups", "Opens the lock screen from the background", R.drawable.ic_overlay) {
@@ -115,9 +109,9 @@ public enum AppPermission {
         }
 
         @Override
-        public void request(PermissionHost host) {
-            MiuiUtils.openMiuiPermissionEditor(host.activity());
-            Toast.makeText(host.activity(), "Allow 'Display pop-up windows while running in background'", Toast.LENGTH_LONG).show();
+        public void request(Activity activity) {
+            MiuiUtils.openMiuiPermissionEditor(activity);
+            Toast.makeText(activity, "Allow 'Display pop-up windows while running in background'", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -138,20 +132,20 @@ public enum AppPermission {
 
     public abstract boolean isGranted(Context context);
 
-    public abstract void request(PermissionHost host);
+    public abstract void request(Activity activity);
 
-    static Intent packageIntent(PermissionHost host, String action) {
+    static Intent packageIntent(Activity activity, String action) {
         Intent intent = new Intent(action);
-        intent.setData(Uri.fromParts("package", host.activity().getPackageName(), null));
+        intent.setData(Uri.fromParts("package", activity.getPackageName(), null));
         return intent;
     }
 
-    static void open(PermissionHost host, Intent intent, String hint) {
+    static void open(Activity activity, Intent intent, String hint) {
         try {
-            host.activity().startActivity(intent);
-            if (hint != null) Toast.makeText(host.activity(), hint, Toast.LENGTH_SHORT).show();
+            activity.startActivity(intent);
+            if (hint != null) Toast.makeText(activity, hint, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(host.activity(), "Couldn't open Settings", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Couldn't open Settings", Toast.LENGTH_SHORT).show();
         }
     }
 }

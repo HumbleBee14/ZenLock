@@ -195,98 +195,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"
                         android:text="Send Test OTP"
-                        style="@style/ModernButton.Secondary"
+                        style="@style/ModernButton.Pill"
                         android:layout_marginTop="12dp"
                         android:paddingHorizontal="16dp"
                         android:paddingVertical="8dp"
                         android:layout_gravity="center_horizontal"
                         android:visibility="gone"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Email Option Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/emailCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:layout_constraintTop_toBottomOf="@id/smsCard">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <!-- Email Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Email Contact"
-                        style="@style/ModernText.Subheading"
-                        android:textColor="@color/textPrimary"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Coming Soon"
-                        style="@style/ModernText.Caption"
-                        android:textColor="@color/accent"
-                        android:background="@drawable/modern_input_background"
-                        android:padding="8dp"
-                        android:textSize="12sp"/>
-
-                </LinearLayout>
-
-                <!-- Email Description -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Send OTP via email to trusted contact"
-                    style="@style/ModernText.Caption"
-                    android:textColor="@color/textSecondary"
-                    android:layout_marginBottom="16dp"/>
-
-                <!-- Email Input -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Partner's Email Address"
-                        style="@style/ModernText.Body"
-                        android:textColor="@color/textPrimary"
-                        android:layout_marginBottom="8dp"/>
-
-                    <EditText
-                        android:id="@+id/partnerEmailInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:hint="partner@example.com"
-                        android:inputType="textEmailAddress"
-                        android:background="@drawable/modern_input_background"
-                        android:textColor="@color/textPrimary"
-                        android:textColorHint="@color/textHint"
-                        android:padding="12dp"
-                        android:textSize="16sp"/>
 
                 </LinearLayout>
 
@@ -300,11 +214,11 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:text="Save"
-            style="@style/ModernButton.Primary"
+            style="@style/ModernButton.Pill"
             android:layout_marginTop="32dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
-            app:layout_constraintTop_toBottomOf="@id/emailCard"
+            app:layout_constraintTop_toBottomOf="@id/smsCard"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 

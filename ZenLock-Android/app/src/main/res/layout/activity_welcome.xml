@@ -187,9 +187,16 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/welcomeNext"
-        style="@style/ModernButton.Primary"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:text="Next" />
+        style="@style/ModernButton.Pill"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:minHeight="48dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:layout_gravity="center_horizontal"
+        android:text="Next"
+        app:icon="@drawable/ic_arrow_forward"
+        app:iconGravity="textEnd"
+        app:iconSize="18dp" />
 
 </LinearLayout>

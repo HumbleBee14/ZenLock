@@ -43,12 +43,15 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/permissionsContinue"
-        style="@style/ModernButton.Primary"
+        style="@style/ModernButton.Pill"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:minHeight="40dp"
         android:layout_gravity="end"
         android:layout_marginTop="10dp"
-        android:text="Continue" />
+        android:text="Continue"
+        app:icon="@drawable/ic_arrow_forward"
+        app:iconGravity="textEnd"
+        app:iconSize="18dp" />
 
 </LinearLayout>

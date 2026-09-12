@@ -45,8 +45,11 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.grepguru.zenlock.LockScreenActivity;
 import com.grepguru.zenlock.R;
+import com.grepguru.zenlock.guards.UnlockMethodGuard;
 import com.grepguru.zenlock.permissions.FeaturePermissions;
 import com.grepguru.zenlock.permissions.PermissionGate;
 import com.grepguru.zenlock.utils.AnalyticsManager;
@@ -59,6 +62,7 @@ public class HomeFragment extends Fragment {
     private TextView selectedTimeDisplay;
     private TextView startFocusHint;
     private TextView startDelayValue;
+    private TextView startDelayLabel;
     private View rootContentView;
     private View timeDisplayContainer;
     private View startDelayValueContainer;
@@ -122,6 +126,7 @@ public class HomeFragment extends Fragment {
         selectedTimeDisplay = view.findViewById(R.id.selectedTimeDisplay);
         startFocusHint = view.findViewById(R.id.startFocusHint);
         startDelayValue = view.findViewById(R.id.startDelayValue);
+        startDelayLabel = view.findViewById(R.id.startDelayLabel);
         timeDisplayContainer = view.findViewById(R.id.timeDisplayContainer);
         startDelayValueContainer = view.findViewById(R.id.startDelayValueContainer);
         startDelayChevron = view.findViewById(R.id.startDelayChevron);
@@ -318,6 +323,8 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setTextColor(ContextCompat.getColor(requireContext(), R.color.textPrimary));
             startDelayPicker.setSelectionDividerHeight(0);
         }
+        startDelayPicker.setVerticalFadingEdgeEnabled(true);
+        startDelayPicker.setFadingEdgeLength(dpToPx(56));
     }
 
     private void toggleStartDelayPicker() {
@@ -473,18 +480,21 @@ public class HomeFragment extends Fragment {
         int hour = lockUntilHour != -1 ? lockUntilHour : Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1;
         int minute = lockUntilMinute != -1 ? lockUntilMinute : 0;
 
-        android.app.TimePickerDialog picker = new android.app.TimePickerDialog(
-                requireContext(),
-                (view, selectedHour, selectedMinute) -> {
-                    lockUntilHour = selectedHour;
-                    lockUntilMinute = selectedMinute;
-                    updateLockUntilDisplay();
-                    updateLockButtonState();
-                },
-                hour, minute, false
-        );
-        picker.setTitle("Lock until");
-        picker.show();
+        MaterialTimePicker picker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(hour % 24)
+                .setMinute(minute)
+                .setTitleText("Lock until")
+                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+                .setTheme(R.style.ZenTimePicker)
+                .build();
+        picker.addOnPositiveButtonClickListener(v -> {
+            lockUntilHour = picker.getHour();
+            lockUntilMinute = picker.getMinute();
+            updateLockUntilDisplay();
+            updateLockButtonState();
+        });
+        picker.show(getChildFragmentManager(), "lockUntilPicker");
     }
 
     private void updateLockUntilDisplay() {
@@ -650,6 +660,7 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         }
         startDelayValue.setText(formatStartDelayLabel(selectedStartDelayMinutes));
+        startDelayLabel.setText(selectedStartDelayMinutes > 0 ? "Starts in" : "Starts");
     }
 
     private String formatStartDelayLabel(int minutes) {
@@ -775,10 +786,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void startZenActivation() {
-        startZenActivation(false);
-    }
-
-    private void startZenActivation(boolean unlockWarningAcknowledged) {
         if (isLongPressing) return;
         hideStartDelayPicker();
         if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
@@ -786,11 +793,10 @@ public class HomeFragment extends Fragment {
             Toast.makeText(requireContext(), getPendingStartBlockedMessage(), Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // Same rule as SettingsFragment.updateUnlockMethodStates(): pin OR partner phone configured.
-        // Show a warning before locking if neither is set, so users know they may get locked out.
-        if (!unlockWarningAcknowledged && !hasAnyUnlockMethodConfigured()) {
-            showNoUnlockMethodWarning();
+        if (!UnlockMethodGuard.isSatisfied(requireContext())) {
+            UnlockMethodGuard.ensure(requireActivity(), "Got it", () -> {
+                if (isAdded()) Toast.makeText(requireContext(), "Hold Start Focus to begin", Toast.LENGTH_SHORT).show();
+            });
             return;
         }
 
@@ -832,21 +838,7 @@ public class HomeFragment extends Fragment {
         longPressHandler.postDelayed(longPressRunnable, ZEN_ACTIVATION_DURATION);
     }
 
-    private boolean hasAnyUnlockMethodConfigured() {
-        SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        boolean pinConfigured = !prefs.getString("unlock_pin", "").isEmpty();
-        boolean partnerConfigured = !prefs.getString("partner_phone", "").isEmpty();
-        return pinConfigured || partnerConfigured;
-    }
 
-    private void showNoUnlockMethodWarning() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("⚠️ No unlock method configured")
-                .setMessage("No unlock methods configured! You may get locked out during focus sessions. Please enable at least one unlock method.")
-                .setPositiveButton("Continue anyway", (dialog, which) -> startZenActivation(true))
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 
     private void cancelZenActivation() {
         if (!isLongPressing) return;

@@ -28,6 +28,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.grepguru.zenlock.quotes.QuoteStore;
 import com.grepguru.zenlock.model.*;
 import com.grepguru.zenlock.ui.adapter.*;
 import com.grepguru.zenlock.ui.timer.TimerType;
@@ -802,35 +803,12 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private void setupMotivationalQuotes() {
         TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
-
-        // Check if quotes are enabled
-        if (!preferences.getBoolean("show_quotes", true)) {
-            lockscreenMessage.setText("Stay focused, stay productive!");
+        String quote = preferences.getBoolean("show_quotes", true) ? QuoteStore.random(this) : null;
+        if (quote == null) {
+            lockscreenMessage.setVisibility(View.GONE);
             return;
         }
-
-        // Motivational quotes array
-        String[] quotes = {
-            "The only way to do great work is to love what you do.",
-            "Focus on being productive instead of busy.",
-            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-            "The future depends on what you do today.",
-            "Don't watch the clock, do what it does. Keep going.",
-            "The only limit to our realization of tomorrow is our doubts of today.",
-            "It always seems impossible until it's done.",
-            "The way to get started is to quit talking and begin doing.",
-            "Your time is limited, don't waste it living someone else's life.",
-            "The only person you are destined to become is the person you decide to be.",
-            "Stay focused, stay productive!",
-            "Every moment is a fresh beginning.",
-            "Make today amazing!",
-            "You are capable of amazing things.",
-            "Focus on progress, not perfection."
-        };
-
-        // Select a random quote
-        int randomIndex = (int) (Math.random() * quotes.length);
-        lockscreenMessage.setText(quotes[randomIndex]);
+        lockscreenMessage.setText(quote);
     }
 
     /**
@@ -871,7 +849,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 lockscreenMessage.setVisibility(View.GONE);
             } else {
                 // Digital timer: check if quotes are enabled
-                boolean quotesEnabled = preferences.getBoolean("show_quotes", true);
+                boolean quotesEnabled = preferences.getBoolean("show_quotes", true) && QuoteStore.hasQuotes(this);
                 lockscreenMessage.setVisibility(quotesEnabled ? View.VISIBLE : View.GONE);
             }
         }

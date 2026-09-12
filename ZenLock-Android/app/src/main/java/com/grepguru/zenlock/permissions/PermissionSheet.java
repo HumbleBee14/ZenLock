@@ -1,6 +1,5 @@
 package com.grepguru.zenlock.permissions;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +8,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
@@ -23,7 +20,7 @@ import com.grepguru.zenlock.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PermissionSheet extends BottomSheetDialogFragment implements PermissionHost {
+public class PermissionSheet extends BottomSheetDialogFragment {
 
     private static final String TAG = "PermissionSheet";
 
@@ -31,9 +28,6 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
     private Runnable onReady;
     private LinearLayout rows;
     private MaterialButton continueButton;
-
-    private final ActivityResultLauncher<String> runtimePermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> render());
 
     static void show(FragmentActivity activity, PermissionRequest request, @Nullable Runnable onReady) {
         FragmentManager manager = activity.getSupportFragmentManager();
@@ -57,7 +51,10 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
         TextView title = view.findViewById(R.id.permissionsTitle);
         rows = view.findViewById(R.id.permissionRows);
         continueButton = view.findViewById(R.id.permissionsContinue);
-        if (request != null) title.setText(request.title);
+        if (request != null) {
+            title.setText(request.title);
+            continueButton.setText(request.actionLabel);
+        }
         continueButton.setVisibility(onReady == null ? View.GONE : View.VISIBLE);
         continueButton.setOnClickListener(v -> {
             Runnable ready = onReady;
@@ -106,17 +103,7 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
         enable.setVisibility(granted ? View.GONE : View.VISIBLE);
         check.setVisibility(granted ? View.VISIBLE : View.GONE);
         row.setAlpha(granted ? 0.6f : 1f);
-        enable.setOnClickListener(v -> requirement.permission.request(this));
+        enable.setOnClickListener(v -> requirement.permission.request(requireActivity()));
         rows.addView(row);
-    }
-
-    @Override
-    public Activity activity() {
-        return requireActivity();
-    }
-
-    @Override
-    public void requestRuntimePermission(String permission) {
-        runtimePermissionLauncher.launch(permission);
     }
 }

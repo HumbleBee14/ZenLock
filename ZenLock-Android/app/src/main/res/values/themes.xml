@@ -34,62 +34,28 @@
 
 
     <!-- Modern Button Styles -->
-    <style name="ModernButton.Primary" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/primary</item>
-        <item name="rippleColor">#40FFFFFF</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="iconTint">@color/white</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:letterSpacing">0.02</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
-        <item name="iconPadding">10dp</item>
-        <item name="cornerRadius">14dp</item>
-        <item name="android:elevation">0dp</item>
-        <item name="android:stateListAnimator">@null</item>
+    <style name="ShapeAppearance.ZenLock.Pill" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 
-    <style name="ModernButton.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="strokeColor">@color/divider</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="rippleColor">#20FFFFFF</item>
-        <item name="android:textColor">@color/textPrimary</item>
-        <item name="iconTint">@color/textPrimary</item>
+    <style name="ModernButton.Pill" parent="Widget.MaterialComponents.Button">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.ZenLock.Pill</item>
+        <item name="backgroundTint">@color/primaryTonal</item>
+        <item name="rippleColor">@color/primaryRipple</item>
+        <item name="android:textColor">@color/primaryLight</item>
+        <item name="iconTint">@color/primaryLight</item>
+        <item name="iconPadding">8dp</item>
         <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:letterSpacing">0.02</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
-        <item name="iconPadding">10dp</item>
-        <item name="cornerRadius">14dp</item>
-        <item name="android:elevation">0dp</item>
-        <item name="android:stateListAnimator">@null</item>
-    </style>
-
-    <style name="ModernButton.Text" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="rippleColor">#20FFFFFF</item>
-        <item name="android:textColor">@color/textSecondary</item>
-        <item name="iconTint">@color/textSecondary</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:letterSpacing">0.02</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
-        <item name="iconPadding">10dp</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">22dp</item>
+        <item name="android:paddingEnd">22dp</item>
         <item name="android:elevation">0dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
@@ -176,12 +142,24 @@
         <item name="android:colorControlNormal">@color/primary</item>
     </style>
 
-    <!-- Spinner Style for Schedule Dialog -->
-    <style name="SpinnerStyle" parent="Theme.AppCompat.Light">
-        <item name="android:textColorPrimary">@color/textPrimary</item>
-        <item name="android:textColorSecondary">@color/textSecondary</item>
-        <item name="android:colorControlNormal">@color/primary</item>
-        <item name="android:popupBackground">@color/surface</item>
+    <style name="ZenChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/zen_chip_background</item>
+        <item name="chipStrokeColor">@color/zen_chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">18dp</item>
+        <item name="chipMinHeight">36dp</item>
+        <item name="chipMinTouchTargetSize">0dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="rippleColor">@color/primaryRipple</item>
+        <item name="android:textColor">@color/zen_chip_text</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAlignment">center</item>
+        <item name="chipStartPadding">0dp</item>
+        <item name="chipEndPadding">0dp</item>
+        <item name="textStartPadding">0dp</item>
+        <item name="textEndPadding">0dp</item>
     </style>
 
     <!-- Modern Alert Dialog Style with Dark Theme -->
@@ -262,6 +240,24 @@
         <item name="colorOnSurface">@color/dark_gray</item>
         <item name="colorSurfaceVariant">@color/time_picker_surface_lavender</item>
         <item name="colorOnSurfaceVariant">@color/dark_gray</item>
+    </style>
+
+    <style name="ZenTimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/textPrimary</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="materialTimePickerTitleStyle">@style/ZenTimePicker.Title</item>
+    </style>
+
+    <style name="ZenTimePicker.Title" parent="Widget.MaterialComponents.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/textSecondary</item>
     </style>
 
 </resources>

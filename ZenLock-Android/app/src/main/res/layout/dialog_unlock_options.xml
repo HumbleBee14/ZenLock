@@ -160,12 +160,10 @@
     <!-- Cancel Button -->
     <Button
         android:id="@+id/cancelButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cancel"
-        android:textSize="16sp"
-        android:background="@drawable/modern_button_secondary"
-        android:textColor="@color/textSecondary"
-        android:padding="16dp"/>
+        style="@style/ModernButton.Pill"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_gravity="end"
+        android:text="Cancel" />
 
 </LinearLayout>

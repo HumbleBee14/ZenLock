@@ -52,8 +52,7 @@ public class AnalyticsFragment extends Fragment {
 
     // Today's stats views
     private TextView todaySessions, todayTime;
-    private TextView todayTrendIndicator, todayMobileUsage, todayTimeSaved;
-    private ProgressBar sessionsProgress, timeProgress;
+    private TextView todayMobileUsage;
 
     // Expandable sections
     private LinearLayout recentSessionsHeader, recentSessionsContent;
@@ -149,13 +148,8 @@ public class AnalyticsFragment extends Fragment {
         // Today's stats
         todaySessions = view.findViewById(R.id.todaySessions);
         todayTime = view.findViewById(R.id.todayTime);
-        todayTrendIndicator = view.findViewById(R.id.todayTrendIndicator);
         todayMobileUsage = view.findViewById(R.id.todayMobileUsage);
-        todayTimeSaved = view.findViewById(R.id.todayTimeSaved);
 
-        // Progress bars
-        sessionsProgress = view.findViewById(R.id.sessionsProgress);
-        timeProgress = view.findViewById(R.id.timeProgress);
 
 
         // Recent sessions expandable section
@@ -521,16 +515,7 @@ public class AnalyticsFragment extends Fragment {
         // Observe today's stats with LiveData
         analyticsManager.getTodayStatsLive().observe(getViewLifecycleOwner(), todayStats -> {
             if (todayStats != null) {
-                // Get yesterday's stats for comparison
-                DailyStatsEntity yesterdayStats = analyticsManager.getYesterdayStats();
-                
-                // Update today's stats with real data
-        updateTodayStats(
-                    todayStats.totalSessions,
-                    todayStats.totalFocusTime / (1000 * 60), // Convert to minutes
-                    (int) todayStats.avgFocusScore,
-                    yesterdayStats
-                );
+                updateTodayStats(todayStats.totalSessions, todayStats.totalFocusTime / (1000 * 60));
             }
             // Don't show default values - let the UI show existing data until real data loads
         });
@@ -613,7 +598,7 @@ public class AnalyticsFragment extends Fragment {
         return (int) Math.min((actualMinutes * 100) / weeklyGoalMinutes, 100);
     }
 
-    private void updateTodayStats(int sessions, long focusTimeMinutes, int focusScore, DailyStatsEntity yesterdayStats) {
+    private void updateTodayStats(int sessions, long focusTimeMinutes) {
         if (todaySessions != null) todaySessions.setText(String.valueOf(sessions));
 
         if (todayTime != null) {
@@ -628,22 +613,7 @@ public class AnalyticsFragment extends Fragment {
 
 
 
-        // Update progress bars
-        if (sessionsProgress != null) {
-            sessionsProgress.setProgress(Math.min(sessions, 10)); // Goal: 10 sessions
-        }
-        if (timeProgress != null) {
-            timeProgress.setProgress((int) Math.min(focusTimeMinutes, 480)); // Goal: 8 hours
-        }
-
-
-        // Update trend indicator with today vs yesterday comparison
-        if (todayTrendIndicator != null) {
-            updateTrendIndicator(sessions, focusTimeMinutes, focusScore, yesterdayStats);
-        }
-        
-        // Update mobile usage and time saved
-        updateMobileUsageDisplay(focusTimeMinutes);
+        updateMobileUsageDisplay();
     }
     
     private void refreshMobileUsageData() {
@@ -674,7 +644,7 @@ public class AnalyticsFragment extends Fragment {
         }).start();
     }
     
-    private void updateMobileUsageDisplay(long focusTimeMinutes) {
+    private void updateMobileUsageDisplay() {
         // Get real mobile usage data using DailyMobileUsageManager for efficiency
         new Thread(() -> {
             try {
@@ -695,17 +665,6 @@ public class AnalyticsFragment extends Fragment {
                                 todayMobileUsage.setText("0m");
                             }
                         }
-                        
-                        // Calculate and update time saved in hours
-                        if (todayTimeSaved != null) {
-                            // Time saved = focus time (actual hours focused)
-                            // If no sessions, show 0
-                            if (focusTimeMinutes > 0) {
-                                todayTimeSaved.setText(formatTime(focusTimeMinutes));
-                            } else {
-                                todayTimeSaved.setText("0m");
-                            }
-                        }
                     });
                 }
             } catch (Exception e) {
@@ -723,39 +682,6 @@ public class AnalyticsFragment extends Fragment {
         }).start();
     }
     
-    private void updateTrendIndicator(int todaySessions, long todayFocusTime, int todayFocusScore, DailyStatsEntity yesterdayStats) {
-        if (yesterdayStats == null) {
-            // No comparison data available
-            todayTrendIndicator.setText("📊 First Day");
-            todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-            return;
-        }
-        
-        // Calculate percentage change in focus time
-        long yesterdayFocusTime = yesterdayStats.totalFocusTime / (1000 * 60); // Convert to minutes
-        double changePercentage = 0;
-        
-        if (yesterdayFocusTime > 0) {
-            changePercentage = ((double) (todayFocusTime - yesterdayFocusTime) / yesterdayFocusTime) * 100;
-        } else if (todayFocusTime > 0) {
-            changePercentage = 100; // 100% increase from 0
-        }
-        
-        // Update trend indicator with proper color coding
-        if (changePercentage > 10) {
-            // Increase in focus time (good) - show in green
-            todayTrendIndicator.setText(String.format("↗️ +%.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.success));
-        } else if (changePercentage > -10) {
-            // Similar performance
-            todayTrendIndicator.setText("→ Similar");
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.textSecondary));
-            } else {
-            // Decrease in focus time (bad) - show in red
-            todayTrendIndicator.setText(String.format("↘️ %.0f%%", changePercentage));
-                todayTrendIndicator.setTextColor(requireContext().getColor(R.color.warning));
-        }
-    }
 
     
     

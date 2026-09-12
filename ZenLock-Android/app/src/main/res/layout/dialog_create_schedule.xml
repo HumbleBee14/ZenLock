@@ -1,340 +1,353 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/backgroundPrimary">
+    android:background="@drawable/bottom_sheet_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="24dp">
 
-        <!-- Header -->
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/sheet_handle" />
+
         <TextView
+            android:id="@+id/scheduleDialogTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Schedule ⏲"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Schedule Name -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Schedule Name"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginTop="14dp"
+            android:text="New schedule"
+            android:textSize="17sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/textPrimary" />
 
         <EditText
             android:id="@+id/nameInput"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter schedule name"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:background="@drawable/rounded_input_background"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/zen_field_background"
+            android:hint="Schedule name"
+            android:textSize="15sp"
             android:textColor="@color/textPrimary"
-            android:textColorHint="@color/textSecondary"
-            android:layout_marginBottom="20dp"
+            android:textColorHint="@color/textHint"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:inputType="textCapWords"
-            android:capitalize="words" />
+            android:imeOptions="actionDone"
+            android:maxLength="23"
+            android:maxLines="1" />
 
-        <!-- Start Time -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Time"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/startTimeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="09:00"
-            android:textSize="16sp"
-            android:textColor="@color/textPrimary"
-            android:padding="12dp"
-            android:background="@drawable/rounded_input_background"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Focus Duration -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Focus Duration"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/selectedDurationDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Set a duration for focus session"
-            android:textSize="16sp"
-            android:textColor="@color/textSecondary"
-            android:gravity="center"
-            android:padding="12dp"
-            android:background="@drawable/rounded_input_background"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Frequency -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Frequency"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/selectedFrequencyDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Once"
-            android:textSize="16sp"
-            android:textColor="@color/textPrimary"
-            android:padding="12dp"
-            android:background="@drawable/rounded_input_background"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:layout_marginBottom="20dp" />
-
-        <!-- Frequency Selection (Hidden by default) -->
         <LinearLayout
-            android:id="@+id/frequencySelectionLayout"
+            android:id="@+id/startTimeRow"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginBottom="20dp">
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
 
-            <RadioGroup
-                android:id="@+id/repeatTypeGroup"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_weight="1"
+                android:text="Starts"
+                android:textSize="15sp"
+                android:textColor="@color/textPrimary" />
 
-                <RadioButton
-                    android:id="@+id/onceRadio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Once"
-                    android:textSize="16sp"
-                    android:textColor="@color/textPrimary"
-                    android:padding="8dp" />
+            <TextView
+                android:id="@+id/startTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9:00 AM"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/primaryLight" />
 
-                <RadioButton
-                    android:id="@+id/dailyRadio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Daily"
-                    android:textSize="16sp"
-                    android:textColor="@color/textPrimary"
-                    android:padding="8dp"
-                    android:checked="true" />
-
-                <RadioButton
-                    android:id="@+id/weeklyRadio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Weekly"
-                    android:textSize="16sp"
-                    android:textColor="@color/textPrimary"
-                    android:padding="8dp" />
-
-            </RadioGroup>
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/textTertiary"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
-        <!-- Weekly Days (Hidden by default) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dividerSubtle" />
+
+        <LinearLayout
+            android:id="@+id/durationRow"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Duration"
+                android:textSize="15sp"
+                android:textColor="@color/textPrimary" />
+
+            <TextView
+                android:id="@+id/selectedDurationDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set duration"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/primaryLight" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/textTertiary"
+                android:contentDescription="@null" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dividerSubtle" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Repeat"
+            android:textSize="15sp"
+            android:textColor="@color/textPrimary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/onceChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Once" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/dailyChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Daily" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/weeklyChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="Weekly" />
+
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/weeklyDaysLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginBottom="20dp">
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Select Days"
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                android:layout_marginBottom="8dp" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/sundayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="S" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="7">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/mondayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="M" />
 
-                <CheckBox
-                    android:id="@+id/sundayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="S"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tuesdayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="T" />
 
-                <CheckBox
-                    android:id="@+id/mondayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="M"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center"
-                    android:checked="true" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/wednesdayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="W" />
 
-                <CheckBox
-                    android:id="@+id/tuesdayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="T"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center"
-                    android:checked="true" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/thursdayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="T" />
 
-                <CheckBox
-                    android:id="@+id/wednesdayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="W"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center"
-                    android:checked="true" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/fridayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="F" />
 
-                <CheckBox
-                    android:id="@+id/thursdayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="T"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center"
-                    android:checked="true" />
-
-                <CheckBox
-                    android:id="@+id/fridayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="F"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center"
-                    android:checked="true" />
-
-                <CheckBox
-                    android:id="@+id/saturdayCheckbox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="S"
-                    android:textSize="12sp"
-                    android:textColor="@color/textPrimary"
-                    android:gravity="center" />
-
-            </LinearLayout>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/saturdayChip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="S" />
 
         </LinearLayout>
 
-        <!-- Pre-Notify Settings -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Pre-Notification"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp" />
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="20dp">
+            android:gravity="center_vertical">
 
-            <CheckBox
-                android:id="@+id/preNotifyCheckbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Notify me"
-                android:textSize="16sp"
-                android:textColor="@color/textPrimary"
-                android:layout_marginEnd="12dp" />
-
-            <Spinner
-                android:id="@+id/preNotifySpinner"
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:padding="8dp"
-                android:background="@drawable/rounded_input_background"
-                android:enabled="false"
-                android:entries="@array/pre_notify_times"
-                android:popupBackground="@color/surface"
-                android:theme="@style/SpinnerStyle" />
+                android:text="Notify before"
+                android:textSize="15sp"
+                android:textColor="@color/textPrimary" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/preNotifySwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.Switch" />
 
         </LinearLayout>
 
-        <!-- Action Buttons -->
         <LinearLayout
+            android:id="@+id/preNotifyOptions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:visibility="gone">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/notify1Chip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="1m" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/notify2Chip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="2m" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/notify3Chip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="3m" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/notify5Chip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="5m" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/notify10Chip"
+                style="@style/ZenChip"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="10m" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
             android:gravity="end">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/cancelButton"
-                style="@style/ModernButton.Text"
+                style="@style/ModernButton.Pill"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:minHeight="44dp"
+                android:layout_height="40dp"
+                android:minHeight="40dp"
                 android:layout_marginEnd="8dp"
                 android:text="Cancel" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/createButton"
-                style="@style/ModernButton.Primary"
+                style="@style/ModernButton.Pill"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:minHeight="44dp"
+                android:layout_height="40dp"
+                android:minHeight="40dp"
                 android:text="Create" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</ScrollView> 
+</androidx.core.widget.NestedScrollView>
