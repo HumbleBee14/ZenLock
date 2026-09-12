@@ -69,6 +69,10 @@ public class AnalyticsFragment extends Fragment {
     private TextView usagePermissionBanner;
     
     private TabLayout trendsTabs;
+    private TabLayout mostUsedTabs;
+    private LinearLayout mostUsedList;
+    private TextView mostUsedEmpty;
+    private int mostUsedPeriod = com.grepguru.zenlock.utils.TopAppsUsage.TODAY;
     private TextView currentFocusTime, previousFocusTime, currentMobileUsage, previousMobileUsage;
     private TextView focusChange, mobileChange;
     private TextView currentFocusLabel, previousFocusLabel, currentMobileLabel, previousMobileLabel, chartCaption;
@@ -108,8 +112,7 @@ public class AnalyticsFragment extends Fragment {
         // Setup expandable sections
         setupExpandableSections();
         setupTrendsTabs();
-        
-        // Setup usage permission banner
+        setupMostUsedTabs();
         setupUsagePermissionBanner();
 
         // Pre-populate recent mobile usage data and store yesterday's data
@@ -139,8 +142,65 @@ public class AnalyticsFragment extends Fragment {
         // Check if user granted permission while away
         checkPermissionStatusOnResume();
         
-        // Force refresh mobile usage data every time analytics page is opened
         refreshMobileUsageData();
+        loadMostUsed();
+    }
+
+    private void setupMostUsedTabs() {
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Today"));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Week"));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Month"));
+        mostUsedTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                mostUsedPeriod = tab.getPosition();
+                loadMostUsed();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    private void loadMostUsed() {
+        if (!analyticsManager.hasUsageStatsPermission()) {
+            showMostUsed(java.util.Collections.emptyList(), "Allow usage access to see your most used apps");
+            return;
+        }
+        int period = mostUsedPeriod;
+        new Thread(() -> {
+            List<com.grepguru.zenlock.utils.TopAppsUsage.Entry> entries =
+                    com.grepguru.zenlock.utils.TopAppsUsage.top(requireContext(), period, 10);
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
+                if (isAdded() && period == mostUsedPeriod) showMostUsed(entries, "No usage yet");
+            });
+        }).start();
+    }
+
+    private void showMostUsed(List<com.grepguru.zenlock.utils.TopAppsUsage.Entry> entries, String emptyText) {
+        mostUsedList.removeAllViews();
+        if (entries.isEmpty()) {
+            mostUsedEmpty.setText(emptyText);
+            mostUsedEmpty.setVisibility(View.VISIBLE);
+            return;
+        }
+        mostUsedEmpty.setVisibility(View.GONE);
+        long max = entries.get(0).timeMs;
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (com.grepguru.zenlock.utils.TopAppsUsage.Entry entry : entries) {
+            View row = inflater.inflate(R.layout.item_top_app, mostUsedList, false);
+            ((ImageView) row.findViewById(R.id.topAppIcon)).setImageDrawable(entry.icon);
+            ((TextView) row.findViewById(R.id.topAppName)).setText(entry.label);
+            ((TextView) row.findViewById(R.id.topAppTime)).setText(formatTime(entry.timeMs / 60000));
+            View bar = row.findViewById(R.id.topAppBar);
+            bar.setPivotX(0f);
+            bar.setScaleX(max > 0 ? Math.max(0.02f, (float) entry.timeMs / max) : 0f);
+            mostUsedList.addView(row);
+        }
     }
 
     private void initializeViews(View view) {
@@ -165,6 +225,9 @@ public class AnalyticsFragment extends Fragment {
         usagePermissionBanner = view.findViewById(R.id.usagePermissionBanner);
         
         trendsTabs = view.findViewById(R.id.trendsTabs);
+        mostUsedTabs = view.findViewById(R.id.mostUsedTabs);
+        mostUsedList = view.findViewById(R.id.mostUsedList);
+        mostUsedEmpty = view.findViewById(R.id.mostUsedEmpty);
         currentFocusTime = view.findViewById(R.id.currentFocusTime);
         previousFocusTime = view.findViewById(R.id.previousFocusTime);
         currentMobileUsage = view.findViewById(R.id.currentMobileUsage);
