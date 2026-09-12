@@ -10,8 +10,8 @@ android {
         applicationId = "com.grepguru.zenlock"
         minSdk = 28
         targetSdk = 36
-        versionCode = 45
-        versionName = "1.15.0"
+        versionCode = 46
+        versionName = "1.16.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // major.minor.patch
