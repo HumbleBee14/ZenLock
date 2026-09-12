@@ -33,7 +33,7 @@ public enum AppPermission {
 
         @Override
         public void request(Activity activity) {
-            open(activity, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), "Turn on ZenLock in the list");
+            AccessibilityDisclosureDialog.show((androidx.fragment.app.FragmentActivity) activity);
         }
     },
     OVERLAY("Display over other apps", "Shows the lock screen over blocked apps", R.drawable.ic_overlay) {

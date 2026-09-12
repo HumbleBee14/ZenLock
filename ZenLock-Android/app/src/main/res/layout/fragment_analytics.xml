@@ -534,7 +534,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         android:id="@+id/recentSessionsText"

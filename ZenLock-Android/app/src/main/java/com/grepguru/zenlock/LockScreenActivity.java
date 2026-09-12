@@ -21,7 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
-import android.app.AlertDialog;
+import android.app.Dialog;
+import com.google.android.material.chip.Chip;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import androidx.core.app.NotificationCompat;
 
 import androidx.activity.OnBackPressedCallback;
@@ -62,9 +67,15 @@ public class LockScreenActivity extends AppCompatActivity {
     private android.os.Handler autoHideHandler;
     private Runnable autoHideRunnable;
     
-    // Timer system
     private TimerType currentTimer;
     private View timerContainer;
+    private final android.os.Handler uiHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable quoteRotation;
+    private boolean finishing = false;
+    private static final long QUOTE_ROTATION_MS = 10 * 60 * 1000L;
+    private static final long APPS_AUTO_COLLAPSE_MS = 6000L;
+    private static final long CHROME_HIDE_MS = 5000L;
+    private final Runnable chromeHide = this::hideChrome;
     
     // Persistent notification
     private static final String CHANNEL_ID = "zenlock_persistent_lock";
@@ -214,8 +225,8 @@ public class LockScreenActivity extends AppCompatActivity {
             }
         }
         
-        // Initialize timer system with total target duration
         initializeTimer(targetDuration);
+        bindSessionHeader();
         if (remainingTimeMillis <= 0) {
             isLockScreenActive = false; // Reset flag before finishing
             finishLockScreen();
@@ -227,9 +238,11 @@ public class LockScreenActivity extends AppCompatActivity {
         LinearLayout noAppsContainer = findViewById(R.id.noAppsContainer);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
 
-        // Row adapter owns the four-column layout and centers incomplete rows.
-        androidx.recyclerview.widget.LinearLayoutManager layoutManager = new androidx.recyclerview.widget.LinearLayoutManager(this);
-        appsRecycler.setLayoutManager(layoutManager);
+        appsRecycler.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(
+                this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
+        appsRecycler.setNestedScrollingEnabled(false);
+        appsRecycler.setHasFixedSize(true);
+        appsRecycler.setItemViewCacheSize(12);
 
         SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         Set<String> whitelistedApps = preferences.getStringSet("whitelisted_apps", new HashSet<>());
@@ -308,9 +321,23 @@ public class LockScreenActivity extends AppCompatActivity {
             }
         });
 
-        // Set up expand button click listener
+        Runnable appsAutoCollapse = () -> {
+            if (isExpanded) expandAppsButton.performClick();
+        };
+        appsRecycler.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN
+                    || event.getActionMasked() == android.view.MotionEvent.ACTION_UP) {
+                uiHandler.removeCallbacks(appsAutoCollapse);
+                uiHandler.postDelayed(appsAutoCollapse, APPS_AUTO_COLLAPSE_MS);
+            }
+            return false;
+        });
+        TextView quoteView = findViewById(R.id.lockscreenMessage);
         expandAppsButton.setOnClickListener(v -> {
+            uiHandler.removeCallbacks(appsAutoCollapse);
             if (!isExpanded) {
+                uiHandler.postDelayed(appsAutoCollapse, APPS_AUTO_COLLAPSE_MS);
+                quoteView.setVisibility(View.GONE);
                 // Expand: Show all apps (default + additional)
                 if (additionalAppModels.isEmpty()) {
                     // Only default apps exist, just show them
@@ -348,9 +375,12 @@ public class LockScreenActivity extends AppCompatActivity {
             } else {
                 appsRecycler.setVisibility(View.GONE);
                 noAppsContainer.setVisibility(View.GONE);
+                boolean quotesEnabled = preferences.getBoolean("show_quotes", true) && QuoteStore.hasQuotes(this);
+                quoteView.setVisibility(quotesEnabled && !finishing ? View.VISIBLE : View.GONE);
             }
 
             isExpanded = !isExpanded;
+            if (isExpanded) uiHandler.removeCallbacks(chromeHide); else armChromeHide();
             expandAppsButton.setContentDescription(getString(isExpanded ? R.string.hide_allowed_apps : R.string.show_allowed_apps));
 
             // Rotate the expand icon (0° for expanded pointing down, 180° for collapsed pointing up)
@@ -392,15 +422,10 @@ public class LockScreenActivity extends AppCompatActivity {
         });
 
         // Set up unlock arrow click listener
-        unlockArrow.setOnClickListener(v -> {
-            showUnlockButton();
-        });
-
-        // Set up tap-to-reveal functionality on main content
-        View mainContentContainer = findViewById(R.id.mainContentContainer);
-        mainContentContainer.setOnClickListener(v -> {
-            showUnlockButton();
-        });
+        unlockArrow.setOnClickListener(v -> showUnlockButton());
+        findViewById(R.id.mainContentContainer).setOnClickListener(v -> showChrome());
+        lockRoot.setOnClickListener(v -> showChrome());
+        armChromeHide();
 
         // Set up extend button click listener
         extendLockButton.setOnClickListener(v -> {
@@ -446,6 +471,7 @@ public class LockScreenActivity extends AppCompatActivity {
     protected void onPause() {
         if (unlockHold != null) unlockHold.cancel();
         super.onPause();
+        if (finishing) return;
 
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
@@ -630,12 +656,11 @@ public class LockScreenActivity extends AppCompatActivity {
         ImageView unlockArrow = findViewById(R.id.unlockArrow);
         LinearLayout unlockExtendButtonContainer = findViewById(R.id.unlockExtendButtonContainer);
 
-        // Cancel any existing auto-hide timer
         if (autoHideHandler != null && autoHideRunnable != null) {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
+        uiHandler.removeCallbacks(chromeHide);
 
-        // Show unlock and extend button container with smooth slide-up animation
         unlockExtendButtonContainer.setVisibility(View.VISIBLE);
         unlockExtendButtonContainer.setTranslationY(50f); // Start slightly below
         unlockExtendButtonContainer.setAlpha(0f);
@@ -682,13 +707,43 @@ public class LockScreenActivity extends AppCompatActivity {
             })
             .start();
 
-        // Show arrow with fade in
         unlockArrow.setVisibility(View.VISIBLE);
         unlockArrow.setAlpha(0f);
         unlockArrow.animate()
-            .alpha(0.6f)
+            .alpha(1f)
             .setDuration(300)
             .start();
+        armChromeHide();
+    }
+
+    private View[] chromeViews() {
+        return new View[]{findViewById(R.id.unlockArrow), findViewById(R.id.expandButtonContainer)};
+    }
+
+    private void armChromeHide() {
+        uiHandler.removeCallbacks(chromeHide);
+        uiHandler.postDelayed(chromeHide, CHROME_HIDE_MS);
+    }
+
+    private void hideChrome() {
+        if (finishing || isExpanded) return;
+        if (findViewById(R.id.unlockExtendButtonContainer).getVisibility() == View.VISIBLE) return;
+        for (View view : chromeViews()) {
+            if (view == null || view.getVisibility() != View.VISIBLE) continue;
+            view.animate().alpha(0f).setDuration(400)
+                .withEndAction(() -> { if (view.getAlpha() == 0f) view.setVisibility(View.INVISIBLE); })
+                .start();
+        }
+    }
+
+    private void showChrome() {
+        if (finishing) return;
+        for (View view : chromeViews()) {
+            if (view == null || view.getVisibility() == View.GONE) continue;
+            view.setVisibility(View.VISIBLE);
+            view.animate().alpha(1f).setDuration(250).start();
+        }
+        armChromeHide();
     }
 
     @Override
@@ -706,12 +761,11 @@ public class LockScreenActivity extends AppCompatActivity {
             countDownTimer.cancel();
         }
 
-        // Cancel auto-hide timer
         if (autoHideHandler != null && autoHideRunnable != null) {
             autoHideHandler.removeCallbacks(autoHideRunnable);
         }
+        uiHandler.removeCallbacksAndMessages(null);
 
-        // Cleanup timer
         if (currentTimer != null) {
             currentTimer.cleanup();
         }
@@ -809,6 +863,86 @@ public class LockScreenActivity extends AppCompatActivity {
             return;
         }
         lockscreenMessage.setText(quote);
+        if (QuoteStore.all(this).size() < 2) return;
+        quoteRotation = () -> {
+            rotateQuote(lockscreenMessage);
+            uiHandler.postDelayed(quoteRotation, QUOTE_ROTATION_MS);
+        };
+        uiHandler.postDelayed(quoteRotation, QUOTE_ROTATION_MS);
+    }
+
+    private void rotateQuote(TextView lockscreenMessage) {
+        String current = lockscreenMessage.getText().toString();
+        String next = QuoteStore.random(this);
+        for (int i = 0; i < 5 && next != null && next.equals(current); i++) next = QuoteStore.random(this);
+        if (next == null || next.equals(current)) return;
+        String chosen = next;
+        lockscreenMessage.animate().alpha(0f).setDuration(400).withEndAction(() -> {
+            lockscreenMessage.setText(chosen);
+            lockscreenMessage.animate().alpha(1f).setDuration(400).start();
+        }).start();
+    }
+
+    private void bindSessionHeader() {
+        TextView sessionTitle = findViewById(R.id.sessionTitle);
+        String source = preferences.getString("current_session_source", "");
+        String name = source.startsWith("schedule:") ? source.substring("schedule:".length()).trim() : "";
+        sessionTitle.setText(name.isEmpty() ? "Focus" : name);
+        updateEndsAt();
+    }
+
+    private void updateEndsAt() {
+        TextView endsAtText = findViewById(R.id.endsAtText);
+        long lockEndTime = preferences.getLong("lockEndTime", 0);
+        if (endsAtText == null || lockEndTime <= 0) return;
+        String time = new SimpleDateFormat("h:mm a", Locale.getDefault()).format(new Date(lockEndTime));
+        Calendar now = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        end.setTimeInMillis(lockEndTime);
+        boolean sameDay = now.get(Calendar.YEAR) == end.get(Calendar.YEAR)
+                && now.get(Calendar.DAY_OF_YEAR) == end.get(Calendar.DAY_OF_YEAR);
+        endsAtText.setText(sameDay ? "Ends at " + time : "Ends tomorrow at " + time);
+    }
+
+    private void updateProgress(long totalTimeMs, long remainingTimeMs) {
+        View fill = findViewById(R.id.timerProgressFill);
+        if (fill == null || totalTimeMs <= 0) return;
+        float progress = 1f - (float) remainingTimeMs / totalTimeMs;
+        fill.setPivotX(0f);
+        fill.setScaleX(Math.max(0f, Math.min(1f, progress)));
+    }
+
+    private static String formatDuration(long millis) {
+        long minutes = Math.max(1, Math.round(millis / 60000.0));
+        long hours = minutes / 60;
+        minutes %= 60;
+        if (hours == 0) return minutes + "m";
+        if (minutes == 0) return hours + "h";
+        return hours + "h " + minutes + "m";
+    }
+
+    private void showFinishMoment(long totalTimeMs) {
+        finishing = true;
+        if (countDownTimer != null) countDownTimer.cancel();
+        if (quoteRotation != null) uiHandler.removeCallbacks(quoteRotation);
+        if (autoHideHandler != null && autoHideRunnable != null) autoHideHandler.removeCallbacks(autoHideRunnable);
+        if (unlockHold != null) unlockHold.cancel();
+        if (currentTimer != null) currentTimer.updateTimer(totalTimeMs, 0);
+        updateProgress(totalTimeMs, 0);
+
+        TextView sessionTitle = findViewById(R.id.sessionTitle);
+        TextView endsAtText = findViewById(R.id.endsAtText);
+        sessionTitle.setText("Done");
+        endsAtText.setText(formatDuration(totalTimeMs) + " focused");
+        findViewById(R.id.mainContentContainer).setClickable(false);
+
+        int[] fade = {R.id.lockscreenMessage, R.id.unlockArrow, R.id.unlockExtendButtonContainer,
+                R.id.unlockInputsContainer, R.id.parentAppsContainer, R.id.expandButtonContainer};
+        for (int id : fade) {
+            View view = findViewById(id);
+            if (view != null && view.getVisibility() == View.VISIBLE) view.animate().alpha(0f).setDuration(300).start();
+        }
+        uiHandler.postDelayed(this::finishLockScreen, 1800);
     }
 
     /**
@@ -835,24 +969,18 @@ public class LockScreenActivity extends AppCompatActivity {
             float density = getResources().getDisplayMetrics().density;
             int availableWidth = getResources().getDisplayMetrics().widthPixels - (int) (48 * density);
             params.width = Math.min((int) (280 * density), availableWidth);
-            params.height = "circular".equals(timerStyle) ? params.width : (int) (100 * density);
+            boolean circular = "circular".equals(timerStyle);
+            params.height = circular ? params.width : (int) (100 * density);
             frameLayout.setLayoutParams(params);
-        }
 
-        // Initialize the timer using total duration so progress reflects overall session
-        currentTimer.initialize(totalTimeMs);
-
-        // Hide quotes for circular timer to save space
-        TextView lockscreenMessage = findViewById(R.id.lockscreenMessage);
-        if (lockscreenMessage != null) {
-            if ("circular".equals(timerStyle)) {
-                lockscreenMessage.setVisibility(View.GONE);
-            } else {
-                // Digital timer: check if quotes are enabled
-                boolean quotesEnabled = preferences.getBoolean("show_quotes", true) && QuoteStore.hasQuotes(this);
-                lockscreenMessage.setVisibility(quotesEnabled ? View.VISIBLE : View.GONE);
+            View track = findViewById(R.id.timerProgressTrack);
+            if (track != null) {
+                track.getLayoutParams().width = params.width - (int) (40 * density);
+                track.setVisibility(circular ? View.GONE : View.VISIBLE);
             }
         }
+
+        currentTimer.initialize(totalTimeMs);
     }
 
     private void startCountdownTimer(long totalTimeMs, long remainingTimeMillis) {
@@ -862,6 +990,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 if (currentTimer != null) {
                     currentTimer.updateTimer(totalTimeMs, millisUntilFinished);
                 }
+                updateProgress(totalTimeMs, millisUntilFinished);
             }
 
             @Override
@@ -901,10 +1030,9 @@ public class LockScreenActivity extends AppCompatActivity {
                     editor.remove("lockEndTime"); // Remove saved lock end time
                     editor.apply();
 
-                    // Vibrate on timer completion
-                    VibrationUtils.vibrate(LockScreenActivity.this, 500); // 500ms vibration
-
-                    Toast.makeText(LockScreenActivity.this, "Time's up! Focus Mode Ended.", Toast.LENGTH_SHORT).show();
+                    VibrationUtils.vibrate(LockScreenActivity.this, 500);
+                    showFinishMoment(totalTimeMs);
+                    return;
                 }
                 finishLockScreen();
             }
@@ -927,57 +1055,52 @@ public class LockScreenActivity extends AppCompatActivity {
                 finish();
             }
 
-    /**
-     * Show dialog to select extension time with consistent dark theme design
-     */
     private void showExtendDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_extend_time_picker, null);
+        Context themed = new android.view.ContextThemeWrapper(this, R.style.Theme_ZenLock);
+        View dialogView = android.view.LayoutInflater.from(themed).inflate(R.layout.dialog_extend, null);
+        Chip[] chips = {dialogView.findViewById(R.id.extend15Chip), dialogView.findViewById(R.id.extend30Chip),
+                dialogView.findViewById(R.id.extend60Chip), dialogView.findViewById(R.id.extendCustomChip)};
+        int[] presetMinutes = {15, 30, 60};
+        View pickers = dialogView.findViewById(R.id.extendPickers);
         NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
-        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
-        Button extendButton = dialogView.findViewById(R.id.extendButton);
-        
-        // Configure hours picker (0-5 hours for extension)
+
         hoursPicker.setMinValue(0);
         hoursPicker.setMaxValue(5);
         hoursPicker.setValue(0);
-        
-        // Configure minutes picker with predefined values (same as schedule creation)
+        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "45"};
         minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(8);
-        String[] minuteValues = {"0", "1", "5", "10", "15", "20", "30", "40", "50"};
+        minutesPicker.setMaxValue(minuteValues.length - 1);
         minutesPicker.setDisplayedValues(minuteValues);
-        minutesPicker.setValue(0);
-        
-        // Create custom dialog with dark theme
-        AlertDialog dialog = new AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(true)
-            .create();
-        
-        // Set custom background to match app theme
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        
-        // Set up button listeners
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-        
-        extendButton.setOnClickListener(v -> {
-            int hours = hoursPicker.getValue();
-            int minutes = Integer.parseInt(minuteValues[minutesPicker.getValue()]);
-            long extraMillis = (hours * 3600 + minutes * 60) * 1000;
-            
-            if (extraMillis > 0) {
-                extendLockDuration(extraMillis);
-                String timeText = "";
-                if (hours > 0) timeText += hours + "h ";
-                if (minutes > 0) timeText += minutes + "m";
-                Toast.makeText(this, "Focus session extended by " + timeText, Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-            } else {
-                Toast.makeText(this, "Please select a valid extension time", Toast.LENGTH_SHORT).show();
+        minutesPicker.setValue(3);
+
+        int[] selected = {0};
+        for (int i = 0; i < chips.length; i++) {
+            int index = i;
+            chips[i].setOnClickListener(v -> {
+                selected[0] = index;
+                for (int j = 0; j < chips.length; j++) chips[j].setChecked(j == index);
+                pickers.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+            });
+        }
+        chips[0].setChecked(true);
+
+        Dialog dialog = new Dialog(themed);
+        dialog.setContentView(dialogView);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.extendButton).setOnClickListener(v -> {
+            long minutes = selected[0] < 3
+                    ? presetMinutes[selected[0]]
+                    : hoursPicker.getValue() * 60L + Integer.parseInt(minuteValues[minutesPicker.getValue()]);
+            if (minutes <= 0) {
+                Toast.makeText(this, "Pick a duration", Toast.LENGTH_SHORT).show();
+                return;
             }
+            extendLockDuration(minutes * 60 * 1000L);
+            dialog.dismiss();
         });
-        
         dialog.show();
     }
 
@@ -1002,33 +1125,17 @@ public class LockScreenActivity extends AppCompatActivity {
         }
         startCountdownTimer(targetDuration, remainingTimeMillis);
         
-        // Update the timer display immediately
         updateTimerDisplay(remainingTimeMillis);
-        
-        // Update persistent notification with new end time
+        updateEndsAt();
         updatePersistentNotification();
     }
 
-    /**
-     * Update timer display with new remaining time
-     */
     private void updateTimerDisplay(long remainingTimeMillis) {
-        TextView timerCountdown = findViewById(R.id.timerCountdown);
-        if (timerCountdown != null) {
-            long hours = remainingTimeMillis / (1000 * 60 * 60);
-            long minutes = (remainingTimeMillis % (1000 * 60 * 60)) / (1000 * 60);
-            long seconds = (remainingTimeMillis % (1000 * 60)) / 1000;
-            
-            String timeText;
-            if (hours > 0) {
-                timeText = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-            } else {
-                timeText = String.format("%02d:%02d", minutes, seconds);
-            }
-            timerCountdown.setText(timeText);
-        }
+        long totalTimeMs = preferences.getLong("lockTargetDuration", remainingTimeMillis);
+        if (currentTimer != null) currentTimer.updateTimer(totalTimeMs, remainingTimeMillis);
+        updateProgress(totalTimeMs, remainingTimeMillis);
     }
-    
+
     /**
      * Create persistent notification if enabled in settings
      */

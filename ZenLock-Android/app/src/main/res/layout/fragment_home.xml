@@ -327,7 +327,7 @@
             android:id="@+id/startDelayRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="end|center_vertical"
             android:minHeight="36dp"
             android:orientation="horizontal">
 

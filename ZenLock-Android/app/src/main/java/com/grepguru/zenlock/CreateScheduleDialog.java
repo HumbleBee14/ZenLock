@@ -34,6 +34,7 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
 
     private ScheduleListener listener;
     private ScheduleModel scheduleToEdit;
+    private ScheduleModel template;
 
     private EditText nameInput;
     private TextView startTimeText;
@@ -63,13 +64,21 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
         this.scheduleToEdit = schedule;
     }
 
+    public void setTemplate(ScheduleModel schedule) {
+        this.template = schedule;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_create_schedule, container, false);
         bindViews(view);
         if (scheduleToEdit != null) {
-            populateForEdit(view);
+            ((TextView) view.findViewById(R.id.scheduleDialogTitle)).setText("Edit schedule");
+            createButton.setText("Save");
+            populate(scheduleToEdit);
+        } else if (template != null) {
+            populate(template);
         } else {
             repeatChoice.select(1);
             notifyChoice.select(3);
@@ -200,27 +209,24 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
         selectedDurationDisplay.setText(text);
     }
 
-    private void populateForEdit(View view) {
-        ((TextView) view.findViewById(R.id.scheduleDialogTitle)).setText("Edit schedule");
-        createButton.setText("Save");
-
-        nameInput.setText(scheduleToEdit.getName());
-        selectedHour = scheduleToEdit.getStartHour();
-        selectedMinute = scheduleToEdit.getStartMinute();
-        int totalMinutes = scheduleToEdit.getFocusDurationMinutes();
+    private void populate(ScheduleModel source) {
+        nameInput.setText(source.getName());
+        selectedHour = source.getStartHour();
+        selectedMinute = source.getStartMinute();
+        int totalMinutes = source.getFocusDurationMinutes();
         selectedDurationHours = totalMinutes / 60;
         selectedDurationMinutes = totalMinutes % 60;
 
-        switch (scheduleToEdit.getRepeatType()) {
+        switch (source.getRepeatType()) {
             case ONCE: repeatChoice.select(0); break;
             case WEEKLY: repeatChoice.select(2); break;
             default: repeatChoice.select(1);
         }
-        Set<Integer> repeatDays = scheduleToEdit.getRepeatDays();
+        Set<Integer> repeatDays = source.getRepeatDays();
         for (int i = 0; i < dayChips.length; i++) dayChips[i].setChecked(repeatDays.contains(i + 1));
 
-        preNotifySwitch.setChecked(scheduleToEdit.isPreNotifyEnabled());
-        notifyChoice.select(indexOf(NOTIFY_MINUTES, scheduleToEdit.getPreNotifyMinutes(), 3));
+        preNotifySwitch.setChecked(source.isPreNotifyEnabled());
+        notifyChoice.select(indexOf(NOTIFY_MINUTES, source.getPreNotifyMinutes(), 3));
     }
 
     private void createSchedule() {
