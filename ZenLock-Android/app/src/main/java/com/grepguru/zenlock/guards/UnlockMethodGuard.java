@@ -15,7 +15,10 @@ public final class UnlockMethodGuard {
     private UnlockMethodGuard() {}
 
     public static boolean isConfigured(Context context) {
-        return PinUnlock.isEnabled(context) || !prefs(context).getString("partner_phone", "").isEmpty();
+        if (PinUnlock.isEnabled(context)) return true;
+        SharedPreferences prefs = prefs(context);
+        return prefs.getBoolean("enable_sms_notifications", false)
+            && !prefs.getString("partner_phone", "").isEmpty();
     }
 
     public static boolean isSatisfied(Context context) {

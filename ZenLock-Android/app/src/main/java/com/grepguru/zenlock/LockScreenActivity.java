@@ -114,14 +114,6 @@ public class LockScreenActivity extends AppCompatActivity {
             nm.cancel(9999); // BLOCKER_NOTIFICATION_ID from LockScreenLauncher
         }
 
-        // Start overlay lock service
-        Intent overlayIntent = new Intent(this, OverlayLockService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(overlayIntent);
-        } else {
-            startService(overlayIntent);
-        }
-        
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         analyticsManager = new AnalyticsManager(this);
         unlockManager = new EnhancedUnlockManager(this);
@@ -132,7 +124,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Check if the device restarted using uptime OR if the wasDeviceRestarted flag is set
         boolean wasRestarted = preferences.getBoolean("wasDeviceRestarted", false);
-        boolean autoRestartPref = preferences.getBoolean("auto_restart", false);
+        boolean autoRestartPref = preferences.getBoolean("auto_restart", true);
 
         // If device was restarted (stored uptime > current uptime OR wasDeviceRestarted flag is set)
         if (storedUptime > currentUptime || wasRestarted) {
@@ -751,9 +743,6 @@ public class LockScreenActivity extends AppCompatActivity {
         // Always reset the flag when activity is destroyed
         isLockScreenActive = false;
 
-        // Stop overlay lock service to prevent resource leak
-        stopService(new Intent(this, OverlayLockService.class));
-
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -1048,8 +1037,6 @@ public class LockScreenActivity extends AppCompatActivity {
         // Clear any pre-notifications for this session
         clearPreNotificationsForCurrentSession();
         
-        // Stop overlay lock service
-        stopService(new Intent(this, OverlayLockService.class));
                 finish();
             }
 

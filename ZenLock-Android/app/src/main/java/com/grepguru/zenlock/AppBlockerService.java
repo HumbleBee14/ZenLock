@@ -206,8 +206,6 @@ public class AppBlockerService extends AccessibilityService {
         }
         
         if (!isAllowed) {
-            // Aggressively show overlay and lock screen
-            OverlayLockService.showOverlay(this); // Ensure overlay is shown instantly
             launchLockScreen();
         } else {
             // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting
@@ -226,9 +224,6 @@ public class AppBlockerService extends AccessibilityService {
             if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not launching LockScreenActivity.")) {
                 return;
             }
-
-            // Always show overlay first — this works even when startActivity is blocked
-            OverlayLockService.showOverlay(this);
 
             // On MIUI/HyperOS, startActivity() from background is silently blocked
             // unless "Display pop-up windows while running in background" is enabled.

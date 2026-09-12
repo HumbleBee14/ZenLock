@@ -103,7 +103,11 @@
                     android:name=".LockScreenService"
                     android:enabled="true"
                     android:exported="false"
-                    android:foregroundServiceType="specialUse" />
+                    android:foregroundServiceType="specialUse">
+                    <property
+                        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                        android:value="Keeps a user-started focus session running and brings the lock screen back when a blocked app is opened" />
+                </service>
 
                 <!-- Notification Blocker Service -->
                 <service
