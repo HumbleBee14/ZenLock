@@ -58,7 +58,7 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
         rows = view.findViewById(R.id.permissionRows);
         continueButton = view.findViewById(R.id.permissionsContinue);
         if (request != null) title.setText(request.title);
-        continueButton.setText(onReady == null ? "Done" : "Continue");
+        continueButton.setVisibility(onReady == null ? View.GONE : View.VISIBLE);
         continueButton.setOnClickListener(v -> {
             Runnable ready = onReady;
             dismiss();
@@ -96,7 +96,6 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
         ImageView icon = row.findViewById(R.id.permissionIcon);
         TextView title = row.findViewById(R.id.permissionTitle);
         TextView reason = row.findViewById(R.id.permissionReason);
-        TextView optionalTag = row.findViewById(R.id.permissionOptional);
         MaterialButton enable = row.findViewById(R.id.permissionEnable);
         ImageView check = row.findViewById(R.id.permissionGranted);
 
@@ -104,7 +103,6 @@ public class PermissionSheet extends BottomSheetDialogFragment implements Permis
         title.setText(requirement.permission.title);
         reason.setText(requirement.permission.reason);
         reason.setVisibility(granted ? View.GONE : View.VISIBLE);
-        optionalTag.setVisibility(!granted && !requirement.required ? View.VISIBLE : View.GONE);
         enable.setVisibility(granted ? View.GONE : View.VISIBLE);
         check.setVisibility(granted ? View.VISIBLE : View.GONE);
         row.setAlpha(granted ? 0.6f : 1f);

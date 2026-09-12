@@ -18,33 +18,37 @@
 
     <TextView
         android:id="@+id/permissionsTitle"
-        style="@style/ModernText.Heading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Permissions" />
+        android:layout_marginTop="14dp"
+        android:text="Permissions"
+        android:textSize="17sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/textPrimary" />
 
     <TextView
-        style="@style/ModernText.Caption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="ZenLock needs the following. Status updates when you return."
+        android:layout_marginTop="2dp"
+        android:text="Needed for ZenLock to work seamlessly"
+        android:textSize="11sp"
         android:textColor="@color/textSecondary" />
 
     <LinearLayout
         android:id="@+id/permissionRows"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="6dp"
         android:orientation="vertical" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/permissionsContinue"
         style="@style/ModernButton.Primary"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:minHeight="40dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="10dp"
         android:text="Continue" />
 
 </LinearLayout>

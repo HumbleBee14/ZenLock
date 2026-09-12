@@ -5,13 +5,13 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="10dp">
+    android:paddingVertical="5dp">
 
     <ImageView
         android:id="@+id/permissionIcon"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginEnd="14dp"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginEnd="12dp"
         app:tint="@color/textSecondary"
         android:contentDescription="@null" />
 
@@ -29,29 +29,19 @@
 
             <TextView
                 android:id="@+id/permissionTitle"
-                style="@style/ModernText.Body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
                 android:textColor="@color/textPrimary" />
-
-            <TextView
-                android:id="@+id/permissionOptional"
-                style="@style/ModernText.MetricLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="OPTIONAL"
-                android:textColor="@color/textSecondary"
-                android:visibility="gone" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/permissionReason"
-            style="@style/ModernText.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:textSize="11sp"
             android:textColor="@color/textSecondary" />
 
     </LinearLayout>
@@ -60,19 +50,20 @@
         android:id="@+id/permissionEnable"
         style="@style/ModernButton.Primary"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:minHeight="36dp"
-        android:layout_marginStart="12dp"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
+        android:layout_height="30dp"
+        android:minHeight="30dp"
+        android:layout_marginStart="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:text="Enable"
-        android:textSize="13sp" />
+        android:textSize="12sp"
+        app:cornerRadius="10dp" />
 
     <ImageView
         android:id="@+id/permissionGranted"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginStart="12dp"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="10dp"
         android:src="@drawable/ic_check"
         app:tint="@color/primary"
         android:visibility="gone"

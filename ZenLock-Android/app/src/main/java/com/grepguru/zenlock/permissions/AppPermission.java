@@ -21,7 +21,7 @@ import com.grepguru.zenlock.utils.MiuiUtils;
 import android.accessibilityservice.AccessibilityServiceInfo;
 
 public enum AppPermission {
-    ACCESSIBILITY("Accessibility service", "Detects and closes blocked apps during a session. Nothing leaves your device.", R.drawable.ic_accessibility) {
+    ACCESSIBILITY("Accessibility service", "Closes blocked apps during a session", R.drawable.ic_accessibility) {
         @Override
         public boolean isGranted(Context context) {
             AccessibilityManager manager = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -37,7 +37,7 @@ public enum AppPermission {
             open(host, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), "Turn on ZenLock in the list");
         }
     },
-    OVERLAY("Display over other apps", "Shows the lock screen on top of a blocked app.", R.drawable.ic_overlay) {
+    OVERLAY("Display over other apps", "Shows the lock screen over blocked apps", R.drawable.ic_overlay) {
         @Override
         public boolean isGranted(Context context) {
             return Settings.canDrawOverlays(context);
@@ -48,7 +48,7 @@ public enum AppPermission {
             open(host, packageIntent(host, Settings.ACTION_MANAGE_OVERLAY_PERMISSION), null);
         }
     },
-    NOTIFICATIONS("Notifications", "Keeps the session timer visible while you focus.", R.drawable.ic_message) {
+    NOTIFICATIONS("Notifications", "Shows the session timer", R.drawable.ic_message) {
         @Override
         public boolean appliesTo(Context context) {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
@@ -64,7 +64,7 @@ public enum AppPermission {
             host.requestRuntimePermission(Manifest.permission.POST_NOTIFICATIONS);
         }
     },
-    NOTIFICATION_ACCESS("Notification access", "Hides notifications from blocked apps during a session.", R.drawable.ic_message) {
+    NOTIFICATION_ACCESS("Notification access", "Hides notifications from blocked apps", R.drawable.ic_message) {
         @Override
         public boolean isGranted(Context context) {
             String listeners = Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
@@ -76,7 +76,7 @@ public enum AppPermission {
             open(host, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), "Turn on ZenLock in the list");
         }
     },
-    EXACT_ALARM("Exact alarms", "Starts sessions at the exact scheduled minute.", R.drawable.ic_alarm) {
+    EXACT_ALARM("Exact alarms", "Starts schedules on time", R.drawable.ic_alarm) {
         @Override
         public boolean appliesTo(Context context) {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
@@ -92,7 +92,7 @@ public enum AppPermission {
             open(host, packageIntent(host, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM), null);
         }
     },
-    UNRESTRICTED_BATTERY("Unrestricted battery", "Keeps schedules firing when the phone is asleep.", R.drawable.ic_battery_protect) {
+    UNRESTRICTED_BATTERY("Unrestricted battery", "Keeps schedules running while asleep", R.drawable.ic_battery_protect) {
         @Override
         public boolean isGranted(Context context) {
             return BatteryOptimizationManager.isExempt(context);
@@ -103,7 +103,7 @@ public enum AppPermission {
             BatteryOptimizationManager.requestExemption(host.activity());
         }
     },
-    XIAOMI_BACKGROUND_POPUP("Background pop-ups", "Lets the lock screen appear from the background on Xiaomi devices.", R.drawable.ic_overlay) {
+    XIAOMI_BACKGROUND_POPUP("Background pop-ups", "Opens the lock screen from the background", R.drawable.ic_overlay) {
         @Override
         public boolean appliesTo(Context context) {
             return MiuiUtils.isXiaomiDevice();
@@ -151,7 +151,7 @@ public enum AppPermission {
             host.activity().startActivity(intent);
             if (hint != null) Toast.makeText(host.activity(), hint, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(host.activity(), "Open Settings and grant it manually", Toast.LENGTH_SHORT).show();
+            Toast.makeText(host.activity(), "Couldn't open Settings", Toast.LENGTH_SHORT).show();
         }
     }
 }
