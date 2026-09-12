@@ -4,6 +4,7 @@ enum Constants {
     static let appGroupID = "group.com.humblebee.zenlock"
     static let maxActivities = 20
     static let maxStores = 50
+    static let quickFocusActivity = "zen_quick_focus"
 
     enum Keys {
         static let blockGroups = "zen_block_groups"

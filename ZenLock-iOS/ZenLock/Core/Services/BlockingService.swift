@@ -31,6 +31,7 @@ final class BlockingService {
             try scheduleManager.startMonitoring(for: shared, selection: selection)
             if ScheduleEvaluator.isWithinSchedule(shared) {
                 shieldManager.applyShield(for: shared, selection: selection)
+                WindowLog.record(groupId: shared.id)
             }
         case .usageBased:
             try scheduleManager.startMonitoring(for: shared, selection: selection)
@@ -139,6 +140,7 @@ final class BlockingService {
                 try? scheduleManager.startMonitoring(for: shared, selection: selection)
                 if ScheduleEvaluator.isWithinSchedule(shared) {
                     shieldManager.applyShield(for: shared, selection: selection)
+                    WindowLog.record(groupId: shared.id)
                 } else {
                     shieldManager.removeShield(forGroupId: shared.id)
                 }
@@ -173,5 +175,6 @@ final class BlockingService {
         var groups = storage.loadGroups()
         groups.removeAll { $0.id == groupId }
         storage.saveGroups(groups)
+        WindowLog.clear(groupId: groupId)
     }
 }

@@ -388,8 +388,8 @@ private var extendPickerSheet: some View {
 
     // MARK: - Session lifecycle
 
-    private static let storeNameString = "zen_quick_focus"
-    private static let storeName = ManagedSettingsStore.Name("zen_quick_focus")
+    private static let storeNameString = Constants.quickFocusActivity
+    private static let storeName = ManagedSettingsStore.Name(Constants.quickFocusActivity)
     private static let sessionKey = "zen_quick_focus_session"
 
     private func reload() {

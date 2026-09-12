@@ -9,16 +9,19 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
-        // Apply shield first due to extension's tight memory/time budget.
+        guard activity.rawValue != Constants.quickFocusActivity else { return }
         evaluateBlockState(for: activity, reason: .intervalStart)
         let groupId = extractGroupId(from: activity)
         defaults?.set(Date(), forKey: "schedule_start_\(groupId)")
+        if let group = loadGroup(groupId), group.blockMode == .timeBased, ScheduleEvaluator.isWithinSchedule(group) {
+            WindowLog.record(groupId: groupId, defaults: defaults)
+        }
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
         let storeName = ManagedSettingsStore.Name(activity.rawValue)
         ManagedSettingsStore(named: storeName).clearAllSettings()
-        defaults?.removeObject(forKey: "zen_quick_focus_active")
+        guard activity.rawValue != Constants.quickFocusActivity else { return }
         evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 
@@ -65,6 +68,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
         guard let group = loadGroup(groupId), group.isActive else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
+            ManagedSettingsStore(named: ManagedSettingsStore.Name(groupId)).clearAllSettings()
             return
         }
 
@@ -80,6 +84,9 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             applyShield(storeName: storeName, group: group)
         } else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
+            if group.blockMode == .timeBased, !ScheduleEvaluator.isWithinSchedule(group) {
+                ManagedSettingsStore(named: ManagedSettingsStore.Name(groupId)).clearAllSettings()
+            }
         }
     }
 

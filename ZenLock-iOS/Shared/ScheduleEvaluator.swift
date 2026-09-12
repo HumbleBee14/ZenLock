@@ -14,36 +14,23 @@ enum ScheduleEvaluator {
         }
 
         let comps = calendar.dateComponents([.hour, .minute, .weekday], from: date)
-        guard let hour = comps.hour, let minute = comps.minute else { return false }
-
-        if let allowedDays = group.scheduleDaysOfWeek, !allowedDays.isEmpty {
-            if let weekday = comps.weekday, !allowedDays.contains(weekday) {
-                let crossesMidnight = startHour > endHour || (startHour == endHour && startMin > endMin)
-                if crossesMidnight && isInPostMidnightTail(hour: hour, minute: minute, endHour: endHour, endMin: endMin) {
-                    let prevWeekday = ((weekday - 2 + 7) % 7) + 1
-                    if !allowedDays.contains(prevWeekday) { return false }
-                } else {
-                    return false
-                }
-            }
-        }
+        guard let hour = comps.hour, let minute = comps.minute, let weekday = comps.weekday else { return false }
 
         let nowMinutes = hour * 60 + minute
         let startMinutes = startHour * 60 + startMin
         let endMinutes = endHour * 60 + endMin
-
         let crossesMidnight = startMinutes > endMinutes
 
-        if crossesMidnight {
-            return nowMinutes >= startMinutes || nowMinutes < endMinutes
-        } else {
-            return nowMinutes >= startMinutes && nowMinutes < endMinutes
-        }
-    }
+        let inWindow = crossesMidnight
+            ? (nowMinutes >= startMinutes || nowMinutes < endMinutes)
+            : (nowMinutes >= startMinutes && nowMinutes < endMinutes)
+        guard inWindow else { return false }
 
-    private static func isInPostMidnightTail(hour: Int, minute: Int, endHour: Int, endMin: Int) -> Bool {
-        let now = hour * 60 + minute
-        let end = endHour * 60 + endMin
-        return now < end
+        if let allowedDays = group.scheduleDaysOfWeek, !allowedDays.isEmpty {
+            let inPostMidnightTail = crossesMidnight && nowMinutes < endMinutes
+            let windowStartWeekday = inPostMidnightTail ? ((weekday - 2 + 7) % 7) + 1 : weekday
+            return allowedDays.contains(windowStartWeekday)
+        }
+        return true
     }
 }

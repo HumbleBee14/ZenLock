@@ -75,6 +75,7 @@ enum SessionLedger {
         let activeSince = max(group.updatedAt, horizon)
         guard let firstDay = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: activeSince)) else { return }
 
+        let evidence = WindowLog.starts(groupId: group.id.uuidString)
         var day = firstDay
         let today = calendar.startOfDay(for: now)
         while day <= today {
@@ -91,7 +92,10 @@ enum SessionLedger {
             let alreadyRecorded = sessions.contains { session in
                 session.groupId == group.id && session.startedAt >= window.start && session.startedAt < window.end
             }
-            if !alreadyRecorded {
+            let evidenced = evidence.isEmpty || evidence.contains { stamp in
+                stamp >= window.start.addingTimeInterval(-120) && stamp < window.end
+            }
+            if !alreadyRecorded && evidenced {
                 let startedAt = max(window.start, activeSince)
                 let finished = now >= window.end
                 let session = FocusSession(
