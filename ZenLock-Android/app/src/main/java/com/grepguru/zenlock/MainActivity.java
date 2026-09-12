@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static final float AMBIENT_ALPHA = 0.09f;
     private float touchDownX;
     private float touchDownY;
+    private final Runnable reviewCheck = () -> com.grepguru.zenlock.utils.ReviewPrompter.showIfDue(this);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(lockIntent);
             finish();
+            return;
         }
+        ambientHandler.postDelayed(reviewCheck, 2000);
     }
 }
