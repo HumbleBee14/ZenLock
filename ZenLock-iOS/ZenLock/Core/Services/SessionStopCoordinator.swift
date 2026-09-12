@@ -53,9 +53,9 @@ struct SessionStopCoordinator {
     func finalizeIfElapsed(_ group: BlockGroup, context: ModelContext) -> Bool {
         guard let pending = pendingUnlock(for: group), Date() >= pending.unlocksAt else { return false }
         accountability.cancelPendingUnlock()
-        SessionRecorder(context: context).end(group: group, completed: true)
         _ = blockingService.deactivateGroup(group)
         try? context.save()
+        SessionLedger.reconcile(context: context)
         return true
     }
 }

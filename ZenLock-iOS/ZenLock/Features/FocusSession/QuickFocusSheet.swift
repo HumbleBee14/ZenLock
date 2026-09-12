@@ -60,6 +60,7 @@ struct WheelDurationPicker: UIViewRepresentable {
 
 struct QuickFocusSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var selection = FamilyActivitySelection()
     @State private var showPicker = false
@@ -285,6 +286,7 @@ private var extendPickerSheet: some View {
         a.cooldownEndsAt = nil
         a.save()
         active = a
+        SessionRecorder(context: modelContext).extendQuickFocus(endsAt: a.endsAt)
 
         let center = DeviceActivityCenter()
         center.stopMonitoring([DeviceActivityName(Self.storeNameString)])
@@ -428,6 +430,7 @@ private var extendPickerSheet: some View {
         )
         session.save()
         active = session
+        SessionRecorder(context: modelContext).beginQuickFocus(endsAt: endsAt)
 
         registerDeviceActivitySchedule(endsAt: endsAt)
         scheduleEndNotification(at: endsAt)
@@ -439,6 +442,7 @@ private var extendPickerSheet: some View {
         ManagedSettingsStore(named: Self.storeName).clearAllSettings()
         ActiveSession.clear()
         active = nil
+        SessionRecorder(context: modelContext).endQuickFocus()
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["zen_quick_focus_end"])
     }
 

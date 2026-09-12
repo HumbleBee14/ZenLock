@@ -20,6 +20,7 @@ final class DashboardViewModel {
     func loadGroups(context: ModelContext) {
         let descriptor = FetchDescriptor<BlockGroup>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
         groups = (try? context.fetch(descriptor)) ?? []
+        SessionLedger.reconcile(context: context)
         updateWidgetSnapshot(context: context)
     }
 
@@ -48,13 +49,10 @@ final class DashboardViewModel {
     }
 
     private func activate(_ group: BlockGroup, context: ModelContext) {
-        let recorder = SessionRecorder(context: context)
         do {
             let outcome = try blockingService.armOrActivate(group)
-            if case .activeNow = outcome {
-                recorder.begin(group: group, targetDuration: estimatedDuration(for: group))
-            }
             try context.save()
+            SessionLedger.reconcile(context: context)
             toast = ScheduleToastFactory.make(for: outcome, group: group)
         } catch {
             group.isActive = false
@@ -108,18 +106,4 @@ final class DashboardViewModel {
 
     var activeGroupCount: Int { groups.filter(\.isActive).count }
     var totalGroupCount: Int { groups.count }
-
-    private func estimatedDuration(for group: BlockGroup) -> TimeInterval {
-        switch group.blockMode {
-        case .timeBased:
-            guard let sH = group.scheduleStartHour, let sM = group.scheduleStartMinute,
-                  let eH = group.scheduleEndHour, let eM = group.scheduleEndMinute else { return 0 }
-            let startMin = sH * 60 + sM
-            let endMin = eH * 60 + eM
-            let diff = endMin > startMin ? endMin - startMin : (24 * 60 - startMin) + endMin
-            return TimeInterval(diff * 60)
-        case .usageBased:
-            return TimeInterval((group.usageLimitMinutes ?? 0) * 60)
-        }
-    }
 }

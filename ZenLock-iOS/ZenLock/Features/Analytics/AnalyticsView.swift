@@ -11,8 +11,8 @@ struct AnalyticsView: View {
         var label: String {
             switch self {
             case .today: return "Today"
-            case .week: return "This week"
-            case .month: return "This month"
+            case .week: return "7 days"
+            case .month: return "30 days"
             }
         }
     }
@@ -38,6 +38,7 @@ struct AnalyticsView: View {
         }
         .navigationTitle("Insights")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { SessionLedger.reconcile(context: modelContext) }
     }
 
     private func reportContainer(context: String, height: CGFloat) -> some View {
@@ -66,12 +67,8 @@ struct AnalyticsView: View {
         switch range {
         case .today:
             return DeviceActivityFilter(segment: .hourly(during: DateInterval(start: cal.startOfDay(for: now), end: now)))
-        case .week:
-            let start = cal.date(byAdding: .day, value: -7, to: now) ?? now
-            return DeviceActivityFilter(segment: .daily(during: DateInterval(start: start, end: now)))
-        case .month:
-            let start = cal.date(byAdding: .day, value: -30, to: now) ?? now
-            return DeviceActivityFilter(segment: .daily(during: DateInterval(start: start, end: now)))
+        case .week, .month:
+            return filter(for: range)
         }
     }
 
@@ -113,8 +110,8 @@ struct AnalyticsView: View {
                         } else {
                             ForEach(Array(sessions.prefix(10))) { session in
                                 HStack {
-                                    Image(systemName: session.wasCompleted ? "checkmark.circle.fill" : "circle.dashed")
-                                        .foregroundStyle(session.wasCompleted ? ZenTheme.success : ZenTheme.textSecondary)
+                                    Image(systemName: sessionIcon(session))
+                                        .foregroundStyle(sessionTint(session))
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(session.groupName).font(ZenTheme.body).foregroundStyle(ZenTheme.text)
                                         Text(session.startedAt, format: .relative(presentation: .named))
@@ -122,9 +119,9 @@ struct AnalyticsView: View {
                                             .foregroundStyle(ZenTheme.textSecondary)
                                     }
                                     Spacer()
-                                    Text(durationLabel(session.actualDuration))
+                                    Text(session.endedAt == nil ? "In progress" : durationLabel(session.actualDuration))
                                         .font(ZenTheme.caption.monospacedDigit())
-                                        .foregroundStyle(ZenTheme.textSecondary)
+                                        .foregroundStyle(session.endedAt == nil ? ZenTheme.success : ZenTheme.textSecondary)
                                 }
                                 .padding(.vertical, 4)
                             }
@@ -183,7 +180,17 @@ struct AnalyticsView: View {
         }
     }
 
-private func durationLabel(_ seconds: TimeInterval) -> String {
+    private func sessionIcon(_ session: FocusSession) -> String {
+        if session.endedAt == nil { return "circle.dotted.circle" }
+        return session.wasCompleted ? "checkmark.circle.fill" : "xmark.circle"
+    }
+
+    private func sessionTint(_ session: FocusSession) -> Color {
+        if session.endedAt == nil { return ZenTheme.success }
+        return session.wasCompleted ? ZenTheme.success : ZenTheme.textSecondary
+    }
+
+    private func durationLabel(_ seconds: TimeInterval) -> String {
         let m = Int(seconds / 60)
         if m < 60 { return "\(m)m" }
         return "\(m / 60)h \(m % 60)m"
@@ -205,9 +212,9 @@ private func durationLabel(_ seconds: TimeInterval) -> String {
         case .today:
             start = cal.startOfDay(for: now)
         case .week:
-            start = cal.date(byAdding: .day, value: -7, to: now) ?? now
+            start = cal.date(byAdding: .day, value: -6, to: cal.startOfDay(for: now)) ?? now
         case .month:
-            start = cal.date(byAdding: .day, value: -30, to: now) ?? now
+            start = cal.date(byAdding: .day, value: -29, to: cal.startOfDay(for: now)) ?? now
         }
         return DeviceActivityFilter(
             segment: .daily(during: DateInterval(start: start, end: now))
