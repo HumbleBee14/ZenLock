@@ -40,6 +40,8 @@
 		689457F9BA91CB517D358113 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05239A2EC8F5497E1DD3F041 /* OnboardingView.swift */; };
 		6DC75C1A5435F55FDBB22CC9 /* ScreenTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F838FF54FE2477FAEF846E /* ScreenTimeView.swift */; };
 		6EF3E5F09034FDBA433921CF /* QuickFocusSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37ADB4CD575F50AEBFDEE3AE /* QuickFocusSheet.swift */; };
+		7A11D2E4B9C0F3A5D6E7F801 /* ReviewPrompter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */; };
+		7A11D2E4B9C0F3A5D6E7F803 /* SessionLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */; };
 		7CAE18E62AA67DF4C99D4557 /* TotalUsageScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B63757CB990E8EA6113BA88 /* TotalUsageScene.swift */; };
 		7DE98BB9D2B63CC515C9D697 /* ShimmerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21EDEB20C0158FF35BB68 /* ShimmerEffect.swift */; };
 		820053237EC677A54783F22E /* BlockGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230074094AF16E766D7DD09E /* BlockGroup.swift */; };
@@ -71,8 +73,6 @@
 		C35FDFC1371F02A02F452CE6 /* SharedEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2726AD82516A5DC3C92E130 /* SharedEnums.swift */; };
 		C4BDF23C9428AA4099760CFD /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E568D8A9F39F395C07F6EAE5 /* GlassCard.swift */; };
 		C6B8E91E3B89A6EFFD15ED6E /* CooldownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC70E214EEC7737F201478B9 /* CooldownService.swift */; };
-		7A11D2E4B9C0F3A5D6E7F801 /* ReviewPrompter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */; };
-		7A11D2E4B9C0F3A5D6E7F803 /* SessionLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */; };
 		C870ED4E9C4F210D014C7536 /* ScheduleEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21447AB8BA494E0DBDF1BDE /* ScheduleEvaluator.swift */; };
 		CE424507267817458632ED33 /* PulseCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA04357C2A813D332A0AB784 /* PulseCircle.swift */; };
 		CF9EB13C5ADAC1C8971018C6 /* DeviceActivityReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDE7A7685CA05E37ED69E04 /* DeviceActivityReportExtension.swift */; };
@@ -192,6 +192,8 @@
 		742E2FB138DA8CCAB6AFFF8D /* EditGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupView.swift; sourceTree = "<group>"; };
 		74AECC6EE6879F92B5995EC6 /* SharedBlockGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedBlockGroup.swift; sourceTree = "<group>"; };
 		79DF186E8ECD25F234E7972F /* GroupFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupFormView.swift; sourceTree = "<group>"; };
+		7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPrompter.swift; sourceTree = "<group>"; };
+		7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLedger.swift; sourceTree = "<group>"; };
 		7DD0C4009777D862A37B9BBB /* SelectionPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionPreview.swift; sourceTree = "<group>"; };
 		81A58B46F150FEBD0B240169 /* ZenNotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenNotificationDelegate.swift; sourceTree = "<group>"; };
 		8478883EBA61B7089072B764 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -208,8 +210,6 @@
 		BBDE7A7685CA05E37ED69E04 /* DeviceActivityReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityReportExtension.swift; sourceTree = "<group>"; };
 		BC35B4FF2E313FA944734E69 /* PerAppScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerAppScene.swift; sourceTree = "<group>"; };
 		BC70E214EEC7737F201478B9 /* CooldownService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooldownService.swift; sourceTree = "<group>"; };
-		7A11D2E4B9C0F3A5D6E7F802 /* ReviewPrompter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPrompter.swift; sourceTree = "<group>"; };
-		7A11D2E4B9C0F3A5D6E7F804 /* SessionLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLedger.swift; sourceTree = "<group>"; };
 		BE57ADA74309FD2D82535765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C12AF19807605F8299C82376 /* PerCategoryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerCategoryScene.swift; sourceTree = "<group>"; };
 		C1ABB8AF232DA8C19C78DE41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -634,7 +634,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					176E8E813F23EE75B4B5B608 = {
 						DevelopmentTeam = 252N2WS4Y3;
@@ -844,6 +844,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -876,7 +877,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -892,11 +893,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -1053,6 +1055,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1085,7 +1088,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 252N2WS4Y3;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1107,12 +1110,13 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

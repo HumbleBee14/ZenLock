@@ -12,16 +12,15 @@ struct UsageTrendScene: @preconcurrency DeviceActivityReportScene {
     }
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageTrendData {
-        var points: [UsageTrendData.Point] = []
+        var minutesByDate: [Date: Double] = [:]
         for await activity in data {
             for await segment in activity.activitySegments {
-                points.append(.init(
-                    date: segment.dateInterval.start,
-                    minutes: segment.totalActivityDuration / 60
-                ))
+                minutesByDate[segment.dateInterval.start, default: 0] += segment.totalActivityDuration / 60
             }
         }
-        points.sort { $0.date < $1.date }
+        let points = minutesByDate
+            .map { UsageTrendData.Point(date: $0.key, minutes: $0.value) }
+            .sorted { $0.date < $1.date }
         return UsageTrendData(points: points)
     }
 }
@@ -50,14 +49,14 @@ struct UsageTrendView: View {
                     x: .value("Time", point.date),
                     y: .value("Minutes", point.minutes)
                 )
-                .interpolationMethod(.catmullRom)
+                .interpolationMethod(.monotone)
                 .foregroundStyle(.indigo)
 
                 AreaMark(
                     x: .value("Time", point.date),
                     y: .value("Minutes", point.minutes)
                 )
-                .interpolationMethod(.catmullRom)
+                .interpolationMethod(.monotone)
                 .foregroundStyle(.indigo.opacity(0.15))
             }
             .chartYAxis {
@@ -73,6 +72,8 @@ struct UsageTrendView: View {
     }
 
     private func label(forMinutes m: Double) -> String {
-        m >= 60 ? "\(Int(m / 60))h" : "\(Int(m))m"
+        guard m >= 60 else { return "\(Int(m))m" }
+        let hours = m / 60
+        return hours == hours.rounded() ? "\(Int(hours))h" : String(format: "%.1fh", hours)
     }
 }

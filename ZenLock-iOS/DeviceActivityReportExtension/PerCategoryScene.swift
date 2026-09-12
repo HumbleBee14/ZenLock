@@ -10,17 +10,19 @@ struct PerCategoryScene: @preconcurrency DeviceActivityReportScene {
     }
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> PerCategoryData {
-        var rows: [PerCategoryData.Row] = []
+        var durationByName: [String: TimeInterval] = [:]
         for await activity in data {
             for await segment in activity.activitySegments {
                 for await category in segment.categories {
-                    let duration = category.totalActivityDuration
                     let name = category.category.localizedDisplayName ?? "Other"
-                    rows.append(.init(name: name, duration: duration))
+                    durationByName[name, default: 0] += category.totalActivityDuration
                 }
             }
         }
-        rows.sort { $0.duration > $1.duration }
+        let rows = durationByName
+            .filter { $0.value >= 60 }
+            .map { PerCategoryData.Row(name: $0.key, duration: $0.value) }
+            .sorted { $0.duration > $1.duration }
         return PerCategoryData(rows: Array(rows.prefix(8)))
     }
 }
