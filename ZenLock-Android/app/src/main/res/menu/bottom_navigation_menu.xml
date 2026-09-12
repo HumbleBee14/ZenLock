@@ -7,7 +7,7 @@
 
     <item
         android:id="@+id/schedule"
-        android:icon="@drawable/ic_timer"
+        android:icon="@drawable/ic_schedule"
         android:title="Schedule" />
 
     <item

@@ -40,6 +40,7 @@
     <color name="textHint">#939CA8</color>          <!-- Hint text - darker gray -->
     
     <!-- Surface Colors (Cards & Components) -->
+    <color name="navBackground">#EB121416</color>
     <color name="surface">#1C1F23</color>           <!-- Card backgrounds -->
     <color name="surfaceElevated">#25292E</color>   <!-- Elevated cards -->
     <color name="surfaceHighlight">#343A41</color>  <!-- Highlighted surfaces -->

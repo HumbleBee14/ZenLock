@@ -6,162 +6,17 @@
     android:orientation="vertical"
     android:background="@color/backgroundPrimary"
     android:fitsSystemWindows="true"
-    android:paddingStart="32dp"
-    android:paddingEnd="32dp"
     android:paddingTop="24dp"
     android:paddingBottom="32dp">
 
-    <FrameLayout
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/welcomePager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:id="@+id/welcomePageIntro"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <FrameLayout
-                android:layout_width="220dp"
-                android:layout_height="220dp">
-
-                <View
-                    android:id="@+id/welcomeGlow"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/welcome_glow" />
-
-                <ImageView
-                    android:layout_width="128dp"
-                    android:layout_height="128dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/welcome_icon_circle"
-                    android:contentDescription="@null" />
-
-                <ImageView
-                    android:id="@+id/welcomeIcon"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
-                    android:layout_gravity="center"
-                    android:src="@mipmap/ic_launcher_foreground"
-                    android:contentDescription="ZenLock" />
-
-            </FrameLayout>
-
-            <TextView
-                style="@style/ModernText.Display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="ZenLock" />
-
-            <TextView
-                style="@style/ModernText.Body"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Ready to unlock your zen?"
-                android:textColor="@color/textSecondary" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/welcomePageFeatures"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <TextView
-                style="@style/ModernText.PageTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:text="Focus, your way" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_phone"
-                    app:tint="@color/primary"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/ModernText.Body"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Phone, Clock and Calendar stay within reach"
-                    android:textColor="@color/textPrimary" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_apps"
-                    app:tint="@color/primary"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/ModernText.Body"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Add up to 8 apps you still need"
-                    android:textColor="@color/textPrimary" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_heart"
-                    app:tint="@color/primary"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    style="@style/ModernText.Body"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Free, ad-free, built for the community"
-                    android:textColor="@color/textPrimary" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </FrameLayout>
+        android:layout_weight="1" />
 
     <LinearLayout
+        android:id="@+id/welcomeDots"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -169,7 +24,6 @@
         android:layout_marginBottom="20dp">
 
         <ImageView
-            android:id="@+id/welcomeDotIntro"
             android:layout_width="8dp"
             android:layout_height="8dp"
             android:layout_marginEnd="6dp"
@@ -177,7 +31,13 @@
             android:contentDescription="@null" />
 
         <ImageView
-            android:id="@+id/welcomeDotFeatures"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="6dp"
+            android:src="@drawable/dot_inactive"
+            android:contentDescription="@null" />
+
+        <ImageView
             android:layout_width="8dp"
             android:layout_height="8dp"
             android:src="@drawable/dot_inactive"

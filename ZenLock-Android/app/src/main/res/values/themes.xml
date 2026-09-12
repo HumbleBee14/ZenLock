@@ -208,6 +208,69 @@
         <item name="android:tint">@color/textTertiary</item>
     </style>
 
+    <style name="Zen.NavLabel" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Zen.NavLabel.Active">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Zen.FactCard" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <style name="Zen.FactValue" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/primaryLight</item>
+    </style>
+
+    <style name="Zen.FactLabel" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:textColor">@color/textSecondary</item>
+    </style>
+
+    <style name="Zen.FeatureTile" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/group_background</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="Zen.FeatureTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/textPrimary</item>
+    </style>
+
+    <style name="Zen.FeatureText" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:textColor">@color/textSecondary</item>
+    </style>
+
     <style name="ZenChip" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/zen_chip_background</item>
         <item name="chipStrokeColor">@color/zen_chip_stroke</item>
