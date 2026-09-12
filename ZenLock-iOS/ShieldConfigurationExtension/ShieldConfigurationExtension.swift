@@ -43,7 +43,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             if let appToken, selection.applicationTokens.contains(appToken) { return group }
             if let categoryToken, selection.categoryTokens.contains(categoryToken) { return group }
         }
-        return groups.first
+        return nil
     }
 
     // MARK: - Configuration building

@@ -24,8 +24,9 @@ final class ShieldManager: ShieldManaging {
     }
 
     func removeShield(forGroupId id: String) {
-        let store = ManagedSettingsStore(named: .init(id))
-        store.clearAllSettings()
+        for name in [id, "\(id)-A", "\(id)-B"] {
+            ManagedSettingsStore(named: .init(name)).clearAllSettings()
+        }
     }
 
     func removeAllShields(groupIds: [String]) {

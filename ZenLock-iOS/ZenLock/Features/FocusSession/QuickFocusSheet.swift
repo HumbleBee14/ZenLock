@@ -156,6 +156,8 @@ struct QuickFocusSheet: View {
                 Text(timeRemaining(a.endsAt))
                     .font(.system(size: 56, weight: .bold, design: .monospaced))
                     .foregroundStyle(ZenTheme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                     .frame(maxWidth: .infinity)
                     .padding(ZenTheme.Spacing.lg)
             }
@@ -248,8 +250,12 @@ private var extendPickerSheet: some View {
     }
 
     private func timeRemaining(_ end: Date) -> String {
-        let s = max(0, Int(end.timeIntervalSince(now)))
-        return String(format: "%02d:%02d", s / 60, s % 60)
+        let total = max(0, Int(end.timeIntervalSince(now)))
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
+        return String(format: "%02d:%02d", m, s)
     }
 
     private func requestStop() async {

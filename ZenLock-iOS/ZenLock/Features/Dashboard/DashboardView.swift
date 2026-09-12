@@ -1,11 +1,15 @@
 import SwiftUI
 import SwiftData
 import DeviceActivity
+import StoreKit
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(DeepLinkRouter.self) private var router
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = DashboardViewModel()
+    @State private var reviewTask: Task<Void, Never>?
     @State private var showQuickFocus = false
     @State private var activeFocus: ActiveSession?
     @State private var now = Date()
@@ -81,6 +85,10 @@ struct DashboardView: View {
                 activeFocus = ActiveSession.load()
                 summaryFilterEnd = Date()
                 if router.consume() == .quickFocus { showQuickFocus = true }
+                scheduleReviewCheck()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { scheduleReviewCheck() } else { reviewTask?.cancel() }
             }
             .onChange(of: router.pending) { _, _ in
                 if router.consume() == .quickFocus { showQuickFocus = true }
@@ -98,6 +106,18 @@ struct DashboardView: View {
                 }
                 viewModel.finalizeElapsedCooldowns(context: modelContext)
             }
+        }
+    }
+
+    private func scheduleReviewCheck() {
+        reviewTask?.cancel()
+        reviewTask = Task {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            guard !showQuickFocus, !viewModel.showCreateGroup, !viewModel.showSettings else { return }
+            guard !ReviewPrompter.isBlockingNow(groups: viewModel.groups) else { return }
+            guard ReviewPrompter.consumeAskIfDue() else { return }
+            requestReview()
         }
     }
 
@@ -120,7 +140,12 @@ struct DashboardView: View {
     }
 
     private var headerRow: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: ZenTheme.Spacing.sm + 4) {
+            Image("AppIconArt")
+                .resizable()
+                .frame(width: 40, height: 40)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
             VStack(alignment: .leading, spacing: 2) {
                 Text("ZenLock")
                     .font(ZenTheme.title.weight(.bold))
