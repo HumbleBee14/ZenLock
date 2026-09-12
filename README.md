@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Android](https://img.shields.io/badge/Android-Published-brightgreen.svg)](https://play.google.com/store/apps/details?id=com.grepguru.zenlock)
 [![iOS](https://img.shields.io/badge/iOS-Published-brightgreen.svg)](https://apps.apple.com/us/app/zenlock-focus-app-blocker/id6774016090)
-[![Downloads](https://img.shields.io/badge/Downloads-500%2B-brightgreen.svg)](https://play.google.com/store/apps/details?id=com.grepguru.zenlock)
+[![Downloads](https://img.shields.io/badge/Downloads-2000%2B-brightgreen.svg)](https://play.google.com/store/apps/details?id=com.grepguru.zenlock)
 
 ZenLock is a productivity app that helps you maintain focus by blocking distracting applications during dedicated focus sessions. With an accountability system to prevent impulsive early exits, ZenLock keeps you committed to your goals.
 
