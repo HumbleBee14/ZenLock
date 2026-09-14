@@ -234,6 +234,21 @@ check(UNUserNotificationCenter.requests.count == 1, "stopped group warning is ig
 service.removeGroupFromAppGroups(warningGroup.id.uuidString)
 monitor.eventWillReachThresholdWarning(warningEvent, activity: warningActivity)
 check(UNUserNotificationCenter.requests.count == 1, "deleted group warning is ignored")
+
+for period in [UsagePeriod.hourly, .daily] {
+    let pastUsage = group(period)
+    let outcome = try service.armOrActivate(pastUsage)
+    let message = ScheduleToastFactory.make(for: outcome, group: pastUsage).message
+    check(message.contains(period == .hourly ? "this hour" : "today"), "activation copy identifies the current usage period")
+    check(message.contains("already"), "activation copy explains already-reached limits")
+    _ = service.deactivateGroup(pastUsage)
+    try service.armOrActivate(pastUsage)
+    let activity = DeviceActivityName(pastUsage.id.uuidString)
+    check(DeviceActivityCenter.registrations[activity]?.values.first?.includesPastActivity == true,
+          "re-enabling still requests prior usage in the current period")
+    monitor.eventDidReachThreshold(.init("usage_limit_\(pastUsage.id.uuidString)"), activity: activity)
+    check(shielded(pastUsage), "re-enabled group honors immediate past-usage threshold")
+}
 print("\(checks) checks, \(failures) failures")
 defaults.removePersistentDomain(forName: Constants.appGroupID)
 exit(failures == 0 ? 0 : 1)

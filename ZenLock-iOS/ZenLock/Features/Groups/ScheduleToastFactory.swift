@@ -6,7 +6,18 @@ enum ScheduleToastFactory {
         switch outcome {
         case .activeNow:
             if group.blockMode == .usageBased {
-                return ZenToastData(message: "Usage limit active. Apps block when the limit is reached.", kind: .success)
+                let message: String
+                if #available(iOS 17.4, *) {
+                    switch group.usagePeriod ?? .daily {
+                    case .hourly:
+                        message = "Limit active. Earlier usage this hour counts. Apps block if you've already reached the limit."
+                    case .daily:
+                        message = "Limit active. Earlier usage today counts. Apps block if you've already reached the limit."
+                    }
+                } else {
+                    message = "Limit active. Usage counts from activation on this iOS version."
+                }
+                return ZenToastData(message: message, kind: .success)
             }
             return ZenToastData(message: "Blocking now.", kind: .success)
 

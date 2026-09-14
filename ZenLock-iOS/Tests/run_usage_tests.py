@@ -17,6 +17,7 @@ files = [
     'ZenLock/Core/Models/BlockGroup.swift', 'ZenLock/Features/Groups/GroupDraft.swift',
     'ZenLock/Core/Services/ShieldManager.swift', 'ZenLock/Core/Services/ActivityScheduleManager.swift',
     'ZenLock/Core/Services/BlockingService.swift',
+    'ZenLock/Features/Groups/ScheduleToastFactory.swift',
     'DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.swift',
 ]
 with tempfile.TemporaryDirectory(prefix='zenlock-usage-tests-') as temp:

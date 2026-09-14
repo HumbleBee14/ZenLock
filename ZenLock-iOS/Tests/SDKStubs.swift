@@ -94,7 +94,7 @@ struct ScheduleNotifier {
 
 struct TestModelContext { func save() throws {} }
 struct ZenToastData {
-    enum Kind { case warning }
+    enum Kind { case warning, success, info }
     let message: String
     let kind: Kind
 }
