@@ -18,8 +18,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.1.2"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "1.2.1"
+    CURRENT_PROJECT_VERSION: "4"
     # Your Apple Developer team ID. Required for Family Controls — provisioning
     # profiles can only be issued against a real team. Find it in the Apple
     # Developer portal → Membership, or in any signed pbxproj.
