@@ -78,7 +78,7 @@ for period in [UsagePeriod.hourly, .daily] {
         let schedule = DeviceActivityCenter.schedules[activity]!
         check(schedule.repeats, "usage schedule repeats")
         check(schedule.intervalStart.second == 0, "usage start explicitly specifies zero seconds")
-        check(schedule.warningTime?.minute == 1, "usage schedule requests a one-minute warning")
+        check(schedule.warningTime?.minute == 5, "usage schedule requests a five-minute warning")
         check(schedule.intervalEnd.second == 59, "last minute remains monitored through second 59")
         check(schedule.intervalStart.minute == 0 && schedule.intervalEnd.minute == 59, "usage schedule covers expected minutes")
         check(schedule.intervalStart.hour == (period == .hourly ? nil : 0), "hourly and daily start components")
@@ -249,6 +249,26 @@ for period in [UsagePeriod.hourly, .daily] {
     monitor.eventDidReachThreshold(.init("usage_limit_\(pastUsage.id.uuidString)"), activity: activity)
     check(shielded(pastUsage), "re-enabled group honors immediate past-usage threshold")
 }
+let stale = group()
+try service.activateGroup(stale)
+let staleActivity = DeviceActivityName(stale.id.uuidString)
+var startsBefore = DeviceActivityCenter.startCalls
+service.evaluateActiveGroups([stale])
+check(DeviceActivityCenter.startCalls == startsBefore, "a fresh usage registration is not refreshed")
+storage.setDate(Date().addingTimeInterval(-90_000), forKey: "zen_usage_registered_\(stale.id.uuidString)")
+service.evaluateActiveGroups([stale])
+check(DeviceActivityCenter.startCalls == startsBefore + 1, "a day-old usage registration is refreshed")
+check(DeviceActivityCenter.registrations[staleActivity]?.values.first?.includesPastActivity == true,
+      "refreshed registration still counts existing period usage")
+monitor.eventDidReachThreshold(.init("usage_limit_\(stale.id.uuidString)"), activity: staleActivity)
+check(shielded(stale), "refreshed registration still blocks on threshold")
+startsBefore = DeviceActivityCenter.startCalls
+service.evaluateActiveGroups([stale])
+check(DeviceActivityCenter.startCalls == startsBefore, "refresh resets the staleness clock")
+check(shielded(stale), "refresh does not drop the current-period shield")
+_ = service.deactivateGroup(stale)
+check(storage.date(forKey: "zen_usage_registered_\(stale.id.uuidString)") == nil, "stop clears the registration stamp")
+
 print("\(checks) checks, \(failures) failures")
 defaults.removePersistentDomain(forName: Constants.appGroupID)
 exit(failures == 0 ? 0 : 1)

@@ -35,6 +35,14 @@ final class AppGroupStorage {
         defaults?.removeObject(forKey: key)
     }
 
+    func setDate(_ date: Date, forKey key: String) {
+        defaults?.set(date, forKey: key)
+    }
+
+    func date(forKey key: String) -> Date? {
+        defaults?.object(forKey: key) as? Date
+    }
+
     func set<T: Encodable>(_ value: T, forKey key: String) {
         guard let data = try? JSONEncoder().encode(value) else { return }
         defaults?.set(data, forKey: key)

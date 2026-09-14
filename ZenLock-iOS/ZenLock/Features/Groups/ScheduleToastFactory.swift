@@ -10,12 +10,12 @@ enum ScheduleToastFactory {
                 if #available(iOS 17.4, *) {
                     switch group.usagePeriod ?? .daily {
                     case .hourly:
-                        message = "Limit active. Earlier usage this hour counts. Apps block if you've already reached the limit."
+                        message = "Limit active. Time already used this hour counts."
                     case .daily:
-                        message = "Limit active. Earlier usage today counts. Apps block if you've already reached the limit."
+                        message = "Limit active. Time already used today counts."
                     }
                 } else {
-                    message = "Limit active. Usage counts from activation on this iOS version."
+                    message = "Limit active. Counting starts now."
                 }
                 return ZenToastData(message: message, kind: .success)
             }
