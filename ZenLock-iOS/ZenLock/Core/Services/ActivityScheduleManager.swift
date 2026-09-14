@@ -4,14 +4,19 @@ import FamilyControls
 
 protocol ActivityScheduleManaging {
     func startMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws
+    func ensureUsageMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws
     func stopMonitoring(forGroupId id: String)
     func stopAllMonitoring()
 }
 
 final class ActivityScheduleManager: ActivityScheduleManaging {
     private let center = DeviceActivityCenter()
-    private let storage = AppGroupStorage()
     private let notifier = ScheduleNotifier()
+    private let storage = AppGroupStorage()
+
+    private static let usageRefreshInterval: TimeInterval = 86_400
+
+    private static func usageRegisteredKey(_ id: String) -> String { "zen_usage_registered_\(id)" }
 
     func startMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
         switch group.blockMode {
@@ -21,7 +26,20 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         case .usageBased:
             try startUsageBasedMonitoring(for: group, selection: selection)
         }
-        storage.setScheduleStartTime(Date(), forGroupId: group.id)
+    }
+
+    func ensureUsageMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
+        let registered = center.activities.contains(DeviceActivityName(group.id))
+        guard !registered || usageRegistrationIsStale(group.id) else { return }
+        try startMonitoring(for: group, selection: selection)
+    }
+
+    /// A registration can stop delivering callbacks while still appearing active,
+    /// so refresh it daily. Safe only where past activity is counted on re-register.
+    private func usageRegistrationIsStale(_ id: String) -> Bool {
+        guard #available(iOS 17.4, *) else { return false }
+        guard let last = storage.date(forKey: Self.usageRegisteredKey(id)) else { return true }
+        return Date().timeIntervalSince(last) >= Self.usageRefreshInterval
     }
 
     func stopMonitoring(forGroupId id: String) {
@@ -31,6 +49,7 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
             DeviceActivityName("\(id)-B")
         ])
         notifier.cancelStartNotification(groupId: id)
+        storage.removeValue(forKey: Self.usageRegisteredKey(id))
     }
 
     private func scheduleStartBackstop(for group: SharedBlockGroup) {
@@ -82,35 +101,55 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
     }
 
     private func startUsageBasedMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
-        guard let limitMinutes = group.usageLimitMinutes else { return }
+        guard let limitMinutes = group.usageLimitMinutes,
+              (group.usagePeriod ?? .daily).limitOptions.contains(limitMinutes) else {
+            throw ActivationError.invalidUsageLimit
+        }
+        guard !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty else {
+            throw ActivationError.noAppsSelected
+        }
 
         let schedule: DeviceActivitySchedule
         switch group.usagePeriod ?? .daily {
         case .hourly:
             schedule = DeviceActivitySchedule(
-                intervalStart: DateComponents(minute: 0),
-                intervalEnd: DateComponents(minute: 59),
-                repeats: true
+                intervalStart: DateComponents(minute: 0, second: 0),
+                intervalEnd: DateComponents(minute: 59, second: 59),
+                repeats: true,
+                warningTime: DateComponents(minute: 5)
             )
         case .daily:
             schedule = DeviceActivitySchedule(
-                intervalStart: DateComponents(hour: 0, minute: 0),
-                intervalEnd: DateComponents(hour: 23, minute: 59),
-                repeats: true
+                intervalStart: DateComponents(hour: 0, minute: 0, second: 0),
+                intervalEnd: DateComponents(hour: 23, minute: 59, second: 59),
+                repeats: true,
+                warningTime: DateComponents(minute: 5)
             )
         }
 
-        let usageEvent = DeviceActivityEvent(
-            applications: selection.applicationTokens,
-            categories: selection.categoryTokens,
-            threshold: DateComponents(minute: limitMinutes)
-        )
+        let usageEvent: DeviceActivityEvent
+        if #available(iOS 17.4, *) {
+            usageEvent = DeviceActivityEvent(
+                applications: selection.applicationTokens,
+                categories: selection.categoryTokens,
+                threshold: DateComponents(minute: limitMinutes),
+                includesPastActivity: true
+            )
+        } else {
+            // iOS 17.0–17.3 only counts usage after registration.
+            usageEvent = DeviceActivityEvent(
+                applications: selection.applicationTokens,
+                categories: selection.categoryTokens,
+                threshold: DateComponents(minute: limitMinutes)
+            )
+        }
 
         try center.startMonitoring(
             DeviceActivityName(group.id),
             during: schedule,
             events: [DeviceActivityEvent.Name("usage_limit_\(group.id)"): usageEvent]
         )
+        storage.setDate(Date(), forKey: Self.usageRegisteredKey(group.id))
     }
 
 }

@@ -54,6 +54,9 @@ jobs:
         with:
           xcode-version: "26"
 
+      - name: Test usage enforcement control flow
+        run: python3 Tests/run_usage_tests.py
+
       # Regenerate the Xcode project from project.yml so CI builds exactly what
       # the spec describes (catches target/membership drift too).
       - name: Install XcodeGen

@@ -139,6 +139,9 @@
     "Make it hard to bypass" : {
       "extractionState" : "manual"
     },
+    "Minimum 15 minutes" : {
+
+    },
     "Name" : {
 
     },

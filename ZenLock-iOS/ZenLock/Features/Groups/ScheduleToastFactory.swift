@@ -5,6 +5,20 @@ enum ScheduleToastFactory {
     static func make(for outcome: BlockingService.ArmOutcome, group: BlockGroup) -> ZenToastData {
         switch outcome {
         case .activeNow:
+            if group.blockMode == .usageBased {
+                let message: String
+                if #available(iOS 17.4, *) {
+                    switch group.usagePeriod ?? .daily {
+                    case .hourly:
+                        message = "Limit active. Time already used this hour counts."
+                    case .daily:
+                        message = "Limit active. Time already used today counts."
+                    }
+                } else {
+                    message = "Limit active. Counting starts now."
+                }
+                return ZenToastData(message: message, kind: .success)
+            }
             return ZenToastData(message: "Blocking now.", kind: .success)
 
         case .armed(let startsAt):

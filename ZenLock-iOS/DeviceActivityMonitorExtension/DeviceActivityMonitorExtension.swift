@@ -12,16 +12,16 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         guard activity.rawValue != Constants.quickFocusActivity else { return }
         evaluateBlockState(for: activity, reason: .intervalStart)
         let groupId = extractGroupId(from: activity)
-        defaults?.set(Date(), forKey: "schedule_start_\(groupId)")
         if let group = loadGroup(groupId), group.blockMode == .timeBased, ScheduleEvaluator.isWithinSchedule(group) {
             WindowLog.record(groupId: groupId, defaults: defaults)
         }
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        let storeName = ManagedSettingsStore.Name(activity.rawValue)
-        ManagedSettingsStore(named: storeName).clearAllSettings()
-        guard activity.rawValue != Constants.quickFocusActivity else { return }
+        if activity.rawValue == Constants.quickFocusActivity {
+            ManagedSettingsStore(named: .init(activity.rawValue)).clearAllSettings()
+            return
+        }
         evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 
@@ -29,6 +29,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
+        // A callback can be immediate when earlier usage already met the limit.
+        // Dropping it does not cause DeviceActivity to send another callback.
+        guard let group = loadGroup(activity.rawValue),
+              group.blockMode == .usageBased,
+              event.rawValue == "usage_limit_\(group.id)" else { return }
         evaluateBlockState(for: activity, reason: .thresholdReached)
     }
 
@@ -36,8 +41,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
-        let groupId = extractGroupId(from: activity)
-        let groupName = loadGroup(groupId)?.name ?? "ZenLock"
+        guard let group = loadGroup(activity.rawValue), group.isActive,
+              group.blockMode == .usageBased,
+              event.rawValue == "usage_limit_\(group.id)" else { return }
+        let groupId = group.id
+        let groupName = group.name
 
         let content = UNMutableNotificationContent()
         content.title = "⏳ Almost at your limit"
@@ -62,10 +70,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         let groupId = extractGroupId(from: activity)
         let storeName = ManagedSettingsStore.Name(activity.rawValue)
 
-        if reason == .thresholdReached, isPrematureThreshold(for: groupId) {
-            return
-        }
-
         guard let group = loadGroup(groupId), group.isActive else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
             ManagedSettingsStore(named: ManagedSettingsStore.Name(groupId)).clearAllSettings()
@@ -77,7 +81,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         case .timeBased:
             shouldBlock = (reason != .intervalEnd) && ScheduleEvaluator.isWithinSchedule(group)
         case .usageBased:
-            shouldBlock = (reason == .thresholdReached)
+            let period = group.usagePeriod ?? .daily
+            if reason == .thresholdReached {
+                UsageBlockState.record(groupId, period: period, defaults: defaults)
+            }
+            shouldBlock = UsageBlockState.load(groupId, defaults: defaults)?.isBlocked(period: period) ?? false
         }
 
         if shouldBlock {
@@ -106,13 +114,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         if !selection.categoryTokens.isEmpty {
             store.shield.applicationCategories = .specific(selection.categoryTokens)
         }
-    }
-
-    private func isPrematureThreshold(for groupId: String) -> Bool {
-        guard let startTime = defaults?.object(forKey: "schedule_start_\(groupId)") as? Date else {
-            return false
-        }
-        return Date().timeIntervalSince(startTime) < 60
     }
 
     private func extractGroupId(from activity: DeviceActivityName) -> String {

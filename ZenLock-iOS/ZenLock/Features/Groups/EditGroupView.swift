@@ -10,6 +10,8 @@ struct EditGroupView: View {
     @State private var draft: GroupDraft
     @State private var pending: AccountabilityManager.PendingUnlock?
     @State private var now = Date()
+    @State private var retryActivation = false
+    @State private var toast: ZenToastData?
     @State private var showStopConfirm = false
     @State private var showDeleteConfirm = false
 
@@ -52,6 +54,7 @@ struct EditGroupView: View {
                         .foregroundStyle(ZenTheme.primary)
                 }
             }
+            .zenToast($toast)
             .onAppear { refreshPending() }
             .onReceive(countdownTimer) { _ in
                 now = Date()
@@ -118,6 +121,7 @@ struct EditGroupView: View {
     }
 
     private func save() {
+        let preserveMonitoring = draft.canPreserveMonitoring(for: group)
         if lockStructure {
             draft.applyLockedChanges(to: group)
         } else {
@@ -126,12 +130,22 @@ struct EditGroupView: View {
         try? modelContext.save()
 
         let service = BlockingService()
-        if group.isActive {
+        if preserveMonitoring {
+            service.syncGroupToAppGroups(group)
+        } else if group.isActive || retryActivation {
             // Re-register monitoring so edited schedule/apps take effect and
             // continue to auto-activate without reopening the app.
             service.removeGroupFromAppGroups(group.id.uuidString)
             group.isActive = true
-            _ = try? service.armOrActivate(group)
+            do {
+                try service.armOrActivate(group)
+                retryActivation = false
+            } catch {
+                retryActivation = true
+                try? modelContext.save()
+                toast = ZenToastData(message: "Couldn't start session: \(error.localizedDescription)", kind: .warning)
+                return
+            }
             try? modelContext.save()
         } else {
             service.syncGroupToAppGroups(group)
