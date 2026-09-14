@@ -171,7 +171,7 @@ final class BlockingService {
                 // Do not reset a healthy registration's usage accounting.
                 do {
                     try scheduleManager.ensureUsageMonitoring(for: shared, selection: selection)
-                    storage.set("", forKey: "usage_monitor_error_\(shared.id)")
+                    storage.removeValue(forKey: "usage_monitor_error_\(shared.id)")
                 } catch {
                     // Preserve any existing shield if recovery fails; the error
                     // remains available in Diagnostics for device investigation.

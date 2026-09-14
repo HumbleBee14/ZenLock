@@ -33,8 +33,6 @@ for period in [UsagePeriod.hourly, .daily] {
     check(!shielded(value), "\(period): interval end clears shield")
     monitor.intervalDidStart(for: activity)
     check(!shielded(value), "\(period): new interval starts unblocked")
-    // Simulate an unrelated/stale event after the old elapsed-time heuristic expires.
-    defaults.set(Date().addingTimeInterval(-120), forKey: "schedule_start_\(value.id.uuidString)")
     monitor.eventDidReachThreshold(.init("unrelated"), activity: activity)
     check(!shielded(value), "\(period): unrelated threshold must be ignored")
     monitor.eventDidReachThreshold(event, activity: activity)
@@ -79,6 +77,8 @@ for period in [UsagePeriod.hourly, .daily] {
         check(events.values.first?.includesPastActivity == true, "registration counts existing period usage")
         let schedule = DeviceActivityCenter.schedules[activity]!
         check(schedule.repeats, "usage schedule repeats")
+        check(schedule.intervalStart.second == 0, "usage start explicitly specifies zero seconds")
+        check(schedule.warningTime?.minute == 1, "usage schedule requests a one-minute warning")
         check(schedule.intervalEnd.second == 59, "last minute remains monitored through second 59")
         check(schedule.intervalStart.minute == 0 && schedule.intervalEnd.minute == 59, "usage schedule covers expected minutes")
         check(schedule.intervalStart.hour == (period == .hourly ? nil : 0), "hourly and daily start components")
@@ -179,9 +179,9 @@ check(shielded(recovering), "early end callback cannot erase a current-period th
 UsageBlockState.record(recovering.id.uuidString, period: .hourly, at: Date().addingTimeInterval(-7200))
 service.evaluateActiveGroups([recovering])
 check(!shielded(recovering), "foreground removes expired usage shield if boundary callback was missed")
-let startBefore = defaults.object(forKey: "schedule_start_\(recovering.id.uuidString)") as? Date
+let startBefore = DeviceActivityCenter.startCalls
 service.evaluateActiveGroups([recovering])
-check(defaults.object(forKey: "schedule_start_\(recovering.id.uuidString)") as? Date == startBefore,
+check(DeviceActivityCenter.startCalls == startBefore,
       "foreground does not restart a healthy monitor")
 DeviceActivityCenter().stopMonitoring([recoveringActivity])
 DeviceActivityCenter.failure = RegistrationFailure()
@@ -192,7 +192,7 @@ check(storage.get(String.self, forKey: "usage_monitor_error_\(recovering.id.uuid
       "recovery failure is available for diagnostics")
 DeviceActivityCenter.failure = nil
 service.evaluateActiveGroups([recovering])
-check(storage.get(String.self, forKey: "usage_monitor_error_\(recovering.id.uuidString)") == "",
+check(defaults.object(forKey: "usage_monitor_error_\(recovering.id.uuidString)") == nil,
       "successful recovery clears diagnostic error")
 _ = service.deactivateGroup(recovering)
 check(UsageBlockState.load(recovering.id.uuidString) == nil, "stop clears persisted threshold")
@@ -217,6 +217,23 @@ for (dateString, dayHours) in [("2026-03-08T12:00:00Z", 23), ("2026-11-01T12:00:
         check(!state.isBlocked(period: period == .daily ? .hourly : .daily, at: date), "different usage period ignores stale state")
     }
 }
+
+let warningGroup = group()
+try service.activateGroup(warningGroup)
+let warningActivity = DeviceActivityName(warningGroup.id.uuidString)
+let warningEvent = DeviceActivityEvent.Name("usage_limit_\(warningGroup.id.uuidString)")
+UNUserNotificationCenter.requests = []
+monitor.eventWillReachThresholdWarning(warningEvent, activity: warningActivity)
+check(UNUserNotificationCenter.requests.count == 1, "valid warning posts one notification")
+check(!shielded(warningGroup), "warning does not prematurely block apps")
+monitor.eventWillReachThresholdWarning(.init("unrelated"), activity: warningActivity)
+check(UNUserNotificationCenter.requests.count == 1, "unrelated warning is ignored")
+_ = service.deactivateGroup(warningGroup)
+monitor.eventWillReachThresholdWarning(warningEvent, activity: warningActivity)
+check(UNUserNotificationCenter.requests.count == 1, "stopped group warning is ignored")
+service.removeGroupFromAppGroups(warningGroup.id.uuidString)
+monitor.eventWillReachThresholdWarning(warningEvent, activity: warningActivity)
+check(UNUserNotificationCenter.requests.count == 1, "deleted group warning is ignored")
 print("\(checks) checks, \(failures) failures")
 defaults.removePersistentDomain(forName: Constants.appGroupID)
 exit(failures == 0 ? 0 : 1)

@@ -12,7 +12,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         guard activity.rawValue != Constants.quickFocusActivity else { return }
         evaluateBlockState(for: activity, reason: .intervalStart)
         let groupId = extractGroupId(from: activity)
-        defaults?.set(Date(), forKey: "schedule_start_\(groupId)")
         if let group = loadGroup(groupId), group.blockMode == .timeBased, ScheduleEvaluator.isWithinSchedule(group) {
             WindowLog.record(groupId: groupId, defaults: defaults)
         }
@@ -42,8 +41,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
-        let groupId = extractGroupId(from: activity)
-        let groupName = loadGroup(groupId)?.name ?? "ZenLock"
+        guard let group = loadGroup(activity.rawValue), group.isActive,
+              group.blockMode == .usageBased,
+              event.rawValue == "usage_limit_\(group.id)" else { return }
+        let groupId = group.id
+        let groupName = group.name
 
         let content = UNMutableNotificationContent()
         content.title = "⏳ Almost at your limit"

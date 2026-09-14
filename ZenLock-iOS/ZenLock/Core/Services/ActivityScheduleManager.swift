@@ -11,7 +11,6 @@ protocol ActivityScheduleManaging {
 
 final class ActivityScheduleManager: ActivityScheduleManaging {
     private let center = DeviceActivityCenter()
-    private let storage = AppGroupStorage()
     private let notifier = ScheduleNotifier()
 
     func startMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
@@ -22,7 +21,6 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         case .usageBased:
             try startUsageBasedMonitoring(for: group, selection: selection)
         }
-        storage.setScheduleStartTime(Date(), forGroupId: group.id)
     }
 
     func ensureUsageMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
@@ -100,15 +98,17 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
         switch group.usagePeriod ?? .daily {
         case .hourly:
             schedule = DeviceActivitySchedule(
-                intervalStart: DateComponents(minute: 0),
+                intervalStart: DateComponents(minute: 0, second: 0),
                 intervalEnd: DateComponents(minute: 59, second: 59),
-                repeats: true
+                repeats: true,
+                warningTime: DateComponents(minute: 1)
             )
         case .daily:
             schedule = DeviceActivitySchedule(
-                intervalStart: DateComponents(hour: 0, minute: 0),
+                intervalStart: DateComponents(hour: 0, minute: 0, second: 0),
                 intervalEnd: DateComponents(hour: 23, minute: 59, second: 59),
-                repeats: true
+                repeats: true,
+                warningTime: DateComponents(minute: 1)
             )
         }
 

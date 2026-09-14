@@ -12,6 +12,7 @@ struct DeviceActivitySchedule {
     let intervalStart: DateComponents
     let intervalEnd: DateComponents
     let repeats: Bool
+    var warningTime: DateComponents? = nil
 }
 struct DeviceActivityEvent {
     struct Name: Hashable {
@@ -26,10 +27,12 @@ struct DeviceActivityEvent {
 struct DeviceActivityCenter {
     static var registrations: [DeviceActivityName: [DeviceActivityEvent.Name: DeviceActivityEvent]] = [:]
     static var schedules: [DeviceActivityName: DeviceActivitySchedule] = [:]
+    static var startCalls = 0
     static var failure: Error?
     var activities: [DeviceActivityName] { Array(Self.registrations.keys) }
     func startMonitoring(_ name: DeviceActivityName, during schedule: DeviceActivitySchedule,
                          events: [DeviceActivityEvent.Name: DeviceActivityEvent] = [:]) throws {
+        Self.startCalls += 1
         if let error = Self.failure { throw error }
         Self.registrations[name] = events
         Self.schedules[name] = schedule
@@ -80,8 +83,9 @@ struct UNNotificationRequest {
     let trigger: String?
 }
 struct UNUserNotificationCenter {
+    static var requests: [UNNotificationRequest] = []
     static func current() -> Self { Self() }
-    func add(_ request: UNNotificationRequest) {}
+    func add(_ request: UNNotificationRequest) { Self.requests.append(request) }
 }
 struct ScheduleNotifier {
     func cancelStartNotification(groupId: String) {}

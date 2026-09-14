@@ -19,7 +19,9 @@ strict legacy sessions, minimum/maximum limits, integer extremes, and schedule
 end components. Persisted threshold state is tested at exact schedule boundaries
 and across 23/25-hour DST days. Additional checks cover duplicate interval
 callbacks, missing-monitor recovery, expired-shield cleanup on foreground, and
-recovery failure diagnostics. The real SDK integration must also compile:
+recovery failure diagnostics. Warning checks cover schedule configuration,
+valid notifications, and rejection of unrelated/stopped/deleted-group events.
+The real SDK integration must also compile:
 
 ```sh
 xcodebuild -project ZenLock-iOS/ZenLock.xcodeproj -scheme ZenLock \
@@ -38,7 +40,9 @@ signed build on an iPhone and record its iOS version and app build:
   an unlocked draft becomes 15 minutes; a running strict session retains its
   enforced configuration through cosmetic edits.
 - Select a single app, then repeat with a category. With no previous usage, use
-  the selection for 15 minutes in the current period. Verify the shield appears
+  the selection for 15 minutes in the current period. With notification permission
+  enabled, verify the usage warning is delivered near 14 minutes (delivery timing
+  is controlled by iOS). Verify the shield appears
   with ZenLock backgrounded. Repeat for both hourly and daily limits.
 - On iOS 17.4+, accumulate 15 minutes before creating the limit. Verify that
   existing usage counts and an immediate threshold is honored. On iOS 17.0–17.3,

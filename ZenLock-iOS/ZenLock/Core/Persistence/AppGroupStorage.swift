@@ -31,8 +31,8 @@ final class AppGroupStorage {
         defaults?.bool(forKey: Constants.Keys.activeGroupPrefix + id) ?? false
     }
 
-    func setScheduleStartTime(_ date: Date, forGroupId id: String) {
-        defaults?.set(date, forKey: "schedule_start_\(id)")
+    func removeValue(forKey key: String) {
+        defaults?.removeObject(forKey: key)
     }
 
     func set<T: Encodable>(_ value: T, forKey key: String) {
