@@ -141,6 +141,7 @@ final class BlockingService {
         scheduleManager.stopMonitoring(forGroupId: shared.id)
 
         storage.setGroupActive(shared.id, false)
+        UsageBlockState.clear(shared.id)
         syncGroupToAppGroups(group)
         return .success(())
     }
@@ -167,7 +168,22 @@ final class BlockingService {
                     shieldManager.removeShield(forGroupId: shared.id)
                 }
             case .usageBased:
-                break
+                // Do not reset a healthy registration's usage accounting.
+                do {
+                    try scheduleManager.ensureUsageMonitoring(for: shared, selection: selection)
+                    storage.set("", forKey: "usage_monitor_error_\(shared.id)")
+                } catch {
+                    // Preserve any existing shield if recovery fails; the error
+                    // remains available in Diagnostics for device investigation.
+                    storage.set(error.localizedDescription, forKey: "usage_monitor_error_\(shared.id)")
+                }
+                if let state = UsageBlockState.load(shared.id) {
+                    if state.isBlocked(period: shared.usagePeriod ?? .daily) {
+                        shieldManager.applyShield(for: shared, selection: selection)
+                    } else {
+                        shieldManager.removeShield(forGroupId: shared.id)
+                    }
+                }
             }
         }
     }
@@ -198,5 +214,6 @@ final class BlockingService {
         groups.removeAll { $0.id == groupId }
         storage.saveGroups(groups)
         WindowLog.clear(groupId: groupId)
+        UsageBlockState.clear(groupId)
     }
 }

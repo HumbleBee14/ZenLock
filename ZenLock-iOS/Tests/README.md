@@ -16,7 +16,10 @@ Coverage includes immediate and duplicate thresholds, hourly/daily interval
 resets, stopped/deleted groups, unrelated events, mode changes, invalid or empty
 selections, category-only selections, registration rollback, edit retries,
 strict legacy sessions, minimum/maximum limits, integer extremes, and schedule
-end components. The real SDK integration must also compile:
+end components. Persisted threshold state is tested at exact schedule boundaries
+and across 23/25-hour DST days. Additional checks cover duplicate interval
+callbacks, missing-monitor recovery, expired-shield cleanup on foreground, and
+recovery failure diagnostics. The real SDK integration must also compile:
 
 ```sh
 xcodebuild -project ZenLock-iOS/ZenLock.xcodeproj -scheme ZenLock \
@@ -41,7 +44,10 @@ signed build on an iPhone and record its iOS version and app build:
   existing usage counts and an immediate threshold is honored. On iOS 17.0–17.3,
   the older initializer only counts usage after registration.
 - Verify the shield clears at the next period and the next threshold blocks
-  again. Exercise the last minute of the hour/day, midnight, and a time-zone or
+  again. The monitor explicitly clears expired shields; the settings store does
+  not expire them independently. Start/end callbacks occur when the device is in
+  use. Reopening ZenLock also reconciles recorded expiry and restores missing
+  monitors without restarting healthy registrations. Exercise the last minute of the hour/day, midnight, and a time-zone or
   daylight-saving transition. Calendar boundaries are controlled by iOS.
 - Rename a shielded usage session and verify it stays shielded. Change its
   threshold, period, or selection and verify the new registration takes effect.
@@ -64,3 +70,8 @@ References:
 - https://developer.apple.com/documentation/deviceactivity/deviceactivityevent/includespastactivity
 - https://developer.apple.com/documentation/deviceactivity/deviceactivitycenter/monitoringerror/intervaltooshort
 - https://developer.apple.com/forums/thread/808470
+
+A threshold delivered after its original period has ended cannot be assigned to
+that original period from the callback alone. Such a callback may record the
+current period. Start/end callback reordering is covered by persisted expiry;
+this does not establish safety for every delayed threshold from the OS.

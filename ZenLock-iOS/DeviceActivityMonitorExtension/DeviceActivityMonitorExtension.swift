@@ -19,9 +19,10 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        let storeName = ManagedSettingsStore.Name(activity.rawValue)
-        ManagedSettingsStore(named: storeName).clearAllSettings()
-        guard activity.rawValue != Constants.quickFocusActivity else { return }
+        if activity.rawValue == Constants.quickFocusActivity {
+            ManagedSettingsStore(named: .init(activity.rawValue)).clearAllSettings()
+            return
+        }
         evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 
@@ -78,7 +79,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         case .timeBased:
             shouldBlock = (reason != .intervalEnd) && ScheduleEvaluator.isWithinSchedule(group)
         case .usageBased:
-            shouldBlock = (reason == .thresholdReached)
+            let period = group.usagePeriod ?? .daily
+            if reason == .thresholdReached {
+                UsageBlockState.record(groupId, period: period, defaults: defaults)
+            }
+            shouldBlock = UsageBlockState.load(groupId, defaults: defaults)?.isBlocked(period: period) ?? false
         }
 
         if shouldBlock {

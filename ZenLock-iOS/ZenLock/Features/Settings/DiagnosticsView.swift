@@ -1,6 +1,7 @@
 import SwiftUI
 import FamilyControls
 import ManagedSettings
+import DeviceActivity
 
 struct DiagnosticsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -90,6 +91,19 @@ struct DiagnosticsView: View {
                 return 0
             }()
             out.append("    Shield store: apps=\(appCount), cats=\(catCount)")
+            if g.blockMode == .usageBased {
+                let registered = DeviceActivityCenter().activities.contains(.init(g.id))
+                out.append("    Usage monitor registered: \(registered)")
+                if let state = UsageBlockState.load(g.id, defaults: defaults) {
+                    out.append("    Threshold period: \(state.start) to \(state.end)")
+                    out.append("    Threshold still active: \(state.isBlocked(period: g.usagePeriod ?? .daily))")
+                } else {
+                    out.append("    No recorded usage threshold")
+                }
+                if let error = AppGroupStorage().get(String.self, forKey: "usage_monitor_error_\(g.id)"), !error.isEmpty {
+                    out.append("    Monitor recovery error: \(error)")
+                }
+            }
         }
 
         out.append("")

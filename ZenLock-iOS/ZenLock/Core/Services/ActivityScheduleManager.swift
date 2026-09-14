@@ -4,6 +4,7 @@ import FamilyControls
 
 protocol ActivityScheduleManaging {
     func startMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws
+    func ensureUsageMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws
     func stopMonitoring(forGroupId id: String)
     func stopAllMonitoring()
 }
@@ -22,6 +23,11 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
             try startUsageBasedMonitoring(for: group, selection: selection)
         }
         storage.setScheduleStartTime(Date(), forGroupId: group.id)
+    }
+
+    func ensureUsageMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
+        guard !center.activities.contains(DeviceActivityName(group.id)) else { return }
+        try startMonitoring(for: group, selection: selection)
     }
 
     func stopMonitoring(forGroupId id: String) {

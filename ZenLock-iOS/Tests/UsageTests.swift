@@ -26,6 +26,9 @@ for period in [UsagePeriod.hourly, .daily] {
     check(shielded(value), "\(period): immediate valid threshold must shield (past usage)")
     monitor.eventDidReachThreshold(event, activity: activity)
     check(shielded(value), "\(period): duplicate threshold remains shielded")
+    // Simulate crossing the calendar boundary, not an early callback in the same period.
+    UsageBlockState.record(value.id.uuidString, period: period,
+                           at: Date().addingTimeInterval(-172800))
     monitor.intervalDidEnd(for: activity)
     check(!shielded(value), "\(period): interval end clears shield")
     monitor.intervalDidStart(for: activity)
@@ -159,6 +162,61 @@ lockedEditor.submit()
 check(strictLegacy.isActive && shielded(strictLegacy), "cosmetic save cannot disable a legacy strict session")
 check(strictLegacy.usageLimitMinutes == 5, "strict save does not change enforced legacy limit")
 check(strictLegacy.name == "Still locked", "strict cosmetic edit is saved")
+
+let recovering = group()
+try service.activateGroup(recovering)
+let recoveringActivity = DeviceActivityName(recovering.id.uuidString)
+monitor.eventDidReachThreshold(.init("usage_limit_\(recovering.id.uuidString)"), activity: recoveringActivity)
+monitor.intervalDidStart(for: recoveringActivity)
+check(shielded(recovering), "duplicate or delayed interval start preserves reached threshold")
+DeviceActivityCenter().stopMonitoring([recoveringActivity])
+service.evaluateActiveGroups([recovering])
+check(DeviceActivityCenter.registrations[recoveringActivity] != nil, "foreground restores missing usage registration")
+check(shielded(recovering), "recovery preserves current-period shield")
+
+monitor.intervalDidEnd(for: recoveringActivity)
+check(shielded(recovering), "early end callback cannot erase a current-period threshold")
+UsageBlockState.record(recovering.id.uuidString, period: .hourly, at: Date().addingTimeInterval(-7200))
+service.evaluateActiveGroups([recovering])
+check(!shielded(recovering), "foreground removes expired usage shield if boundary callback was missed")
+let startBefore = defaults.object(forKey: "schedule_start_\(recovering.id.uuidString)") as? Date
+service.evaluateActiveGroups([recovering])
+check(defaults.object(forKey: "schedule_start_\(recovering.id.uuidString)") as? Date == startBefore,
+      "foreground does not restart a healthy monitor")
+DeviceActivityCenter().stopMonitoring([recoveringActivity])
+DeviceActivityCenter.failure = RegistrationFailure()
+UsageBlockState.record(recovering.id.uuidString, period: .hourly)
+service.evaluateActiveGroups([recovering])
+check(shielded(recovering), "recovery failure preserves known current-period shield")
+check(storage.get(String.self, forKey: "usage_monitor_error_\(recovering.id.uuidString)")?.isEmpty == false,
+      "recovery failure is available for diagnostics")
+DeviceActivityCenter.failure = nil
+service.evaluateActiveGroups([recovering])
+check(storage.get(String.self, forKey: "usage_monitor_error_\(recovering.id.uuidString)") == "",
+      "successful recovery clears diagnostic error")
+_ = service.deactivateGroup(recovering)
+check(UsageBlockState.load(recovering.id.uuidString) == nil, "stop clears persisted threshold")
+var calendar = Calendar(identifier: .gregorian)
+calendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+let iso = ISO8601DateFormatter()
+for (dateString, dayHours) in [("2026-03-08T12:00:00Z", 23), ("2026-11-01T12:00:00Z", 25)] {
+    let date = iso.date(from: dateString)!
+    for period in [UsagePeriod.hourly, .daily] {
+        UsageBlockState.record("boundary", period: period, at: date, calendar: calendar)
+        let state = UsageBlockState.load("boundary")!
+        check(state.isBlocked(period: period, at: state.start), "threshold includes period start")
+        check(state.isBlocked(period: period, at: state.end.addingTimeInterval(-1)), "threshold persists until boundary")
+        check(!state.isBlocked(period: period, at: state.end), "threshold expires exactly at boundary")
+        let calendarEnd = calendar.dateInterval(of: period == .hourly ? .hour : .day, for: date)!.end
+        check(!state.isBlocked(period: period, at: calendarEnd.addingTimeInterval(-1)),
+              "scheduled end callback at :59:59 can release the shield")
+        check(!state.isBlocked(period: period, at: state.start.addingTimeInterval(-1)), "clock before stored period is not blocked")
+        if period == .daily {
+            check(state.end.timeIntervalSince(state.start) == Double(dayHours * 3600 - 1), "DST schedule duration uses calendar")
+        }
+        check(!state.isBlocked(period: period == .daily ? .hourly : .daily, at: date), "different usage period ignores stale state")
+    }
+}
 print("\(checks) checks, \(failures) failures")
 defaults.removePersistentDomain(forName: Constants.appGroupID)
 exit(failures == 0 ? 0 : 1)
