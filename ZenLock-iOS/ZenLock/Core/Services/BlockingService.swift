@@ -1,6 +1,18 @@
 import Foundation
 import FamilyControls
 
+enum ActivationError: LocalizedError {
+    case noAppsSelected
+    case invalidUsageLimit
+
+    var errorDescription: String? {
+        switch self {
+        case .noAppsSelected: return "Select at least one app or category to block."
+        case .invalidUsageLimit: return "Choose a usage limit of at least 15 minutes within the selected period."
+        }
+    }
+}
+
 @Observable
 final class BlockingService {
     private let shieldManager: ShieldManaging
@@ -24,17 +36,27 @@ final class BlockingService {
 
         syncGroupToAppGroups(group)
 
-        guard let selection = group.decodedSelection else { return }
-
-        switch shared.blockMode {
-        case .timeBased:
-            try scheduleManager.startMonitoring(for: shared, selection: selection)
-            if ScheduleEvaluator.isWithinSchedule(shared) {
-                shieldManager.applyShield(for: shared, selection: selection)
-                WindowLog.record(groupId: shared.id)
+        do {
+            guard let selection = group.decodedSelection,
+                  !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty else {
+                throw ActivationError.noAppsSelected
             }
-        case .usageBased:
-            try scheduleManager.startMonitoring(for: shared, selection: selection)
+            switch shared.blockMode {
+            case .timeBased:
+                try scheduleManager.startMonitoring(for: shared, selection: selection)
+                if ScheduleEvaluator.isWithinSchedule(shared) {
+                    shieldManager.applyShield(for: shared, selection: selection)
+                    WindowLog.record(groupId: shared.id)
+                }
+            case .usageBased:
+                try scheduleManager.startMonitoring(for: shared, selection: selection)
+            }
+        } catch {
+            group.isActive = false
+            syncGroupToAppGroups(group)
+            scheduleManager.stopMonitoring(forGroupId: shared.id)
+            shieldManager.removeShield(forGroupId: shared.id)
+            throw error
         }
     }
 

@@ -5,6 +5,9 @@ enum ScheduleToastFactory {
     static func make(for outcome: BlockingService.ArmOutcome, group: BlockGroup) -> ZenToastData {
         switch outcome {
         case .activeNow:
+            if group.blockMode == .usageBased {
+                return ZenToastData(message: "Usage limit active. Apps block when the limit is reached.", kind: .success)
+            }
             return ZenToastData(message: "Blocking now.", kind: .success)
 
         case .armed(let startsAt):

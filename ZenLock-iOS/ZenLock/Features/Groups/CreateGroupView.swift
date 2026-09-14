@@ -53,7 +53,11 @@ struct CreateGroupView: View {
         do {
             outcome = try BlockingService().armOrActivate(group)
         } catch {
-            outcome = .windowPassed
+            modelContext.delete(group)
+            BlockingService().removeGroupFromAppGroups(group.id.uuidString)
+            try? modelContext.save()
+            toast = ZenToastData(message: "Couldn't start session: \(error.localizedDescription)", kind: .warning)
+            return
         }
         try? modelContext.save()
         onCreated()

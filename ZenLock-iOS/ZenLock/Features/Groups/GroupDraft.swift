@@ -40,9 +40,21 @@ extension GroupDraft {
         self.scheduleRepeats = group.scheduleRepeats
         self.scheduleDays = Set(group.scheduleDaysOfWeek ?? Array(1...7))
         self.notifyBeforeStart = group.notifyBeforeStart
-        self.usageLimitMinutes = group.usageLimitMinutes ?? 60
         self.usagePeriod = group.usagePeriod ?? .daily
+        self.usageLimitMinutes = usagePeriod.normalizedLimit(group.usageLimitMinutes ?? 60)
         self.deepFocusEnabled = group.deepFocusEnabled
+    }
+
+    /// Cosmetic edits must not reset usage accounting or clear an active shield.
+    func canPreserveMonitoring(for group: BlockGroup) -> Bool {
+        guard group.isActive else { return false }
+        if group.toShared().isStrictLocked { return true }
+        guard group.blockMode == .usageBased, blockMode == .usageBased,
+              group.usagePeriod ?? .daily == usagePeriod,
+              group.usageLimitMinutes == usagePeriod.normalizedLimit(usageLimitMinutes),
+              let previous = group.decodedSelection else { return false }
+        return previous.applicationTokens == selection.applicationTokens
+            && previous.categoryTokens == selection.categoryTokens
     }
 
     func apply(to group: BlockGroup) {
@@ -58,7 +70,7 @@ extension GroupDraft {
         group.scheduleRepeats = scheduleRepeats
         group.scheduleDaysOfWeek = scheduleRepeats ? Array(scheduleDays).sorted() : nil
         group.notifyBeforeStart = notifyBeforeStart
-        group.usageLimitMinutes = usageLimitMinutes
+        group.usageLimitMinutes = usagePeriod.normalizedLimit(usageLimitMinutes)
         group.usagePeriod = usagePeriod
         group.deepFocusEnabled = deepFocusEnabled
         group.updatedAt = Date()

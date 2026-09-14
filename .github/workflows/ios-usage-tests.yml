@@ -1,0 +1,24 @@
+name: iOS Usage Tests
+
+on:
+  pull_request:
+    paths:
+      - 'ZenLock-iOS/**'
+      - '.github/workflows/ios-usage-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ZenLock-iOS/**'
+      - '.github/workflows/ios-usage-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  usage-regressions:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test usage enforcement control flow
+        run: python3 ZenLock-iOS/Tests/run_usage_tests.py

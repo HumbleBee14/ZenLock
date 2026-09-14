@@ -242,12 +242,12 @@ struct GroupFormView: View {
                     .pickerStyle(.segmented)
                     .frame(width: 160)
                     .onChange(of: draft.usagePeriod) { _, _ in
-                        let opts = usageLimitOptions
-                        if !opts.contains(draft.usageLimitMinutes) {
-                            draft.usageLimitMinutes = opts.min(by: { abs($0 - draft.usageLimitMinutes) < abs($1 - draft.usageLimitMinutes) }) ?? opts[0]
-                        }
+                        draft.usageLimitMinutes = draft.usagePeriod.normalizedLimit(draft.usageLimitMinutes)
                     }
                 }
+                Text("Minimum 15 minutes")
+                    .font(ZenTheme.caption)
+                    .foregroundStyle(ZenTheme.textSecondary)
                 Slider(value: Binding(
                     get: {
                         let opts = usageLimitOptions
@@ -272,14 +272,7 @@ struct GroupFormView: View {
     }
 
     private var usageLimitOptions: [Int] {
-        switch draft.usagePeriod {
-        case .hourly:
-            return [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-        case .daily:
-            var opts = [15, 30, 45, 60]
-            opts.append(contentsOf: stride(from: 90, through: 720, by: 30))
-            return opts
-        }
+        draft.usagePeriod.limitOptions
     }
 
     private func usageLimitLabel(_ m: Int) -> String {

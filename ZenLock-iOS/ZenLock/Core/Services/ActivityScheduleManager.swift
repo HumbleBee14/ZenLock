@@ -82,29 +82,46 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
     }
 
     private func startUsageBasedMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {
-        guard let limitMinutes = group.usageLimitMinutes else { return }
+        guard let limitMinutes = group.usageLimitMinutes,
+              (group.usagePeriod ?? .daily).limitOptions.contains(limitMinutes) else {
+            throw ActivationError.invalidUsageLimit
+        }
+        guard !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty else {
+            throw ActivationError.noAppsSelected
+        }
 
         let schedule: DeviceActivitySchedule
         switch group.usagePeriod ?? .daily {
         case .hourly:
             schedule = DeviceActivitySchedule(
                 intervalStart: DateComponents(minute: 0),
-                intervalEnd: DateComponents(minute: 59),
+                intervalEnd: DateComponents(minute: 59, second: 59),
                 repeats: true
             )
         case .daily:
             schedule = DeviceActivitySchedule(
                 intervalStart: DateComponents(hour: 0, minute: 0),
-                intervalEnd: DateComponents(hour: 23, minute: 59),
+                intervalEnd: DateComponents(hour: 23, minute: 59, second: 59),
                 repeats: true
             )
         }
 
-        let usageEvent = DeviceActivityEvent(
-            applications: selection.applicationTokens,
-            categories: selection.categoryTokens,
-            threshold: DateComponents(minute: limitMinutes)
-        )
+        let usageEvent: DeviceActivityEvent
+        if #available(iOS 17.4, *) {
+            usageEvent = DeviceActivityEvent(
+                applications: selection.applicationTokens,
+                categories: selection.categoryTokens,
+                threshold: DateComponents(minute: limitMinutes),
+                includesPastActivity: true
+            )
+        } else {
+            // iOS 17.0–17.3 only counts usage after registration.
+            usageEvent = DeviceActivityEvent(
+                applications: selection.applicationTokens,
+                categories: selection.categoryTokens,
+                threshold: DateComponents(minute: limitMinutes)
+            )
+        }
 
         try center.startMonitoring(
             DeviceActivityName(group.id),

@@ -29,6 +29,11 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
+        // A callback can be immediate when earlier usage already met the limit.
+        // Dropping it does not cause DeviceActivity to send another callback.
+        guard let group = loadGroup(activity.rawValue),
+              group.blockMode == .usageBased,
+              event.rawValue == "usage_limit_\(group.id)" else { return }
         evaluateBlockState(for: activity, reason: .thresholdReached)
     }
 
@@ -61,10 +66,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private func evaluateBlockState(for activity: DeviceActivityName, reason: EvalReason) {
         let groupId = extractGroupId(from: activity)
         let storeName = ManagedSettingsStore.Name(activity.rawValue)
-
-        if reason == .thresholdReached, isPrematureThreshold(for: groupId) {
-            return
-        }
 
         guard let group = loadGroup(groupId), group.isActive else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
@@ -106,13 +107,6 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         if !selection.categoryTokens.isEmpty {
             store.shield.applicationCategories = .specific(selection.categoryTokens)
         }
-    }
-
-    private func isPrematureThreshold(for groupId: String) -> Bool {
-        guard let startTime = defaults?.object(forKey: "schedule_start_\(groupId)") as? Date else {
-            return false
-        }
-        return Date().timeIntervalSince(startTime) < 60
     }
 
     private func extractGroupId(from activity: DeviceActivityName) -> String {
