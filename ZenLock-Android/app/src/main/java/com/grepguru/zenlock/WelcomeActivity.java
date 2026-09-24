@@ -46,7 +46,9 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         setContentView(R.layout.activity_welcome);
+        com.grepguru.zenlock.ui.ScreenInsets.applyToContent(this);
 
         pager = findViewById(R.id.welcomePager);
         dots = findViewById(R.id.welcomeDots);

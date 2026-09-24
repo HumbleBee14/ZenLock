@@ -20,9 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowCompat;
 
 import com.grepguru.zenlock.utils.OTPManager;
 import java.util.regex.Pattern;
@@ -50,6 +47,8 @@ public class PartnerContactActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         if (isLockActive(this)) {
             Intent lockIntent = new Intent(this, LockScreenActivity.class);
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -58,20 +57,8 @@ public class PartnerContactActivity extends AppCompatActivity {
             return;
         }
 
-        super.onCreate(savedInstanceState);
-        
-        // Enable edge-to-edge display
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        
         setContentView(R.layout.activity_partner_contact);
-
-        // Handle system bar insets
-        View rootView = findViewById(android.R.id.content);
-        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
-            androidx.core.graphics.Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, bars.top, 0, bars.bottom);
-            return insets;
-        });
+        com.grepguru.zenlock.ui.ScreenInsets.applyToContent(this);
 
         // Initialize components
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);

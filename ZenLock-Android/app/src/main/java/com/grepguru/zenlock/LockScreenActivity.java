@@ -54,6 +54,8 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private com.grepguru.zenlock.ui.interaction.UnlockHoldController unlockHold;
     private static volatile boolean isLockScreenActive = false;
+    private boolean ownsActiveScreen = false;
+    private boolean screenInitialized = false;
 
     public static boolean isActive() { return isLockScreenActive; }
     private EditText pinInput;
@@ -99,13 +101,17 @@ public class LockScreenActivity extends AppCompatActivity {
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         super.onCreate(savedInstanceState);
+        com.grepguru.zenlock.ui.ScreenInsets.enable(this);
+        preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         // Prevent multiple instances
         if (isLockScreenActive) {
             Log.d("LockScreenActivity", "Lock screen already active, finishing duplicate instance");
+            finishing = true;
             finish();
             return;
         }
         isLockScreenActive = true;
+        ownsActiveScreen = true;
 
         // Dismiss blocker notification if it was used to launch us (MIUI fallback)
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -114,7 +120,6 @@ public class LockScreenActivity extends AppCompatActivity {
             nm.cancel(9999); // BLOCKER_NOTIFICATION_ID from LockScreenLauncher
         }
 
-        preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
         analyticsManager = new AnalyticsManager(this);
         unlockManager = new EnhancedUnlockManager(this);
 
@@ -167,7 +172,7 @@ public class LockScreenActivity extends AppCompatActivity {
             }
 
             // Return to MainActivity
-            isLockScreenActive = false; // Reset flag before finishing
+            releaseActiveScreen();
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -179,13 +184,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Setting up UI
         setContentView(R.layout.activity_lock_screen);
         View lockRoot = findViewById(R.id.lockRoot);
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(lockRoot, (v, windowInsets) -> {
-            androidx.core.graphics.Insets bars = windowInsets.getInsets(
-                    androidx.core.view.WindowInsetsCompat.Type.systemBars()
-                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-            return windowInsets;
-        });
+        com.grepguru.zenlock.ui.ScreenInsets.apply(lockRoot);
 
         // Initializing UI Components
         pinInput = findViewById(R.id.pinInput);
@@ -220,7 +219,7 @@ public class LockScreenActivity extends AppCompatActivity {
         initializeTimer(targetDuration);
         bindSessionHeader();
         if (remainingTimeMillis <= 0) {
-            isLockScreenActive = false; // Reset flag before finishing
+            releaseActiveScreen();
             finishLockScreen();
             return;
         }
@@ -446,6 +445,7 @@ public class LockScreenActivity extends AppCompatActivity {
         startCountdownTimer(targetDuration, remainingTimeMillis);
         
         // Create persistent notification if enabled
+        screenInitialized = true;
         createPersistentNotificationIfEnabled();
     }
 
@@ -460,7 +460,7 @@ public class LockScreenActivity extends AppCompatActivity {
     protected void onPause() {
         if (unlockHold != null) unlockHold.cancel();
         super.onPause();
-        if (finishing) return;
+        if (!canHandleLifecycle()) return;
 
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
@@ -538,6 +538,7 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (!canHandleLifecycle()) return;
 
         // If we're launching a whitelisted app, don't restart the lock screen immediately
         if (isLaunchingWhitelistedApp) {
@@ -611,6 +612,7 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!canHandleLifecycle()) return;
         // Always bring lock screen to front if not already
         ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
@@ -739,8 +741,8 @@ public class LockScreenActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (unlockHold != null) unlockHold.cancel();
         super.onDestroy();
-        // Always reset the flag when activity is destroyed
-        isLockScreenActive = false;
+        screenInitialized = false;
+        releaseActiveScreen();
 
         // Cancel countdown timer to prevent memory leaks
         if (countDownTimer != null) {
@@ -833,7 +835,7 @@ public class LockScreenActivity extends AppCompatActivity {
         editor.apply();
 
         // Return to MainActivity
-        isLockScreenActive = false; // Reset flag before finishing
+        releaseActiveScreen();
         Intent intent = new Intent(LockScreenActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -1026,9 +1028,23 @@ public class LockScreenActivity extends AppCompatActivity {
         countDownTimer.start();
     }
 
+    private boolean canHandleLifecycle() {
+        return screenInitialized && ownsActiveScreen && preferences != null
+                && !finishing && !isFinishing() && !isDestroyed();
+    }
+
+    private void releaseActiveScreen() {
+        // A rejected duplicate or an old instance must not clear a newer owner's state.
+        if (ownsActiveScreen) {
+            isLockScreenActive = false;
+            ownsActiveScreen = false;
+        }
+    }
+
     private void finishLockScreen() {
         // Call this when lock ends (unlock, timer expires, etc.)
-        isLockScreenActive = false;
+        finishing = true;
+        releaseActiveScreen();
         
         // Remove persistent notification
         removePersistentNotification();
@@ -1036,8 +1052,8 @@ public class LockScreenActivity extends AppCompatActivity {
         // Clear any pre-notifications for this session
         clearPreNotificationsForCurrentSession();
         
-                finish();
-            }
+        finish();
+    }
 
     private void showExtendDialog() {
         Context themed = new android.view.ContextThemeWrapper(this, R.style.Theme_ZenLock);
@@ -1124,6 +1140,7 @@ public class LockScreenActivity extends AppCompatActivity {
      * Create persistent notification if enabled in settings
      */
     private void createPersistentNotificationIfEnabled() {
+        if (!canHandleLifecycle()) return;
         boolean persistentNotificationEnabled = preferences.getBoolean("persistent_notification", true);
         if (!persistentNotificationEnabled) {
             return;
@@ -1208,6 +1225,7 @@ public class LockScreenActivity extends AppCompatActivity {
      * Update persistent notification with current end time
      */
     private void updatePersistentNotification() {
+        if (!canHandleLifecycle()) return;
         boolean persistentNotificationEnabled = preferences.getBoolean("persistent_notification", true);
         if (!persistentNotificationEnabled || notificationManager == null) {
             return;

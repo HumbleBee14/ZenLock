@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         
         if (WelcomeActivity.shouldShow(this)) {
             startActivity(new Intent(this, WelcomeActivity.class));

@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/backgroundPrimary"
-    android:fitsSystemWindows="true"
     android:paddingTop="24dp"
     android:paddingBottom="32dp">
 

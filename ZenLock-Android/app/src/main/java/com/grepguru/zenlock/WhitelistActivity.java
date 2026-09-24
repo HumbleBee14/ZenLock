@@ -88,6 +88,7 @@ public class WhitelistActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         if (isLockActive(this)) {
             Intent lockIntent = new Intent(this, LockScreenActivity.class);
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -97,6 +98,7 @@ public class WhitelistActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_whitelist);
+        com.grepguru.zenlock.ui.ScreenInsets.applyToContent(this);
 
         initializeViews();
         setupSelectedAppsBar();

@@ -10,14 +10,17 @@ android {
         applicationId = "com.grepguru.zenlock"
         minSdk = 28
         targetSdk = 36
-        versionCode = 47
-        versionName = "1.16.1"
+        versionCode = 48
+        versionName = "1.16.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // major.minor.patch
 
     buildFeatures {
         buildConfig = true
+    }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
     
     buildTypes {
@@ -91,6 +94,7 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.16.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

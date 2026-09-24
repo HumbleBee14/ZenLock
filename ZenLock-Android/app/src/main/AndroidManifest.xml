@@ -72,6 +72,7 @@
         <!-- Lock Screen Activity -->
         <activity
             android:name=".LockScreenActivity"
+            android:windowSoftInputMode="adjustResize"
             android:taskAffinity=""
             android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
@@ -79,12 +80,14 @@
         <!-- Whitelist Activity -->
         <activity
             android:name=".WhitelistActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
         <!-- Partner Contact Activity -->
         <activity
             android:name=".PartnerContactActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
