@@ -5,38 +5,25 @@ on:
     branches: [main]
     paths:
       - "ZenLock-Android/**"
+      - ".github/workflows/release.yml"
   workflow_dispatch:
-    inputs:
-      bump_type:
-        description: "Version bump type (overrides commit-message detection)"
-        required: false
-        default: "auto"
-        type: choice
-        options:
-          - auto
-          - patch
-          - minor
-          - major
+
+# Serialize publication so two pushes cannot upload the same version concurrently.
+concurrency:
+  group: android-release
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
   release:
-    # Skip auto-runs on version-bump commits to prevent infinite loops.
-    # For manual runs (workflow_dispatch), restrict to repo owner only.
-    if: |
-      (github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore: bump version')) ||
-      (github.event_name == 'workflow_dispatch' && github.actor == 'HumbleBee14')
+    # Merged contributions build on main; manual runs use repository permissions.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          # Use a PAT (not GITHUB_TOKEN) so the workflow can push the
-          # version-bump commit and tag through branch protection.
-          # The PAT belongs to an admin who is in the ruleset bypass list.
-          token: ${{ secrets.RELEASE_PAT }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -44,68 +31,28 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # Version bump logic:
-      # 1. Reads current versionCode and versionName from app/build.gradle.kts
-      # 2. Inspects the merge commit message that triggered this workflow
-      # 3. Decides the semver bump based on conventional-commit prefix:
-      #      feat: .............  minor (1.8.3 -> 1.9.0)
-      #      fix: / chore: / docs: / refactor: / test: / perf: ...  patch (1.8.3 -> 1.8.4)
-      #      BREAKING CHANGE in body (or "BREAKING" prefix) ........ major (1.8.3 -> 2.0.0)
-      # 4. versionCode ALWAYS increments by 1, regardless of bump type (Play Store requires monotonic increase)
-      # 5. Writes the new values back into app/build.gradle.kts via sed
-      - name: Bump version
-        id: bump
-        # Pass untrusted values (commit message, workflow inputs) via env vars
-        # instead of `${{ }}` substitution so bash doesn't try to execute
-        # anything that looks like a shell command inside them.
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
-          MANUAL_BUMP_INPUT: ${{ github.event.inputs.bump_type }}
+      # The checked-in Gradle version is the only source of release numbering.
+      # This workflow never edits, increments, or commits version fields.
+      - name: Read repository version
+        id: version
         run: |
-          set -e
-          GRADLE_FILE="ZenLock-Android/app/build.gradle.kts"
-          CURRENT_CODE=$(grep -E "^\s*versionCode\s*=" "$GRADLE_FILE" | grep -oE "[0-9]+")
-          CURRENT_NAME=$(grep -E "^\s*versionName\s*=" "$GRADLE_FILE" | grep -oE '"[^"]+"' | tr -d '"')
+          python3 - <<'PYTHON'
+          import os
+          import re
+          from pathlib import Path
 
-          echo "Current: code=$CURRENT_CODE name=$CURRENT_NAME"
-
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
-
-          MANUAL_BUMP="$MANUAL_BUMP_INPUT"
-          # Use only the first line (subject) of the commit message for type detection
-          MSG=$(printf '%s' "$COMMIT_MSG" | head -n 1)
-
-          if [ "$MANUAL_BUMP" = "major" ]; then
-            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
-            BUMP_TYPE="major (manual)"
-          elif [ "$MANUAL_BUMP" = "minor" ]; then
-            MINOR=$((MINOR + 1)); PATCH=0
-            BUMP_TYPE="minor (manual)"
-          elif [ "$MANUAL_BUMP" = "patch" ]; then
-            PATCH=$((PATCH + 1))
-            BUMP_TYPE="patch (manual)"
-          elif echo "$MSG" | grep -qE "^(BREAKING|.*BREAKING CHANGE)"; then
-            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
-            BUMP_TYPE="major"
-          elif echo "$MSG" | grep -qE "^feat(\(.+\))?:"; then
-            MINOR=$((MINOR + 1)); PATCH=0
-            BUMP_TYPE="minor"
-          else
-            PATCH=$((PATCH + 1))
-            BUMP_TYPE="patch"
-          fi
-
-          NEW_NAME="$MAJOR.$MINOR.$PATCH"
-          NEW_CODE=$((CURRENT_CODE + 1))
-
-          echo "New: code=$NEW_CODE name=$NEW_NAME ($BUMP_TYPE)"
-
-          sed -i "s/versionCode = $CURRENT_CODE/versionCode = $NEW_CODE/" "$GRADLE_FILE"
-          sed -i "s/versionName = \"$CURRENT_NAME\"/versionName = \"$NEW_NAME\"/" "$GRADLE_FILE"
-
-          echo "new_version=$NEW_NAME" >> $GITHUB_OUTPUT
-          echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
-          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          gradle = Path("ZenLock-Android/app/build.gradle.kts").read_text()
+          names = re.findall(r'^\s*versionName\s*=\s*"([^"\n]+)"\s*(?://.*)?$', gradle, re.MULTILINE)
+          codes = re.findall(r'^\s*versionCode\s*=\s*(\d+)\s*(?://.*)?$', gradle, re.MULTILINE)
+          if len(names) != 1 or len(codes) != 1:
+              raise SystemExit("Expected one literal versionName and versionCode in app/build.gradle.kts")
+          name, code = names[0], codes[0]
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", name) or int(code) < 1:
+              raise SystemExit("Invalid repository versionName or versionCode")
+          print(f"Building repository version {name} (code {code}) without modification")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"version_name={name}\nversion_code={code}\nrelease_tag=v{name}\n")
+          PYTHON
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -120,21 +67,54 @@ jobs:
         working-directory: ZenLock-Android
 
       - name: Rename APKs
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
           mkdir -p release-artifacts
           cp ZenLock-Android/app/build/outputs/apk/playstore/debug/app-playstore-debug.apk \
-             "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-debug.apk"
+             "release-artifacts/zenlock-v${VERSION_NAME}-debug.apk"
           cp ZenLock-Android/app/build/outputs/apk/sms/debug/app-sms-debug.apk \
-             "release-artifacts/zenlock-v${{ steps.bump.outputs.new_version }}-sms-debug.apk"
+             "release-artifacts/zenlock-v${VERSION_NAME}-sms-debug.apk"
 
-      - name: Commit version bump
+      - name: Save APKs for this workflow run
+        uses: actions/upload-artifact@v7
+        with:
+          name: zenlock-v${{ steps.version.outputs.version_name }}-build-${{ steps.version.outputs.version_code }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release-artifacts/*.apk
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Check whether this version is already published
+        id: publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.release_tag }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ZenLock-Android/app/build.gradle.kts
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
-          git tag "v${{ steps.bump.outputs.new_version }}"
-          git push origin main --follow-tags
+          set -euo pipefail
+          STATUS=$(curl --silent --show-error \
+            --output "$RUNNER_TEMP/zenlock-release.json" --write-out '%{http_code}' \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")
+          case "$STATUS" in
+            200)
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              echo "Release $RELEASE_TAG already exists; keeping it unchanged. New APKs are attached to this workflow run." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            404)
+              if git rev-parse --verify "refs/tags/$RELEASE_TAG" >/dev/null 2>&1 && \
+                 [ "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" != "$GITHUB_SHA" ]; then
+                echo "publish=false" >> "$GITHUB_OUTPUT"
+                echo "Tag $RELEASE_TAG belongs to another commit; keeping it unchanged. New APKs are attached to this workflow run." >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "publish=true" >> "$GITHUB_OUTPUT"
+              fi
+              ;;
+            *)
+              echo "::error::Could not check release $RELEASE_TAG (HTTP $STATUS). Refusing to overwrite a release."
+              exit 1
+              ;;
+          esac
 
       # Changelog generation:
       # - Finds the previous version tag so we only include commits shipped in THIS release.
@@ -144,9 +124,12 @@ jobs:
       #   doesn't belong in user-facing release notes).
       # - Any commit not matching a recognized prefix is put under "Other changes".
       - name: Generate changelog
+        if: steps.publication.outputs.publish == 'true'
         id: changelog
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.release_tag }}
         run: |
-          PREV_TAG=$(git tag --sort=-creatordate | grep -v "v${{ steps.bump.outputs.new_version }}" | head -n 1)
+          PREV_TAG=$(git tag --merged HEAD --sort=-version:refname --list 'v[0-9]*' | awk -v current="$RELEASE_TAG" '$0 != current { print; exit }')
           if [ -z "$PREV_TAG" ]; then
             RAW=$(git log --pretty=format:"%s" -n 50)
           else
@@ -226,26 +209,36 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> $GITHUB_OUTPUT
 
+      # Create-only: unlike an update action, this cannot replace an existing release.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: v${{ steps.bump.outputs.new_version }}
-          name: ZenLock v${{ steps.bump.outputs.new_version }}
-          body: |
-            ## What's new in v${{ steps.bump.outputs.new_version }}
+        if: steps.publication.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.release_tag }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+        run: |
+          set -euo pipefail
+          {
+            printf "## What's new in v%s\n\n" "$VERSION_NAME"
+            printf 'App version: **%s** · version code: **%s**\n' "$VERSION_NAME" "$VERSION_CODE"
+            printf 'APK build source: `%s`\n\n' "$GITHUB_SHA"
+            printf '%s\n\n' "$CHANGELOG"
+            cat <<'NOTES'
+          ---
+          ### Downloads
 
-            ${{ steps.changelog.outputs.changelog }}
+          Two debug APKs are attached below (both auto-signed with Android's debug keystore so they install via sideload):
 
-            ---
-            ### Downloads
+          - **`zenlock-vX.Y.Z-debug.apk`** — default build, matches the Play Store version (no SMS permission).
+          - **`zenlock-vX.Y.Z-sms-debug.apk`** — same app with SMS accountability-partner support enabled.
 
-            Two debug APKs are attached below (both auto-signed with Android's debug keystore so they install via sideload):
-
-            - **`zenlock-vX.Y.Z-debug.apk`** — default build, matches the Play Store version (no SMS permission).
-            - **`zenlock-vX.Y.Z-sms-debug.apk`** — same app with SMS accountability-partner support enabled.
-
-            You may need to uninstall the Play Store version first (different signature).
-            For the official release, install from [Google Play](https://play.google.com/store/apps/details?id=com.grepguru.zenlock).
-          files: release-artifacts/*.apk
-          draft: false
-          prerelease: false
+          For the official release, install from [Google Play](https://play.google.com/store/apps/details?id=com.grepguru.zenlock).
+          NOTES
+          } > "$RUNNER_TEMP/zenlock-release-notes.md"
+          gh release create "$RELEASE_TAG" release-artifacts/*.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "ZenLock v$VERSION_NAME" \
+            --notes-file "$RUNNER_TEMP/zenlock-release-notes.md"
