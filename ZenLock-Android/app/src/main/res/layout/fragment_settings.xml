@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +15,6 @@
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         tools:context=".fragments.SettingsFragment">
-
         <TextView
             android:id="@+id/settingsTitle"
             style="@style/ModernText.PageTitle"
@@ -23,52 +22,50 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Settings" />
-
-        <TextView style="@style/Zen.SectionLabel" android:text="Apps" />
-
-        <LinearLayout style="@style/Zen.Group">
-
+        <LinearLayout
+            android:id="@+id/whitelistButton"
+            style="@style/Settings.Row.Clickable"
+            android:background="@drawable/settings_primary_action"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:minHeight="76dp">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="12dp"
+                android:padding="9dp"
+                android:src="@drawable/ic_apps"
+                app:tint="@color/primaryLight"
+                android:contentDescription="@null" />
             <LinearLayout
-                android:id="@+id/whitelistButton"
-                style="@style/Zen.Row.Clickable">
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Allowed Apps"
-                        android:textSize="15sp"
-                        android:textColor="@color/textPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/allowed_apps_summary"
-                        android:textSize="12sp"
-                        android:textColor="@color/textTertiary" />
-
-                </LinearLayout>
-
-                <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
-
+                    android:text="Allowed Apps"
+                    android:textSize="15sp"
+                    android:textColor="@color/textPrimary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/allowed_apps_summary"
+                    android:textSize="12sp"
+                    android:textColor="@color/textTertiary" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout
-                android:id="@+id/defaultAppsHeader"
-                style="@style/Zen.Row.Clickable">
-
-                <TextView style="@style/Zen.RowLabel" android:text="Default Allowed Apps" />
-
+            <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout android:id="@+id/defaultAppsHeader" style="@style/Settings.Row.Clickable">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView style="@style/Settings.RowTitle" android:text="@string/settings_default_apps_title" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_default_apps_summary" />
+                </LinearLayout>
                 <ImageView
                     android:id="@+id/defaultAppsExpandIcon"
                     android:layout_width="20dp"
@@ -76,114 +73,188 @@
                     android:src="@drawable/ic_expand_more"
                     app:tint="@color/textTertiary"
                     android:contentDescription="@null" />
-
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/defaultAppsExpandableContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout style="@style/Zen.Row" android:paddingStart="32dp" android:minHeight="44dp">
-                    <TextView style="@style/Zen.RowLabel" android:text="Phone" android:textSize="14sp" />
+                android:visibility="gone"
+                android:background="@drawable/settings_nested_background"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginBottom="12dp"
+                android:paddingVertical="4dp">
+                <LinearLayout
+                    style="@style/Settings.Row"
+                    android:paddingStart="16dp"
+                    android:minHeight="48dp">
+                    <TextView
+                        style="@style/Zen.RowLabel"
+                        android:text="Phone"
+                        android:textSize="14sp"
+                        android:id="@+id/phoneAppLabel"
+                        android:labelFor="@id/phoneAppToggle" />
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/phoneAppToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch" />
+                        android:theme="@style/AppTheme.Switch"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="8dp" />
                 </LinearLayout>
-
-                <LinearLayout style="@style/Zen.Row" android:paddingStart="32dp" android:minHeight="44dp">
-                    <TextView style="@style/Zen.RowLabel" android:text="Calendar" android:textSize="14sp" />
+                <LinearLayout
+                    style="@style/Settings.Row"
+                    android:paddingStart="16dp"
+                    android:minHeight="48dp">
+                    <TextView
+                        style="@style/Zen.RowLabel"
+                        android:text="Calendar"
+                        android:textSize="14sp"
+                        android:id="@+id/calendarAppLabel"
+                        android:labelFor="@id/calendarAppToggle" />
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/calendarAppToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch" />
+                        android:theme="@style/AppTheme.Switch"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="8dp" />
                 </LinearLayout>
-
-                <LinearLayout style="@style/Zen.Row" android:paddingStart="32dp" android:minHeight="44dp">
-                    <TextView style="@style/Zen.RowLabel" android:text="Clock" android:textSize="14sp" />
+                <LinearLayout
+                    style="@style/Settings.Row"
+                    android:paddingStart="16dp"
+                    android:minHeight="48dp">
+                    <TextView
+                        style="@style/Zen.RowLabel"
+                        android:text="Clock"
+                        android:textSize="14sp"
+                        android:id="@+id/clockAppLabel"
+                        android:labelFor="@id/clockAppToggle" />
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/clockAppToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme.Switch" />
+                        android:theme="@style/AppTheme.Switch"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="8dp" />
                 </LinearLayout>
-
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Block Notifications" />
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_block_notifications_title"
+                        android:id="@+id/blockNotificationsLabel"
+                        android:labelFor="@id/blockNotificationsToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_block_notifications_summary" />
+                </LinearLayout>
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/blockNotificationsToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_home_title"
+                        android:id="@+id/allowLauncherLabel"
+                        android:labelFor="@id/allowLauncherToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_home_summary" />
+                </LinearLayout>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/allowLauncherToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
         </LinearLayout>
-
-        <TextView style="@style/Zen.SectionLabel" android:text="Unlock" />
-
-        <LinearLayout style="@style/Zen.Group">
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="PIN Unlock" />
+        <LinearLayout style="@style/Settings.SectionHeader">
+            <ImageView
+                style="@style/Settings.SectionIcon"
+                app:tint="@color/primaryLight"
+                android:src="@drawable/ic_lock"
+                android:contentDescription="@null" />
+            <TextView
+                style="@style/Settings.SectionTitle"
+                android:text="@string/settings_section_unlock"
+                android:accessibilityHeading="true" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_pin_title"
+                        android:id="@+id/pinUnlockLabel"
+                        android:labelFor="@id/pinUnlockToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_pin_summary" />
+                </LinearLayout>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/clearPinButton"
-                    style="@style/ModernButton.Pill"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:minHeight="30dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginEnd="4dp"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:text="Clear"
                     android:textSize="12sp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:minWidth="48dp"
+                    android:textColor="@color/textSecondary"
+                    android:contentDescription="@string/settings_clear_pin" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/pinUnlockToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Accountability Partner" />
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_partner_title"
+                        android:id="@+id/partnerUnlockLabel"
+                        android:labelFor="@id/partnerUnlockToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_partner_summary" />
+                </LinearLayout>
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/partnerUnlockToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/partnerConfigSection"
-                style="@style/Zen.Row.Clickable"
+                style="@style/Settings.Row.Clickable"
                 android:paddingStart="32dp"
-                android:minHeight="44dp"
+                android:minHeight="48dp"
                 android:visibility="gone">
-
-                <TextView style="@style/Zen.RowLabel" android:text="Partner Contact" android:textSize="14sp" />
-
+                <TextView
+                    style="@style/Zen.RowLabel"
+                    android:text="Partner Contact"
+                    android:textSize="14sp" />
                 <TextView
                     android:id="@+id/partnerConfigValue"
                     style="@style/Zen.RowValue"
                     android:text="Configure" />
-
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
-
             </LinearLayout>
-
         </LinearLayout>
-
         <LinearLayout
             android:id="@+id/noUnlockMethodsWarning"
             android:layout_width="match_parent"
@@ -192,8 +263,9 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
-
+            android:gravity="center_vertical"
+            android:background="@drawable/settings_advisory_background"
+            android:paddingVertical="12dp">
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
@@ -201,63 +273,51 @@
                 android:src="@drawable/ic_warning"
                 app:tint="@color/warning"
                 android:contentDescription="@null" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="No unlock method set. You stay locked until the timer ends."
                 android:textSize="12sp"
                 android:textColor="@color/textSecondary" />
-
         </LinearLayout>
-
-        <TextView style="@style/Zen.SectionLabel" android:text="Reliability" />
-
-        <LinearLayout style="@style/Zen.Group">
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Unrestricted Battery" />
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/batteryExemptionToggle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
-            </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Resume After Reboot" />
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/autoRestartToggle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
-            </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout
-                android:id="@+id/permissionsRow"
-                style="@style/Zen.Row.Clickable">
-                <TextView style="@style/Zen.RowLabel" android:text="Permissions" />
+        <LinearLayout style="@style/Settings.SectionHeader">
+            <ImageView style="@style/Settings.SectionIcon" android:src="@drawable/ic_appearance"
+                app:tint="@color/primaryLight" android:contentDescription="@null" />
+            <TextView style="@style/Settings.SectionTitle" android:text="@string/settings_appearance"
+                android:accessibilityHeading="true" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout android:id="@+id/appearanceRow" style="@style/Settings.Row.Clickable">
+                <TextView style="@style/Zen.RowLabel" android:text="@string/settings_theme" />
+                <TextView android:id="@+id/appearanceValue" style="@style/Zen.RowValue" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
             </LinearLayout>
-
         </LinearLayout>
 
-        <TextView style="@style/Zen.SectionLabel" android:text="Lock screen" />
-
-        <LinearLayout style="@style/Zen.Group">
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Motivational Quotes" />
+        <LinearLayout style="@style/Settings.SectionHeader">
+            <ImageView
+                style="@style/Settings.SectionIcon"
+                app:tint="@color/primaryLight"
+                android:src="@drawable/ic_timer"
+                android:contentDescription="@null" />
+            <TextView
+                style="@style/Settings.SectionTitle"
+                android:text="@string/settings_section_lock_screen"
+                android:accessibilityHeading="true" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout style="@style/Settings.Row">
+                <TextView
+                    style="@style/Zen.RowLabel"
+                    android:text="Motivational Quotes"
+                    android:id="@+id/quotesLabel"
+                    android:labelFor="@id/quotesToggle" />
                 <ImageView
                     android:id="@+id/addQuoteButton"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:padding="6dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="0dp"
+                    android:padding="12dp"
                     android:src="@drawable/ic_add"
                     app:tint="@color/primaryLight"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
@@ -268,63 +328,128 @@
                     android:id="@+id/quotesToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Circular Timer" />
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <TextView
+                    style="@style/Zen.RowLabel"
+                    android:text="Circular Timer"
+                    android:id="@+id/circularTimerLabel"
+                    android:labelFor="@id/circularTimerToggle" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/circularTimerToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Vibration Feedback" />
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <TextView
+                    style="@style/Zen.RowLabel"
+                    android:text="Vibration Feedback"
+                    android:id="@+id/vibrationLabel"
+                    android:labelFor="@id/vibrationToggle" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/vibrationToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Session Notification" />
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_notification_title"
+                        android:id="@+id/persistentNotificationLabel"
+                        android:labelFor="@id/persistentNotificationToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_notification_summary" />
+                </LinearLayout>
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/persistentNotificationToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="Allow Home Screen" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.SectionHeader">
+            <ImageView
+                style="@style/Settings.SectionIcon"
+                app:tint="@color/primaryLight"
+                android:src="@drawable/ic_shield_check"
+                android:contentDescription="@null" />
+            <TextView
+                style="@style/Settings.SectionTitle"
+                android:text="@string/settings_section_reliability"
+                android:accessibilityHeading="true" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_battery_title"
+                        android:id="@+id/batteryExemptionLabel"
+                        android:labelFor="@id/batteryExemptionToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_battery_summary" />
+                </LinearLayout>
                 <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/allowLauncherToggle"
+                    android:id="@+id/batteryExemptionToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme.Switch" />
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
-
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView
+                        style="@style/Settings.RowTitle"
+                        android:text="@string/settings_reboot_title"
+                        android:id="@+id/autoRestartLabel"
+                        android:labelFor="@id/autoRestartToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_reboot_summary" />
+                </LinearLayout>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/autoRestartToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/AppTheme.Switch"
+                    android:minHeight="48dp"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+            <View style="@style/Settings.Divider" />
+            <LinearLayout android:id="@+id/permissionsRow" style="@style/Settings.Row.Clickable">
+                <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView style="@style/Settings.RowTitle" android:text="@string/settings_permissions_title" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/settings_permissions_summary" />
+                </LinearLayout>
+                <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
+            </LinearLayout>
         </LinearLayout>
-
-        <TextView style="@style/Zen.SectionLabel" android:text="About" />
-
-        <LinearLayout style="@style/Zen.Group">
-
-            <LinearLayout
-                android:id="@+id/supportDeveloperCard"
-                style="@style/Zen.Row.Clickable">
-
+        <LinearLayout style="@style/Settings.SectionHeader">
+            <ImageView
+                style="@style/Settings.SectionIcon"
+                app:tint="@color/primaryLight"
+                android:src="@drawable/ic_message"
+                android:contentDescription="@null" />
+            <TextView
+                style="@style/Settings.SectionTitle"
+                android:text="@string/settings_section_about"
+                android:accessibilityHeading="true" />
+        </LinearLayout>
+        <LinearLayout style="@style/Settings.Group">
+            <LinearLayout android:id="@+id/supportDeveloperCard" style="@style/Settings.Row.Clickable">
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -332,18 +457,11 @@
                     android:src="@drawable/ic_heart"
                     app:tint="@color/error"
                     android:contentDescription="@null" />
-
                 <TextView style="@style/Zen.RowLabel" android:text="Support the Developer" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
-
             </LinearLayout>
-
-            <View style="@style/Zen.RowDivider" />
-
-            <LinearLayout
-                android:id="@+id/feedbackCard"
-                style="@style/Zen.Row.Clickable">
-
+            <View style="@style/Settings.Divider" />
+            <LinearLayout android:id="@+id/feedbackCard" style="@style/Settings.Row.Clickable">
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -351,14 +469,10 @@
                     android:src="@drawable/ic_message"
                     app:tint="@color/textSecondary"
                     android:contentDescription="@null" />
-
                 <TextView style="@style/Zen.RowLabel" android:text="Send Feedback" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
-
             </LinearLayout>
-
         </LinearLayout>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -370,7 +484,6 @@
             android:textSize="12sp"
             android:lineSpacingExtra="2dp"
             android:textColor="@color/textSecondary" />
-
         <TextView
             android:id="@+id/versionText"
             android:layout_width="match_parent"
@@ -379,7 +492,5 @@
             android:gravity="center"
             android:textSize="12sp"
             android:textColor="@color/textTertiary" />
-
     </LinearLayout>
-
 </ScrollView>

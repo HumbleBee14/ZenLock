@@ -12,12 +12,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:paddingHorizontal="24dp"
         android:paddingTop="24dp"
         android:paddingBottom="16dp"
         android:animateLayoutChanges="true">
         <LinearLayout
             android:id="@+id/mainContentContainer"
+            android:paddingHorizontal="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -148,7 +148,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:hint="Enter 4-digit PIN"
-                        android:textColor="@color/white"
+                        android:textColor="@color/textPrimary"
                         android:textColorHint="@color/textHint"
                         android:inputType="numberPassword"
                         android:maxLength="4"
@@ -165,7 +165,7 @@
                         android:src="@drawable/ic_eye"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:padding="4dp"
-                        android:contentDescription="Toggle PIN visibility"
+                        android:contentDescription="@string/show_pin"
                         android:alpha="0.8" />
                 </LinearLayout>
                 <Button
@@ -186,18 +186,46 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/defaultAppsRecycler"
-                android:layout_width="wrap_content"
+            <FrameLayout
+                android:id="@+id/allowedAppsRow"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/group_background"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:clipToPadding="false"
-                android:scrollbars="none"
-                android:overScrollMode="never"
-                android:visibility="gone" />
+                android:visibility="gone">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/defaultAppsRecycler"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="2dp"
+                    android:clipToPadding="false"
+                    android:scrollbars="none"
+                    android:overScrollMode="never" />
+                <ImageButton
+                    android:id="@+id/scrollAllowedAppsLeft"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="left|center_vertical"
+                    android:src="@drawable/ic_chevron_right"
+                    android:rotation="180"
+                    android:background="@drawable/app_scroll_edge_fade"
+                    android:alpha="0.9"
+                    android:padding="12dp"
+                    android:contentDescription="@string/scroll_allowed_apps_left"
+                    android:visibility="invisible" />
+                <ImageButton
+                    android:id="@+id/scrollAllowedAppsRight"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:src="@drawable/ic_chevron_right"
+                    android:background="@drawable/app_scroll_edge_fade"
+                    android:alpha="0.9"
+                    android:padding="12dp"
+                    android:contentDescription="@string/scroll_allowed_apps_right"
+                    android:visibility="invisible" />
+            </FrameLayout>
             <LinearLayout
                 android:id="@+id/noAppsContainer"
                 android:layout_width="match_parent"

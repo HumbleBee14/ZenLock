@@ -67,7 +67,7 @@
             android:background="@android:color/transparent"
             android:hint="Search apps..."
             android:textColor="@android:color/white"
-            android:textColorHint="#80FFFFFF"
+            android:textColorHint="@color/textHint"
             android:textSize="16sp"
             android:imeOptions="actionSearch"
             android:inputType="text"

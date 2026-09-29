@@ -7,7 +7,7 @@
             android:innerRadiusRatio="2.3"
             android:thicknessRatio="18"
             android:useLevel="false">
-            <solid android:color="#15FFFFFF" />
+            <solid android:color="@color/dividerSubtle" />
         </shape>
     </item>
     <!-- Progress Ring -->

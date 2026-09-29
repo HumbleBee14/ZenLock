@@ -30,7 +30,7 @@ public final class UnlockHoldController {
         button.setOnClickListener(v -> {
             if (ready) { ready = false; onReady.run(); }
         });
-        // Assistive activation offers the same five-second delay with an explicit cancel action.
+        // Assistive activation offers the same one-second delay with an explicit cancel action.
         androidx.core.view.ViewCompat.replaceAccessibilityAction(button,
                 androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
                 button.getContext().getString(R.string.unlock_accessible_wait), (view, arguments) -> {

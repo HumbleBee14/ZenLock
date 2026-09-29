@@ -16,6 +16,54 @@
     <string name="show_allowed_apps">Show allowed apps</string>
     <string name="hide_allowed_apps">Hide allowed apps</string>
     <string name="schedule_future_time">Choose a later time for a one-time schedule.</string>
-    <string name="unlock_accessible_wait">Start five-second unlock wait. Activate again to cancel.</string>
+    <string name="unlock_accessible_wait">Start one-second unlock wait. Activate again to cancel.</string>
     <string name="play_store_sms_note"><![CDATA[Not available in the Play Store build due to Google\'s SMS policy. Get the APK from <a href="https://github.com/HumbleBee14/ZenLock/releases/latest">GitHub</a>.]]></string>
+    <string name="scroll_allowed_apps_left">Scroll allowed apps left</string>
+    <string name="scroll_allowed_apps_right">Scroll allowed apps right</string>
+    <string name="permission_optional">Optional</string>
+    <string name="focus_preparing">Preparing your focus session…</string>
+    <string name="focus_checking_setup">Checking your setup</string>
+    <string name="show_pin">Show PIN</string>
+    <string name="hide_pin">Hide PIN</string>
+    <string name="settings_section_unlock">Unlock</string>
+    <string name="settings_section_reliability">Reliability</string>
+    <string name="settings_section_lock_screen">Lock screen</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_default_apps_title">Default Allowed Apps</string>
+    <string name="settings_default_apps_summary">Choose which built-in apps stay available</string>
+    <string name="settings_block_notifications_title">Block Notifications</string>
+    <string name="settings_block_notifications_summary">Silence notifications from blocked apps</string>
+    <string name="settings_pin_title">PIN Unlock</string>
+    <string name="settings_pin_summary">Leave a session early with your PIN</string>
+    <string name="settings_partner_title">Accountability Partner</string>
+    <string name="settings_partner_summary">Ask your partner for an unlock code</string>
+    <string name="settings_battery_title">Unrestricted Battery</string>
+    <string name="settings_battery_summary">Help scheduled sessions start reliably</string>
+    <string name="settings_reboot_title">Resume After Reboot</string>
+    <string name="settings_reboot_summary">Continue an active session after restarting</string>
+    <string name="settings_permissions_title">Permissions</string>
+    <string name="settings_permissions_summary">Review access used by each feature</string>
+    <string name="settings_notification_title">Session Notification</string>
+    <string name="settings_notification_summary">Keep session details in your notification shade</string>
+    <string name="settings_home_title">Allow Home Screen</string>
+    <string name="settings_home_summary">Allow the launcher during a focus session</string>
+    <string name="settings_clear_pin">Clear saved PIN</string>
+    <string name="lock_until_hours">Hour</string>
+    <string name="lock_until_minutes">Minute</string>
+    <string name="lock_until_period_action">%1$s. Switch to %2$s</string>
+    <string name="lock_until_today">Today · %1$s</string>
+    <string name="lock_until_tomorrow">Tomorrow · %1$s</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string-array name="theme_choices">
+        <item>Follow phone</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string name="schedule_list_heading">Your schedules</string>
+    <string name="schedule_empty_hint">Start with a routine below, or create your own.</string>
+    <string name="schedule_none_upcoming">No upcoming sessions</string>
+    <string name="schedule_none_upcoming_hint">Enable a schedule or create a new one to plan your next focus session.</string>
+    <string name="schedule_enabled">Enabled</string>
+    <string name="schedule_paused">Paused</string>
 </resources>

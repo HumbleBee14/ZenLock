@@ -30,19 +30,9 @@ public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.
     private final List<AppModel> allowedApps;
     private final Context context;
     private final Map<String, Drawable> flatIcons = new HashMap<>();
-    private OnAppLaunchListener onAppLaunchListener;
-
-    public interface OnAppLaunchListener {
-        void onAppLaunching();
-    }
-
     public AllowedAppsAdapter(Context context, List<AppModel> allowedApps) {
         this.context = context;
         this.allowedApps = allowedApps;
-    }
-
-    public void setOnAppLaunchListener(OnAppLaunchListener listener) {
-        this.onAppLaunchListener = listener;
     }
 
     @NonNull
@@ -80,7 +70,6 @@ public class AllowedAppsAdapter extends RecyclerView.Adapter<AllowedAppsAdapter.
         try {
             if (intent == null) throw new ActivityNotFoundException();
             context.startActivity(intent);
-            if (onAppLaunchListener != null) onAppLaunchListener.onAppLaunching();
         } catch (ActivityNotFoundException | SecurityException e) {
             Toast.makeText(context, context.getString(R.string.cannot_open_app, app.getAppName()), Toast.LENGTH_SHORT).show();
         }

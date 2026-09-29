@@ -25,23 +25,34 @@ public class PermissionSheet extends BottomSheetDialogFragment {
     private static final String TAG = "PermissionSheet";
 
     private PermissionRequest request;
-    private Runnable onReady;
+    private String resultKey;
+    private Bundle payload;
     private LinearLayout rows;
     private MaterialButton continueButton;
 
-    static void show(FragmentActivity activity, PermissionRequest request, @Nullable Runnable onReady) {
+    static void show(FragmentActivity activity, PermissionRequest request, @Nullable String resultKey, Bundle payload) {
         FragmentManager manager = activity.getSupportFragmentManager();
         if (manager.findFragmentByTag(TAG) != null) return;
         PermissionSheet sheet = new PermissionSheet();
-        sheet.request = request;
-        sheet.onReady = onReady;
+        Bundle arguments = new Bundle();
+        arguments.putBundle("request", request.toBundle());
+        arguments.putString("result_key", resultKey);
+        arguments.putBundle("payload", new Bundle(payload));
+        sheet.setArguments(arguments);
         sheet.show(manager, TAG);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (request == null) dismissAllowingStateLoss();
+        Bundle arguments = getArguments();
+        if (arguments == null || arguments.getBundle("request") == null) {
+            dismissAllowingStateLoss();
+            return;
+        }
+        request = PermissionRequest.fromBundle(arguments.getBundle("request"));
+        resultKey = arguments.getString("result_key");
+        payload = arguments.getBundle("payload");
     }
 
     @Nullable
@@ -55,11 +66,16 @@ public class PermissionSheet extends BottomSheetDialogFragment {
             title.setText(request.title);
             continueButton.setText(request.actionLabel);
         }
-        continueButton.setVisibility(onReady == null ? View.GONE : View.VISIBLE);
+        continueButton.setVisibility(resultKey == null ? View.GONE : View.VISIBLE);
         continueButton.setOnClickListener(v -> {
-            Runnable ready = onReady;
+            // Recheck at the moment of consent, including after a Settings round trip.
+            if (request == null || !request.requiredGranted(requireContext())) {
+                render();
+                return;
+            }
+            continueButton.setEnabled(false);
             dismiss();
-            if (ready != null) ready.run();
+            if (resultKey != null) getParentFragmentManager().setFragmentResult(resultKey, new Bundle(payload));
         });
         return view;
     }
@@ -98,6 +114,9 @@ public class PermissionSheet extends BottomSheetDialogFragment {
 
         icon.setImageResource(requirement.permission.icon);
         title.setText(requirement.permission.title);
+        TextView optional = row.findViewById(R.id.permissionOptional);
+        // "Optional" describes this feature request, not the global permissions inventory.
+        optional.setVisibility(!requirement.required && resultKey != null ? View.VISIBLE : View.GONE);
         reason.setText(requirement.permission.reason);
         reason.setVisibility(granted ? View.GONE : View.VISIBLE);
         enable.setVisibility(granted ? View.GONE : View.VISIBLE);

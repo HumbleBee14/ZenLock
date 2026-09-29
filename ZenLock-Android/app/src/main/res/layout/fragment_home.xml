@@ -47,14 +47,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <LinearLayout
+        <FrameLayout
+            android:id="@+id/timerModeContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="24dp"
+            android:measureAllChildren="true"
+            android:paddingTop="36dp"
             android:paddingBottom="24dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp">
+            android:paddingHorizontal="8dp">
+
+        <LinearLayout
+            android:id="@+id/durationModeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
 
             <!-- Duration Mode: Clickable Time Display -->
             <LinearLayout
@@ -88,48 +95,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="hours : minutes"
-                    android:textSize="11sp"
-                    android:textColor="@color/textTertiary"
-                    android:fontFamily="sans-serif"
-                    android:letterSpacing="0.05"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"/>
-
-            </LinearLayout>
-
-            <!-- Lock Until Mode: Time Display (hidden by default) -->
-            <LinearLayout
-                android:id="@+id/lockUntilContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="16dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/lockUntilTimeDisplay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="09:00 AM"
-                    android:textSize="48sp"
-                    android:textColor="@color/textPrimary"
-                    android:fontFamily="sans-serif-light"
-                    android:letterSpacing="-0.02"
-                    android:layout_gravity="center"
-                    android:maxLines="1"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="28sp"
-                    android:autoSizeMaxTextSize="48sp"/>
-
-                <TextView
-                    android:id="@+id/lockUntilLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lock Until"
                     android:textSize="11sp"
                     android:textColor="@color/textTertiary"
                     android:fontFamily="sans-serif"
@@ -291,18 +256,102 @@
 
 
         </LinearLayout>
+            <LinearLayout
+                android:id="@+id/lockUntilContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:visibility="gone">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lock_until_hours"
+                            android:textSize="12sp"
+                            android:textColor="@color/textTertiary" />
+                        <com.grepguru.zenlock.ui.interaction.ClockNumberPicker
+                            android:id="@+id/lockUntilHoursPicker"
+                            android:layout_width="match_parent"
+                            android:layout_height="132dp"
+                            android:contentDescription="@string/lock_until_hours"
+                            android:theme="@style/ClockWheelTheme" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="wrap_content"
+                        android:text=":"
+                        android:gravity="center"
+                        android:textSize="28sp"
+                        android:textColor="@color/textPrimary"
+                        android:importantForAccessibility="no" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lock_until_minutes"
+                            android:textSize="12sp"
+                            android:textColor="@color/textTertiary" />
+                        <com.grepguru.zenlock.ui.interaction.ClockNumberPicker
+                            android:id="@+id/lockUntilMinutesPicker"
+                            android:layout_width="match_parent"
+                            android:layout_height="132dp"
+                            android:contentDescription="@string/lock_until_minutes"
+                            android:theme="@style/ClockWheelTheme" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/lockUntilPeriodButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:minWidth="56dp"
+                        android:layout_marginStart="8dp"
+                        android:paddingHorizontal="10dp"
+                        android:text="AM"
+                        android:textColor="@color/primaryLight"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="@color/border" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/lockUntilTimeDisplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/textSecondary" />
+
+            </LinearLayout>
+        </FrameLayout>
+
 
         <!-- Mode Toggle: Duration / Lock Until -->
         <ImageButton
             android:id="@+id/modeToggleButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="top|end"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
             android:src="@drawable/ic_schedule"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="6dp"
+            android:padding="12dp"
             android:contentDescription="Switch to lock until time"
             android:scaleType="fitCenter"
             app:tint="@color/textSecondary"/>

@@ -31,7 +31,7 @@ public class LockScreenLauncher {
             
             // Create intent to launch LockScreenActivity
             Intent lockIntent = new Intent(context, LockScreenActivity.class);
-            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             lockIntent.putExtra("from_schedule", true);
             lockIntent.putExtra("schedule_name", scheduleName);
             lockIntent.putExtra("schedule_id", scheduleId);
@@ -80,7 +80,7 @@ public class LockScreenLauncher {
             // Final fallback: try direct launch
             try {
                 Intent lockIntent = new Intent(context, LockScreenActivity.class);
-                lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 lockIntent.putExtra("from_schedule", true);
                 lockIntent.putExtra("schedule_name", scheduleName);
                 lockIntent.putExtra("schedule_id", scheduleId);
@@ -108,7 +108,7 @@ public class LockScreenLauncher {
             createNotificationChannel(context);
 
             Intent lockIntent = new Intent(context, LockScreenActivity.class);
-            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
                 context,

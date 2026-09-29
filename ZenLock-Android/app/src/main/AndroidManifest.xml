@@ -30,6 +30,12 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
 
+        <!-- Resolve HOME handlers to distinguish launchers from normal app activities. -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+
         <!-- Essential system apps -->
         <package android:name="com.android.phone"/>  <!-- Calls -->
         <package android:name="com.google.android.dialer"/>
@@ -41,6 +47,7 @@
     </queries>
 
     <application
+        android:name=".ZenLockApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

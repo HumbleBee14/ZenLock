@@ -2,7 +2,6 @@ package com.grepguru.zenlock;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -84,15 +83,15 @@ public class AppBlockerService extends AccessibilityService {
     private String lastLoggedPackage = "";
     private long lastLogTime = 0;
     private static final long LOG_DEBOUNCE_MS = 1000; // Only log same package once per second
-    private String lastForegroundPackage = "";
-    private long lastForegroundCheckTime = 0;
-    private static final long FOREGROUND_CHECK_DEBOUNCE_MS = 100; // Reduced debounce for instant response
     private AnalyticsManager analyticsManager;
     private SharedPreferences sessionPreferences;
+    private boolean launchPending;
+    private boolean blockedWindow;
     private final android.os.Handler sessionHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable presentLockScreen = this::presentLockScreen;
     private final Runnable verifyLockScreen = () -> {
-        if (LockScreenActivity.isActive()) return;
-        if (!getSharedPreferences("FocusLockPrefs", MODE_PRIVATE).getBoolean("isLocked", false)) return;
+        launchPending = false;
+        if (!blockedWindow || LockScreenActivity.isVisible() || !shouldEnforce()) return;
         LockScreenLauncher.launchFromBlocker(this);
     };
     private final Runnable activateSession = () -> {
@@ -102,23 +101,13 @@ public class AppBlockerService extends AccessibilityService {
         if (sessionPreferences.getBoolean("isLocked", false)
                 && sessionPreferences.getLong("lockEndTime", 0) > System.currentTimeMillis()) {
             analyticsManager = new AnalyticsManager(this);
-            if (!LockScreenActivity.isActive()) {
-                Intent launch = new Intent(this, LockScreenActivity.class);
-                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                if (!MiuiUtils.canStartActivityFromBackground(this)) {
-                    LockScreenLauncher.launchFromBlocker(this);
-                } else {
-                    try {
-                        startActivity(launch);
-                    } catch (RuntimeException blocked) {
-                        LockScreenLauncher.launchFromBlocker(this);
-                    }
-                }
-            }
+            blockedWindow = true;
+            launchLockScreen();
         }
     };
     private final SharedPreferences.OnSharedPreferenceChangeListener sessionListener = (prefs, key) -> {
         if ("isLocked".equals(key)) {
+            if (!prefs.getBoolean("isLocked", false)) clearPendingBlock();
             sessionHandler.removeCallbacks(activateSession);
             sessionHandler.post(activateSession);
         }
@@ -127,175 +116,103 @@ public class AppBlockerService extends AccessibilityService {
     
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event == null) {
+        // Click/focus events can come from transient or background UI; they are not
+        // evidence that the foreground application changed.
+        if (event == null || event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
+        if (!shouldEnforce()) {
+            clearPendingBlock();
+            return;
+        }
+        String packageName = event.getPackageName() == null ? "" : event.getPackageName().toString();
+        if (packageName.isEmpty()) return;
+        String className = event.getClassName() == null ? "" : event.getClassName().toString();
+        if (packageName.equals(getPackageName())) {
+            clearPendingBlock();
             return;
         }
 
-        // CRITICAL CHECK: If system lock screen (Keyguard) is active, do nothing
-        // This prevents conflicts and infinite loops when the system lock screen is displayed
-        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. AppBlockerService will not interfere.")) {
-            return;
-        }
+        SharedPreferences prefs = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
+        boolean allowLauncher = prefs.getBoolean("allow_launcher_during_lock", false);
+        // Launcher identity must come from its package / HOME intent, never an
+        // arbitrary app's activity name (e.g. an allowed app's LauncherActivity).
+        boolean launcher = LAUNCHER_PACKAGES.contains(packageName) || AppUtils.isLauncherPackage(this, packageName);
+        boolean systemRecents = "com.android.systemui".equals(packageName)
+                && className.toLowerCase(java.util.Locale.ROOT).contains("recents");
+        boolean allowed = (launcher || systemRecents) ? allowLauncher
+                : WhitelistManager.isAppWhitelisted(this, packageName);
 
-        SharedPreferences preferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
-        boolean isLocked = preferences.getBoolean("isLocked", false);
-        boolean allowLauncherDuringLock = preferences.getBoolean("allow_launcher_during_lock", false);
-
-        if (!isLocked) {
-            return; // No focus session active, nothing to block
-        }
-
-        String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "";
-        String className = event.getClassName() != null ? event.getClassName().toString() : "";
-        
-        // Skip if package name is empty or null
-        if (packageName.isEmpty()) {
-            return;
-        }
-
-        // Skip if the event is from our own LockScreenActivity to prevent self-blocking loops
-        if (className.contains("LockScreenActivity") || packageName.equals(getApplicationContext().getPackageName())) {
-            return;
-        }
-        // IMMEDIATE BLOCK: Block launcher classes that bypass the lock
-        if (isLauncherBypassClass(className)) {
-            if (!allowLauncherDuringLock) {
-                Log.d("AppBlockerService", "🚫 BLOCKING LAUNCHER BYPASS: " + packageName + " | Class: " + className);
-                launchLockScreen();
-                return;
-            } // else: allow launcher bypass if user enabled
-        }
-
-        // Skip if this is the same package we just processed recently (debouncing)
-        long currentTime = System.currentTimeMillis();
-        if (packageName.equals(lastForegroundPackage) && (currentTime - lastForegroundCheckTime) < FOREGROUND_CHECK_DEBOUNCE_MS) {
-            // Only skip if the package is the same and not the launcher (so launcher is always processed)
-            if (!AppUtils.isLauncherPackage(this, packageName)) {
-                return; // Skip processing the same package too frequently
-            }
-        }
-        // -----------------------------------
-        lastForegroundPackage = packageName;
-        lastForegroundCheckTime = currentTime;
-        
-        // FIRST: Check if this is a launcher package (skip whitelist check for these)
-        boolean isLauncherPackage = isLauncherPackage(packageName);
-        // SECOND: Check if this is a specific launcher/recent activity class that should be blocked
-        boolean isLauncherBypass = isLauncherBypassClass(className);
-        // THIRD: Determine if allowed
-        boolean isAllowed;
-        if (isLauncherPackage) {
-            // For launcher packages, only block specific classes (like Launcher, RecentsActivity)
-            isAllowed = allowLauncherDuringLock || !isLauncherBypass;
-        } else {
-            // For non-launcher packages, check whitelist
-            isAllowed = WhitelistManager.isAppWhitelisted(this, packageName);
-        }
-        
-        // Track analytics
         if (analyticsManager != null && analyticsManager.hasActiveSession()) {
-            if (isAllowed) {
-                analyticsManager.recordAppAccess(packageName);
-            } else {
-                analyticsManager.recordBlockedAttempt(packageName);
-            }
+            if (allowed) analyticsManager.recordAppAccess(packageName);
+            else analyticsManager.recordBlockedAttempt(packageName);
         }
-        
-        // Log EVERY package event for debugging (with debouncing to prevent spam)
-        if (!packageName.equals(lastLoggedPackage) || (currentTime - lastLogTime) > LOG_DEBOUNCE_MS) {
-            Log.d("AppBlockerService", "🔍 CURRENT APP: " + packageName + " | Class: " + className + " | Allowed: " + isAllowed + (isLauncherBypass ? " (Launcher Bypass Blocked)" : ""));
+        long now = System.currentTimeMillis();
+        if (!packageName.equals(lastLoggedPackage) || now - lastLogTime > LOG_DEBOUNCE_MS) {
+            Log.d("AppBlockerService", "Window: " + packageName + " | Class: " + className + " | Allowed: " + allowed);
             lastLoggedPackage = packageName;
-            lastLogTime = currentTime;
+            lastLogTime = now;
         }
-        
-        // Also log touch events specifically
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED || 
-            event.getEventType() == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
-            Log.d("AppBlockerService", "👆 TOUCH EVENT on: " + packageName + " | Type: " + getEventTypeName(event.getEventType()));
-        }
-        
-        if (!isAllowed) {
-            launchLockScreen();
+        if (allowed) {
+            // A keyboard / notification shade is a supporting window, not proof
+            // that the blocked app underneath it has been left.
+            if (!launcher && !systemRecents && (WhitelistManager.isEnabledKeyboard(this, packageName)
+                    || "com.android.systemui".equals(packageName) || "android".equals(packageName))) return;
+            clearPendingBlock();
         } else {
-            // Mark that we allowed a whitelisted app to prevent LockScreenActivity from restarting
-            SharedPreferences prefs = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putLong("lastWhitelistedAppTime", System.currentTimeMillis());
-            editor.apply();
-            // Log.d("AppBlockerService", "Marked whitelisted app access time: " + packageName);
+            blockedWindow = true;
+            launchLockScreen();
         }
     }
 
+    private boolean shouldEnforce() {
+        android.os.PowerManager power = (android.os.PowerManager) getSystemService(POWER_SERVICE);
+        return getSharedPreferences("FocusLockPrefs", MODE_PRIVATE).getBoolean("isLocked", false)
+                && (power == null || power.isInteractive())
+                && !KeyguardUtils.isKeyguardLocked(this);
+    }
+
+    private void clearPendingBlock() {
+        blockedWindow = false;
+        launchPending = false;
+        sessionHandler.removeCallbacks(presentLockScreen);
+        sessionHandler.removeCallbacks(verifyLockScreen);
+        android.app.NotificationManager manager = getSystemService(android.app.NotificationManager.class);
+        if (manager != null) manager.cancel(9999);
+    }
 
     private void launchLockScreen() {
+        if (!shouldEnforce() || launchPending) return;
+        launchPending = true;
+        // Let the destination window and activity lifecycle settle. An allowed
+        // app event cancels this, including transient launcher windows en route.
+        sessionHandler.postDelayed(presentLockScreen, 100);
+    }
+
+    private void presentLockScreen() {
+        // Existing-but-paused and actually-visible screens are different states.
+        // Never replace the visible PIN screen, or queue launches for an event burst.
+        if (!blockedWindow || !shouldEnforce() || LockScreenActivity.isVisible()) {
+            launchPending = false;
+            return;
+        }
         try {
-            // Double-check that system lock screen is not active before launching
-            if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not launching LockScreenActivity.")) {
-                return;
-            }
-
-            // On MIUI/HyperOS, startActivity() from background is silently blocked
-            // unless "Display pop-up windows while running in background" is enabled.
-            // Use full-screen intent notification as fallback which MIUI does NOT block.
             if (!MiuiUtils.canStartActivityFromBackground(this)) {
-                Log.d("AppBlockerService", "MIUI detected with background start blocked — using notification fallback");
                 LockScreenLauncher.launchFromBlocker(this);
-                return;
+            } else {
+                Intent intent = new Intent(this, LockScreenActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
             }
-
-            Intent intent = new Intent(this, LockScreenActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            sessionHandler.removeCallbacks(verifyLockScreen);
-            sessionHandler.postDelayed(verifyLockScreen, 1500);
-        } catch (Exception e) {
-            Log.e("AppBlockerService", "Failed to launch LockScreenActivity, trying notification fallback", e);
-            // Fallback for any OEM that silently blocks without throwing
+        } catch (RuntimeException e) {
+            Log.e("AppBlockerService", "Direct launch failed; using notification fallback", e);
             LockScreenLauncher.launchFromBlocker(this);
         }
+        sessionHandler.removeCallbacks(verifyLockScreen);
+        sessionHandler.postDelayed(verifyLockScreen, 1500);
     }
 
     @Override
     public void onInterrupt() {
-    }
-
-    private boolean isLauncherPackage(String packageName) {
-        return LAUNCHER_PACKAGES.contains(packageName);
-    }
-
-    private boolean isLauncherBypassClass(String className) {
-        // Block launcher classes that can bypass the lock
-        // Block any class containing "Launcher" keyword (covers custom launchers)
-        // Block specific recent activity classes
-
-        String classLower = className.toLowerCase();
-
-        // Block any class containing "Launcher" (covers all launchers)
-        if (classLower.contains("launcher")) {
-            return true;
-        }
-
-        // Block any class containing "Recents" (covers OEM recents screens)
-        if (classLower.contains("recents")) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private String getEventTypeName(int eventType) {
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_VIEW_CLICKED:
-                return "CLICK";
-            case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
-                return "LONG_CLICK";
-            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                return "WINDOW_CHANGE";
-            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-                return "FOCUS";
-            default:
-                return "OTHER(" + eventType + ")";
-        }
+        clearPendingBlock();
     }
 
     @Override
@@ -306,10 +223,7 @@ public class AppBlockerService extends AccessibilityService {
         analyticsManager = new AnalyticsManager(this);
         
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | 
-                         AccessibilityEvent.TYPE_VIEW_CLICKED | 
-                         AccessibilityEvent.TYPE_VIEW_LONG_CLICKED |
-                         AccessibilityEvent.TYPE_VIEW_FOCUSED;
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.notificationTimeout = 100;
         setServiceInfo(info);
@@ -321,6 +235,7 @@ public class AppBlockerService extends AccessibilityService {
     }
     @Override
     public void onDestroy() {
+        clearPendingBlock();
         sessionHandler.removeCallbacks(activateSession);
         if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);
         sessionPreferences = null;

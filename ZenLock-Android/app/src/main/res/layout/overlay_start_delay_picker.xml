@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/surface"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="8dp">
+    android:background="@drawable/start_delay_popup_background"
+    android:clipToOutline="true">
 
     <NumberPicker
         android:id="@+id/startDelayPicker"
         android:layout_width="96dp"
         android:layout_height="168dp"
+        android:background="@android:color/transparent"
+        android:solidColor="@android:color/transparent"
         android:descendantFocusability="blocksDescendants"
         android:theme="@style/NumberPickerDarkTheme" />
 
-</androidx.cardview.widget.CardView>
+</FrameLayout>

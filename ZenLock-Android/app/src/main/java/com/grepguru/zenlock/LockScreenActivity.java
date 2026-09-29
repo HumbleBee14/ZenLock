@@ -1,6 +1,5 @@
 package com.grepguru.zenlock;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -42,7 +41,6 @@ import com.grepguru.zenlock.utils.AppUtils;
 import com.grepguru.zenlock.utils.AnalyticsManager;
 import com.grepguru.zenlock.utils.EnhancedUnlockManager;
 import com.grepguru.zenlock.utils.KeyguardUtils;
-import com.grepguru.zenlock.utils.WhitelistManager;
 import com.grepguru.zenlock.VibrationUtils;
 
 import java.util.ArrayList;
@@ -54,13 +52,14 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private com.grepguru.zenlock.ui.interaction.UnlockHoldController unlockHold;
     private static volatile boolean isLockScreenActive = false;
+    private static volatile boolean isLockScreenVisible = false;
     private boolean ownsActiveScreen = false;
     private boolean screenInitialized = false;
 
     public static boolean isActive() { return isLockScreenActive; }
+    public static boolean isVisible() { return isLockScreenVisible; }
     private EditText pinInput;
     private SharedPreferences preferences;
-    private boolean isLaunchingWhitelistedApp = false;
     private AnalyticsManager analyticsManager;
     private boolean isExpanded = false;
     private EnhancedUnlockManager unlockManager;
@@ -226,6 +225,17 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Single RecyclerView for all apps (default + additional)
         RecyclerView appsRecycler = findViewById(R.id.defaultAppsRecycler);
+        View appsRow = findViewById(R.id.allowedAppsRow);
+        View scrollLeft = findViewById(R.id.scrollAllowedAppsLeft);
+        View scrollRight = findViewById(R.id.scrollAllowedAppsRight);
+        Runnable updateScrollHints = () -> {
+            scrollLeft.setVisibility(appsRecycler.canScrollHorizontally(-1) ? View.VISIBLE : View.INVISIBLE);
+            scrollRight.setVisibility(appsRecycler.canScrollHorizontally(1) ? View.VISIBLE : View.INVISIBLE);
+        };
+        appsRecycler.addOnLayoutChangeListener((v, l, t, r, b, oldL, oldT, oldR, oldB) -> updateScrollHints.run());
+        appsRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) { updateScrollHints.run(); }
+        });
         LinearLayout noAppsContainer = findViewById(R.id.noAppsContainer);
         android.widget.ImageView expandAppsButton = findViewById(R.id.expandAppsButton);
 
@@ -286,9 +296,6 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Create single adapter for the RecyclerView
         AllowedAppsAdapter appsAdapter = new AllowedAppsAdapter(this, currentAppModels);
-        appsAdapter.setOnAppLaunchListener(() -> {
-            isLaunchingWhitelistedApp = true;
-        });
 
         appsRecycler.setAdapter(appsAdapter);
 
@@ -300,20 +307,28 @@ public class LockScreenActivity extends AppCompatActivity {
 
         // Set up PIN visibility toggle
         pinVisibilityToggle.setOnClickListener(v -> {
-            if (pinInput.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
-                // Show PIN
-                pinInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                pinVisibilityToggle.setImageResource(R.drawable.ic_eye_off);
-            } else {
-                // Hide PIN
-                pinInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                pinVisibilityToggle.setImageResource(R.drawable.ic_eye);
-            }
+            int start = pinInput.getSelectionStart();
+            int end = pinInput.getSelectionEnd();
+            boolean hidden = pinInput.getTransformationMethod() instanceof android.text.method.PasswordTransformationMethod;
+            pinInput.setTransformationMethod(hidden ? null : android.text.method.PasswordTransformationMethod.getInstance());
+            pinVisibilityToggle.setImageResource(hidden ? R.drawable.ic_eye_off : R.drawable.ic_eye);
+            pinVisibilityToggle.setContentDescription(getString(hidden ? R.string.hide_pin : R.string.show_pin));
+            if (start >= 0 && end >= 0) pinInput.setSelection(start, end);
         });
 
         Runnable appsAutoCollapse = () -> {
             if (isExpanded) expandAppsButton.performClick();
         };
+        scrollLeft.setOnClickListener(v -> {
+            appsRecycler.smoothScrollBy(-Math.max(1, appsRecycler.getWidth() * 3 / 4), 0);
+            uiHandler.removeCallbacks(appsAutoCollapse);
+            uiHandler.postDelayed(appsAutoCollapse, APPS_AUTO_COLLAPSE_MS);
+        });
+        scrollRight.setOnClickListener(v -> {
+            appsRecycler.smoothScrollBy(Math.max(1, appsRecycler.getWidth() * 3 / 4), 0);
+            uiHandler.removeCallbacks(appsAutoCollapse);
+            uiHandler.postDelayed(appsAutoCollapse, APPS_AUTO_COLLAPSE_MS);
+        });
         appsRecycler.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN
                     || event.getActionMasked() == android.view.MotionEvent.ACTION_UP) {
@@ -350,10 +365,10 @@ public class LockScreenActivity extends AppCompatActivity {
                         .alpha(1f)
                         .setDuration(300)
                         .start();
-                    appsRecycler.setVisibility(View.GONE);
+                    appsRow.setVisibility(View.GONE);
                 } else {
                     // Show the RecyclerView with smooth animation
-                    appsRecycler.setVisibility(View.VISIBLE);
+                    appsRow.setVisibility(View.VISIBLE);
                     appsRecycler.setAlpha(0f);
                     appsRecycler.animate()
                         .alpha(1f)
@@ -363,7 +378,7 @@ public class LockScreenActivity extends AppCompatActivity {
                 }
                 
             } else {
-                appsRecycler.setVisibility(View.GONE);
+                appsRow.setVisibility(View.GONE);
                 noAppsContainer.setVisibility(View.GONE);
                 boolean quotesEnabled = preferences.getBoolean("show_quotes", true) && QuoteStore.hasQuotes(this);
                 quoteView.setVisibility(quotesEnabled && !finishing ? View.VISIBLE : View.GONE);
@@ -397,17 +412,13 @@ public class LockScreenActivity extends AppCompatActivity {
             
             @Override
             public void onUnlockCancelled() {
+                armUnlockHide();
             }
         });
 
         unlockHold = new com.grepguru.zenlock.ui.interaction.UnlockHoldController(unlockPromptButton, () -> {
             if (autoHideHandler != null && autoHideRunnable != null) autoHideHandler.removeCallbacks(autoHideRunnable);
-        }, () -> unlockManager.showUnlockDialog(), () -> {
-            if (autoHideHandler != null && autoHideRunnable != null) {
-                autoHideHandler.removeCallbacks(autoHideRunnable);
-                autoHideHandler.postDelayed(autoHideRunnable, 5000);
-            }
-        });
+        }, () -> unlockManager.showUnlockDialog(), this::armUnlockHide);
 
         // Set up unlock arrow click listener
         unlockArrow.setOnClickListener(v -> showUnlockButton());
@@ -459,184 +470,49 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         if (unlockHold != null) unlockHold.cancel();
+        if (ownsActiveScreen) isLockScreenVisible = false;
         super.onPause();
-        if (!canHandleLifecycle()) return;
-
-        // If we're launching a whitelisted app, don't restart the lock screen immediately
-        if (isLaunchingWhitelistedApp) {
-            isLaunchingWhitelistedApp = false; // Reset the flag
-            Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on pause.");
-            return;
-        }
-
-        // Check if screen is off — if so, don't restart. The screen turning off triggers
-        // onPause, and restarting would call setTurnScreenOn(true) which turns the screen
-        // back on, creating an infinite wake loop. AppBlockerService will catch any app
-        // when the user wakes the device.
-        if (!isScreenOn()) {
-            Log.d("LockScreenActivity", "Screen is off. Not restarting on pause.");
-            return;
-        }
-
-        // Check if system lock screen (Keyguard) is active - if so, don't restart
-        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on pause.")) {
-            return;
-        }
-
-        // Check if AppBlockerService recently allowed a whitelisted app
-        long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
-        long currentTime = System.currentTimeMillis();
-        if (lastWhitelistedAppTime > 0 && (currentTime - lastWhitelistedAppTime) < 5000) { // Within last 5 seconds
-            Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on pause.");
-            return;
-        }
-
-        // Check if a whitelisted app is currently in the foreground
-        if (isWhitelistedAppInForeground()) {
-            Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on pause.");
-            return;
-        }
-
-        // Only restart if we're not already finishing and this is a legitimate pause
-        if (!isFinishing() && !isDestroyed()) {
-            // Use a longer delay to prevent rapid restarts
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                if (!isFinishing() && !isDestroyed()) {
-                    // Check screen is still on before restarting
-                    if (!isScreenOn()) {
-                        Log.d("LockScreenActivity", "Screen turned off. Canceling restart.");
-                        return;
-                    }
-
-                    // Double-check keyguard state before restarting
-                    if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
-                        return;
-                    }
-
-                    // Double-check if AppBlockerService recently allowed a whitelisted app
-                    long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
-                    long currentTime2 = System.currentTimeMillis();
-                    if (lastWhitelistedAppTime2 > 0 && (currentTime2 - lastWhitelistedAppTime2) < 5000) {
-                        Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
-                        return;
-                    }
-
-                    // Double-check if whitelisted app is still in foreground
-                    if (isWhitelistedAppInForeground()) {
-                        Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
-                        return;
-                    }
-
-                    Intent intent = new Intent(this, LockScreenActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }, 150); // Increased delay to 150ms
-        }
+        // Accessibility window events own enforcement. Lifecycle callbacks also run
+        // for allowed apps, IMEs and system dialogs, so must never relaunch the lock.
     }
 
     @Override
     protected void onStop() {
+        if (ownsActiveScreen) isLockScreenVisible = false;
         super.onStop();
-        if (!canHandleLifecycle()) return;
-
-        // If we're launching a whitelisted app, don't restart the lock screen immediately
-        if (isLaunchingWhitelistedApp) {
-            Log.d("LockScreenActivity", "Whitelisted app launch detected. Not restarting on stop.");
-            return;
-        }
-
-        // Don't restart if screen is off (same reason as onPause — prevents wake loop)
-        if (!isScreenOn()) {
-            Log.d("LockScreenActivity", "Screen is off. Not restarting on stop.");
-            return;
-        }
-
-        // Check if system lock screen (Keyguard) is active - if so, don't restart
-        if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(this, "System Keyguard is active. Not restarting on stop.")) {
-            return;
-        }
-
-        // Check if AppBlockerService recently allowed a whitelisted app
-        long lastWhitelistedAppTime = preferences.getLong("lastWhitelistedAppTime", 0);
-        long currentTime = System.currentTimeMillis();
-        if (lastWhitelistedAppTime > 0 && (currentTime - lastWhitelistedAppTime) < 5000) { // Within last 5 seconds
-            Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Not restarting on stop.");
-            return;
-        }
-
-        // Check if a whitelisted app is currently in the foreground
-        if (isWhitelistedAppInForeground()) {
-            Log.d("LockScreenActivity", "Whitelisted app is in foreground. Not restarting on stop.");
-            return;
-        }
-
-        // Only restart if we're not already finishing
-        if (!isFinishing() && !isDestroyed()) {
-            // Use a longer delay to prevent rapid restarts
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                if (!isFinishing() && !isDestroyed()) {
-                    // Check screen is still on
-                    if (!isScreenOn()) {
-                        Log.d("LockScreenActivity", "Screen turned off. Canceling restart.");
-                        return;
-                    }
-
-                    // Double-check keyguard state before restarting
-                    if (KeyguardUtils.shouldReturnEarlyDueToKeyguard(LockScreenActivity.this, "System Keyguard is active. Canceling restart.")) {
-                        return;
-                    }
-
-                    // Double-check if AppBlockerService recently allowed a whitelisted app
-                    long lastWhitelistedAppTime2 = preferences.getLong("lastWhitelistedAppTime", 0);
-                    long currentTime2 = System.currentTimeMillis();
-                    if (lastWhitelistedAppTime2 > 0 && (currentTime2 - lastWhitelistedAppTime2) < 5000) {
-                        Log.d("LockScreenActivity", "AppBlockerService recently allowed whitelisted app. Canceling restart.");
-                        return;
-                    }
-
-                    // Double-check if whitelisted app is still in foreground
-                    if (isWhitelistedAppInForeground()) {
-                        Log.d("LockScreenActivity", "Whitelisted app still in foreground. Canceling restart.");
-                        return;
-                    }
-
-                    Intent intent = new Intent(this, LockScreenActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }, 100); // 0.1 second delay for onStop
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (!canHandleLifecycle()) return;
-        // Always bring lock screen to front if not already
-        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (am != null) {
-            am.moveTaskToFront(getTaskId(), 0);
-        }
-
-        // Ensure persistent notification is always visible
+        isLockScreenVisible = true;
         createPersistentNotificationIfEnabled();
+    }
 
-        // If lock screen lost focus, restart it instantly
-        if (!isLockScreenActive) {
-            Intent intent = new Intent(this, LockScreenActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+    @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent event) {
+        if (screenInitialized && event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+            showChrome();
+            armUnlockHide();
         }
+        // Observe touches without consuming them: PIN fields, scrolling and app
+        // buttons must still receive the original gesture.
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus && unlockHold != null) unlockHold.cancel();
+        if (!hasFocus) {
+            if (unlockHold != null) unlockHold.cancel();
+            if (autoHideHandler != null && autoHideRunnable != null) autoHideHandler.removeCallbacks(autoHideRunnable);
+        } else {
+            armUnlockHide();
+        }
 
         // Remove automatic restart on focus change to prevent loops
-        // The onPause/onStop methods will handle legitimate cases where user tries to leave
+        // AppBlockerService handles navigation to blocked apps.
     }
 
     /**
@@ -652,6 +528,9 @@ public class LockScreenActivity extends AppCompatActivity {
         }
         uiHandler.removeCallbacks(chromeHide);
 
+        unlockExtendButtonContainer.animate().cancel();
+        unlockExtendButtonContainer.animate().withEndAction(null);
+        unlockArrow.animate().cancel();
         unlockExtendButtonContainer.setVisibility(View.VISIBLE);
         unlockExtendButtonContainer.setTranslationY(50f); // Start slightly below
         unlockExtendButtonContainer.setAlpha(0f);
@@ -674,7 +553,15 @@ public class LockScreenActivity extends AppCompatActivity {
         autoHideRunnable = () -> {
             hideUnlockButton();
         };
-        autoHideHandler.postDelayed(autoHideRunnable, 5000); // 5 seconds
+        armUnlockHide();
+    }
+
+    private void armUnlockHide() {
+        if (!screenInitialized || finishing || autoHideHandler == null || autoHideRunnable == null) return;
+        if (findViewById(R.id.unlockExtendButtonContainer).getVisibility() != View.VISIBLE
+                || findViewById(R.id.unlockPromptButton).isPressed()) return;
+        autoHideHandler.removeCallbacks(autoHideRunnable);
+        autoHideHandler.postDelayed(autoHideRunnable, CHROME_HIDE_MS);
     }
 
     /**
@@ -698,6 +585,8 @@ public class LockScreenActivity extends AppCompatActivity {
             })
             .start();
 
+        unlockArrow.animate().cancel();
+        unlockArrow.animate().withEndAction(null);
         unlockArrow.setVisibility(View.VISIBLE);
         unlockArrow.setAlpha(0f);
         unlockArrow.animate()
@@ -708,7 +597,8 @@ public class LockScreenActivity extends AppCompatActivity {
     }
 
     private View[] chromeViews() {
-        return new View[]{findViewById(R.id.unlockArrow), findViewById(R.id.expandButtonContainer)};
+        return new View[]{findViewById(R.id.unlockArrow), findViewById(R.id.expandButtonContainer),
+                findViewById(R.id.endsAtText)};
     }
 
     private void armChromeHide() {
@@ -731,8 +621,9 @@ public class LockScreenActivity extends AppCompatActivity {
         if (finishing) return;
         for (View view : chromeViews()) {
             if (view == null || view.getVisibility() == View.GONE) continue;
+            view.animate().cancel();
             view.setVisibility(View.VISIBLE);
-            view.animate().alpha(1f).setDuration(250).start();
+            view.animate().alpha(1f).setDuration(250).withEndAction(null).start();
         }
         armChromeHide();
     }
@@ -763,52 +654,6 @@ public class LockScreenActivity extends AppCompatActivity {
             unlockManager.cleanup();
         }
     }
-
-    /**
-     * Check if the device screen is currently on.
-     * Used to prevent restarting LockScreenActivity when the screen turns off,
-     * which would cause an infinite wake loop due to setTurnScreenOn(true).
-     */
-    private boolean isScreenOn() {
-        try {
-            android.os.PowerManager powerManager = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
-            return powerManager != null && powerManager.isInteractive();
-        } catch (Exception e) {
-            return true; // Assume screen is on if check fails
-        }
-    }
-
-    /**
-     * Check if a whitelisted app is currently in the foreground.
-     * This prevents LockScreenActivity from restarting when user is using allowed apps.
-     */
-    private boolean isWhitelistedAppInForeground() {
-        try {
-            // Use ActivityManager to get running processes
-            android.app.ActivityManager activityManager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-            if (activityManager != null) {
-                java.util.List<android.app.ActivityManager.RunningAppProcessInfo> runningProcesses = activityManager.getRunningAppProcesses();
-                if (runningProcesses != null) {
-                    for (android.app.ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
-                        if (processInfo.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                            String foregroundPackage = processInfo.processName;
-
-                            // Check if this is a whitelisted app
-                            if (WhitelistManager.isAppWhitelisted(LockScreenActivity.this, foregroundPackage)) {
-                                Log.d("LockScreenActivity", "Whitelisted app detected in foreground: " + foregroundPackage);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e("LockScreenActivity", "Error checking foreground app", e);
-        }
-        return false;
-    }
-
-
 
     private void handleUnlockSuccess(UnlockMethod method) {
         // Vibrate for feedback if enabled
@@ -921,6 +766,9 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView sessionTitle = findViewById(R.id.sessionTitle);
         TextView endsAtText = findViewById(R.id.endsAtText);
         sessionTitle.setText("Done");
+        endsAtText.animate().cancel();
+        endsAtText.setVisibility(View.VISIBLE);
+        endsAtText.setAlpha(1f);
         endsAtText.setText(formatDuration(totalTimeMs) + " focused");
         findViewById(R.id.mainContentContainer).setClickable(false);
 
@@ -1037,6 +885,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // A rejected duplicate or an old instance must not clear a newer owner's state.
         if (ownsActiveScreen) {
             isLockScreenActive = false;
+            isLockScreenVisible = false;
             ownsActiveScreen = false;
         }
     }

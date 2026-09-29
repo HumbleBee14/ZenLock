@@ -38,6 +38,15 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/permissionOptional"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission_optional"
+            android:textSize="12sp"
+            android:textColor="@color/textSecondary"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/permissionReason"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

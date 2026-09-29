@@ -1,0 +1,17 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:minHeight="64dp" android:layout_marginBottom="8dp"
+    android:paddingHorizontal="14dp" android:paddingVertical="12dp"
+    android:orientation="horizontal" android:gravity="center_vertical"
+    android:background="@drawable/tile_ripple" android:clickable="true" android:focusable="true">
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical">
+        <TextView android:id="@+id/templateName" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:textSize="15sp"
+            android:fontFamily="sans-serif-medium" android:textColor="@color/textPrimary" />
+        <TextView android:id="@+id/templateSummary" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="4dp"
+            android:textSize="12sp" android:textColor="@color/textSecondary" />
+    </LinearLayout>
+    <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
+</LinearLayout>

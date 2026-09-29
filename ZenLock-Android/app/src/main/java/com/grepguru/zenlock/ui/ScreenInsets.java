@@ -14,9 +14,10 @@ public final class ScreenInsets {
     private ScreenInsets() {}
 
     public static void enable(ComponentActivity activity) {
-        // All app screens use dark surfaces, independent of the device theme.
-        EdgeToEdge.enable(activity, SystemBarStyle.dark(Color.TRANSPARENT),
-                SystemBarStyle.dark(Color.TRANSPARENT));
+        boolean light = activity.getResources().getBoolean(com.grepguru.zenlock.R.bool.light_system_bars);
+        SystemBarStyle bars = light ? SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                : SystemBarStyle.dark(Color.TRANSPARENT);
+        EdgeToEdge.enable(activity, bars, bars);
     }
 
     public static void applyToContent(ComponentActivity activity) {

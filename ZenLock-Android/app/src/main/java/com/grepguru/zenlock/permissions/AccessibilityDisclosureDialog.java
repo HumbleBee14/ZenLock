@@ -27,7 +27,7 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new MaterialAlertDialogBuilder(requireContext())
+        return new MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_ZenLock_AccessibilityDisclosure)
                 .setTitle(R.string.accessibility_disclosure_title)
                 .setMessage(R.string.accessibility_disclosure_message)
                 .setPositiveButton(R.string.accessibility_disclosure_agree, (dialog, which) ->

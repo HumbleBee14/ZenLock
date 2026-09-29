@@ -64,6 +64,7 @@ public class ScheduleFragment extends Fragment {
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
     private LinearLayout templateList;
+    private View upNextGroup;
     private TextView upNextName;
     private TextView upNextTime;
     private TextView upNextCountdown;
@@ -72,6 +73,22 @@ public class ScheduleFragment extends Fragment {
     private final Runnable tick = this::refreshOverview;
     private static final String[] DAY_LETTERS = {"S", "M", "T", "W", "T", "F", "S"};
     
+    private static final String SCHEDULE_PERMISSION_RESULT = "schedule.permissions";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener(SCHEDULE_PERMISSION_RESULT, this, (key, result) -> {
+            if (result.containsKey("enable_id")) {
+                ScheduleModel schedule = scheduleManager.getScheduleById(result.getInt("enable_id"));
+                if (schedule != null && !schedule.isEnabled()) toggleSchedule(schedule);
+            } else {
+                String template = result.getString("template");
+                openCreateScheduleDialog(template == null ? null : new com.google.gson.Gson().fromJson(template, ScheduleModel.class));
+            }
+        });
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -102,6 +119,7 @@ public class ScheduleFragment extends Fragment {
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
         emptyStateText = view.findViewById(R.id.emptyStateText);
         templateList = view.findViewById(R.id.templateList);
+        upNextGroup = view.findViewById(R.id.upNextGroup);
         upNextName = view.findViewById(R.id.upNextName);
         upNextTime = view.findViewById(R.id.upNextTime);
         upNextCountdown = view.findViewById(R.id.upNextCountdown);
@@ -130,19 +148,11 @@ public class ScheduleFragment extends Fragment {
                 template("Lunch break", 13, 0, 45, ScheduleModel.RepeatType.WEEKLY, weekdays),
                 template("Wind down", 22, 0, 60, ScheduleModel.RepeatType.DAILY, new HashSet<>())};
         for (ScheduleModel model : templates) {
-            Chip chip = new Chip(requireContext(), null, R.style.ZenChip);
-            chip.setChipBackgroundColorResource(R.color.backgroundTertiary);
-            chip.setChipStrokeWidth(0f);
-            chip.setTextColor(requireContext().getColor(R.color.textPrimary));
-            chip.setCheckable(false);
-            chip.setEnsureMinTouchTargetSize(false);
-            chip.setText(model.getName() + "  ·  " + model.getFormattedStartTime() + "  ·  " + model.getFormattedDuration());
-            chip.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(38));
-            params.bottomMargin = dp(8);
-            chip.setLayoutParams(params);
-            chip.setOnClickListener(v -> showCreateScheduleDialog(model));
-            templateList.addView(chip);
+            View row = getLayoutInflater().inflate(R.layout.item_schedule_template, templateList, false);
+            ((TextView) row.findViewById(R.id.templateName)).setText(model.getName());
+            ((TextView) row.findViewById(R.id.templateSummary)).setText(model.getFormattedStartTime() + " · " + model.getFormattedDuration());
+            row.setOnClickListener(v -> showCreateScheduleDialog(model));
+            templateList.addView(row);
         }
     }
 
@@ -183,10 +193,12 @@ public class ScheduleFragment extends Fragment {
             }
         }
 
+        upNextGroup.setVisibility(schedules.isEmpty() ? View.GONE : View.VISIBLE);
         if (nextSchedule == null) {
-            upNextName.setText("Nothing scheduled");
+            upNextName.setText(R.string.schedule_none_upcoming);
             upNextCountdown.setVisibility(View.GONE);
-            upNextTime.setVisibility(View.GONE);
+            upNextTime.setText(R.string.schedule_none_upcoming_hint);
+            upNextTime.setVisibility(View.VISIBLE);
         } else {
             upNextName.setText(nextSchedule.getName());
             upNextCountdown.setVisibility(View.VISIBLE);
@@ -236,10 +248,11 @@ public class ScheduleFragment extends Fragment {
                 if (schedule.isEnabled()) {
                     toggleSchedule(schedule);
                 } else {
+                    Bundle action = new Bundle();
+                    action.putInt("enable_id", schedule.getId());
                     UnlockMethodGuard.ensure(requireActivity(), "Enable anyway", () ->
-                            PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
-                                if (isAdded()) toggleSchedule(schedule);
-                            }));
+                            PermissionGate.ensure(ScheduleFragment.this, FeaturePermissions.schedule(requireContext()),
+                                    SCHEDULE_PERMISSION_RESULT, action));
                 }
             }
 
@@ -309,7 +322,7 @@ public class ScheduleFragment extends Fragment {
         if (schedules.isEmpty()) {
             emptyStateLayout.setVisibility(View.VISIBLE);
             schedulesRecyclerView.setVisibility(View.GONE);
-            emptyStateText.setText("No schedules yet");
+            emptyStateText.setText(R.string.schedule_empty_hint);
         } else {
             emptyStateLayout.setVisibility(View.GONE);
             schedulesRecyclerView.setVisibility(View.VISIBLE);
@@ -321,10 +334,10 @@ public class ScheduleFragment extends Fragment {
     }
 
     private void showCreateScheduleDialog(ScheduleModel template) {
+        Bundle action = new Bundle();
+        if (template != null) action.putString("template", new com.google.gson.Gson().toJson(template));
         UnlockMethodGuard.ensure(requireActivity(), "Create anyway", () ->
-                PermissionGate.ensure(requireActivity(), FeaturePermissions.schedule(requireContext()), () -> {
-                    if (isAdded()) openCreateScheduleDialog(template);
-                }));
+                PermissionGate.ensure(this, FeaturePermissions.schedule(requireContext()), SCHEDULE_PERMISSION_RESULT, action));
     }
 
     private void openCreateScheduleDialog(ScheduleModel template) {

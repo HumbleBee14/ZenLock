@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="App Name"
-        android:textColor="@color/white"
+        android:textColor="@color/textPrimary"
         android:textSize="16sp"/>
 
     <!-- Checkbox for selection -->
@@ -28,5 +28,5 @@
         android:id="@+id/appCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:buttonTint="@color/white" />
+        android:buttonTint="@color/primary" />
 </LinearLayout>

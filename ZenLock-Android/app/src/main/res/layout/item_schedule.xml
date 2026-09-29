@@ -9,13 +9,14 @@
     android:paddingEnd="12dp"
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:background="@drawable/tile_ripple"
+    android:background="@drawable/schedule_card_background"
     android:clickable="true"
     android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
+        android:minHeight="64dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
@@ -34,29 +35,17 @@
 
                 <TextView
                     android:id="@+id/scheduleName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="Morning Focus"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="@color/textPrimary"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:ellipsize="end" />
 
-                <TextView
-                    android:id="@+id/scheduleTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/tag_background"
-                    android:paddingStart="7dp"
-                    android:paddingEnd="7dp"
-                    android:paddingTop="2dp"
-                    android:paddingBottom="2dp"
-                    android:text="Daily"
-                    android:textSize="10sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:textColor="@color/primaryLight" />
+
 
             </LinearLayout>
 
@@ -71,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="9:00 AM"
-                    android:textSize="12sp"
+                    android:textSize="18sp"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="@color/primaryLight" />
 
@@ -84,11 +73,31 @@
                     android:text="– 10:30 AM · 1h 30m"
                     android:textSize="12sp"
                     android:textColor="@color/textSecondary"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:ellipsize="end" />
 
             </LinearLayout>
 
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="8dp">
+                <TextView
+                    android:id="@+id/scheduleTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/tag_background"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="7dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:text="Daily"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/primaryLight" />
+                <TextView android:id="@+id/scheduleStatus" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textSize="11sp"
+                    android:textColor="@color/textSecondary" />
+            </LinearLayout>
         </LinearLayout>
 
         <androidx.appcompat.widget.SwitchCompat
@@ -113,8 +122,8 @@
             android:id="@+id/editButton"
             style="@style/ModernButton.Pill"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minHeight="36dp"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textSize="13sp"
@@ -125,8 +134,8 @@
             android:id="@+id/deleteButton"
             style="@style/ModernButton.Pill"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minHeight="36dp"
+            android:layout_height="48dp"
+            android:minHeight="48dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textSize="13sp"

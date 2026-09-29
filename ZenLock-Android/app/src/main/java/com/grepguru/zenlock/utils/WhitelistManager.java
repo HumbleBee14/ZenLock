@@ -34,23 +34,7 @@ public class WhitelistManager {
             return true;
         }
         
-        // Allow any keyboard enabled on the device
-        try {
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                List<InputMethodInfo> enabledIMEs = imm.getEnabledInputMethodList();
-                for (InputMethodInfo imi : enabledIMEs) {
-                    if (imi.getPackageName().equals(packageName)) {
-                        return true;
-                    }
-                    if (imi.getServiceInfo() != null && imi.getServiceInfo().packageName.equals(packageName)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "IME check failed for: " + packageName, e);
-        }
+        if (isEnabledKeyboard(context, packageName)) return true;
 
         // SECURITY CHECK: Block known security risk packages
         if (isSecurityRisk(packageName)) {
@@ -98,6 +82,29 @@ public class WhitelistManager {
         return isWhitelisted;
     }
     
+    /** Resolve the IME role from Android, without guessing OEM package names. */
+    public static boolean isEnabledKeyboard(Context context, String packageName) {
+        if (packageName == null || packageName.isEmpty()) return false;
+        try {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                List<InputMethodInfo> enabledIMEs = imm.getEnabledInputMethodList();
+                for (InputMethodInfo imi : enabledIMEs) {
+                    if (imi.getPackageName().equals(packageName)) {
+                        return true;
+                    }
+                    if (imi.getServiceInfo() != null && imi.getServiceInfo().packageName.equals(packageName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "IME check failed for: " + packageName, e);
+        }
+
+        return false;
+    }
+
     /**
      * Get a list of all whitelisted packages for debugging
      * @param context The context

@@ -66,10 +66,33 @@ public class SettingsFragment extends Fragment {
 
     public SettingsFragment() {}
 
+    private static final String NOTIFICATION_PERMISSION_RESULT = "settings.notification_permissions";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener(NOTIFICATION_PERMISSION_RESULT, this, (key, result) -> {
+            preferences.edit().putBoolean("block_notifications", true).apply();
+            syncBlockNotificationsToggle();
+        });
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        String[] themes = getResources().getStringArray(R.array.theme_choices);
+        TextView appearanceValue = view.findViewById(R.id.appearanceValue);
+        appearanceValue.setText(themes[com.grepguru.zenlock.ui.ThemePreference.selectedIndex(requireContext())]);
+        view.findViewById(R.id.appearanceRow).setOnClickListener(v ->
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.settings_theme)
+                        .setSingleChoiceItems(themes, com.grepguru.zenlock.ui.ThemePreference.selectedIndex(requireContext()), (dialog, which) -> {
+                            dialog.dismiss();
+                            com.grepguru.zenlock.ui.ThemePreference.select(requireContext(), which);
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show());
 
         // Initialize components
         preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
@@ -151,11 +174,8 @@ public class SettingsFragment extends Fragment {
         blockNotificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked && !AppPermission.NOTIFICATION_ACCESS.isGranted(requireContext())) {
                 blockNotificationsToggle.setChecked(false);
-                PermissionGate.ensure(requireActivity(), FeaturePermissions.notificationBlocking(), () -> {
-                    if (!isAdded()) return;
-                    preferences.edit().putBoolean("block_notifications", true).apply();
-                    syncBlockNotificationsToggle();
-                });
+                PermissionGate.ensure(this, FeaturePermissions.notificationBlocking(),
+                        NOTIFICATION_PERMISSION_RESULT, new Bundle());
                 return;
             }
             preferences.edit().putBoolean("block_notifications", isChecked).apply();

@@ -82,7 +82,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             scheduleTag.setText(repeatTag(schedule));
             scheduleTime.setText(schedule.getFormattedStartTime());
             scheduleMeta.setText(buildMeta(schedule));
-            scheduleInfo.setAlpha(schedule.isEnabled() ? 1f : 0.5f);
+            scheduleInfo.setAlpha(1f);
+            scheduleCard.setActivated(schedule.isEnabled());
+            ((TextView) scheduleCard.findViewById(R.id.scheduleStatus)).setText(
+                    schedule.isEnabled() ? R.string.schedule_enabled : R.string.schedule_paused);
+            scheduleSwitch.setContentDescription(schedule.getName());
 
             scheduleSwitch.setOnCheckedChangeListener(null);
             scheduleSwitch.setChecked(schedule.isEnabled());

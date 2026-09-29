@@ -1,7 +1,7 @@
 package com.grepguru.zenlock.permissions;
 
 import android.content.Context;
-
+import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +41,28 @@ public final class PermissionRequest {
             if (requirement.required && !requirement.permission.isGranted(context)) return false;
         }
         return true;
+    }
+
+    Bundle toBundle() {
+        Bundle state = new Bundle();
+        state.putString("title", title);
+        state.putString("action", actionLabel);
+        ArrayList<String> required = new ArrayList<>();
+        ArrayList<String> recommended = new ArrayList<>();
+        for (Requirement item : requirements) {
+            (item.required ? required : recommended).add(item.permission.name());
+        }
+        state.putStringArrayList("required", required);
+        state.putStringArrayList("recommended", recommended);
+        return state;
+    }
+
+    static PermissionRequest fromBundle(Bundle state) {
+        Builder builder = titled(state.getString("title", "Permissions"))
+                .action(state.getString("action", "Continue"));
+        for (String name : state.getStringArrayList("required")) builder.require(AppPermission.valueOf(name));
+        for (String name : state.getStringArrayList("recommended")) builder.recommend(AppPermission.valueOf(name));
+        return builder.build();
     }
 
     public static Builder titled(String title) {

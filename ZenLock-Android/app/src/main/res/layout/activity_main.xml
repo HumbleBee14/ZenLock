@@ -14,6 +14,7 @@
         android:layout_height="280dp"
         android:src="@mipmap/ic_launcher_monochrome"
         android:alpha="0.09"
+        app:tint="@color/textTertiary"
         android:translationY="64dp"
         android:importantForAccessibility="no"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"

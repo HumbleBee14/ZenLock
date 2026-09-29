@@ -82,7 +82,9 @@ public class HomeFragment extends Fragment {
 
     // Lock Until mode
     private View lockUntilContainer;
-    private View durationControlsContainer;
+    private View durationModeContainer;
+    private NumberPicker lockUntilHoursPicker, lockUntilMinutesPicker;
+    private MaterialButton lockUntilPeriodButton;
     private TextView lockUntilTimeDisplay;
     private boolean isLockUntilMode = false;
     private int lockUntilHour = -1;
@@ -109,7 +111,39 @@ public class HomeFragment extends Fragment {
     private ValueAnimator progressAnimator;
     private ObjectAnimator emojiPulseX, emojiPulseY;
     private boolean isLongPressing = false;
-    private static final long ZEN_ACTIVATION_DURATION = 2000; // 2 seconds
+    private static final long ZEN_ACTIVATION_DURATION = 1000; // 1 second
+
+    private static final String PERMISSION_RESULT = "home.focus_permissions";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener(PERMISSION_RESULT, this, (key, selection) -> {
+            selectedMinutes = selection.getInt("minutes", 10);
+            isLockUntilMode = selection.getBoolean("until_mode");
+            lockUntilHour = selection.getInt("until_hour", -1);
+            lockUntilMinute = selection.getInt("until_minute", -1);
+            selectedStartDelayMinutes = selection.getInt("delay", 0);
+            SharedPreferences prefs = requireContext().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+            if (!prefs.getBoolean("isLocked", false)) proceedWithLockSession(prefs);
+        });
+    }
+
+    private Bundle focusSelection() {
+        Bundle state = new Bundle();
+        state.putInt("minutes", selectedMinutes);
+        state.putBoolean("until_mode", isLockUntilMode);
+        state.putInt("until_hour", lockUntilHour);
+        state.putInt("until_minute", lockUntilMinute);
+        state.putInt("delay", selectedStartDelayMinutes);
+        return state;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBundle("focus_selection", focusSelection());
+    }
 
     public HomeFragment() {}
 
@@ -145,8 +179,12 @@ public class HomeFragment extends Fragment {
         // Lock Until mode views
         modeToggleButton = view.findViewById(R.id.modeToggleButton);
         lockUntilContainer = view.findViewById(R.id.lockUntilContainer);
-        durationControlsContainer = view.findViewById(R.id.durationControlsContainer);
         lockUntilTimeDisplay = view.findViewById(R.id.lockUntilTimeDisplay);
+        durationModeContainer = view.findViewById(R.id.durationModeContainer);
+        lockUntilHoursPicker = view.findViewById(R.id.lockUntilHoursPicker);
+        lockUntilMinutesPicker = view.findViewById(R.id.lockUntilMinutesPicker);
+        lockUntilPeriodButton = view.findViewById(R.id.lockUntilPeriodButton);
+        setupLockUntilWheels();
 
         // Initialize Zen Progress Overlay
         zenProgressOverlay = view.findViewById(R.id.zenProgressOverlay);
@@ -163,12 +201,19 @@ public class HomeFragment extends Fragment {
 
         analyticsManager = new AnalyticsManager(requireContext());
 
-        setTimeInMinutes(10);
-
-        updateStartDelayDisplay();
-        if (prefs.getBoolean("lock_until_mode", false)) {
-            modeToggleButton.performClick();
+        Bundle selection = savedInstanceState == null ? null : savedInstanceState.getBundle("focus_selection");
+        setTimeInMinutes(selection == null ? 10 : selection.getInt("minutes", 10));
+        if (selection != null) {
+            lockUntilHour = selection.getInt("until_hour", -1);
+            lockUntilMinute = selection.getInt("until_minute", -1);
+            selectedStartDelayMinutes = selection.getInt("delay", 0);
+            startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         }
+        updateStartDelayDisplay();
+        boolean untilMode = selection == null ? prefs.getBoolean("lock_until_mode", false)
+                : selection.getBoolean("until_mode");
+        isLockUntilMode = false;
+        if (untilMode) modeToggleButton.performClick();
         updateLockButtonState();
 
         pendingSessionListener = (sp, key) -> {
@@ -324,7 +369,7 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setSelectionDividerHeight(0);
         }
         startDelayPicker.setVerticalFadingEdgeEnabled(true);
-        startDelayPicker.setFadingEdgeLength(dpToPx(56));
+        startDelayPicker.setFadingEdgeLength(dpToPx(40));
     }
 
     private void toggleStartDelayPicker() {
@@ -451,8 +496,7 @@ public class HomeFragment extends Fragment {
             if (isLockUntilMode) {
                 modeToggleButton.setImageResource(R.drawable.ic_timer);
                 modeToggleButton.setContentDescription("Switch to duration mode");
-                timeDisplayContainer.setVisibility(View.GONE);
-                durationControlsContainer.setVisibility(View.GONE);
+                durationModeContainer.setVisibility(View.GONE);
                 lockUntilContainer.setVisibility(View.VISIBLE);
 
                 if (lockUntilHour == -1) {
@@ -466,8 +510,7 @@ public class HomeFragment extends Fragment {
             } else {
                 modeToggleButton.setImageResource(R.drawable.ic_schedule);
                 modeToggleButton.setContentDescription("Switch to lock until time");
-                timeDisplayContainer.setVisibility(View.VISIBLE);
-                durationControlsContainer.setVisibility(View.VISIBLE);
+                durationModeContainer.setVisibility(View.VISIBLE);
                 lockUntilContainer.setVisibility(View.GONE);
                 updateTimeDisplay();
             }
@@ -476,7 +519,43 @@ public class HomeFragment extends Fragment {
         lockUntilContainer.setOnClickListener(v -> showLockUntilTimePicker());
     }
 
+    private void setupLockUntilWheels() {
+        lockUntilHoursPicker.setMinValue(1);
+        lockUntilHoursPicker.setMaxValue(12);
+        lockUntilMinutesPicker.setMinValue(0);
+        lockUntilMinutesPicker.setMaxValue(59);
+        lockUntilMinutesPicker.setFormatter(value -> String.format(java.util.Locale.getDefault(), "%02d", value));
+        for (NumberPicker wheel : new NumberPicker[]{lockUntilHoursPicker, lockUntilMinutesPicker}) {
+            wheel.setWrapSelectorWheel(true);
+            wheel.setOnClickListener(v -> showLockUntilTimePicker());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                wheel.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28,
+                        getResources().getDisplayMetrics()));
+                wheel.setTextColor(ContextCompat.getColor(requireContext(), R.color.textTertiary));
+                wheel.setSelectionDividerHeight(0);
+            }
+            wheel.setVerticalFadingEdgeEnabled(true);
+            wheel.setFadingEdgeLength(dpToPx(36));
+        }
+        lockUntilHoursPicker.setOnValueChangedListener((picker, oldValue, newValue) -> {
+            lockUntilHour = newValue % 12 + (lockUntilHour >= 12 ? 12 : 0);
+            updateLockUntilDisplay();
+            updateLockButtonState();
+        });
+        lockUntilMinutesPicker.setOnValueChangedListener((picker, oldValue, newValue) -> {
+            lockUntilMinute = newValue;
+            updateLockUntilDisplay();
+            updateLockButtonState();
+        });
+        lockUntilPeriodButton.setOnClickListener(v -> {
+            lockUntilHour = (lockUntilHour + 12) % 24;
+            updateLockUntilDisplay();
+            updateLockButtonState();
+        });
+    }
+
     private void showLockUntilTimePicker() {
+        if (getChildFragmentManager().findFragmentByTag("lockUntilPicker") != null) return;
         int hour = lockUntilHour != -1 ? lockUntilHour : Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1;
         int minute = lockUntilMinute != -1 ? lockUntilMinute : 0;
 
@@ -501,7 +580,18 @@ public class HomeFragment extends Fragment {
         int displayHour = lockUntilHour % 12;
         if (displayHour == 0) displayHour = 12;
         String amPm = lockUntilHour < 12 ? "AM" : "PM";
-        lockUntilTimeDisplay.setText(String.format("%d:%02d %s", displayHour, lockUntilMinute, amPm));
+        lockUntilHoursPicker.setValue(displayHour);
+        lockUntilMinutesPicker.setValue(lockUntilMinute);
+        lockUntilPeriodButton.setText(amPm);
+        lockUntilPeriodButton.setContentDescription(getString(R.string.lock_until_period_action,
+                amPm, lockUntilHour < 12 ? "PM" : "AM"));
+        Calendar now = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        end.setTimeInMillis(getNextLockUntilEndTimeMillis());
+        boolean today = now.get(Calendar.YEAR) == end.get(Calendar.YEAR)
+                && now.get(Calendar.DAY_OF_YEAR) == end.get(Calendar.DAY_OF_YEAR);
+        String time = String.format(java.util.Locale.getDefault(), "%d:%02d %s", displayHour, lockUntilMinute, amPm);
+        lockUntilTimeDisplay.setText(getString(today ? R.string.lock_until_today : R.string.lock_until_tomorrow, time));
     }
 
     private long getLockUntilDurationMs() {
@@ -634,7 +724,7 @@ public class HomeFragment extends Fragment {
         hoursPicker.setValue(hours);
         
         // Find closest minute value in picker
-        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50};
+        int[] minuteValues = {0, 5, 10, 15, 20, 30, 40, 50};
         int closestIndex = 0;
         for (int i = 0; i < minuteValues.length; i++) {
             if (minuteValues[i] == remainingMinutes) {
@@ -691,8 +781,8 @@ public class HomeFragment extends Fragment {
         hoursPicker.setMinValue(0);
         hoursPicker.setMaxValue(23);
         minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(8);
-        String[] minuteValues = {"0", "1", "5", "10", "15", "20", "30", "40", "50"};
+        minutesPicker.setMaxValue(7);
+        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "40", "50"};
         minutesPicker.setDisplayedValues(minuteValues);
 
         hoursPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateFromPickers());
@@ -700,13 +790,13 @@ public class HomeFragment extends Fragment {
 
         // Default values
         hoursPicker.setValue(0);
-        minutesPicker.setValue(4); // Index 4 = 15 minutes
+        minutesPicker.setValue(3); // Index 3 = 15 minutes
     }
 
     private void updateFromPickers() {
         int hours = hoursPicker.getValue();
         int minuteIndex = minutesPicker.getValue();
-        int[] minuteValues = {0, 1, 5, 10, 15, 20, 30, 40, 50};
+        int[] minuteValues = {0, 5, 10, 15, 20, 30, 40, 50};
         int minutes = minuteValues[minuteIndex];
         
         selectedMinutes = (hours * 60) + minutes;
@@ -728,8 +818,8 @@ public class HomeFragment extends Fragment {
         dialogHoursPicker.setMinValue(0);
         dialogHoursPicker.setMaxValue(23);
         dialogMinutesPicker.setMinValue(0);
-        dialogMinutesPicker.setMaxValue(8);
-        String[] minuteValues = {"0", "1", "5", "10", "15", "20", "30", "40", "50"};
+        dialogMinutesPicker.setMaxValue(7);
+        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "40", "50"};
         dialogMinutesPicker.setDisplayedValues(minuteValues);
         
         // Set current values
@@ -738,7 +828,7 @@ public class HomeFragment extends Fragment {
         dialogHoursPicker.setValue(currentHours);
         
         // Find closest minute value
-        int[] minuteValuesInt = {0, 1, 5, 10, 15, 20, 30, 40, 50};
+        int[] minuteValuesInt = {0, 5, 10, 15, 20, 30, 40, 50};
         int closestIndex = 0;
         for (int i = 0; i < minuteValuesInt.length; i++) {
             if (minuteValuesInt[i] == currentMinutes) {
@@ -867,19 +957,15 @@ public class HomeFragment extends Fragment {
     private void completeZenActivation() {
         isLongPressing = false;
 
-        if (selectedStartDelayMinutes > 0) {
-            zenProgressMessage.setText("⏳ Focus session scheduled");
-            zenProgressSubtitle.setText(formatStartDelayLabel(selectedStartDelayMinutes));
-        } else {
-            zenProgressMessage.setText("🎯 ZEN Mode Activated!");
-            zenProgressSubtitle.setText("Beginning your mindful focus session");
-        }
+        // The hold confirms intent; permissions and scheduling can still fail.
+        zenProgressMessage.setText(R.string.focus_preparing);
+        zenProgressSubtitle.setText(R.string.focus_checking_setup);
 
         // Delay then start lock service
         longPressHandler.postDelayed(() -> {
             hideZenOverlay();
             checkAndStartLockService();
-        }, 500);
+        }, 150);
     }
 
     private void hideZenOverlay() {
@@ -931,12 +1017,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void checkAndStartLockService() {
-        SharedPreferences preferences = requireActivity().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
-        PermissionGate.ensure(requireActivity(),
+        PermissionGate.ensure(this,
                 FeaturePermissions.focusSession(requireContext(), selectedStartDelayMinutes > 0),
-                () -> {
-                    if (isAdded()) proceedWithLockSession(preferences);
-                });
+                PERMISSION_RESULT, focusSelection());
     }
 
     private void proceedWithLockSession(SharedPreferences preferences) {
