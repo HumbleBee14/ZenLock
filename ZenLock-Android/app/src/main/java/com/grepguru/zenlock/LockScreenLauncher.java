@@ -102,12 +102,17 @@ public class LockScreenLauncher {
     private static final int BLOCKER_NOTIFICATION_ID = 9999;
 
     public static void launchFromBlocker(Context context) {
+        launchFromBlocker(context, false);
+    }
+
+    public static void launchFromBlocker(Context context, boolean showBlockedNotice) {
         try {
             Log.d(TAG, "Launching lock screen via notification fallback (blocker)");
 
             createNotificationChannel(context);
 
             Intent lockIntent = new Intent(context, LockScreenActivity.class);
+            lockIntent.putExtra(LockScreenActivity.EXTRA_BLOCKED_APP_NOTICE, showBlockedNotice);
             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(

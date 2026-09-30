@@ -34,6 +34,27 @@ public class LockScreenActivityTest {
         ReflectionHelpers.setStaticField(LockScreenActivity.class, "isLockScreenActive", false);
     }
 
+    @Test public void blockedReturnShowsWarningOnceAndNormalResumeStaysQuiet() {
+        RuntimeEnvironment.getApplication().getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE)
+                .edit().putBoolean("isLocked", true)
+                .putLong("lockEndTime", System.currentTimeMillis() + 900_000)
+                .putLong("lockTargetDuration", 900_000).commit();
+        ActivityController<LockScreenActivity> owner = Robolectric.buildActivity(LockScreenActivity.class)
+                .create().start().resume();
+        org.robolectric.shadows.ShadowToast.reset();
+        owner.pause().resume();
+        assertEquals(0, org.robolectric.shadows.ShadowToast.shownToastCount());
+        Intent blocked = new Intent().putExtra("show_blocked_app_notice", true);
+        owner.get().onNewIntent(blocked);
+        assertEquals("This app isn’t allowed during focus.",
+                org.robolectric.shadows.ShadowToast.getTextOfLatestToast());
+        owner.get().onNewIntent(new Intent().putExtra("show_blocked_app_notice", true));
+        assertEquals(1, org.robolectric.shadows.ShadowToast.shownToastCount());
+        owner.pause().resume();
+        assertEquals(1, org.robolectric.shadows.ShadowToast.shownToastCount());
+        owner.pause().stop().destroy();
+    }
+
     @Test
     public void rejectedDuplicateToleratesLateCallbacks() {
         ReflectionHelpers.setStaticField(LockScreenActivity.class, "isLockScreenActive", true);

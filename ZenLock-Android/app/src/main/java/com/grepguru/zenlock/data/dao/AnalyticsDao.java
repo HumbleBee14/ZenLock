@@ -23,12 +23,35 @@ import java.util.List;
  */
 @Dao
 public interface AnalyticsDao {
+
+    static long[] localDayBounds(String date) {
+        java.time.LocalDate day = java.time.LocalDate.parse(date);
+        java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+        return new long[]{day.atStartOfDay(zone).toInstant().toEpochMilli(),
+                day.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()};
+    }
+
+    String LOCAL_DAY_STATS = "SELECT :date AS date, COUNT(*) AS total_sessions, " +
+            "COALESCE(SUM(actual_duration), 0) AS total_focus_time, " +
+            "COALESCE(SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END), 0) AS completed_sessions, " +
+            "COALESCE(SUM(CASE WHEN completed = 0 THEN 1 ELSE 0 END), 0) AS interrupted_sessions, " +
+            "COALESCE(AVG(focus_score), 0) AS avg_focus_score, " +
+            "COALESCE((SELECT SUM(usage_time) FROM app_usage WHERE is_whitelisted = 1 AND session_id IN " +
+            "(SELECT session_id FROM sessions WHERE start_time >= :start AND start_time < :end)), 0) AS total_whitelisted_time, " +
+            "0 AS created_at, 0 AS updated_at FROM sessions WHERE start_time >= :start AND start_time < :end";
+
+    @Query(LOCAL_DAY_STATS)
+    LiveData<DailyStatsEntity> observeLocalDayStats(String date, long start, long end);
+
+    @Query(LOCAL_DAY_STATS)
+    DailyStatsEntity calculateLocalDayStats(String date, long start, long end);
+
     
     // =====================================
     // SESSION OPERATIONS
     // =====================================
     
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insertSession(SessionEntity session);
     
     @Update
@@ -37,10 +60,15 @@ public interface AnalyticsDao {
     @Query("SELECT * FROM sessions ORDER BY start_time DESC LIMIT :limit")
     LiveData<List<SessionEntity>> getRecentSessions(int limit);
     
-    @Query("SELECT * FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date ORDER BY start_time DESC")
-    LiveData<List<SessionEntity>> getSessionsForDate(String date);
+    default LiveData<List<SessionEntity>> getSessionsForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getSessionsForLocalDay(bounds[0], bounds[1]);
+    }
+
+    @Query("SELECT * FROM sessions WHERE start_time >= :start AND start_time < :end ORDER BY start_time DESC")
+    LiveData<List<SessionEntity>> getSessionsForLocalDay(long start, long end);
     
-    @Query("SELECT * FROM sessions WHERE start_time >= :startTime AND start_time <= :endTime ORDER BY start_time DESC")
+    @Query("SELECT * FROM sessions WHERE start_time >= :startTime AND start_time < :endTime ORDER BY start_time DESC")
     List<SessionEntity> getSessionsForDateRange(long startTime, long endTime);
     
     @Query("SELECT * FROM sessions WHERE session_id = :sessionId")
@@ -123,25 +151,55 @@ public interface AnalyticsDao {
     // ANALYTICS CALCULATIONS
     // =====================================
     
-    @Query("SELECT COUNT(*) FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date")
-    int getSessionCountForDate(String date);
+    @Query("SELECT COUNT(*) FROM sessions WHERE start_time >= :start AND start_time < :end")
+    int getSessionCountForDateRange(long start, long end);
+
+    default int getSessionCountForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getSessionCountForDateRange(bounds[0], bounds[1]);
+    }
     
-    @Query("SELECT SUM(actual_duration) FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date")
-    Long getTotalFocusTimeForDate(String date);
+    @Query("SELECT SUM(actual_duration) FROM sessions WHERE start_time >= :start AND start_time < :end")
+    Long getTotalFocusTimeForDateRange(long start, long end);
+
+    default Long getTotalFocusTimeForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getTotalFocusTimeForDateRange(bounds[0], bounds[1]);
+    }
     
-    @Query("SELECT COUNT(*) FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date AND completed = 1")
-    int getCompletedSessionsForDate(String date);
+    @Query("SELECT COUNT(*) FROM sessions WHERE start_time >= :start AND start_time < :end AND completed = 1")
+    int getCompletedSessionsForDateRange(long start, long end);
+
+    default int getCompletedSessionsForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getCompletedSessionsForDateRange(bounds[0], bounds[1]);
+    }
     
-    @Query("SELECT COUNT(*) FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date AND completed = 0")
-    int getInterruptedSessionsForDate(String date);
+    @Query("SELECT COUNT(*) FROM sessions WHERE start_time >= :start AND start_time < :end AND completed = 0")
+    int getInterruptedSessionsForDateRange(long start, long end);
+
+    default int getInterruptedSessionsForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getInterruptedSessionsForDateRange(bounds[0], bounds[1]);
+    }
     
-    @Query("SELECT AVG(focus_score) FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date")
-    Float getAverageFocusScoreForDate(String date);
+    @Query("SELECT AVG(focus_score) FROM sessions WHERE start_time >= :start AND start_time < :end")
+    Float getAverageFocusScoreForDateRange(long start, long end);
+
+    default Float getAverageFocusScoreForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getAverageFocusScoreForDateRange(bounds[0], bounds[1]);
+    }
     
     @Query("SELECT SUM(usage_time) FROM app_usage WHERE session_id IN " +
-           "(SELECT session_id FROM sessions WHERE date(start_time/1000, 'unixepoch') = :date) " +
+           "(SELECT session_id FROM sessions WHERE start_time >= :start AND start_time < :end) " +
            "AND is_whitelisted = 1")
-    Long getTotalWhitelistedTimeForDate(String date);
+    Long getTotalWhitelistedTimeForDateRange(long start, long end);
+
+    default Long getTotalWhitelistedTimeForDate(String date) {
+        long[] bounds = localDayBounds(date);
+        return getTotalWhitelistedTimeForDateRange(bounds[0], bounds[1]);
+    }
     
     // Weekly calculations
     @Query("SELECT COUNT(*) FROM sessions WHERE strftime('%Y-%W', start_time/1000, 'unixepoch') = :weekKey")
@@ -208,6 +266,7 @@ public interface AnalyticsDao {
     @Transaction
     default void insertSessionWithAppUsage(SessionEntity session, List<AppUsageEntity> appUsages) {
         long sessionId = insertSession(session);
+        if (sessionId == -1) return; // Already saved; do not duplicate its app usage.
         if (appUsages != null && !appUsages.isEmpty()) {
             for (AppUsageEntity appUsage : appUsages) {
                 appUsage.sessionId = sessionId;

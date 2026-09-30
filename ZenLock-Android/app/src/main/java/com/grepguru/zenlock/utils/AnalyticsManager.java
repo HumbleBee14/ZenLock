@@ -40,6 +40,7 @@ public class AnalyticsManager {
     private MobileUsageTracker mobileUsageTracker;
     
     // Current session tracking (still using SharedPreferences for active session state)
+    private static final Object SESSION_LOCK = new Object();
     private static final String SESSION_PREFS = "CurrentSessionPrefs";
     private SharedPreferences sessionPrefs;
     
@@ -56,7 +57,10 @@ public class AnalyticsManager {
         this.mobileUsageTracker = new MobileUsageTracker(context);
         
         // Restore current session state if exists
-        restoreCurrentSessionState();
+        synchronized (SESSION_LOCK) {
+            restoreCurrentSessionState();
+            recoverExpiredSession();
+        }
         
         // Update today's mobile usage if permission is available (only once per app launch)
         updateTodayMobileUsageIfAvailable();
@@ -87,30 +91,37 @@ public class AnalyticsManager {
      * Start a new focus session with source
      */
     public void startSession(long targetDurationMillis, String source) {
-        currentSessionStart = System.currentTimeMillis();
-        currentSessionTarget = targetDurationMillis;
-        currentSessionSource = source;
-        currentSessionAppUsage.clear();
+        synchronized (SESSION_LOCK) {
+            sessionPrefs.edit().remove("session_end").remove("session_completed").apply();
+            currentSessionStart = System.currentTimeMillis();
+            currentSessionTarget = targetDurationMillis;
+            currentSessionSource = source;
+            currentSessionAppUsage.clear();
         
-        // Save current session state
-        saveCurrentSessionState();
+            // Save current session state
+            saveCurrentSessionState();
         
-        Log.d(TAG, "Session started: " + formatDuration(targetDurationMillis) + " from " + source);
+            Log.d(TAG, "Session started: " + formatDuration(targetDurationMillis) + " from " + source);
+        }
     }
     
     /**
      * Record app usage during current session
      */
     public void recordAppUsage(String packageName, long usageTime) {
-        if (currentSessionStart > 0) {
-            String appName = getAppName(packageName);
-            currentSessionAppUsage.put(packageName, 
-                currentSessionAppUsage.getOrDefault(packageName, 0L) + usageTime);
+        synchronized (SESSION_LOCK) {
+            restoreCurrentSessionState();
+            if (sessionPrefs.contains("session_end")) return;
+            if (currentSessionStart > 0) {
+                String appName = getAppName(packageName);
+                currentSessionAppUsage.put(packageName,
+                    currentSessionAppUsage.getOrDefault(packageName, 0L) + usageTime);
             
-            // Update session state
-            saveCurrentSessionState();
+                // Update session state
+                saveCurrentSessionState();
             
-            Log.d(TAG, "App usage recorded: " + appName + " (" + formatDuration(usageTime) + ")");
+                Log.d(TAG, "App usage recorded: " + appName + " (" + formatDuration(usageTime) + ")");
+            }
         }
     }
     
@@ -135,50 +146,76 @@ public class AnalyticsManager {
      * End current focus session
      */
     public void endSession(boolean completed) {
-        if (currentSessionStart == 0) {
-            Log.w(TAG, "No active session to end");
-            return;
-        }
+        synchronized (SESSION_LOCK) {
+            restoreCurrentSessionState();
+            if (currentSessionStart == 0) {
+                Log.w(TAG, "No active session to end");
+                return;
+            }
         
-        long endTime = System.currentTimeMillis();
-        long actualDuration = endTime - currentSessionStart;
-        int focusScore = calculateFocusScore(actualDuration, currentSessionTarget);
+            SharedPreferences focusPrefs = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
+            long deadline = focusPrefs.getLong("lockEndTime", 0);
+            long now = System.currentTimeMillis();
+            if (deadline >= currentSessionStart && deadline <= now) completed = true;
+            long endTime = sessionPrefs.getLong("session_end",
+                    completed && deadline >= currentSessionStart && deadline <= now ? deadline : now);
+            completed = sessionPrefs.getBoolean("session_completed", completed);
+            currentSessionTarget = focusPrefs.getLong("lockTargetDuration", currentSessionTarget);
+            long actualDuration = Math.max(0, endTime - currentSessionStart);
+            // Retain the final snapshot until Room confirms the transaction. A restart can retry it.
+            sessionPrefs.edit().putLong("session_end", endTime)
+                    .putBoolean("session_completed", completed)
+                    .putLong("session_target", currentSessionTarget).apply();
+            int focusScore = calculateFocusScore(actualDuration, currentSessionTarget);
         
-        // Create session entity
-        SessionEntity session = new SessionEntity(
-            System.currentTimeMillis(), // Use current time as session ID
-            currentSessionStart,
-            endTime,
-            currentSessionTarget,
-            actualDuration,
-            completed,
-            currentSessionSource,
-            focusScore
-        );
-        
-        // Create app usage entities
-        List<AppUsageEntity> appUsages = new ArrayList<>();
-        for (Map.Entry<String, Long> entry : currentSessionAppUsage.entrySet()) {
-            AppUsageEntity appUsage = new AppUsageEntity(
-                session.sessionId,
-                entry.getKey(),
-                getAppName(entry.getKey()),
-                entry.getValue(),
-                isWhitelisted(entry.getKey())
+            // Create session entity
+            SessionEntity session = new SessionEntity(
+                currentSessionStart, // Stable ID makes retries and multiple managers idempotent
+                currentSessionStart,
+                endTime,
+                currentSessionTarget,
+                actualDuration,
+                completed,
+                currentSessionSource,
+                focusScore
             );
-            appUsages.add(appUsage);
+        
+            // Create app usage entities
+            List<AppUsageEntity> appUsages = new ArrayList<>();
+            for (Map.Entry<String, Long> entry : currentSessionAppUsage.entrySet()) {
+                AppUsageEntity appUsage = new AppUsageEntity(
+                    session.sessionId,
+                    entry.getKey(),
+                    getAppName(entry.getKey()),
+                    entry.getValue(),
+                    isWhitelisted(entry.getKey())
+                );
+                appUsages.add(appUsage);
+            }
+        
+            // Save session to database
+            repository.insertSession(session, appUsages, () -> {
+                synchronized (SESSION_LOCK) {
+                    if (sessionPrefs.getLong("session_start", 0) == session.startTime) {
+                        clearCurrentSessionState();
+                    }
+                }
+            });
+        
+            Log.d(TAG, "Session ended: " + (completed ? "COMPLETED" : "INTERRUPTED") +
+                  " Duration: " + formatDuration(actualDuration) +
+                  " Target: " + formatDuration(currentSessionTarget) +
+                  " Score: " + focusScore);
         }
-        
-        // Save session to database
-        repository.insertSession(session, appUsages);
-        
-        // Clear current session
-        clearCurrentSessionState();
-        
-        Log.d(TAG, "Session ended: " + (completed ? "COMPLETED" : "INTERRUPTED") + 
-              " Duration: " + formatDuration(actualDuration) + 
-              " Target: " + formatDuration(currentSessionTarget) +
-              " Score: " + focusScore);
+    }
+
+    private void recoverExpiredSession() {
+        long deadline = context.getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE)
+                .getLong("lockEndTime", 0);
+        if (currentSessionStart > 0 && (sessionPrefs.contains("session_end")
+                || (deadline >= currentSessionStart && deadline <= System.currentTimeMillis()))) {
+            endSession(true);
+        }
     }
     
     // =====================================
@@ -301,7 +338,7 @@ public class AnalyticsManager {
      * Check if there's an active session
      */
     public boolean hasActiveSession() {
-        return currentSessionStart > 0;
+        return sessionPrefs.getLong("session_start", 0) > 0 && !sessionPrefs.contains("session_end");
     }
     
     /**
@@ -331,14 +368,15 @@ public class AnalyticsManager {
     public long getThisWeekFocusTime() {
         try {
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.add(Calendar.DAY_OF_YEAR, -((calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7));
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
             
             long weekStart = calendar.getTimeInMillis();
-            long weekEnd = weekStart + (7 * 24 * 60 * 60 * 1000);
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+            long weekEnd = calendar.getTimeInMillis();
             
             return repository.getTotalFocusTimeForPeriod(weekStart, weekEnd);
         } catch (Exception e) {
@@ -353,14 +391,15 @@ public class AnalyticsManager {
     public long getLastWeekFocusTime() {
         try {
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.add(Calendar.DAY_OF_YEAR, -((calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7));
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
             
             long thisWeekStart = calendar.getTimeInMillis();
-            long lastWeekStart = thisWeekStart - (7 * 24 * 60 * 60 * 1000);
+            calendar.add(Calendar.WEEK_OF_YEAR, -1);
+            long lastWeekStart = calendar.getTimeInMillis();
             long lastWeekEnd = thisWeekStart;
             
             return repository.getTotalFocusTimeForPeriod(lastWeekStart, lastWeekEnd);
@@ -407,7 +446,8 @@ public class AnalyticsManager {
             calendar.set(Calendar.MILLISECOND, 0);
             
             long monthStart = calendar.getTimeInMillis();
-            long monthEnd = monthStart + (30L * 24 * 60 * 60 * 1000); // Approximate month
+            calendar.add(Calendar.MONTH, 1);
+            long monthEnd = calendar.getTimeInMillis();
             
             return repository.getTotalFocusTimeForPeriod(monthStart, monthEnd);
         } catch (Exception e) {

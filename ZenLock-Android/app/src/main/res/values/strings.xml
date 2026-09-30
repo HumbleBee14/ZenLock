@@ -66,4 +66,10 @@
     <string name="schedule_none_upcoming_hint">Enable a schedule or create a new one to plan your next focus session.</string>
     <string name="schedule_enabled">Enabled</string>
     <string name="schedule_paused">Paused</string>
+    <string name="insights_usage_title">See your phone usage</string>
+    <string name="insights_usage_message">Enable Usage Access to see time spent in other apps. Your focus sessions are tracked without it.</string>
+    <string name="insights_open_settings">Open settings</string>
+    <string name="insights_not_now">Not now</string>
+    <string name="insights_usage_banner">Phone usage unavailable. Tap to enable Usage Access.</string>
+    <string name="blocked_app_notice">This app isn’t allowed during focus.</string>
 </resources>

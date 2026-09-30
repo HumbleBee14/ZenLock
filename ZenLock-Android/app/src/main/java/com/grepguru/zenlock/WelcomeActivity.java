@@ -31,6 +31,8 @@ public class WelcomeActivity extends AppCompatActivity {
     private LinearLayout dots;
     private MaterialButton nextButton;
     private ObjectAnimator glowPulse;
+    private Context introContext;
+    private ValueAnimator pageTransition;
 
     public static boolean shouldShow(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -46,6 +48,14 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Only the brand introduction uses the dark palette; never change the
+        // user's app-wide appearance preference for onboarding.
+        android.view.ContextThemeWrapper darkIntro =
+                new android.view.ContextThemeWrapper(this, R.style.Theme_ZenLock);
+        android.content.res.Configuration darkConfig = new android.content.res.Configuration();
+        darkConfig.uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        darkIntro.applyOverrideConfiguration(darkConfig);
+        introContext = darkIntro;
         com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         setContentView(R.layout.activity_welcome);
         com.grepguru.zenlock.ui.ScreenInsets.applyToContent(this);
@@ -60,16 +70,44 @@ public class WelcomeActivity extends AppCompatActivity {
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
+                updateAppearance(position);
                 updateDots(position);
                 nextButton.setText(position == PAGES.length - 1 ? "Get started" : "Next");
             }
+            @Override public void onPageScrollStateChanged(int state) {
+                nextButton.setEnabled(state == ViewPager2.SCROLL_STATE_IDLE);
+            }
         });
+        updateAppearance(0);
+        updateDots(0);
 
         nextButton.setOnClickListener(v -> {
             int current = pager.getCurrentItem();
             if (current == PAGES.length - 1) finishWelcome();
-            else pager.setCurrentItem(current + 1, true);
+            else advancePage();
         });
+    }
+
+    private void advancePage() {
+        if (pager.getScrollState() != ViewPager2.SCROLL_STATE_IDLE || !pager.beginFakeDrag()) return;
+        nextButton.setEnabled(false);
+        final float direction = pager.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? 1f : -1f;
+        final float[] previous = {0f};
+        pageTransition = ValueAnimator.ofFloat(0f, pager.getWidth());
+        pageTransition.setDuration(700);
+        pageTransition.setInterpolator(new AccelerateDecelerateInterpolator());
+        pageTransition.addUpdateListener(animation -> {
+            float distance = (float) animation.getAnimatedValue();
+            if (pager.isFakeDragging()) pager.fakeDragBy(direction * (distance - previous[0]));
+            previous[0] = distance;
+        });
+        pageTransition.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override public void onAnimationEnd(android.animation.Animator animation) {
+                if (pager.isFakeDragging()) pager.endFakeDrag();
+                nextButton.setEnabled(pager.getScrollState() == ViewPager2.SCROLL_STATE_IDLE);
+            }
+        });
+        pageTransition.start();
     }
 
     private static final int[] FACT_CARDS = {R.id.factCard1, R.id.factCard2, R.id.factCard3, R.id.factCard4};
@@ -126,9 +164,27 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void updateDots(int position) {
+        Context palette = position == 0 ? introContext : this;
         for (int i = 0; i < dots.getChildCount(); i++) {
-            ((ImageView) dots.getChildAt(i)).setImageResource(i == position ? R.drawable.dot_active : R.drawable.dot_inactive);
+            ImageView dot = (ImageView) dots.getChildAt(i);
+            dot.setImageResource(i == position ? R.drawable.dot_active : R.drawable.dot_inactive);
+            dot.setImageTintList(android.content.res.ColorStateList.valueOf(
+                    palette.getColor(i == position ? R.color.primaryLight : R.color.divider)));
         }
+    }
+
+    private void updateAppearance(int position) {
+        Context palette = position == 0 ? introContext : this;
+        findViewById(R.id.welcomeRoot).setBackgroundColor(palette.getColor(R.color.backgroundPrimary));
+        nextButton.setTextColor(palette.getColor(R.color.primaryLight));
+        nextButton.setIconTint(android.content.res.ColorStateList.valueOf(palette.getColor(R.color.primaryLight)));
+        nextButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(palette.getColor(R.color.primaryTonal)));
+        nextButton.setRippleColor(android.content.res.ColorStateList.valueOf(palette.getColor(R.color.primaryRipple)));
+        androidx.core.view.WindowInsetsControllerCompat bars =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        boolean light = palette.getResources().getBoolean(R.bool.light_system_bars);
+        bars.setAppearanceLightStatusBars(light);
+        bars.setAppearanceLightNavigationBars(light);
     }
 
     private void startGlow(View glow) {
@@ -154,6 +210,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (pageTransition != null) pageTransition.cancel();
         if (glowPulse != null) glowPulse.cancel();
         super.onDestroy();
     }
@@ -168,7 +225,8 @@ public class WelcomeActivity extends AppCompatActivity {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+            Context palette = viewType == R.layout.welcome_page_intro ? introContext : parent.getContext();
+            View view = LayoutInflater.from(palette).inflate(viewType, parent, false);
             return new RecyclerView.ViewHolder(view) {};
         }
 

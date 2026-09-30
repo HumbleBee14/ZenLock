@@ -76,12 +76,14 @@
             android:exported="false"
             android:theme="@style/Theme.ZenLock" />
 
-        <!-- Lock Screen Activity -->
+        <!-- Reuse one focus task for manual starts and blocker returns. Keep it in
+             Recents: Android 13 can trim excluded tasks as soon as Home opens. -->
         <activity
             android:name=".LockScreenActivity"
             android:windowSoftInputMode="adjustResize"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}.focus"
+            android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <!-- Whitelist Activity -->

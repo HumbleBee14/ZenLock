@@ -18,6 +18,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class AppBlockerService extends AccessibilityService {
+    private static java.lang.ref.WeakReference<AppBlockerService> connectedService =
+            new java.lang.ref.WeakReference<>(null);
+
+    static void onLockScreenPresented() {
+        AppBlockerService service = connectedService.get();
+        if (service != null) service.clearPendingBlock();
+    }
     private static final Set<String> LAUNCHER_PACKAGES = new HashSet<>(Arrays.asList(
         // Samsung
         "com.sec.android.app.launcher",           // Samsung One UI Launcher
@@ -87,12 +94,13 @@ public class AppBlockerService extends AccessibilityService {
     private SharedPreferences sessionPreferences;
     private boolean launchPending;
     private boolean blockedWindow;
+    private boolean blockedAppReturn;
     private final android.os.Handler sessionHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable presentLockScreen = this::presentLockScreen;
     private final Runnable verifyLockScreen = () -> {
         launchPending = false;
         if (!blockedWindow || LockScreenActivity.isVisible() || !shouldEnforce()) return;
-        LockScreenLauncher.launchFromBlocker(this);
+        LockScreenLauncher.launchFromBlocker(this, blockedAppReturn);
     };
     private final Runnable activateSession = () -> {
         if (sessionPreferences == null) return;
@@ -158,6 +166,7 @@ public class AppBlockerService extends AccessibilityService {
                     || "com.android.systemui".equals(packageName) || "android".equals(packageName))) return;
             clearPendingBlock();
         } else {
+            blockedAppReturn = true;
             blockedWindow = true;
             launchLockScreen();
         }
@@ -172,6 +181,7 @@ public class AppBlockerService extends AccessibilityService {
 
     private void clearPendingBlock() {
         blockedWindow = false;
+        blockedAppReturn = false;
         launchPending = false;
         sessionHandler.removeCallbacks(presentLockScreen);
         sessionHandler.removeCallbacks(verifyLockScreen);
@@ -196,15 +206,16 @@ public class AppBlockerService extends AccessibilityService {
         }
         try {
             if (!MiuiUtils.canStartActivityFromBackground(this)) {
-                LockScreenLauncher.launchFromBlocker(this);
+                LockScreenLauncher.launchFromBlocker(this, blockedAppReturn);
             } else {
                 Intent intent = new Intent(this, LockScreenActivity.class);
+                intent.putExtra(LockScreenActivity.EXTRA_BLOCKED_APP_NOTICE, blockedAppReturn);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         } catch (RuntimeException e) {
             Log.e("AppBlockerService", "Direct launch failed; using notification fallback", e);
-            LockScreenLauncher.launchFromBlocker(this);
+            LockScreenLauncher.launchFromBlocker(this, blockedAppReturn);
         }
         sessionHandler.removeCallbacks(verifyLockScreen);
         sessionHandler.postDelayed(verifyLockScreen, 1500);
@@ -218,6 +229,7 @@ public class AppBlockerService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        connectedService = new java.lang.ref.WeakReference<>(this);
         
         // Initialize analytics manager
         analyticsManager = new AnalyticsManager(this);
@@ -235,6 +247,7 @@ public class AppBlockerService extends AccessibilityService {
     }
     @Override
     public void onDestroy() {
+        if (connectedService.get() == this) connectedService.clear();
         clearPendingBlock();
         sessionHandler.removeCallbacks(activateSession);
         if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);

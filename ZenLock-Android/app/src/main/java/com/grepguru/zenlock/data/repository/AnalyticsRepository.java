@@ -35,7 +35,7 @@ public class AnalyticsRepository {
     public AnalyticsRepository(Context context) {
         AnalyticsDatabase db = AnalyticsDatabase.getDatabase(context);
         analyticsDao = db.analyticsDao();
-        executor = Executors.newFixedThreadPool(4);
+        executor = Executors.newSingleThreadExecutor();
     }
     
     // =====================================
@@ -46,9 +46,14 @@ public class AnalyticsRepository {
      * Insert a new session with app usage data
      */
     public void insertSession(SessionEntity session, List<AppUsageEntity> appUsages) {
+        insertSession(session, appUsages, () -> {});
+    }
+
+    public void insertSession(SessionEntity session, List<AppUsageEntity> appUsages, Runnable onSaved) {
         executor.execute(() -> {
             try {
                 analyticsDao.insertSessionWithAppUsage(session, appUsages);
+                onSaved.run();
                 Log.d(TAG, "Session inserted: " + session.sessionId);
                 
                 // Update daily stats after inserting session
@@ -103,7 +108,9 @@ public class AnalyticsRepository {
      * Get today's stats
      */
     public LiveData<DailyStatsEntity> getTodayStats() {
-        return getDailyStats(getCurrentDate());
+        String date = getCurrentDate();
+        long[] bounds = AnalyticsDao.localDayBounds(date);
+        return analyticsDao.observeLocalDayStats(date, bounds[0], bounds[1]);
     }
     
     /**
@@ -172,7 +179,16 @@ public class AnalyticsRepository {
      */
     public List<DailyStatsEntity> getDailyStatsForDateRangeSync(String startDate, String endDate) {
         try {
-            return analyticsDao.getDailyStatsForDateRangeSync(startDate, endDate);
+            // Derive chart totals from sessions, including records written before the
+            // local-day fix; do not reuse stale UTC-grouped daily_stats rows.
+            List<DailyStatsEntity> result = new java.util.ArrayList<>();
+            java.time.LocalDate end = java.time.LocalDate.parse(endDate);
+            for (java.time.LocalDate day = java.time.LocalDate.parse(startDate);
+                    !day.isAfter(end); day = day.plusDays(1)) {
+                long[] bounds = AnalyticsDao.localDayBounds(day.toString());
+                result.add(analyticsDao.calculateLocalDayStats(day.toString(), bounds[0], bounds[1]));
+            }
+            return result;
         } catch (Exception e) {
             Log.e(TAG, "Error getting daily stats for date range", e);
             return java.util.Collections.emptyList();

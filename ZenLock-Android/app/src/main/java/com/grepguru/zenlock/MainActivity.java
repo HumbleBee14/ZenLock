@@ -177,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
             
                     if (isLocked && lockEndTime > 0 && currentTime >= lockEndTime) {
                         Log.w(TAG, "Found expired session on app start, cleaning up");
+                        // Recover the completed session before removing its deadline.
+                        new AnalyticsManager(this);
                         android.content.SharedPreferences.Editor editor = prefs.edit();
                         editor.putBoolean("isLocked", false);
                         editor.remove("lockEndTime");

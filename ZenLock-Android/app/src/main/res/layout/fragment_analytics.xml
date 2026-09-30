@@ -36,7 +36,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone"
-            android:text="Usage access required for full analytics. Tap to grant."
+            android:text="@string/insights_usage_banner"
             android:textSize="13sp"
             android:textColor="@color/scoreGold"
             android:background="@drawable/glass_card_inner"
@@ -59,7 +59,8 @@
             app:layout_constraintTop_toBottomOf="@id/usagePermissionBanner"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp">
+            app:cardElevation="0dp"
+            android:clipToOutline="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -201,7 +202,8 @@
             android:layout_marginBottom="4dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            app:cardElevation="0dp"
+            android:clipToOutline="true"
             app:layout_constraintTop_toBottomOf="@id/todayStatsCard">
 
             <LinearLayout
@@ -490,7 +492,8 @@
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            app:cardElevation="0dp"
+            android:clipToOutline="true"
             app:layout_constraintTop_toBottomOf="@id/trendsCard">
 
             <LinearLayout
@@ -555,7 +558,8 @@
             android:layout_marginBottom="32dp"
             app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            app:cardElevation="0dp"
+            android:clipToOutline="true"
             app:layout_constraintTop_toBottomOf="@id/mostUsedCard">
 
             <LinearLayout

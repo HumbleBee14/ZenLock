@@ -67,6 +67,8 @@ public class AnalyticsFragment extends Fragment {
     
     // Usage permission banner
     private TextView usagePermissionBanner;
+    private boolean usagePromptShown;
+    private AlertDialog usagePrompt;
     
     private TabLayout trendsTabs;
     private TabLayout mostUsedTabs;
@@ -99,6 +101,7 @@ public class AnalyticsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        usagePromptShown = savedInstanceState != null && savedInstanceState.getBoolean("usage_prompt_shown", false);
 
         // Initialize analytics manager
         analyticsManager = new AnalyticsManager(requireContext());
@@ -139,11 +142,14 @@ public class AnalyticsFragment extends Fragment {
         // Check permission status when returning from settings (single check)
         checkUsageStatsPermission();
         
-        // Check if user granted permission while away
-        checkPermissionStatusOnResume();
+        showUsagePromptIfNeeded();
         
         refreshMobileUsageData();
         loadMostUsed();
+        loadWeeklyStats();
+        loadMonthlyStats();
+        loadWeeklyChart();
+        loadMonthlyChart();
     }
 
     private void setupMostUsedTabs() {
@@ -303,6 +309,11 @@ public class AnalyticsFragment extends Fragment {
             trendsChart.invalidate();
         } else {
             trendsChart.clear();
+        }
+        if (!analyticsManager.hasUsageStatsPermission()) {
+            currentMobileUsage.setText("—");
+            previousMobileUsage.setText("—");
+            mobileChange.setText("—");
         }
     }
 
@@ -571,6 +582,7 @@ public class AnalyticsFragment extends Fragment {
         if (usagePermissionBanner != null) {
             usagePermissionBanner.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
         }
+        if (!hasPermission && todayMobileUsage != null) todayMobileUsage.setText("—");
     }
     
     
@@ -680,6 +692,10 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void refreshMobileUsageData() {
+        if (!analyticsManager.hasUsageStatsPermission()) {
+            todayMobileUsage.setText("—");
+            return;
+        }
         // Force refresh mobile usage data every time analytics page is opened
         new Thread(() -> {
             try {
@@ -693,7 +709,9 @@ public class AnalyticsFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         if (!isAdded()) return; // Double check fragment is still attached
                         if (todayMobileUsage != null) {
-                            if (mobileUsageMs > 0) {
+                            if (!analyticsManager.hasUsageStatsPermission()) {
+                                todayMobileUsage.setText("—");
+                            } else if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
                             } else {
                                 todayMobileUsage.setText("0m");
@@ -708,6 +726,10 @@ public class AnalyticsFragment extends Fragment {
     }
     
     private void updateMobileUsageDisplay() {
+        if (!analyticsManager.hasUsageStatsPermission()) {
+            todayMobileUsage.setText("—");
+            return;
+        }
         // Get real mobile usage data using DailyMobileUsageManager for efficiency
         new Thread(() -> {
             try {
@@ -722,7 +744,9 @@ public class AnalyticsFragment extends Fragment {
                         if (!isAdded()) return; // Double check fragment is still attached
                         // Update mobile usage
                         if (todayMobileUsage != null) {
-                            if (mobileUsageMs > 0) {
+                            if (!analyticsManager.hasUsageStatsPermission()) {
+                                todayMobileUsage.setText("—");
+                            } else if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
                             } else {
                                 todayMobileUsage.setText("0m");
@@ -870,17 +894,32 @@ public class AnalyticsFragment extends Fragment {
     }
 
     
-    private void checkPermissionStatusOnResume() {
+    private void showUsagePromptIfNeeded() {
         if (analyticsManager.hasUsageStatsPermission()) {
-            // Permission granted! Reset permission state
             UsageStatsPermissionManager.resetPermissionState(requireContext());
-            
-            // Mobile usage will be updated automatically by AnalyticsManager
-            
-        } else if (UsageStatsPermissionManager.shouldShowPermissionRequest(requireContext())) {
-            // User came back but didn't grant permission
-            UsageStatsPermissionManager.markPermissionDenied(requireContext());
+            if (usagePrompt != null) usagePrompt.dismiss();
+            return;
         }
+        if (usagePromptShown) return;
+        usagePromptShown = true;
+        usagePrompt = new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.insights_usage_title)
+                .setMessage(R.string.insights_usage_message)
+                .setPositiveButton(R.string.insights_open_settings, (dialog, which) ->
+                        com.grepguru.zenlock.permissions.AppPermission.USAGE_ACCESS.request(requireActivity()))
+                .setNegativeButton(R.string.insights_not_now, null)
+                .show();
+    }
+
+    @Override public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("usage_prompt_shown", usagePromptShown);
+    }
+
+    @Override public void onDestroyView() {
+        if (usagePrompt != null) usagePrompt.dismiss();
+        usagePrompt = null;
+        super.onDestroyView();
     }
     
     

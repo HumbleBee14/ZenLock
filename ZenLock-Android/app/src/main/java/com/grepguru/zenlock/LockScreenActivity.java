@@ -49,6 +49,23 @@ import java.util.List;
 import java.util.Set;
 
 public class LockScreenActivity extends AppCompatActivity {
+    static final String EXTRA_BLOCKED_APP_NOTICE = "show_blocked_app_notice";
+    private Toast blockedAppToast;
+    private long lastBlockedNoticeAt = -3000;
+
+    private void showBlockedAppNotice() {
+        Intent intent = getIntent();
+        if (!canHandleLifecycle() || !isLockScreenVisible || intent == null
+                || !intent.getBooleanExtra(EXTRA_BLOCKED_APP_NOTICE, false)) return;
+        intent.removeExtra(EXTRA_BLOCKED_APP_NOTICE);
+        long now = android.os.SystemClock.elapsedRealtime();
+        if (now - lastBlockedNoticeAt < 3000) return;
+        lastBlockedNoticeAt = now;
+        if (blockedAppToast != null) blockedAppToast.cancel();
+        blockedAppToast = Toast.makeText(this, R.string.blocked_app_notice, Toast.LENGTH_SHORT);
+        blockedAppToast.show();
+    }
+
 
     private com.grepguru.zenlock.ui.interaction.UnlockHoldController unlockHold;
     private static volatile boolean isLockScreenActive = false;
@@ -463,12 +480,15 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
+        showBlockedAppNotice();
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) manager.cancel(LockScreenService.NOTIFICATION_ID);
     }
 
     @Override
     protected void onPause() {
+        if (blockedAppToast != null) blockedAppToast.cancel();
         if (unlockHold != null) unlockHold.cancel();
         if (ownsActiveScreen) isLockScreenVisible = false;
         super.onPause();
@@ -487,6 +507,10 @@ public class LockScreenActivity extends AppCompatActivity {
         super.onResume();
         if (!canHandleLifecycle()) return;
         isLockScreenVisible = true;
+        // Reusing a task need not emit a new accessibility window event. Confirm
+        // presentation so a subsequent blocked app isn't held behind an old retry.
+        AppBlockerService.onLockScreenPresented();
+        showBlockedAppNotice();
         createPersistentNotificationIfEnabled();
     }
 
@@ -630,6 +654,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (blockedAppToast != null) blockedAppToast.cancel();
         if (unlockHold != null) unlockHold.cancel();
         super.onDestroy();
         screenInitialized = false;

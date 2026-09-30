@@ -83,7 +83,7 @@ public class MobileUsageTracker {
      */
     public static long[] getWeekTimestamps(Calendar anyDay) {
         Calendar cal = (Calendar) anyDay.clone();
-        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.add(Calendar.DAY_OF_YEAR, -((cal.get(Calendar.DAY_OF_WEEK) + 5) % 7));
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -105,7 +105,7 @@ public class MobileUsageTracker {
     public static long[] getThisWeekSoFarTimestamps() {
         Calendar now = Calendar.getInstance(TimeZone.getDefault());
         Calendar start = (Calendar) now.clone();
-        start.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        start.add(Calendar.DAY_OF_YEAR, -((start.get(Calendar.DAY_OF_WEEK) + 5) % 7));
         start.set(Calendar.HOUR_OF_DAY, 0);
         start.set(Calendar.MINUTE, 0);
         start.set(Calendar.SECOND, 0);
