@@ -1,4 +1,5 @@
 import DeviceActivity
+import ExtensionKit
 import SwiftUI
 
 @main
