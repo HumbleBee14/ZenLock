@@ -29,38 +29,32 @@ struct EditGroupView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                ZenTheme.background.ignoresSafeArea()
-                ScrollView {
-                    VStack(spacing: ZenTheme.Spacing.lg) {
-                        GroupFormView(draft: $draft, lockStructure: lockStructure)
-                        unlockCard
-                        deleteCard
-                    }
-                    .padding(.horizontal, ZenTheme.Spacing.md)
-                    .padding(.vertical, ZenTheme.Spacing.lg)
+        ZStack {
+            ZenTheme.background.ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: ZenTheme.Spacing.lg) {
+                    GroupFormView(draft: $draft, lockStructure: lockStructure)
+                    unlockCard
+                    deleteCard
                 }
-                .scrollDismissesKeyboard(.interactively)
+                .padding(.horizontal, ZenTheme.Spacing.md)
+                .padding(.vertical, ZenTheme.Spacing.lg)
             }
-            .navigationTitle(group.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundStyle(ZenTheme.textSecondary)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { save() }
-                        .foregroundStyle(ZenTheme.primary)
-                }
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .navigationTitle(group.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { save() }
+                    .foregroundStyle(ZenTheme.primary)
             }
-            .zenToast($toast)
-            .onAppear { refreshPending() }
-            .onReceive(countdownTimer) { _ in
-                now = Date()
-                if let pending, now >= pending.unlocksAt { finalizeUnlock() }
-            }
+        }
+        .zenToast($toast)
+        .onAppear { refreshPending() }
+        .onReceive(countdownTimer) { _ in
+            now = Date()
+            if let pending, now >= pending.unlocksAt { finalizeUnlock() }
         }
     }
 
