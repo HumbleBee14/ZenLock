@@ -245,7 +245,7 @@ struct GroupFormView: View {
                         draft.usageLimitMinutes = draft.usagePeriod.normalizedLimit(draft.usageLimitMinutes)
                     }
                 }
-                Text("Minimum 15 minutes")
+                Text(draft.usagePeriod == .hourly ? "1-minute steps, up to 59 min per hour" : "10-minute steps, up to 12 hr per day")
                     .font(ZenTheme.caption)
                     .foregroundStyle(ZenTheme.textSecondary)
                 Slider(value: Binding(

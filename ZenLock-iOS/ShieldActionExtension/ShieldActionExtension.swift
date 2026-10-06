@@ -11,6 +11,10 @@ class ShieldActionExtension: ShieldActionDelegate {
         for application: ApplicationToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
+        if releaseStaleShields(appToken: application, categoryToken: nil) {
+            completionHandler(.none)
+            return
+        }
         let group = resolveGroup { selection in selection.applicationTokens.contains(application) }
         handle(action: action, group: group, completionHandler: completionHandler)
     }
@@ -20,8 +24,29 @@ class ShieldActionExtension: ShieldActionDelegate {
         for category: ActivityCategoryToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
+        if releaseStaleShields(appToken: nil, categoryToken: category) {
+            completionHandler(.none)
+            return
+        }
         let group = resolveGroup { selection in selection.categoryTokens.contains(category) }
         handle(action: action, group: group, completionHandler: completionHandler)
+    }
+
+    private func releaseStaleShields(appToken: ApplicationToken?, categoryToken: ActivityCategoryToken?) -> Bool {
+        var released = false
+        for group in loadGroups() {
+            guard let data = defaults?.data(forKey: Constants.Keys.selectionPrefix + group.id),
+                  let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) else { continue }
+            let matches = (appToken.map { selection.applicationTokens.contains($0) } ?? false)
+                || (categoryToken.map { selection.categoryTokens.contains($0) } ?? false)
+            guard matches else { continue }
+            if ShieldExpiry.releaseIfStale(groupId: group.id, defaults: defaults) { released = true }
+        }
+        if ShieldTokenMatch.quickFocusShields(appToken: appToken, categoryToken: categoryToken),
+           ShieldExpiry.releaseQuickFocusIfStale(defaults: defaults) {
+            released = true
+        }
+        return released
     }
 
     // MARK: - Core handler

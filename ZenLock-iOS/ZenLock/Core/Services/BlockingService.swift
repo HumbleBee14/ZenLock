@@ -139,11 +139,27 @@ final class BlockingService {
 
         shieldManager.removeShield(forGroupId: shared.id)
         scheduleManager.stopMonitoring(forGroupId: shared.id)
+        CooldownRelease.cancelPending(forGroupId: shared.id)
 
         storage.setGroupActive(shared.id, false)
         UsageBlockState.clear(shared.id)
         syncGroupToAppGroups(group)
         return .success(())
+    }
+
+    func applyReleasedCooldowns(_ groups: [BlockGroup]) {
+        CooldownRelease.releaseGroupIfElapsed()
+        let completed = CooldownRelease.takeCompletedUnlocks()
+        guard !completed.isEmpty else { return }
+        for group in groups where completed.contains(group.id.uuidString) {
+            group.isActive = false
+            group.updatedAt = Date()
+            shieldManager.removeShield(forGroupId: group.id.uuidString)
+            scheduleManager.stopMonitoring(forGroupId: group.id.uuidString)
+            storage.setGroupActive(group.id.uuidString, false)
+            UsageBlockState.clear(group.id.uuidString)
+            syncGroupToAppGroups(group)
+        }
     }
 
     /// Re-evaluate active groups and sync shield state on app foreground.
@@ -208,6 +224,7 @@ final class BlockingService {
     func removeGroupFromAppGroups(_ groupId: String) {
         shieldManager.removeShield(forGroupId: groupId)
         scheduleManager.stopMonitoring(forGroupId: groupId)
+        CooldownRelease.cancelPending(forGroupId: groupId)
         storage.setGroupActive(groupId, false)
 
         var groups = storage.loadGroups()

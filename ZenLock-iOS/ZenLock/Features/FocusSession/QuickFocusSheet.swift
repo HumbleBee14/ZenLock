@@ -268,9 +268,11 @@ private var extendPickerSheet: some View {
 
     private func startCooldown(minutes: Int) {
         guard var a = active else { return }
-        a.cooldownEndsAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        let unlocksAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        a.cooldownEndsAt = unlocksAt
         a.save()
         active = a
+        CooldownRelease.schedule(DeviceActivityName(CooldownRelease.quickFocusActivity), unlocksAt: unlocksAt)
     }
 
     private func cancelCooldown() {
@@ -278,6 +280,7 @@ private var extendPickerSheet: some View {
         a.cooldownEndsAt = nil
         a.save()
         active = a
+        CooldownRelease.cancel(DeviceActivityName(CooldownRelease.quickFocusActivity))
     }
 
     private func extendSession(by minutes: Int) {
@@ -286,6 +289,7 @@ private var extendPickerSheet: some View {
         a.cooldownEndsAt = nil
         a.save()
         active = a
+        CooldownRelease.cancel(DeviceActivityName(CooldownRelease.quickFocusActivity))
         SessionRecorder(context: modelContext).extendQuickFocus(endsAt: a.endsAt)
 
         let center = DeviceActivityCenter()
@@ -438,7 +442,7 @@ private var extendPickerSheet: some View {
 
     private func stop() {
         let center = DeviceActivityCenter()
-        center.stopMonitoring([DeviceActivityName(Self.storeNameString)])
+        center.stopMonitoring([DeviceActivityName(Self.storeNameString), DeviceActivityName(CooldownRelease.quickFocusActivity)])
         ManagedSettingsStore(named: Self.storeName).clearAllSettings()
         ActiveSession.clear()
         active = nil
@@ -447,21 +451,12 @@ private var extendPickerSheet: some View {
     }
 
     private func registerDeviceActivitySchedule(endsAt: Date) {
-        let now = Date()
-        let startComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
-        let endComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: endsAt)
-
-        let schedule = DeviceActivitySchedule(
-            intervalStart: startComponents,
-            intervalEnd: endComponents,
-            repeats: false
-        )
-
         let center = DeviceActivityCenter()
         do {
-            try center.startMonitoring(DeviceActivityName(Self.storeNameString), during: schedule)
+            try center.startMonitoring(DeviceActivityName(Self.storeNameString), during: CooldownRelease.paddedSchedule(endingAt: endsAt))
+            Constants.sharedDefaults?.removeObject(forKey: "quick_focus_monitor_error")
         } catch {
-            print("Failed to register DeviceActivity schedule: \(error)")
+            Constants.sharedDefaults?.set(error.localizedDescription, forKey: "quick_focus_monitor_error")
         }
     }
 

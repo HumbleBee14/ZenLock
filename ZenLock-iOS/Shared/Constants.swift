@@ -17,6 +17,8 @@ enum Constants {
         static let trialStartDate = "zen_trial_start_date"
         static let lastSyncDate = "zen_last_sync_date"
         static let shieldConfigPrefix = "zen_shield_config_"
+        static let quickFocusSession = "zen_quick_focus_session"
+        static let quickFocusReleasedAt = "zen_quick_focus_released_at"
     }
 
     enum Defaults {

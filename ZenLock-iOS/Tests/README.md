@@ -19,7 +19,12 @@ strict legacy sessions, minimum/maximum limits, integer extremes, and schedule
 end components. Persisted threshold state is tested at exact schedule boundaries
 and across 23/25-hour DST days. Additional checks cover duplicate interval
 callbacks, missing-monitor recovery, expired-shield cleanup on foreground, and
-recovery failure diagnostics. Warning checks cover schedule configuration,
+recovery failure diagnostics. Cool-down checks cover the release activity the
+extension uses to unlock after a stop, early and late release callbacks,
+foreground reconciliation, and Quick Focus release. Self-healing shield checks
+cover expired usage periods, finished time windows, inactive or deleted
+sessions, elapsed cool-downs, orphaned Quick Focus shields, and the sweep every
+monitor callback performs for other sessions, while live blocks stay in place. Warning checks cover schedule configuration,
 valid notifications, and rejection of unrelated/stopped/deleted-group events.
 The real SDK integration must also compile:
 
@@ -35,10 +40,16 @@ Host checks and unsigned builds do not validate callback delivery, app-group
 provisioning, or enforcement by the Screen Time daemon. Before release, use a
 signed build on an iPhone and record its iOS version and app build:
 
-- Verify hourly and daily sliders start at 15 minutes and display the minimum.
-  Switch periods with the slider at each end. Edit a legacy 5/10-minute session:
-  an unlocked draft becomes 15 minutes; a running strict session retains its
-  enforced configuration through cosmetic edits.
+- Verify the hourly slider moves in 1-minute steps and the daily slider in
+  10-minute steps. Switch periods with the slider at each end. Edit a legacy
+  15-minute daily session: an unlocked draft snaps to a 10-minute step; a running
+  strict session retains its enforced configuration through cosmetic edits.
+- Set a 1-minute hourly limit and use the app; verify the shield appears within a
+  few minutes of the limit (callback timing is controlled by iOS).
+- Stop a non-strict session with a 1-minute cool-down, leave ZenLock, and open a
+  blocked app after the countdown: it must open without reopening ZenLock. Also
+  stop a Quick Focus session the same way. Reopen ZenLock and verify the session
+  shows as off and its history entry is closed.
 - Select a single app, then repeat with a category. With no previous usage, use
   the selection for 15 minutes in the current period. With notification permission
   enabled, verify the usage warning is delivered near 14 minutes (delivery timing
@@ -59,11 +70,17 @@ signed build on an iPhone and record its iOS version and app build:
   Verify the error is shown and no session is falsely marked active. Correct the
   problem and retry from the same editor.
 - Stop or delete a session and verify late callbacks cannot reactivate it.
+- Force a stale shield (for example, reach an hourly limit, then keep the phone
+  idle past the hour) and tap the blocked app: the shield should read "Block
+  ended" with an Unlock button, and tapping it should open the app without
+  opening ZenLock.
 
 ## Platform limits
 
-The 15-minute usage minimum is a product rule. Apple's 15-minute API minimum
-applies to the monitoring schedule, not to the usage threshold.
+Usage limits move in 1-minute steps per hour (1–59 min) and 10-minute steps per
+day (10 min–12 hr). Apple's 15-minute API minimum applies to the monitoring
+schedule, not to the usage threshold, so short thresholds are valid; iOS still
+controls how promptly a threshold callback is delivered.
 
 The app honors matching threshold callbacks, including immediate callbacks for
 past usage. It cannot distinguish a legitimate callback from Apple's reported

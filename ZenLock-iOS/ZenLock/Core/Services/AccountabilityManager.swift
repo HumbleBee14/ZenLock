@@ -1,14 +1,6 @@
 import Foundation
 
 final class AccountabilityManager {
-    static let pendingUnlockKey = "zen_pending_unlock"
-
-    struct PendingUnlock: Codable {
-        let groupId: String
-        let groupName: String
-        let requestedAt: Date
-        let unlocksAt: Date
-    }
 
     private let defaults: UserDefaults?
 
@@ -17,30 +9,30 @@ final class AccountabilityManager {
     }
 
     var pendingUnlock: PendingUnlock? {
-        guard let data = defaults?.data(forKey: Self.pendingUnlockKey) else { return nil }
-        return try? JSONDecoder().decode(PendingUnlock.self, from: data)
+        PendingUnlock.load(defaults: defaults)
     }
 
-    /// Begin the cool-down. Returns the unlock-at date.
     @discardableResult
     func requestUnlock(group: BlockGroup) -> Date {
         let cool = CooldownService.minutes
         let now = Date()
         let unlocksAt = now.addingTimeInterval(TimeInterval(cool * 60))
+        let id = group.id.uuidString
 
-        let pending = PendingUnlock(
-            groupId: group.id.uuidString,
+        PendingUnlock(
+            groupId: id,
             groupName: group.name,
             requestedAt: now,
             unlocksAt: unlocksAt
-        )
-        if let data = try? JSONEncoder().encode(pending) {
-            defaults?.set(data, forKey: Self.pendingUnlockKey)
-        }
+        ).save(defaults: defaults)
+        CooldownRelease.schedule(CooldownRelease.groupActivity(id), unlocksAt: unlocksAt, now: now)
         return unlocksAt
     }
 
     func cancelPendingUnlock() {
-        defaults?.removeObject(forKey: Self.pendingUnlockKey)
+        if let pending = pendingUnlock {
+            CooldownRelease.cancel(CooldownRelease.groupActivity(pending.groupId))
+        }
+        PendingUnlock.clear(defaults: defaults)
     }
 }

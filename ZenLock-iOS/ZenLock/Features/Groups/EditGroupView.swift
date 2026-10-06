@@ -8,7 +8,7 @@ struct EditGroupView: View {
 
     @Bindable var group: BlockGroup
     @State private var draft: GroupDraft
-    @State private var pending: AccountabilityManager.PendingUnlock?
+    @State private var pending: PendingUnlock?
     @State private var now = Date()
     @State private var retryActivation = false
     @State private var toast: ZenToastData?
@@ -83,7 +83,9 @@ struct EditGroupView: View {
                     Button("No", role: .cancel) {}
                     Button("Yes", role: .destructive) {
                         Task {
-                            _ = await stopCoordinator.requestStop(group)
+                            if case .anotherCooldownRunning(let groupName) = await stopCoordinator.requestStop(group) {
+                                toast = ZenToastData(message: "“\(groupName)” is already cooling down. Wait for it to finish first.", kind: .warning)
+                            }
                             refreshPending()
                         }
                     }

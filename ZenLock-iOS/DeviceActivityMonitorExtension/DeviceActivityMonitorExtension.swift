@@ -9,7 +9,12 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let defaults = UserDefaults(suiteName: Constants.appGroupID)
 
     override func intervalDidStart(for activity: DeviceActivityName) {
+        if CooldownRelease.isReleaseActivity(activity) {
+            releaseCooldown(for: activity)
+            return
+        }
         guard activity.rawValue != Constants.quickFocusActivity else { return }
+        ShieldExpiry.sweep(excluding: extractGroupId(from: activity), defaults: defaults)
         evaluateBlockState(for: activity, reason: .intervalStart)
         let groupId = extractGroupId(from: activity)
         if let group = loadGroup(groupId), group.blockMode == .timeBased, ScheduleEvaluator.isWithinSchedule(group) {
@@ -18,10 +23,15 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        if activity.rawValue == Constants.quickFocusActivity {
-            ManagedSettingsStore(named: .init(activity.rawValue)).clearAllSettings()
+        if CooldownRelease.isReleaseActivity(activity) {
+            releaseCooldown(for: activity)
             return
         }
+        if activity.rawValue == Constants.quickFocusActivity {
+            ShieldExpiry.releaseQuickFocusIfStale(now: Date().addingTimeInterval(Self.endCallbackGrace), defaults: defaults)
+            return
+        }
+        ShieldExpiry.sweep(excluding: extractGroupId(from: activity), defaults: defaults)
         evaluateBlockState(for: activity, reason: .intervalEnd)
     }
 
@@ -34,6 +44,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         guard let group = loadGroup(activity.rawValue),
               group.blockMode == .usageBased,
               event.rawValue == "usage_limit_\(group.id)" else { return }
+        ShieldExpiry.sweep(excluding: group.id, defaults: defaults)
         evaluateBlockState(for: activity, reason: .thresholdReached)
     }
 
@@ -60,7 +71,17 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         UNUserNotificationCenter.current().add(request)
     }
 
+    private func releaseCooldown(for activity: DeviceActivityName) {
+        if activity.rawValue == CooldownRelease.quickFocusActivity {
+            CooldownRelease.releaseQuickFocusIfElapsed(defaults: defaults)
+        } else {
+            CooldownRelease.releaseGroupIfElapsed(defaults: defaults)
+        }
+    }
+
     // MARK: - Single-path evaluation
+
+    private static let endCallbackGrace: TimeInterval = 60
 
     private enum EvalReason {
         case intervalStart, intervalEnd, thresholdReached
@@ -79,7 +100,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         let shouldBlock: Bool
         switch group.blockMode {
         case .timeBased:
-            shouldBlock = (reason != .intervalEnd) && ScheduleEvaluator.isWithinSchedule(group)
+            let probe = reason == .intervalEnd ? Date().addingTimeInterval(Self.endCallbackGrace) : Date()
+            shouldBlock = ScheduleEvaluator.isWithinSchedule(group, at: probe)
         case .usageBased:
             let period = group.usagePeriod ?? .daily
             if reason == .thresholdReached {

@@ -11,13 +11,45 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     private let grayColor = UIColor(red: 120/255, green: 120/255, blue: 128/255, alpha: 1)
 
     override func configuration(shielding application: Application) -> ShieldConfiguration {
+        if isStale(appToken: application.token, categoryToken: nil) { return releasedConfiguration() }
         let group = resolveGroup(for: application.token, categoryToken: nil)
         return buildConfiguration(for: group, fallbackName: application.localizedDisplayName)
     }
 
     override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
+        if isStale(appToken: application.token, categoryToken: category.token) { return releasedConfiguration() }
         let group = resolveGroup(for: application.token, categoryToken: category.token)
         return buildConfiguration(for: group, fallbackName: category.localizedDisplayName)
+    }
+
+    private func isStale(appToken: ApplicationToken?, categoryToken: ActivityCategoryToken?) -> Bool {
+        var matched = false
+        for group in loadGroups() {
+            guard let selection = decodeSelection(defaults?.data(forKey: Constants.Keys.selectionPrefix + group.id)) else { continue }
+            let matches = (appToken.map { selection.applicationTokens.contains($0) } ?? false)
+                || (categoryToken.map { selection.categoryTokens.contains($0) } ?? false)
+            guard matches else { continue }
+            matched = true
+            if !ShieldExpiry.isStale(groupId: group.id, defaults: defaults) { return false }
+        }
+        if ShieldTokenMatch.quickFocusShields(appToken: appToken, categoryToken: categoryToken) {
+            matched = true
+            if !ShieldExpiry.quickFocusIsStale(defaults: defaults) { return false }
+        }
+        return matched
+    }
+
+    private func releasedConfiguration() -> ShieldConfiguration {
+        ShieldConfiguration(
+            backgroundBlurStyle: .systemUltraThinMaterialDark,
+            backgroundColor: UIColor.black.withAlphaComponent(0.85),
+            icon: nil,
+            title: ShieldConfiguration.Label(text: "🧘 Block ended", color: .white),
+            subtitle: ShieldConfiguration.Label(text: "This block has finished. Tap Unlock to continue.", color: UIColor.white.withAlphaComponent(0.7)),
+            primaryButtonLabel: ShieldConfiguration.Label(text: "Unlock", color: .white),
+            primaryButtonBackgroundColor: indigoColor,
+            secondaryButtonLabel: nil
+        )
     }
 
     // MARK: - Group resolution

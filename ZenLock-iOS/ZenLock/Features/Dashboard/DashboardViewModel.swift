@@ -20,6 +20,8 @@ final class DashboardViewModel {
     func loadGroups(context: ModelContext) {
         let descriptor = FetchDescriptor<BlockGroup>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
         groups = (try? context.fetch(descriptor)) ?? []
+        blockingService.applyReleasedCooldowns(groups)
+        try? context.save()
         SessionLedger.reconcile(context: context)
         updateWidgetSnapshot(context: context)
     }
@@ -70,6 +72,8 @@ final class DashboardViewModel {
             )
         case .authFailed:
             toast = ZenToastData(message: "Authentication required to stop.", kind: .warning)
+        case .anotherCooldownRunning(let groupName):
+            toast = ZenToastData(message: "“\(groupName)” is already cooling down. Wait for it to finish first.", kind: .warning)
         case .cooldownStarted:
             toast = ZenToastData(message: "Cooling down — apps unlock when the timer ends.", kind: .info)
         }
@@ -80,9 +84,12 @@ final class DashboardViewModel {
         for group in groups where stopCoordinator.pendingUnlock(for: group) != nil {
             stopCoordinator.finalizeIfElapsed(group, context: context)
         }
+        if CooldownRelease.releaseQuickFocusIfElapsed() {
+            SessionLedger.reconcile(context: context)
+        }
     }
 
-    func pendingUnlock(for group: BlockGroup) -> AccountabilityManager.PendingUnlock? {
+    func pendingUnlock(for group: BlockGroup) -> PendingUnlock? {
         stopCoordinator.pendingUnlock(for: group)
     }
 

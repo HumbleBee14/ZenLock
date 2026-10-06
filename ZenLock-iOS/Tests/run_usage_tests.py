@@ -12,11 +12,12 @@ import tempfile
 root = Path(__file__).resolve().parents[1]
 files = [
     'Shared/Constants.swift', 'Shared/SharedEnums.swift',
-    'Shared/SharedBlockGroup.swift', 'Shared/ScheduleEvaluator.swift', 'Shared/WindowLog.swift', 'Shared/UsageBlockState.swift',
+    'Shared/SharedBlockGroup.swift', 'Shared/ScheduleEvaluator.swift', 'Shared/WindowLog.swift', 'Shared/UsageBlockState.swift', 'Shared/CooldownRelease.swift', 'Shared/ShieldExpiry.swift',
     'ZenLock/Core/Persistence/SelectionCoder.swift', 'ZenLock/Core/Persistence/AppGroupStorage.swift',
     'ZenLock/Core/Models/BlockGroup.swift', 'ZenLock/Features/Groups/GroupDraft.swift',
     'ZenLock/Core/Services/ShieldManager.swift', 'ZenLock/Core/Services/ActivityScheduleManager.swift',
     'ZenLock/Core/Services/BlockingService.swift',
+    'ZenLock/Core/Services/CooldownService.swift', 'ZenLock/Core/Services/AccountabilityManager.swift',
     'ZenLock/Features/Groups/ScheduleToastFactory.swift',
     'DeviceActivityMonitorExtension/DeviceActivityMonitorExtension.swift',
 ]

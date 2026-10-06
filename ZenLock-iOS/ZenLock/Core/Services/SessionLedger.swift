@@ -59,7 +59,9 @@ enum SessionLedger {
             session.endedAt = plannedEnd
             session.wasCompleted = true
         } else if ActiveSession.load() == nil {
-            session.endedAt = now
+            let releasedAt = Constants.sharedDefaults?.object(forKey: Constants.Keys.quickFocusReleasedAt) as? Date
+            Constants.sharedDefaults?.removeObject(forKey: Constants.Keys.quickFocusReleasedAt)
+            session.endedAt = max(session.startedAt, min(now, releasedAt ?? now))
             session.wasCompleted = false
         }
     }

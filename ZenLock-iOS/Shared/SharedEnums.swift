@@ -11,12 +11,12 @@ enum UsagePeriod: String, Codable, Sendable {
 }
 
 extension UsagePeriod {
-    /// Product limits; DeviceActivity's 15-minute minimum concerns the schedule,
-    /// not the usage threshold. Keep UI, saved drafts and registration consistent.
+    /// DeviceActivity's 15-minute minimum concerns the schedule, not the usage
+    /// threshold. Keep UI, saved drafts and registration consistent.
     var limitOptions: [Int] {
         switch self {
-        case .hourly: return Array(stride(from: 15, through: 50, by: 5))
-        case .daily: return [15, 30, 45, 60] + Array(stride(from: 90, through: 720, by: 30))
+        case .hourly: return Array(1...59)
+        case .daily: return Array(stride(from: 10, through: 720, by: 10))
         }
     }
 

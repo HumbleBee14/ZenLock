@@ -35,6 +35,9 @@ struct ZenLockApp: App {
         let context = ModelContext(container)
         let descriptor = FetchDescriptor<BlockGroup>()
         guard let groups = try? context.fetch(descriptor) else { return }
+        blockingService.applyReleasedCooldowns(groups)
+        CooldownRelease.releaseQuickFocusIfElapsed()
+        try? context.save()
         blockingService.evaluateActiveGroups(groups)
         SessionLedger.reconcile(context: context)
     }

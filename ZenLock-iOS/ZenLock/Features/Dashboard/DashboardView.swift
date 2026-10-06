@@ -318,7 +318,7 @@ struct DashboardView: View {
 private struct GroupRow: View {
     let group: BlockGroup
     let now: Date
-    let pendingUnlock: AccountabilityManager.PendingUnlock?
+    let pendingUnlock: PendingUnlock?
     let onToggle: () -> Void
     let onDelete: () -> Void
     let onCancelCooldown: () -> Void

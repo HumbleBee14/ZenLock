@@ -10,6 +10,7 @@ struct SessionStopCoordinator {
     enum Result {
         case blockedStrict
         case authFailed
+        case anotherCooldownRunning(groupName: String)
         case cooldownStarted(startedAt: Date, endsAt: Date)
     }
 
@@ -25,7 +26,7 @@ struct SessionStopCoordinator {
     }
 
     /// True while this group is in its cool-down (apps still blocked, timer running).
-    func pendingUnlock(for group: BlockGroup) -> AccountabilityManager.PendingUnlock? {
+    func pendingUnlock(for group: BlockGroup) -> PendingUnlock? {
         guard let pending = accountability.pendingUnlock,
               pending.groupId == group.id.uuidString else { return nil }
         return pending
@@ -34,6 +35,9 @@ struct SessionStopCoordinator {
     /// Begin stopping: enforce Strict Mode, require Face ID, then start the cool-down.
     func requestStop(_ group: BlockGroup) async -> Result {
         if group.toShared().isStrictLocked { return .blockedStrict }
+        if let pending = accountability.pendingUnlock, pending.groupId != group.id.uuidString {
+            return .anotherCooldownRunning(groupName: pending.groupName)
+        }
 
         let ok = await BiometricGate.authenticate(reason: "Stop “\(group.name)”")
         guard ok else { return .authFailed }
@@ -52,6 +56,8 @@ struct SessionStopCoordinator {
     @discardableResult
     func finalizeIfElapsed(_ group: BlockGroup, context: ModelContext) -> Bool {
         guard let pending = pendingUnlock(for: group), Date() >= pending.unlocksAt else { return false }
+        CooldownRelease.releaseGroupIfElapsed()
+        CooldownRelease.consumeCompletedUnlock(group.id.uuidString)
         accountability.cancelPendingUnlock()
         _ = blockingService.deactivateGroup(group)
         try? context.save()
