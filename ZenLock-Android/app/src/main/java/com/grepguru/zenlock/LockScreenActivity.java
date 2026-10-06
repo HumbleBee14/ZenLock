@@ -477,6 +477,25 @@ public class LockScreenActivity extends AppCompatActivity {
         createPersistentNotificationIfEnabled();
     }
 
+    private void updateUninstallProtectionControl() {
+        View button = findViewById(R.id.uninstallProtectionButton);
+        if (button == null) return;
+        button.setVisibility(com.grepguru.zenlock.admin.UninstallProtection.isEnabled(this) ? View.VISIBLE : View.GONE);
+        button.setOnClickListener(v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                new android.view.ContextThemeWrapper(this, R.style.Theme_ZenLock))
+                .setTitle(R.string.uninstall_protection_disable_title)
+                .setMessage(R.string.uninstall_protection_disable_message)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.uninstall_protection_disable, (dialog, which) -> {
+                    try {
+                        com.grepguru.zenlock.admin.UninstallProtection.disable(this);
+                        button.postDelayed(this::updateUninstallProtectionControl, 500);
+                    } catch (RuntimeException e) {
+                        Toast.makeText(this, R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                    }
+                }).show());
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -510,6 +529,7 @@ public class LockScreenActivity extends AppCompatActivity {
         // Reusing a task need not emit a new accessibility window event. Confirm
         // presentation so a subsequent blocked app isn't held behind an old retry.
         AppBlockerService.onLockScreenPresented();
+        updateUninstallProtectionControl();
         showBlockedAppNotice();
         createPersistentNotificationIfEnabled();
     }

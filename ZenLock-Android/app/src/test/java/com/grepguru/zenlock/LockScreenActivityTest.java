@@ -271,6 +271,26 @@ public class LockScreenActivityTest {
         owner.pause().stop().destroy();
     }
 
+    @Test public void uninstallProtectionCanBeRemovedFromFocusScreenWithoutUnlocking() {
+        android.app.admin.DevicePolicyManager manager = RuntimeEnvironment.getApplication()
+                .getSystemService(android.app.admin.DevicePolicyManager.class);
+        shadowOf(manager).setActiveAdmin(com.grepguru.zenlock.admin.UninstallProtection.component(
+                RuntimeEnvironment.getApplication()));
+        ActivityController<LockScreenActivity> owner = openUnlockControls();
+        android.view.View button = owner.get().findViewById(R.id.uninstallProtectionButton);
+        assertEquals(android.view.View.VISIBLE, button.getVisibility());
+        button.performClick();
+        androidx.appcompat.app.AlertDialog dialog = (androidx.appcompat.app.AlertDialog)
+                org.robolectric.shadows.ShadowDialog.getLatestDialog();
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).performClick();
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofMillis(600));
+        assertFalse(com.grepguru.zenlock.admin.UninstallProtection.isEnabled(owner.get()));
+        assertEquals(android.view.View.GONE, button.getVisibility());
+        assertTrue(owner.get().getSharedPreferences("FocusLockPrefs", 0).getBoolean("isLocked", false));
+        assertFalse(owner.get().isFinishing());
+        owner.pause().stop().destroy();
+    }
+
     private ActivityController<LockScreenActivity> openUnlockControls() {
         RuntimeEnvironment.getApplication().getSharedPreferences("FocusLockPrefs",0).edit()
             .putBoolean("isLocked",true).putLong("lockEndTime",System.currentTimeMillis()+900000)

@@ -171,4 +171,21 @@ public class AppBlockerServiceTest {
    assertEquals(1,blocker.launches.size());
    blocker.onDestroy();
  }
+ @Test public void adminControlsCancelPendingBlockButOrdinarySettingsStayBlocked() {
+   android.content.pm.ResolveInfo info = new android.content.pm.ResolveInfo();
+   info.activityInfo = new android.content.pm.ActivityInfo();
+   info.activityInfo.packageName = "com.android.settings";
+   info.activityInfo.name = "com.android.settings.DeviceAdminAdd";
+   info.activityInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+   info.activityInfo.applicationInfo.flags = android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+   shadowOf(blocker.getPackageManager()).addResolveInfoForIntent(
+       com.grepguru.zenlock.admin.UninstallProtection.activationIntent(blocker), info);
+   sendEvent("example.blocked", "example.blocked.MainActivity");
+   event(info.activityInfo.packageName, info.activityInfo.name);
+   shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(2000));
+   assertEquals(0, blocker.launches.size());
+   assertNull(shadowOf(blocker.getSystemService(NotificationManager.class)).getNotification(9999));
+   event("com.android.settings", "com.android.settings.Settings");
+   assertEquals(1, blocker.launches.size());
+ }
 }

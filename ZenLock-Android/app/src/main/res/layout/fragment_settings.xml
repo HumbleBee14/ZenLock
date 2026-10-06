@@ -395,6 +395,17 @@
         <LinearLayout style="@style/Settings.Group">
             <LinearLayout style="@style/Settings.Row">
                 <LinearLayout style="@style/Settings.RowCopy">
+                    <TextView style="@style/Settings.RowTitle" android:text="@string/uninstall_protection_title"
+                        android:labelFor="@id/uninstallProtectionToggle" />
+                    <TextView style="@style/Settings.RowSummary" android:text="@string/uninstall_protection_summary" />
+                </LinearLayout>
+                <androidx.appcompat.widget.SwitchCompat android:id="@+id/uninstallProtectionToggle"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:theme="@style/AppTheme.Switch" android:minHeight="48dp" android:layout_marginStart="8dp" />
+            </LinearLayout>
+            <View style="@style/Settings.Divider" />
+            <LinearLayout style="@style/Settings.Row">
+                <LinearLayout style="@style/Settings.RowCopy">
                     <TextView
                         style="@style/Settings.RowTitle"
                         android:text="@string/settings_battery_title"

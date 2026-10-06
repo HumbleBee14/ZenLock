@@ -72,4 +72,13 @@
     <string name="insights_not_now">Not now</string>
     <string name="insights_usage_banner">Phone usage unavailable. Tap to enable Usage Access.</string>
     <string name="blocked_app_notice">This app isn’t allowed during focus.</string>
+    <string name="uninstall_protection_title">Prevent uninstall</string>
+    <string name="uninstall_protection_summary">Optional · Requires deactivating Device Admin before uninstalling.</string>
+    <string name="uninstall_protection_explanation">Enable Device Admin to add a deactivation step before uninstalling ZenLock. You can turn this off in ZenLock Settings, on the focus screen, or in Android’s device administrator settings. ZenLock requests no password, screen-lock, or erase-data policies.</string>
+    <string name="uninstall_protection_continue">Open Android confirmation</string>
+    <string name="uninstall_protection_manage">Uninstall protection</string>
+    <string name="uninstall_protection_disable_title">Turn off uninstall protection?</string>
+    <string name="uninstall_protection_disable_message">Remove ZenLock’s Device Admin access. Your focus session will continue.</string>
+    <string name="uninstall_protection_disable">Turn off protection</string>
+    <string name="uninstall_protection_error">Couldn’t change Device Admin access. You can manage it in Android’s device administrator settings.</string>
 </resources>

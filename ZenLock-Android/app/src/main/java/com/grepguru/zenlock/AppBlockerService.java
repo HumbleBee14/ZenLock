@@ -134,6 +134,10 @@ public class AppBlockerService extends AccessibilityService {
         String packageName = event.getPackageName() == null ? "" : event.getPackageName().toString();
         if (packageName.isEmpty()) return;
         String className = event.getClassName() == null ? "" : event.getClassName().toString();
+        if (com.grepguru.zenlock.admin.UninstallProtection.isManagementWindow(this, packageName, className)) {
+            clearPendingBlock();
+            return;
+        }
         if (packageName.equals(getPackageName())) {
             clearPendingBlock();
             return;

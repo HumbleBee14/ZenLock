@@ -64,6 +64,43 @@ public class SettingsFragment extends Fragment {
     // Allow Launcher/Home Screen during Lock toggle
     private SwitchCompat allowLauncherToggle;
 
+    private final ActivityResultLauncher<Intent> uninstallProtectionLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
+                    syncUninstallProtection());
+
+    private void syncUninstallProtection() {
+        if (getView() == null) return;
+        SwitchCompat toggle = getView().findViewById(R.id.uninstallProtectionToggle);
+        toggle.setOnCheckedChangeListener(null);
+        toggle.setChecked(com.grepguru.zenlock.admin.UninstallProtection.isEnabled(requireContext()));
+        toggle.setOnCheckedChangeListener((button, checked) -> {
+            // Never show success before Android has actually activated the receiver.
+            syncUninstallProtection();
+            if (checked) {
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.uninstall_protection_title)
+                        .setMessage(R.string.uninstall_protection_explanation)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(R.string.uninstall_protection_continue, (dialog, which) -> {
+                            try {
+                                uninstallProtectionLauncher.launch(
+                                        com.grepguru.zenlock.admin.UninstallProtection.activationIntent(requireContext()));
+                            } catch (RuntimeException e) {
+                                Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                                syncUninstallProtection();
+                            }
+                        }).show();
+            } else {
+                try {
+                    com.grepguru.zenlock.admin.UninstallProtection.disable(requireContext());
+                    toggle.postDelayed(this::syncUninstallProtection, 500);
+                } catch (RuntimeException e) {
+                    Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
     public SettingsFragment() {}
 
     private static final String NOTIFICATION_PERMISSION_RESULT = "settings.notification_permissions";
@@ -425,6 +462,7 @@ public class SettingsFragment extends Fragment {
         syncBlockNotificationsToggle();
         if (getView() != null) {
             updateBatteryExemptionState(getView());
+            syncUninstallProtection();
         }
 
     }
