@@ -484,7 +484,21 @@ check(ManagedSettingsStore(named: quickStoreName).shield.applications == ["app"]
 quick.endsAt = Date().addingTimeInterval(30)
 defaults.set(try! JSONEncoder().encode(quick), forKey: Constants.Keys.quickFocusSession)
 monitor.intervalDidEnd(for: .init(Constants.quickFocusActivity))
-check(ManagedSettingsStore(named: quickStoreName).shield.applications == nil, "a slightly early end callback still releases Quick Focus at its deadline")
+check(ManagedSettingsStore(named: quickStoreName).shield.applications == ["app"], "an end callback 30 seconds early does not unlock Quick Focus")
+quick.endsAt = Date().addingTimeInterval(2)
+defaults.set(try! JSONEncoder().encode(quick), forKey: Constants.Keys.quickFocusSession)
+monitor.intervalDidEnd(for: .init(Constants.quickFocusActivity))
+check(ManagedSettingsStore(named: quickStoreName).shield.applications == nil, "an end callback within seconds of the deadline releases Quick Focus")
+
+let overnight = timedGroup(startOffset: -3, endOffset: -1)
+overnight.isActive = true
+service.syncGroupToAppGroups(overnight)
+for suffix in ["-A", "-B"] {
+    ManagedSettingsStore(named: .init(overnight.id.uuidString + suffix)).shield.applications = ["app"]
+}
+monitor.intervalDidEnd(for: .init(overnight.id.uuidString + "-B"))
+let leftover = ["", "-A", "-B"].contains { ManagedSettingsStore(named: .init(overnight.id.uuidString + $0)).shield.applications != nil }
+check(!leftover, "the final overnight end callback clears every store for the window")
 
 let shortQuick = CooldownRelease.paddedSchedule(endingAt: Date().addingTimeInterval(600))
 let shortStart = Calendar.current.date(from: shortQuick.intervalStart)!

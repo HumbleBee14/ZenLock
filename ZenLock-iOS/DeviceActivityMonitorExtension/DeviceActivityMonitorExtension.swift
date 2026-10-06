@@ -28,7 +28,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             return
         }
         if activity.rawValue == Constants.quickFocusActivity {
-            ShieldExpiry.releaseQuickFocusIfStale(now: Date().addingTimeInterval(Self.endCallbackGrace), defaults: defaults)
+            ShieldExpiry.releaseQuickFocusIfStale(now: Date().addingTimeInterval(Self.quickFocusEndGrace), defaults: defaults)
             return
         }
         ShieldExpiry.sweep(excluding: extractGroupId(from: activity), defaults: defaults)
@@ -82,6 +82,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     // MARK: - Single-path evaluation
 
     private static let endCallbackGrace: TimeInterval = 60
+    private static let quickFocusEndGrace: TimeInterval = 5
 
     private enum EvalReason {
         case intervalStart, intervalEnd, thresholdReached
@@ -115,7 +116,9 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         } else {
             ManagedSettingsStore(named: storeName).clearAllSettings()
             if group.blockMode == .timeBased, !ScheduleEvaluator.isWithinSchedule(group) {
-                ManagedSettingsStore(named: ManagedSettingsStore.Name(groupId)).clearAllSettings()
+                for name in [groupId, "\(groupId)-A", "\(groupId)-B"] {
+                    ManagedSettingsStore(named: .init(name)).clearAllSettings()
+                }
             }
         }
     }
