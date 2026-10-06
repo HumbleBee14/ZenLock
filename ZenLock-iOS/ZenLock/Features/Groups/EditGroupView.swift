@@ -66,7 +66,11 @@ struct EditGroupView: View {
 
     @ViewBuilder
     private var unlockCard: some View {
-        if group.isActive && !group.deepFocusEnabled {
+        if !group.isActive {
+            ZenButton(title: "Start session", icon: "play.fill", style: .primary) {
+                startSession()
+            }
+        } else if !group.deepFocusEnabled {
             if let pending {
                 CooldownCountdownView(
                     endsAt: pending.unlocksAt,
@@ -121,6 +125,21 @@ struct EditGroupView: View {
         try? modelContext.save()
         BlockingService().removeGroupFromAppGroups(group.id.uuidString)
         dismiss()
+    }
+
+    private func startSession() {
+        draft.apply(to: group)
+        let service = BlockingService()
+        do {
+            let outcome = try service.armOrActivate(group)
+            try? modelContext.save()
+            SessionLedger.reconcile(context: modelContext)
+            toast = ScheduleToastFactory.make(for: outcome, group: group)
+        } catch {
+            group.isActive = false
+            try? modelContext.save()
+            toast = ZenToastData(message: "Couldn't start session: \(error.localizedDescription)", kind: .warning)
+        }
     }
 
     private func save() {
