@@ -28,7 +28,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             return
         }
         if activity.rawValue == Constants.quickFocusActivity {
-            ShieldExpiry.releaseQuickFocusIfStale(now: Date().addingTimeInterval(Self.quickFocusEndGrace), defaults: defaults)
+            ShieldExpiry.releaseQuickFocusIfStale(now: Date().addingTimeInterval(Self.endCallbackGrace), defaults: defaults)
             return
         }
         ShieldExpiry.sweep(excluding: extractGroupId(from: activity), defaults: defaults)
@@ -81,8 +81,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
     // MARK: - Single-path evaluation
 
-    private static let endCallbackGrace: TimeInterval = 60
-    private static let quickFocusEndGrace: TimeInterval = 5
+    private static let endCallbackGrace: TimeInterval = 5
 
     private enum EvalReason {
         case intervalStart, intervalEnd, thresholdReached
