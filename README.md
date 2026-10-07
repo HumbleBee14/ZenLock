@@ -1,5 +1,5 @@
 <p align="center">
-   <a href="https://play.google.com/store/apps/details?id=com.grepguru.zenlock"><img src="ZenLock-Android/assets/playstore-icon.png" alt="ZenLock Logo" width="100"/></a>
+   <a href="https://play.google.com/store/apps/details?id=com.grepguru.zenlock"><img src="docs/ZenLock_Gateway%20to%20Focus.png" alt="ZenLock – Stay focused" width="100%"/></a>
 </p>
 
 # ZenLock
