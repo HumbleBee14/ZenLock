@@ -113,6 +113,13 @@ public class AppBlockerService extends AccessibilityService {
             launchLockScreen();
         }
     };
+    private final android.content.BroadcastReceiver packageListener = new android.content.BroadcastReceiver() {
+        @Override
+        public void onReceive(android.content.Context context, Intent intent) {
+            com.grepguru.zenlock.admin.UninstallProtection.refresh();
+        }
+    };
+    private boolean packageListenerRegistered;
     private final SharedPreferences.OnSharedPreferenceChangeListener sessionListener = (prefs, key) -> {
         if ("isLocked".equals(key)) {
             if (!prefs.getBoolean("isLocked", false)) clearPendingBlock();
@@ -134,6 +141,10 @@ public class AppBlockerService extends AccessibilityService {
         String packageName = event.getPackageName() == null ? "" : event.getPackageName().toString();
         if (packageName.isEmpty()) return;
         String className = event.getClassName() == null ? "" : event.getClassName().toString();
+        if (com.grepguru.zenlock.admin.UninstallProtection.isManagementWindow(this, packageName, className)) {
+            clearPendingBlock();
+            return;
+        }
         if (packageName.equals(getPackageName())) {
             clearPendingBlock();
             return;
@@ -242,8 +253,23 @@ public class AppBlockerService extends AccessibilityService {
         if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);
         sessionPreferences = getSharedPreferences("FocusLockPrefs", MODE_PRIVATE);
         sessionPreferences.registerOnSharedPreferenceChangeListener(sessionListener);
+        registerPackageListener();
         sessionHandler.removeCallbacks(activateSession);
         sessionHandler.post(activateSession);
+    }
+
+    private void registerPackageListener() {
+        if (packageListenerRegistered) return;
+        android.content.IntentFilter filter = new android.content.IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addDataScheme("package");
+        androidx.core.content.ContextCompat.registerReceiver(this, packageListener, filter,
+                androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED);
+        packageListenerRegistered = true;
+        com.grepguru.zenlock.admin.UninstallProtection.refresh();
     }
     @Override
     public void onDestroy() {
@@ -252,6 +278,10 @@ public class AppBlockerService extends AccessibilityService {
         sessionHandler.removeCallbacks(activateSession);
         if (sessionPreferences != null) sessionPreferences.unregisterOnSharedPreferenceChangeListener(sessionListener);
         sessionPreferences = null;
+        if (packageListenerRegistered) {
+            unregisterReceiver(packageListener);
+            packageListenerRegistered = false;
+        }
         super.onDestroy();
     }
 }

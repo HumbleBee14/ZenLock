@@ -24,6 +24,11 @@
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <queries>
+        <intent><action android:name="android.settings.SETTINGS" /></intent>
+        <intent><action android:name="android.app.action.ADD_DEVICE_ADMIN" /></intent>
+        <intent><action android:name="android.settings.DEVICE_ADMIN_SETTINGS" /></intent>
+        <intent><action android:name="android.intent.action.DELETE" /><data android:scheme="package" /></intent>
+        <intent><action android:name="android.intent.action.UNINSTALL_PACKAGE" /><data android:scheme="package" /></intent>
         <!-- Allow querying all apps with launcher activities (for whitelist selection) -->
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -196,6 +201,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".admin.UninstallProtectionReceiver"
+            android:label="@string/app_name"
+            android:description="@string/uninstall_protection_admin_description"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data android:name="android.app.device_admin" android:resource="@xml/uninstall_protection_admin" />
+            <intent-filter><action android:name="android.app.action.DEVICE_ADMIN_ENABLED" /></intent-filter>
+        </receiver>
     </application>
 
 

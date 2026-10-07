@@ -72,4 +72,16 @@
     <string name="insights_not_now">Not now</string>
     <string name="insights_usage_banner">Phone usage unavailable. Tap to enable Usage Access.</string>
     <string name="blocked_app_notice">This app isn’t allowed during focus.</string>
+    <string name="uninstall_protection_title">Prevent uninstall</string>
+    <string name="uninstall_protection_summary">Optional · Makes ZenLock harder to delete on impulse.</string>
+    <string name="uninstall_protection_explanation">ZenLock uses Device Admin only to stay installed. No password, screen-lock or erase-data access is requested.</string>
+    <string name="uninstall_protection_admin_description">Keeps ZenLock installed.</string>
+    <string name="uninstall_protection_dialog_message">Keeps ZenLock installed while you build the habit.\n\nUses Android’s Device Admin permission.\n\nNo password, screen-lock or erase-data access is requested.</string>
+    <string name="uninstall_protection_continue">Confirm</string>
+    <string name="uninstall_protection_disable_title">Turn off uninstall protection?</string>
+    <string name="uninstall_protection_disable_message">ZenLock can be uninstalled in one tap again. Keep it on if you’re prone to deleting the app when focus gets hard.</string>
+    <string name="uninstall_protection_keep">Keep on</string>
+    <string name="uninstall_protection_disable">Turn off</string>
+    <string name="uninstall_protection_disable_warning">ZenLock can be uninstalled once this is turned off. Any running focus session continues.</string>
+    <string name="uninstall_protection_error">Couldn’t change uninstall protection. Please try again.</string>
 </resources>

@@ -64,6 +64,67 @@ public class SettingsFragment extends Fragment {
     // Allow Launcher/Home Screen during Lock toggle
     private SwitchCompat allowLauncherToggle;
 
+    private final ActivityResultLauncher<Intent> uninstallProtectionLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->
+                    syncUninstallProtection());
+
+    private void syncUninstallProtection() {
+        if (getView() == null) return;
+        SwitchCompat toggle = getView().findViewById(R.id.uninstallProtectionToggle);
+        toggle.setOnCheckedChangeListener(null);
+        toggle.setChecked(com.grepguru.zenlock.admin.UninstallProtection.isEnabled(requireContext()));
+        toggle.setOnCheckedChangeListener((button, checked) -> {
+            // Never show success before Android has actually activated the receiver.
+            syncUninstallProtection();
+            if (checked) {
+                showUninstallProtectionSheet();
+            } else {
+                ConfirmSheet.show(requireActivity(), getString(R.string.uninstall_protection_disable_title),
+                        getString(R.string.uninstall_protection_disable_message),
+                        getString(R.string.uninstall_protection_keep),
+                        getString(R.string.uninstall_protection_disable), () -> {
+                            if (!isAdded()) return;
+                            try {
+                                com.grepguru.zenlock.admin.UninstallProtection.disable(requireContext());
+                                toggle.postDelayed(this::syncUninstallProtection, 500);
+                            } catch (RuntimeException e) {
+                                Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                            }
+                        });
+            }
+        });
+    }
+
+    private void showUninstallProtectionSheet() {
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.sheet_uninstall_protection, null);
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+        sheet.setContentView(content);
+        android.text.SpannableStringBuilder bullets = new android.text.SpannableStringBuilder();
+        int gap = (int) (8 * getResources().getDisplayMetrics().density);
+        for (String point : getString(R.string.uninstall_protection_dialog_message).split("\\n\\n")) {
+            if (bullets.length() > 0) bullets.append("\n\n");
+            int start = bullets.length();
+            bullets.append(point);
+            bullets.setSpan(new android.text.style.BulletSpan(gap), start, bullets.length(),
+                    android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        ((TextView) content.findViewById(R.id.uninstallProtectionMessage)).setText(bullets);
+        content.findViewById(R.id.uninstallProtectionCancel).setOnClickListener(v -> sheet.dismiss());
+        content.findViewById(R.id.uninstallProtectionConfirm).setOnClickListener(v -> {
+            sheet.dismiss();
+            try {
+                uninstallProtectionLauncher.launch(
+                        com.grepguru.zenlock.admin.UninstallProtection.activationIntent(requireContext()));
+            } catch (RuntimeException e) {
+                Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                syncUninstallProtection();
+            }
+        });
+        sheet.setOnShowListener(dialog -> Sheets.expandAboveKeyboard(sheet));
+        sheet.show();
+    }
+
     public SettingsFragment() {}
 
     private static final String NOTIFICATION_PERMISSION_RESULT = "settings.notification_permissions";
@@ -425,6 +486,7 @@ public class SettingsFragment extends Fragment {
         syncBlockNotificationsToggle();
         if (getView() != null) {
             updateBatteryExemptionState(getView());
+            syncUninstallProtection();
         }
 
     }
