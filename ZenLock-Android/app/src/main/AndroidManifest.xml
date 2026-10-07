@@ -203,8 +203,8 @@
 
         <receiver
             android:name=".admin.UninstallProtectionReceiver"
-            android:label="@string/uninstall_protection_title"
-            android:description="@string/uninstall_protection_explanation"
+            android:label="@string/app_name"
+            android:description="@string/uninstall_protection_admin_description"
             android:permission="android.permission.BIND_DEVICE_ADMIN"
             android:exported="true">
             <meta-data android:name="android.app.device_admin" android:resource="@xml/uninstall_protection_admin" />

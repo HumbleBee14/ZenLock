@@ -5,16 +5,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ActivityInfo;
-import java.util.HashSet;
-import java.util.Set;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.Settings;
 import com.grepguru.zenlock.R;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public final class UninstallProtection {
     private UninstallProtection() {}
+
+    private static final class ResolvedWindows {
+        final Set<String> settingsPackages = new HashSet<>();
+        final Set<ComponentName> adminActivities = new HashSet<>();
+        final Map<String, Set<String>> uninstallActivities = new HashMap<>();
+    }
+
+    private static volatile ResolvedWindows resolved;
 
     public static ComponentName component(Context context) {
         return new ComponentName(context, UninstallProtectionReceiver.class);
@@ -39,46 +49,60 @@ public final class UninstallProtection {
         }
     }
 
+    public static void refresh() {
+        resolved = null;
+    }
+
     public static boolean isManagementWindow(Context context, String packageName, String className) {
-        Set<String> settingsPackages = new HashSet<>();
-        for (ResolveInfo info : context.getPackageManager().queryIntentActivities(
-                new Intent(Settings.ACTION_SETTINGS), 0)) {
-            if (isSystemActivity(info)) settingsPackages.add(info.activityInfo.packageName);
+        if (!isEnabled(context)) return false;
+        ResolvedWindows windows = resolved;
+        if (windows == null) {
+            windows = resolve(context);
+            resolved = windows;
+        }
+        if (windows.adminActivities.contains(new ComponentName(packageName, className))) return true;
+        Set<String> uninstall = windows.uninstallActivities.get(packageName);
+        if (uninstall == null) return false;
+        return !windows.settingsPackages.contains(packageName) || uninstall.contains(className);
+    }
+
+    private static ResolvedWindows resolve(Context context) {
+        ResolvedWindows windows = new ResolvedWindows();
+        PackageManager pm = context.getPackageManager();
+        for (ResolveInfo info : pm.queryIntentActivities(new Intent(Settings.ACTION_SETTINGS), 0)) {
+            if (isSystemActivity(info)) windows.settingsPackages.add(info.activityInfo.packageName);
         }
         Intent[] adminIntents = {
                 activationIntent(context), new Intent("android.settings.DEVICE_ADMIN_SETTINGS")
         };
         for (Intent intent : adminIntents) {
-            for (ResolveInfo info : context.getPackageManager().queryIntentActivities(intent, 0)) {
+            for (ResolveInfo info : pm.queryIntentActivities(intent, 0)) {
                 if (!isSystemActivity(info)) continue;
-                settingsPackages.add(info.activityInfo.packageName);
-                if (matchesActivity(info.activityInfo, packageName, className)) return true;
+                windows.settingsPackages.add(info.activityInfo.packageName);
+                windows.adminActivities.add(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
             }
         }
+        Uri self = Uri.parse("package:" + context.getPackageName());
         Intent[] uninstallIntents = {
-                new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + context.getPackageName())),
-                new Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.parse("package:" + context.getPackageName()))
+                new Intent(Intent.ACTION_DELETE, self), new Intent(Intent.ACTION_UNINSTALL_PACKAGE, self)
         };
         for (Intent intent : uninstallIntents) {
-            for (ResolveInfo info : context.getPackageManager().queryIntentActivities(intent, 0)) {
-                if (!isSystemActivity(info) || !packageName.equals(info.activityInfo.packageName)) continue;
-                // Dedicated system installers can redirect to a progress activity or dialog.
-                // Settings remains restricted to its resolved management activities.
-                if (!settingsPackages.contains(packageName)
-                        || matchesActivity(info.activityInfo, packageName, className)) return true;
+            for (ResolveInfo info : pm.queryIntentActivities(intent, 0)) {
+                if (!isSystemActivity(info)) continue;
+                Set<String> activities = windows.uninstallActivities.get(info.activityInfo.packageName);
+                if (activities == null) {
+                    activities = new HashSet<>();
+                    windows.uninstallActivities.put(info.activityInfo.packageName, activities);
+                }
+                activities.add(info.activityInfo.name);
             }
         }
-        return false;
+        return windows;
     }
 
     private static boolean isSystemActivity(ResolveInfo info) {
         return info.activityInfo != null && info.activityInfo.applicationInfo != null
                 && (info.activityInfo.applicationInfo.flags
                     & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
-    }
-
-    private static boolean matchesActivity(ActivityInfo info, String packageName, String className) {
-        return packageName.equals(info.packageName)
-                && className.equals(info.name);
     }
 }

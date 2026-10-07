@@ -73,12 +73,15 @@
     <string name="insights_usage_banner">Phone usage unavailable. Tap to enable Usage Access.</string>
     <string name="blocked_app_notice">This app isn’t allowed during focus.</string>
     <string name="uninstall_protection_title">Prevent uninstall</string>
-    <string name="uninstall_protection_summary">Optional · Requires deactivating Device Admin before uninstalling.</string>
-    <string name="uninstall_protection_explanation">Enable Device Admin to add a deactivation step before uninstalling ZenLock. You can turn this off in ZenLock Settings, on the focus screen, or in Android’s device administrator settings. ZenLock requests no password, screen-lock, or erase-data policies.</string>
-    <string name="uninstall_protection_continue">Open Android confirmation</string>
-    <string name="uninstall_protection_manage">Uninstall protection</string>
+    <string name="uninstall_protection_summary">Optional · Makes ZenLock harder to delete on impulse.</string>
+    <string name="uninstall_protection_explanation">ZenLock uses Device Admin only to stay installed. No password, screen-lock or erase-data access is requested.</string>
+    <string name="uninstall_protection_admin_description">Keeps ZenLock installed.</string>
+    <string name="uninstall_protection_dialog_message">Keeps ZenLock installed while you build the habit.\n\nUses Android’s Device Admin permission.\n\nNo password, screen-lock or erase-data access is requested.</string>
+    <string name="uninstall_protection_continue">Confirm</string>
     <string name="uninstall_protection_disable_title">Turn off uninstall protection?</string>
-    <string name="uninstall_protection_disable_message">Remove ZenLock’s Device Admin access. Your focus session will continue.</string>
-    <string name="uninstall_protection_disable">Turn off protection</string>
-    <string name="uninstall_protection_error">Couldn’t change Device Admin access. You can manage it in Android’s device administrator settings.</string>
+    <string name="uninstall_protection_disable_message">ZenLock can be uninstalled in one tap again. Keep it on if you’re prone to deleting the app when focus gets hard.</string>
+    <string name="uninstall_protection_keep">Keep on</string>
+    <string name="uninstall_protection_disable">Turn off</string>
+    <string name="uninstall_protection_disable_warning">ZenLock can be uninstalled once this is turned off. Any running focus session continues.</string>
+    <string name="uninstall_protection_error">Couldn’t change uninstall protection. Please try again.</string>
 </resources>

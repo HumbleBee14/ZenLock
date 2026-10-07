@@ -77,28 +77,52 @@ public class SettingsFragment extends Fragment {
             // Never show success before Android has actually activated the receiver.
             syncUninstallProtection();
             if (checked) {
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.uninstall_protection_title)
-                        .setMessage(R.string.uninstall_protection_explanation)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(R.string.uninstall_protection_continue, (dialog, which) -> {
+                showUninstallProtectionSheet();
+            } else {
+                ConfirmSheet.show(requireActivity(), getString(R.string.uninstall_protection_disable_title),
+                        getString(R.string.uninstall_protection_disable_message),
+                        getString(R.string.uninstall_protection_keep),
+                        getString(R.string.uninstall_protection_disable), () -> {
+                            if (!isAdded()) return;
                             try {
-                                uninstallProtectionLauncher.launch(
-                                        com.grepguru.zenlock.admin.UninstallProtection.activationIntent(requireContext()));
+                                com.grepguru.zenlock.admin.UninstallProtection.disable(requireContext());
+                                toggle.postDelayed(this::syncUninstallProtection, 500);
                             } catch (RuntimeException e) {
                                 Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
-                                syncUninstallProtection();
                             }
-                        }).show();
-            } else {
-                try {
-                    com.grepguru.zenlock.admin.UninstallProtection.disable(requireContext());
-                    toggle.postDelayed(this::syncUninstallProtection, 500);
-                } catch (RuntimeException e) {
-                    Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
-                }
+                        });
             }
         });
+    }
+
+    private void showUninstallProtectionSheet() {
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.sheet_uninstall_protection, null);
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+        sheet.setContentView(content);
+        android.text.SpannableStringBuilder bullets = new android.text.SpannableStringBuilder();
+        int gap = (int) (8 * getResources().getDisplayMetrics().density);
+        for (String point : getString(R.string.uninstall_protection_dialog_message).split("\\n\\n")) {
+            if (bullets.length() > 0) bullets.append("\n\n");
+            int start = bullets.length();
+            bullets.append(point);
+            bullets.setSpan(new android.text.style.BulletSpan(gap), start, bullets.length(),
+                    android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        ((TextView) content.findViewById(R.id.uninstallProtectionMessage)).setText(bullets);
+        content.findViewById(R.id.uninstallProtectionCancel).setOnClickListener(v -> sheet.dismiss());
+        content.findViewById(R.id.uninstallProtectionConfirm).setOnClickListener(v -> {
+            sheet.dismiss();
+            try {
+                uninstallProtectionLauncher.launch(
+                        com.grepguru.zenlock.admin.UninstallProtection.activationIntent(requireContext()));
+            } catch (RuntimeException e) {
+                Toast.makeText(requireContext(), R.string.uninstall_protection_error, Toast.LENGTH_LONG).show();
+                syncUninstallProtection();
+            }
+        });
+        sheet.setOnShowListener(dialog -> Sheets.expandAboveKeyboard(sheet));
+        sheet.show();
     }
 
     public SettingsFragment() {}

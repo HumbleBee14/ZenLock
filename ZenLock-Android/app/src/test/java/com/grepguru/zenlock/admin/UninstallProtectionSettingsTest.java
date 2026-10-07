@@ -6,7 +6,7 @@ import android.app.admin.DevicePolicyManager;
 import android.os.Bundle;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.appcompat.widget.SwitchCompat;
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.fragments.SettingsFragment;
@@ -29,6 +29,12 @@ public class UninstallProtectionSettingsTest {
         }
     }
 
+    private static androidx.fragment.app.DialogFragment confirmSheet(Host host) {
+        shadowOf(Looper.getMainLooper()).idle();
+        host.getSupportFragmentManager().executePendingTransactions();
+        return (androidx.fragment.app.DialogFragment) host.getSupportFragmentManager().findFragmentByTag("ConfirmSheet");
+    }
+
     @Test public void consentCancelAndExternalDeactivationKeepToggleHonest() {
         ActivityController<Host> owner = Robolectric.buildActivity(Host.class).create().start().resume();
         Host host = owner.get();
@@ -39,10 +45,10 @@ public class UninstallProtectionSettingsTest {
         SwitchCompat toggle = fragment.requireView().findViewById(R.id.uninstallProtectionToggle);
         assertFalse(toggle.isChecked());
         toggle.performClick();
-        AlertDialog prompt = (AlertDialog) ShadowDialog.getLatestDialog();
+        BottomSheetDialog prompt = (BottomSheetDialog) ShadowDialog.getLatestDialog();
         assertTrue(prompt.isShowing());
         assertFalse("Requesting consent cannot optimistically enable protection", toggle.isChecked());
-        prompt.getButton(AlertDialog.BUTTON_NEGATIVE).performClick();
+        prompt.findViewById(R.id.uninstallProtectionCancel).performClick();
         assertFalse(UninstallProtection.isEnabled(host));
         assertFalse(toggle.isChecked());
         DevicePolicyManager manager = host.getSystemService(DevicePolicyManager.class);
@@ -50,6 +56,18 @@ public class UninstallProtectionSettingsTest {
         owner.pause().resume();
         assertTrue(toggle.isChecked());
         toggle.performClick();
+        assertTrue("Turning off must wait for confirmation", UninstallProtection.isEnabled(host));
+        assertTrue(toggle.isChecked());
+        androidx.fragment.app.DialogFragment warning = confirmSheet(host);
+        assertNotNull(warning);
+        warning.requireView().findViewById(R.id.confirmCancel).performClick();
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600));
+        assertTrue(UninstallProtection.isEnabled(host));
+        assertTrue(toggle.isChecked());
+        toggle.performClick();
+        warning = confirmSheet(host);
+        assertNotNull(warning);
+        warning.requireView().findViewById(R.id.confirmAction).performClick();
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600));
         assertFalse(UninstallProtection.isEnabled(host));
         assertFalse(toggle.isChecked());

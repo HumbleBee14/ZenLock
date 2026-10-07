@@ -19,6 +19,50 @@ import org.robolectric.annotation.Config;
 public class UninstallProtectionTest {
     private final Context context = RuntimeEnvironment.getApplication();
 
+    private void activateAdmin() {
+        shadowOf(context.getSystemService(DevicePolicyManager.class)).setActiveAdmin(UninstallProtection.component(context));
+        UninstallProtection.refresh();
+    }
+
+    private ResolveInfo systemActivity(String packageName, String name) {
+        ResolveInfo info = new ResolveInfo();
+        info.activityInfo = new ActivityInfo();
+        info.activityInfo.packageName = packageName;
+        info.activityInfo.name = name;
+        info.activityInfo.applicationInfo = new ApplicationInfo();
+        info.activityInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        return info;
+    }
+
+    @Test public void managementWindowsStayBlockedWhileProtectionIsOff() {
+        ResolveInfo admin = systemActivity("com.android.settings", "com.android.settings.DeviceAdminAdd");
+        ResolveInfo installer = systemActivity("example.systeminstaller", "example.systeminstaller.UninstallActivity");
+        shadowOf(context.getPackageManager()).addResolveInfoForIntent(UninstallProtection.activationIntent(context), admin);
+        shadowOf(context.getPackageManager()).addResolveInfoForIntent(
+                new Intent(Intent.ACTION_DELETE, android.net.Uri.parse("package:" + context.getPackageName())), installer);
+        UninstallProtection.refresh();
+        assertFalse(UninstallProtection.isManagementWindow(context, admin.activityInfo.packageName, admin.activityInfo.name));
+        assertFalse(UninstallProtection.isManagementWindow(context, installer.activityInfo.packageName, "android.app.Dialog"));
+        activateAdmin();
+        assertTrue(UninstallProtection.isManagementWindow(context, admin.activityInfo.packageName, admin.activityInfo.name));
+        assertTrue(UninstallProtection.isManagementWindow(context, installer.activityInfo.packageName, "android.app.Dialog"));
+    }
+
+    @Test public void resolvedWindowsAreCachedUntilRefreshed() {
+        activateAdmin();
+        ResolveInfo admin = systemActivity("com.android.settings", "com.android.settings.DeviceAdminAdd");
+        assertFalse(UninstallProtection.isManagementWindow(context, admin.activityInfo.packageName, admin.activityInfo.name));
+        shadowOf(context.getPackageManager()).addResolveInfoForIntent(UninstallProtection.activationIntent(context), admin);
+        assertFalse(UninstallProtection.isManagementWindow(context, admin.activityInfo.packageName, admin.activityInfo.name));
+        UninstallProtection.refresh();
+        assertTrue(UninstallProtection.isManagementWindow(context, admin.activityInfo.packageName, admin.activityInfo.name));
+    }
+
+    @Test public void deactivationShowsAWarningWithoutBlocking() {
+        CharSequence warning = new UninstallProtectionReceiver().onDisableRequested(context, new Intent());
+        assertEquals(context.getString(com.grepguru.zenlock.R.string.uninstall_protection_disable_warning), warning);
+    }
+
     @Test public void defaultOffAndRequestRequiresSystemConsent() {
         assertFalse(UninstallProtection.isEnabled(context));
         Intent intent = UninstallProtection.activationIntent(context);
@@ -39,6 +83,7 @@ public class UninstallProtectionTest {
     }
 
     @Test public void trustedAdminWindowIsAllowedButOtherSettingsAndSpoofedAppsAreNot() {
+        activateAdmin();
         ResolveInfo info = new ResolveInfo();
         info.activityInfo = new ActivityInfo();
         info.activityInfo.packageName = "com.android.settings";
@@ -47,13 +92,16 @@ public class UninstallProtectionTest {
         info.activityInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
         shadowOf(context.getPackageManager()).addResolveInfoForIntent(
                 UninstallProtection.activationIntent(context), info);
+        UninstallProtection.refresh();
         assertTrue(UninstallProtection.isManagementWindow(context, info.activityInfo.packageName, info.activityInfo.name));
         assertFalse(UninstallProtection.isManagementWindow(context, "com.android.settings", "com.android.settings.Settings"));
         assertFalse(UninstallProtection.isManagementWindow(context, "example.fake", info.activityInfo.name));
         info.activityInfo.applicationInfo.flags = 0;
+        UninstallProtection.refresh();
         assertFalse(UninstallProtection.isManagementWindow(context, info.activityInfo.packageName, info.activityInfo.name));
     }
     @Test public void sharedSettingsAliasTargetStaysBlockedAndSystemInstallerRemainsAccessible() {
+        activateAdmin();
         ResolveInfo info = new ResolveInfo();
         info.activityInfo = new ActivityInfo();
         info.activityInfo.packageName = "example.systemsettings";
@@ -63,6 +111,7 @@ public class UninstallProtectionTest {
         info.activityInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
         shadowOf(context.getPackageManager()).addResolveInfoForIntent(
                 UninstallProtection.activationIntent(context), info);
+        UninstallProtection.refresh();
         assertFalse("Shared Settings alias targets must not expose unrelated settings",
                 UninstallProtection.isManagementWindow(context,
                     info.activityInfo.packageName, info.activityInfo.targetActivity));
@@ -76,9 +125,11 @@ public class UninstallProtectionTest {
         installer.activityInfo.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
         shadowOf(context.getPackageManager()).addResolveInfoForIntent(
                 new Intent(Intent.ACTION_DELETE, android.net.Uri.parse("package:" + context.getPackageName())), installer);
+        UninstallProtection.refresh();
         assertTrue(UninstallProtection.isManagementWindow(context,
                 installer.activityInfo.packageName, "android.app.Dialog"));
         installer.activityInfo.applicationInfo.flags = 0;
+        UninstallProtection.refresh();
         assertFalse(UninstallProtection.isManagementWindow(context,
                 installer.activityInfo.packageName, "android.app.Dialog"));
     }
