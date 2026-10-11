@@ -169,6 +169,7 @@ struct GroupFormView: View {
         GlassCard {
             VStack(alignment: .leading, spacing: ZenTheme.Spacing.md) {
                 Text("Schedule").font(ZenTheme.headline).foregroundStyle(ZenTheme.text)
+                Text("At least 15 minutes").font(ZenTheme.caption).foregroundStyle(ZenTheme.textSecondary)
 
                 HStack {
                     VStack(alignment: .leading) {
@@ -190,7 +191,7 @@ struct GroupFormView: View {
                 }
 
                 if crossesMidnight {
-                    Label("Schedule crosses midnight — will be split into two windows.", systemImage: "moon.stars")
+                    Label("Ends the next day.", systemImage: "moon.stars")
                         .font(ZenTheme.caption2)
                         .foregroundStyle(ZenTheme.textSecondary)
                 }

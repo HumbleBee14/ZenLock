@@ -75,29 +75,18 @@ final class ActivityScheduleManager: ActivityScheduleManaging {
               let endHour = group.scheduleEndHour,
               let endMin = group.scheduleEndMinute else { return }
 
-        let crossesMidnight = startHour > endHour || (startHour == endHour && startMin > endMin)
+        let startMinutes = startHour * 60 + startMin
+        let endMinutes = endHour * 60 + endMin
+        let duration = (endMinutes - startMinutes + 1440) % 1440
+        guard duration >= 15 else { throw ActivationError.invalidTimeWindow }
 
-        if crossesMidnight {
-            let scheduleA = DeviceActivitySchedule(
-                intervalStart: DateComponents(hour: startHour, minute: startMin),
-                intervalEnd: DateComponents(hour: 23, minute: 59),
-                repeats: group.scheduleRepeats
-            )
-            let scheduleB = DeviceActivitySchedule(
-                intervalStart: DateComponents(hour: 0, minute: 0),
-                intervalEnd: DateComponents(hour: endHour, minute: endMin),
-                repeats: group.scheduleRepeats
-            )
-            try center.startMonitoring(DeviceActivityName("\(group.id)-A"), during: scheduleA)
-            try center.startMonitoring(DeviceActivityName("\(group.id)-B"), during: scheduleB)
-        } else {
-            let schedule = DeviceActivitySchedule(
-                intervalStart: DateComponents(hour: startHour, minute: startMin),
-                intervalEnd: DateComponents(hour: endHour, minute: endMin),
-                repeats: group.scheduleRepeats
-            )
-            try center.startMonitoring(DeviceActivityName(group.id), during: schedule)
-        }
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: startHour, minute: startMin),
+            intervalEnd: DateComponents(hour: endHour, minute: endMin),
+            repeats: group.scheduleRepeats
+        )
+        try center.startMonitoring(DeviceActivityName(group.id), during: schedule)
+        center.stopMonitoring([DeviceActivityName("\(group.id)-A"), DeviceActivityName("\(group.id)-B")])
     }
 
     private func startUsageBasedMonitoring(for group: SharedBlockGroup, selection: FamilyActivitySelection) throws {

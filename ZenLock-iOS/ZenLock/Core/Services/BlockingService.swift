@@ -4,9 +4,11 @@ import FamilyControls
 enum ActivationError: LocalizedError {
     case noAppsSelected
     case invalidUsageLimit
+    case invalidTimeWindow
 
     var errorDescription: String? {
         switch self {
+        case .invalidTimeWindow: return "Choose a schedule lasting at least 15 minutes. Overnight schedules continue into the next day."
         case .noAppsSelected: return "Select at least one app or category to block."
         case .invalidUsageLimit: return "Choose a usage limit of at least 15 minutes within the selected period."
         }

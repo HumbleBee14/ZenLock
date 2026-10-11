@@ -506,6 +506,72 @@ let shortEnd = Calendar.current.date(from: shortQuick.intervalEnd)!
 check(shortEnd.timeIntervalSince(shortStart) >= 15 * 60 - 1, "a 10-minute Quick Focus registers a valid 15-minute interval")
 check(abs(shortEnd.timeIntervalSinceNow - 600) < 2, "padded schedule still ends at the session deadline")
 
+for repeats in [false, true] {
+    for (startHour, startMinute, endHour, endMinute) in [(23, 50, 6, 0), (23, 59, 7, 0), (22, 0, 0, 5), (23, 50, 0, 5), (10, 0, 10, 15)] {
+        let value = group()
+        value.blockMode = .timeBased
+        value.scheduleStartHour = startHour
+        value.scheduleStartMinute = startMinute
+        value.scheduleEndHour = endHour
+        value.scheduleEndMinute = endMinute
+        value.scheduleRepeats = repeats
+        let before = DeviceActivityCenter.startCalls
+        try service.activateGroup(value)
+        let name = DeviceActivityName(value.id.uuidString)
+        let schedule = DeviceActivityCenter.schedules[name]
+        check(schedule != nil, "time window registers under its group identity")
+        check(DeviceActivityCenter.startCalls == before + 1, "overnight window registers once without short midnight fragments")
+        check(schedule?.intervalStart.hour == startHour && schedule?.intervalStart.minute == startMinute, "registration retains requested start")
+        check(schedule?.intervalEnd.hour == endHour && schedule?.intervalEnd.minute == endMinute, "registration retains requested end")
+        check(schedule?.repeats == repeats, "registration retains repeat choice")
+        check(DeviceActivityCenter.schedules[.init(value.id.uuidString + "-A")] == nil && DeviceActivityCenter.schedules[.init(value.id.uuidString + "-B")] == nil, "new windows have no split registrations")
+        _ = service.deactivateGroup(value)
+    }
+}
+
+for (startHour, startMinute, endHour, endMinute) in [(23, 55, 0, 5), (10, 0, 10, 14), (10, 0, 10, 0)] {
+    let value = group()
+    value.blockMode = .timeBased
+    value.scheduleStartHour = startHour
+    value.scheduleStartMinute = startMinute
+    value.scheduleEndHour = endHour
+    value.scheduleEndMinute = endMinute
+    do {
+        try service.activateGroup(value)
+        check(false, "genuinely short or empty windows cannot activate")
+    } catch ActivationError.invalidTimeWindow {
+        check(!value.isActive, "short window rolls back activation")
+        check(DeviceActivityCenter.schedules[.init(value.id.uuidString)] == nil, "short window leaves no monitor")
+    } catch {
+        check(false, "short window has a clear validation error")
+    }
+}
+let migratedWindow = group()
+migratedWindow.blockMode = .timeBased
+migratedWindow.scheduleStartHour = 23
+migratedWindow.scheduleStartMinute = 50
+migratedWindow.scheduleEndHour = 6
+migratedWindow.scheduleEndMinute = 0
+let oldSchedule = DeviceActivitySchedule(intervalStart: DateComponents(hour: 23, minute: 50), intervalEnd: DateComponents(hour: 23, minute: 59), repeats: true)
+for suffix in ["-A", "-B"] {
+    try DeviceActivityCenter().startMonitoring(.init(migratedWindow.id.uuidString + suffix), during: oldSchedule)
+}
+try service.activateGroup(migratedWindow)
+check(DeviceActivityCenter.schedules[.init(migratedWindow.id.uuidString)] != nil, "existing overnight group gets a continuous registration")
+check(DeviceActivityCenter.schedules[.init(migratedWindow.id.uuidString + "-A")] == nil && DeviceActivityCenter.schedules[.init(migratedWindow.id.uuidString + "-B")] == nil, "migration removes legacy midnight registrations")
+_ = service.deactivateGroup(migratedWindow)
+
+var overnightCalendar = Calendar(identifier: .gregorian)
+overnightCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
+let fridayNight = migratedWindow.toShared()
+var fridayOnly = fridayNight
+fridayOnly.scheduleDaysOfWeek = [6]
+for (day, hour, minute, expected) in [(9, 23, 49, false), (9, 23, 50, true), (9, 23, 59, true), (10, 0, 0, true), (10, 5, 59, true), (10, 6, 0, false), (11, 1, 0, false)] {
+    let date = overnightCalendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
+    check(ScheduleEvaluator.isWithinSchedule(fridayOnly, at: date, calendar: overnightCalendar) == expected,
+          "overnight selected-day window preserves exact boundaries across midnight: day \(day) \(hour):\(minute)")
+}
+
 print("\(checks) checks, \(failures) failures")
 defaults.removePersistentDomain(forName: Constants.appGroupID)
 exit(failures == 0 ? 0 : 1)
