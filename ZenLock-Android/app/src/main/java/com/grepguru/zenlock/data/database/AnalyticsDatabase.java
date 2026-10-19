@@ -60,7 +60,7 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
                     // Allow queries on main thread for simple operations (not recommended for complex queries)
                     .allowMainThreadQueries()
                     // Fallback to destructive migration for now (will add proper migrations later)
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(false)
                     // Add callback for database creation
                     .addCallback(roomDatabaseCallback)
                     .build();
