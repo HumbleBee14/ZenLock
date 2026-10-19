@@ -46,7 +46,6 @@
     <string name="screen_focus_scheduled">Foco agendado</string>
     <string name="screen_focus_session">Sessão de foco</string>
     <string name="screen_focus_session_starts_in_1_d_min">A sessão de foco começa em %1$d min</string>
-    <string name="screen_get_started">Começar</string>
     <string name="screen_got_it">Entendi</string>
     <string name="screen_grant_sms_permission">Conceder permissão de SMS</string>
     <string name="screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_">Oi, Dinesh! Gostaria de compartilhar um comentário sobre o ZenLock:\n\nVersão do app: %1$s\nVersão do Android: %2$s\nDispositivo: %3$s\n\nMeu comentário:\n</string>
@@ -69,7 +68,6 @@
     <string name="screen_monthly">Mensalmente</string>
     <string name="screen_morning_deep_work">Trabalho focado pela manhã</string>
     <string name="screen_new_quote">Nova citação</string>
-    <string name="screen_next">Próximo</string>
     <string name="screen_no_data_yet">Ainda sem dados</string>
     <string name="screen_no_email_app_found">Nenhum app de e-mail encontrado.</string>
     <string name="screen_no_sessions_yet_start_your_first_focus_session">Ainda sem sessões. Comece sua primeira sessão de foco!</string>

@@ -46,7 +46,6 @@
     <string name="screen_focus_scheduled">Concentration programmée</string>
     <string name="screen_focus_session">Séance de concentration</string>
     <string name="screen_focus_session_starts_in_1_d_min">La séance de concentration commence dans %1$d min</string>
-    <string name="screen_get_started">Commencer</string>
     <string name="screen_got_it">Compris</string>
     <string name="screen_grant_sms_permission">Accorder l’autorisation SMS</string>
     <string name="screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_">Bonjour Dinesh ! Je souhaite partager des commentaires sur ZenLock :\n\nVersion de l’appli : %1$s\nVersion d’Android : %2$s\nAppareil : %3$s\n\nMes commentaires :\n</string>
@@ -69,7 +68,6 @@
     <string name="screen_monthly">Tous les mois</string>
     <string name="screen_morning_deep_work">Travail approfondi du matin</string>
     <string name="screen_new_quote">Nouvelle citation</string>
-    <string name="screen_next">Suivant</string>
     <string name="screen_no_data_yet">Pas encore de données</string>
     <string name="screen_no_email_app_found">Aucune appli de messagerie trouvée.</string>
     <string name="screen_no_sessions_yet_start_your_first_focus_session">Pas encore de séances. Lancez votre première séance de concentration !</string>

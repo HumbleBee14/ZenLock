@@ -46,7 +46,6 @@
     <string name="screen_focus_scheduled">تمت جدولة التركيز</string>
     <string name="screen_focus_session">جلسة تركيز</string>
     <string name="screen_focus_session_starts_in_1_d_min">تبدأ جلسة التركيز بعد %1$d د</string>
-    <string name="screen_get_started">ابدأ</string>
     <string name="screen_got_it">فهمت</string>
     <string name="screen_grant_sms_permission">منح إذن الرسائل النصية</string>
     <string name="screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_">مرحبًا Dinesh! أود مشاركة بعض الملاحظات حول ZenLock:\n\nإصدار التطبيق: %1$s\nإصدار Android: %2$s\nالجهاز: %3$s\n\nملاحظاتي:\n</string>
@@ -69,7 +68,6 @@
     <string name="screen_monthly">شهريًا</string>
     <string name="screen_morning_deep_work">عمل عميق صباحًا</string>
     <string name="screen_new_quote">اقتباس جديد</string>
-    <string name="screen_next">التالي</string>
     <string name="screen_no_data_yet">لا توجد بيانات بعد</string>
     <string name="screen_no_email_app_found">لم يتم العثور على تطبيق بريد إلكتروني.</string>
     <string name="screen_no_sessions_yet_start_your_first_focus_session">لا توجد جلسات بعد. ابدأ أول جلسة تركيز لك!</string>

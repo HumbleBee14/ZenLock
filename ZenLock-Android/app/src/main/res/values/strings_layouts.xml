@@ -16,7 +16,7 @@
     <string name="layout_send_test_otp">Send Test OTP</string>
     <string name="partner_sms_validity_note">SMS charges apply. Codes stay valid for %1$d minutes.</string>
     <string name="layout_save">Save</string>
-    <string name="layout_next">Next</string>
+    <string name="layout_next" translatable="false">Next</string>
     <string name="layout_search_apps">Search apps...</string>
     <string name="layout_loading_apps">Loading apps</string>
     <string name="layout_new_schedule">New schedule</string>
@@ -132,26 +132,26 @@
     <string name="layout_you_will_stay_locked_until_the_timer_ends_add_a_pin_or_par">You will stay locked until the timer ends. Add a PIN or partner in Settings to unlock early.</string>
     <string name="layout_don_t_ask_again">Don\'t ask again</string>
     <string name="layout_got_it">Got it</string>
-    <string name="layout_where_attention_goes">Where attention goes</string>
+    <string name="layout_where_attention_goes" translatable="false">Where attention goes</string>
     <string name="layout_96" translatable="false">96</string>
-    <string name="layout_times_a_day_the_average_person_checks_their_phone_about_on">times a day the average person checks their phone. About once every ten minutes.</string>
-    <string name="layout_47_sec">47 sec</string>
-    <string name="layout_average_attention_on_one_screen_before_switching_it_was_2_">average attention on one screen before switching. It was 2½ minutes twenty years ago.</string>
-    <string name="layout_23_min">23 min</string>
-    <string name="layout_to_get_fully_back_into_deep_work_after_a_single_interrupti">to get fully back into deep work after a single interruption.</string>
-    <string name="layout_40_days">40+ days</string>
-    <string name="layout_a_year_spent_looking_at_a_phone_at_today_s_average_of_over">a year spent looking at a phone, at today\'s average of over three hours a day.</string>
-    <string name="layout_focus_your_way">Focus, your way</string>
-    <string name="layout_everything_you_need_nothing_that_pulls_you_back">Everything you need. Nothing that pulls you back.</string>
-    <string name="layout_lock_it">Lock it</string>
-    <string name="layout_for_25_minutes_or_every_weekday_morning_on_a_schedule">For 25 minutes, or every weekday morning on a schedule.</string>
-    <string name="layout_essentials_stay">Essentials stay</string>
-    <string name="layout_phone_clock_and_calendar_plus_up_to_8_apps_you_pick">Phone, Clock and Calendar, plus up to 8 apps you pick.</string>
-    <string name="layout_no_easy_exit">No easy exit</string>
-    <string name="layout_a_pin_or_a_trusted_partner_decides_when_you_end_early">A PIN or a trusted partner decides when you end early.</string>
-    <string name="layout_free_always">Free, always</string>
-    <string name="layout_open_source_no_ads_no_tracking_no_upsell">Open source. No ads, no tracking, no upsell.</string>
-    <string name="layout_put_the_phone_down_keep_the_day">Put the phone down. Keep the day.</string>
+    <string name="layout_times_a_day_the_average_person_checks_their_phone_about_on" translatable="false">times a day the average person checks their phone. About once every ten minutes.</string>
+    <string name="layout_47_sec" translatable="false">47 sec</string>
+    <string name="layout_average_attention_on_one_screen_before_switching_it_was_2_" translatable="false">average attention on one screen before switching. It was 2½ minutes twenty years ago.</string>
+    <string name="layout_23_min" translatable="false">23 min</string>
+    <string name="layout_to_get_fully_back_into_deep_work_after_a_single_interrupti" translatable="false">to get fully back into deep work after a single interruption.</string>
+    <string name="layout_40_days" translatable="false">40+ days</string>
+    <string name="layout_a_year_spent_looking_at_a_phone_at_today_s_average_of_over" translatable="false">a year spent looking at a phone, at today\'s average of over three hours a day.</string>
+    <string name="layout_focus_your_way" translatable="false">Focus, your way</string>
+    <string name="layout_everything_you_need_nothing_that_pulls_you_back" translatable="false">Everything you need. Nothing that pulls you back.</string>
+    <string name="layout_lock_it" translatable="false">Lock it</string>
+    <string name="layout_for_25_minutes_or_every_weekday_morning_on_a_schedule" translatable="false">For 25 minutes, or every weekday morning on a schedule.</string>
+    <string name="layout_essentials_stay" translatable="false">Essentials stay</string>
+    <string name="layout_phone_clock_and_calendar_plus_up_to_8_apps_you_pick" translatable="false">Phone, Clock and Calendar, plus up to 8 apps you pick.</string>
+    <string name="layout_no_easy_exit" translatable="false">No easy exit</string>
+    <string name="layout_a_pin_or_a_trusted_partner_decides_when_you_end_early" translatable="false">A PIN or a trusted partner decides when you end early.</string>
+    <string name="layout_free_always" translatable="false">Free, always</string>
+    <string name="layout_open_source_no_ads_no_tracking_no_upsell" translatable="false">Open source. No ads, no tracking, no upsell.</string>
+    <string name="layout_put_the_phone_down_keep_the_day" translatable="false">Put the phone down. Keep the day.</string>
     <string name="layout_zen_mode_progress_overlay" translatable="false">🧘‍♂️</string>
     <string name="layout_entering_zen_mode">Entering ZEN Mode...</string>
     <string name="layout_hold_to_begin_your_mindful_focus_session">Hold to begin your mindful focus session</string>

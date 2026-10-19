@@ -46,7 +46,7 @@
     <string name="screen_focus_scheduled">Focus Scheduled</string>
     <string name="screen_focus_session">Focus Session</string>
     <string name="screen_focus_session_starts_in_1_d_min">Focus session starts in %1$d min</string>
-    <string name="screen_get_started">Get started</string>
+    <string name="screen_get_started" translatable="false">Get started</string>
     <string name="screen_got_it">Got it</string>
     <string name="screen_grant_sms_permission">Grant SMS Permission</string>
     <string name="screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_">Hi Dinesh! I\'d like to share some feedback about ZenLock:\n\nApp Version: %1$s\nAndroid Version: %2$s\nDevice: %3$s\n\nMy feedback:\n</string>
@@ -69,7 +69,7 @@
     <string name="screen_monthly">Monthly</string>
     <string name="screen_morning_deep_work">Morning deep work</string>
     <string name="screen_new_quote">New quote</string>
-    <string name="screen_next">Next</string>
+    <string name="screen_next" translatable="false">Next</string>
     <string name="screen_no_data_yet">No data yet</string>
     <string name="screen_no_email_app_found">No email app found.</string>
     <string name="screen_no_sessions_yet_start_your_first_focus_session">No sessions yet. Start your first focus session!</string>
