@@ -24,7 +24,7 @@ public class LocalizedPresentationTest {
         }
     }
 
-    @Test @Config(qualifiers = "ar")
+    @Test @Config(qualifiers = "fr")
     public void clockUsesZeroToNineWhileItsActionsFollowAppLanguage() {
         org.robolectric.android.controller.ActivityController<PickerHost> host =
                 org.robolectric.Robolectric.buildActivity(PickerHost.class).setup();

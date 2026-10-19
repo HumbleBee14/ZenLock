@@ -65,7 +65,7 @@ for tag in tags[1:]:
         else:
             source_other = next(n for n in node if n.get('quantity') == 'other')
             quantities = {n.get('quantity') for n in other}
-            required = {'zero', 'one', 'two', 'few', 'many', 'other'} if tag == 'ar' else ({'one', 'many', 'other'} if tag in ('pt-BR', 'fr', 'es') else ({'one', 'other'} if tag == 'de' else {'other'}))
+            required = ({'one', 'many', 'other'} if tag in ('pt-BR', 'fr', 'es') else ({'one', 'other'} if tag == 'de' else {'other'}))
             if not required <= quantities:
                 errors.append(f'{tag}: missing plural categories {key}: {required - quantities}')
             for n in other:

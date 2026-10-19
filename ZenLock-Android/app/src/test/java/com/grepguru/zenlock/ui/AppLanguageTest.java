@@ -30,15 +30,15 @@ public class AppLanguageTest {
     @Test public void catalogueUsesNativeNamesAndPortugueseHasNoRegionLabel() {
         String[] tags = AppLanguage.languageTags(context);
         String[] names = AppLanguage.languageNames(context);
-        assertArrayEquals(new String[]{"en", "pt-BR", "ar", "fr", "de", "es"}, tags);
-        assertArrayEquals(new String[]{"English", "Português", "العربية", "Français", "Deutsch", "Español"}, names);
+        assertArrayEquals(new String[]{"en", "pt-BR", "fr", "de", "es"}, tags);
+        assertArrayEquals(new String[]{"English", "Português", "Français", "Deutsch", "Español"}, names);
     }
-    @Test public void languageControlStaysEnglishEvenInArabic() {
+    @Test public void languageControlStaysEnglishInFrench() {
         Configuration config = new Configuration(context.getResources().getConfiguration());
-        config.setLocales(new LocaleList(Locale.forLanguageTag("ar")));
-        Context arabic = context.createConfigurationContext(config);
-        assertEquals("Change language", arabic.getString(R.string.change_language));
-        assertEquals("الإعدادات", arabic.getString(R.string.layout_settings));
+        config.setLocales(new LocaleList(Locale.forLanguageTag("fr")));
+        Context french = context.createConfigurationContext(config);
+        assertEquals("Change language", french.getString(R.string.change_language));
+        assertEquals("Paramètres", french.getString(R.string.layout_settings));
     }
     @Test public void explicitChoiceLocalizesBackgroundContextAndPreservesFocusState() {
         context.getSharedPreferences("FocusLockPrefs", 0).edit()
@@ -57,12 +57,12 @@ public class AppLanguageTest {
         AppLanguage.initializeDefault(phone);
         assertEquals("en", AppLanguage.selectedTag(phone));
     }
-    @Test public void everyTranslationResolvesAndOnlyArabicMirrorsLayout() {
+    @Test public void everyTranslationResolvesWithLeftToRightLayout() {
         for (String tag : AppLanguage.languageTags(context)) {
             AppLanguage.select(context, tag);
             Context localized = AppLanguage.localizedContext(context);
             assertEquals(tag, localized.getResources().getConfiguration().getLocales().get(0).toLanguageTag());
-            assertEquals(tag.equals("ar") ? android.view.View.LAYOUT_DIRECTION_RTL : android.view.View.LAYOUT_DIRECTION_LTR,
+            assertEquals(android.view.View.LAYOUT_DIRECTION_LTR,
                     localized.getResources().getConfiguration().getLayoutDirection());
             assertFalse(localized.getString(R.string.layout_settings).isEmpty());
             assertEquals("Change language", localized.getString(R.string.change_language));
@@ -88,8 +88,8 @@ public class AppLanguageTest {
         assertTrue(manager.getApplicationLocales().isEmpty());
     }
     @Test @Config(sdk = 33)
-    public void systemResetUsesSystemLocalesEvenWhenCallerRetainsArabicContext() {
-        AppLanguage.select(context, "ar");
+    public void systemResetUsesSystemLocalesEvenWhenCallerRetainsFrenchContext() {
+        AppLanguage.select(context, "fr");
         Context retained = AppLanguage.localizedContext(context);
         context.getSystemService(android.app.LocaleManager.class).setApplicationLocales(LocaleList.getEmptyLocaleList());
         String expected = androidx.core.app.LocaleManagerCompat.getSystemLocales(context).get(0).getLanguage();

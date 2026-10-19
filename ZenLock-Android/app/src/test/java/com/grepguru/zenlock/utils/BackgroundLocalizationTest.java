@@ -44,20 +44,6 @@ public class BackgroundLocalizationTest {
         assertEquals("45 Sek.", DurationText.seconds(context, 45));
     }
 
-    @Test public void arabicUiWordsKeepLatinDigits() {
-        AppLanguage.select(context, "ar");
-        String minutes = DurationText.minutes(context, 7);
-        String seconds = DurationText.seconds(context, 90);
-        assertEquals("7 د", minutes);
-        assertEquals("90 ث", seconds);
-        assertFalse((minutes + seconds).matches(".*[\\u0660-\\u0669\\u06f0-\\u06f9].*"));
-        ScheduleModel schedule = new ScheduleModel();
-        schedule.setName("My 90 minute routine");
-        schedule.setFocusDurationMinutes(90);
-        assertEquals("1 س 30 د", schedule.getFormattedDuration(context));
-        assertEquals("My 90 minute routine", schedule.getName());
-    }
-
     @Test public void backgroundNotificationUsesSingularAndPlural() {
         AppLanguage.select(context, "fr");
         Context localized = AppLanguage.localizedContext(context);
