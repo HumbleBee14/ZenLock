@@ -1,5 +1,8 @@
 package com.grepguru.zenlock;
 
+import android.content.Context;
+
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,8 +21,6 @@ import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 import com.grepguru.zenlock.model.ScheduleModel;
 import com.grepguru.zenlock.ui.Sheets;
 
@@ -74,8 +75,8 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.dialog_create_schedule, container, false);
         bindViews(view);
         if (scheduleToEdit != null) {
-            ((TextView) view.findViewById(R.id.scheduleDialogTitle)).setText("Edit schedule");
-            createButton.setText("Save");
+            ((TextView) view.findViewById(R.id.scheduleDialogTitle)).setText(getString(R.string.screen_edit_schedule));
+            createButton.setText(getString(R.string.screen_save));
             populate(scheduleToEdit);
         } else if (template != null) {
             populate(template);
@@ -128,6 +129,16 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
                 view.findViewById(R.id.fridayChip),
                 view.findViewById(R.id.saturdayChip)};
 
+        android.icu.text.DateFormatSymbols weekdays = new android.icu.text.DateFormatSymbols(
+                getResources().getConfiguration().getLocales().get(0));
+        String[] narrow = weekdays.getWeekdays(android.icu.text.DateFormatSymbols.STANDALONE,
+                android.icu.text.DateFormatSymbols.NARROW);
+        String[] full = weekdays.getWeekdays();
+        for (int i = 0; i < dayChips.length; i++) {
+            dayChips[i].setText(narrow[i + 1]);
+            dayChips[i].setContentDescription(full[i + 1]);
+        }
+
         view.findViewById(R.id.startTimeRow).setOnClickListener(v -> showTimePicker());
         view.findViewById(R.id.durationRow).setOnClickListener(v -> showDurationPicker());
         preNotifySwitch.setOnCheckedChangeListener((button, checked) ->
@@ -141,20 +152,23 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
     }
 
     private void showTimePicker() {
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(selectedHour)
-                .setMinute(selectedMinute)
-                .setTitleText("Starts at")
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .setTheme(R.style.ZenTimePicker)
-                .build();
-        timePicker.addOnPositiveButtonClickListener(v -> {
-            selectedHour = timePicker.getHour();
-            selectedMinute = timePicker.getMinute();
-            updateStartTimeDisplay();
-        });
-        timePicker.show(getChildFragmentManager(), "MaterialTimePicker");
+        // Keep the numeric clock in English; functional title and buttons follow the app language.
+        android.content.res.Configuration numbers = new android.content.res.Configuration(getResources().getConfiguration());
+        numbers.setLocale(java.util.Locale.US);
+        androidx.appcompat.view.ContextThemeWrapper numberContext =
+                new androidx.appcompat.view.ContextThemeWrapper(requireActivity(), R.style.Theme_ZenLock);
+        numberContext.applyOverrideConfiguration(numbers);
+        android.app.TimePickerDialog picker = new android.app.TimePickerDialog(numberContext,
+                (view, hour, minute) -> {
+                    selectedHour = hour;
+                    selectedMinute = minute;
+                    updateStartTimeDisplay();
+                }, selectedHour, selectedMinute, false);
+        picker.setTitle(getString(R.string.screen_starts_at));
+        picker.setButton(android.content.DialogInterface.BUTTON_POSITIVE, getString(android.R.string.ok), picker);
+        picker.setButton(android.content.DialogInterface.BUTTON_NEGATIVE, getString(android.R.string.cancel),
+                (dialog, which) -> dialog.dismiss());
+        picker.show();
     }
 
     private void showDurationPicker() {
@@ -163,6 +177,7 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
 
         hoursPicker.setMinValue(0);
+        hoursPicker.setFormatter(value -> String.valueOf(value));
         hoursPicker.setMaxValue(23);
         hoursPicker.setValue(selectedDurationHours);
 
@@ -188,24 +203,21 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
     }
 
     private void updateStartTimeDisplay() {
-        String amPm = selectedHour >= 12 ? "PM" : "AM";
+        String amPm = new java.text.DateFormatSymbols(getResources().getConfiguration().getLocales().get(0)).getAmPmStrings()[selectedHour >= 12 ? 1 : 0];
         int displayHour = selectedHour % 12;
         if (displayHour == 0) displayHour = 12;
-        startTimeText.setText(String.format("%d:%02d %s", displayHour, selectedMinute, amPm));
+        startTimeText.setText(String.format(java.util.Locale.ROOT, getString(R.string.screen_clock_time), displayHour, selectedMinute, amPm));
     }
 
     private void updateDurationDisplay() {
         if (selectedDurationHours == 0 && selectedDurationMinutes == 0) {
-            selectedDurationDisplay.setText("Set duration");
+            selectedDurationDisplay.setText(getString(R.string.screen_set_duration));
             return;
         }
-        StringBuilder text = new StringBuilder();
-        if (selectedDurationHours > 0) text.append(selectedDurationHours).append("h");
-        if (selectedDurationMinutes > 0) {
-            if (text.length() > 0) text.append(' ');
-            text.append(selectedDurationMinutes).append("m");
-        }
-        selectedDurationDisplay.setText(text);
+        selectedDurationDisplay.setText(selectedDurationHours == 0
+                ? String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_minutes_short), selectedDurationMinutes)
+                : selectedDurationMinutes == 0 ? String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_short), selectedDurationHours)
+                : String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), selectedDurationHours, selectedDurationMinutes));
     }
 
     private void populate(ScheduleModel source) {
@@ -231,12 +243,12 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
     private void createSchedule() {
         String name = nameInput.getText().toString().trim();
         if (name.isEmpty()) {
-            Toast.makeText(requireContext(), "Enter a schedule name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.screen_enter_a_schedule_name), Toast.LENGTH_SHORT).show();
             return;
         }
         int totalDurationMinutes = selectedDurationHours * 60 + selectedDurationMinutes;
         if (totalDurationMinutes == 0) {
-            Toast.makeText(requireContext(), "Set a duration", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.screen_set_a_duration), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -265,7 +277,7 @@ public class CreateScheduleDialog extends BottomSheetDialogFragment {
                 if (dayChips[i].isChecked()) repeatDays.add(i + 1);
             }
             if (repeatDays.isEmpty()) {
-                Toast.makeText(requireContext(), "Pick at least one day", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.screen_pick_at_least_one_day), Toast.LENGTH_SHORT).show();
                 return;
             }
         }

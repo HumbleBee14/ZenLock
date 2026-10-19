@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="28dp"
-        android:text="Where attention goes" />
+        android:text="@string/layout_where_attention_goes" />
 
     <LinearLayout
         android:id="@+id/factCard1"
@@ -20,8 +20,8 @@
         android:rotation="-2.5"
         android:background="@drawable/group_background">
 
-        <TextView style="@style/Zen.FactValue" android:text="96" />
-        <TextView style="@style/Zen.FactLabel" android:text="times a day the average person checks their phone. About once every ten minutes." />
+        <TextView style="@style/Zen.FactValue" android:text="@string/layout_96" />
+        <TextView style="@style/Zen.FactLabel" android:text="@string/layout_times_a_day_the_average_person_checks_their_phone_about_on" />
 
     </LinearLayout>
 
@@ -32,8 +32,8 @@
         android:rotation="2"
         android:background="@drawable/zen_field_background">
 
-        <TextView style="@style/Zen.FactValue" android:text="47 sec" />
-        <TextView style="@style/Zen.FactLabel" android:text="average attention on one screen before switching. It was 2½ minutes twenty years ago." />
+        <TextView style="@style/Zen.FactValue" android:text="@string/layout_47_sec" />
+        <TextView style="@style/Zen.FactLabel" android:text="@string/layout_average_attention_on_one_screen_before_switching_it_was_2_" />
 
     </LinearLayout>
 
@@ -44,8 +44,8 @@
         android:rotation="-1.5"
         android:background="@drawable/group_background">
 
-        <TextView style="@style/Zen.FactValue" android:text="23 min" />
-        <TextView style="@style/Zen.FactLabel" android:text="to get fully back into deep work after a single interruption." />
+        <TextView style="@style/Zen.FactValue" android:text="@string/layout_23_min" />
+        <TextView style="@style/Zen.FactLabel" android:text="@string/layout_to_get_fully_back_into_deep_work_after_a_single_interrupti" />
 
     </LinearLayout>
 
@@ -56,8 +56,8 @@
         android:rotation="1.5"
         android:background="@drawable/zen_field_background">
 
-        <TextView style="@style/Zen.FactValue" android:text="40+ days" />
-        <TextView style="@style/Zen.FactLabel" android:text="a year spent looking at a phone, at today's average of over three hours a day." />
+        <TextView style="@style/Zen.FactValue" android:text="@string/layout_40_days" />
+        <TextView style="@style/Zen.FactLabel" android:text="@string/layout_a_year_spent_looking_at_a_phone_at_today_s_average_of_over" />
 
     </LinearLayout>
 

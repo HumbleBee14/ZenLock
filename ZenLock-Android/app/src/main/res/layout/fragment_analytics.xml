@@ -20,7 +20,7 @@
             android:id="@+id/analyticsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Insights"
+            android:text="@string/layout_insights"
             style="@style/ModernText.PageTitle"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +86,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Today's Focus"
+                        android:text="@string/layout_today_s_focus"
                         style="@style/ModernText.SectionTitle"/>
 
                 </LinearLayout>
@@ -108,7 +108,7 @@
                             android:id="@+id/todayTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/layout_0"
                             android:textSize="22sp"
                             android:textStyle="bold"
                             android:textColor="@color/primary"
@@ -119,7 +119,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="FOCUS TIME" />
+                            android:text="@string/layout_focus_time" />
 
                     </LinearLayout>
 
@@ -139,7 +139,7 @@
                             android:id="@+id/todayMobileUsage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/layout_0"
                             android:textSize="22sp"
                             android:textStyle="bold"
                             android:textColor="@color/textPrimary"
@@ -150,7 +150,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="PHONE USAGE" />
+                            android:text="@string/layout_phone_usage" />
 
                     </LinearLayout>
 
@@ -170,7 +170,7 @@
                             android:id="@+id/todaySessions"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/layout_0"
                             android:textSize="22sp"
                             android:textStyle="bold"
                             android:textColor="@color/textSecondary"
@@ -181,7 +181,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="SESSIONS" />
+                            android:text="@string/layout_sessions" />
 
                     </LinearLayout>
 
@@ -265,14 +265,14 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Focus Time"
+                                android:text="@string/layout_focus_time_2"
                                 style="@style/ModernText.SectionTitle"/>
 
                             <TextView
                                 android:id="@+id/focusChange"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="--"
+                                android:text="@string/layout_fragment_analytics"
                                 android:textSize="11sp"
                                 android:fontFamily="sans-serif-medium"
                                 android:textColor="@color/textSecondary"
@@ -299,7 +299,7 @@
                                     android:id="@+id/currentFocusTime"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0m"
+                                    android:text="@string/layout_0m"
                                     android:textSize="22sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/primary"
@@ -309,7 +309,7 @@
                                     android:id="@+id/currentFocusLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="THIS WEEK"
+                                    android:text="@string/layout_this_week"
                                     style="@style/ModernText.MetricLabel"
                                     android:layout_marginTop="2dp"/>
 
@@ -325,7 +325,7 @@
                                     android:id="@+id/previousFocusTime"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0m"
+                                    android:text="@string/layout_0m"
                                     android:textSize="22sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/textSecondary"
@@ -335,7 +335,7 @@
                                     android:id="@+id/previousFocusLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="LAST WEEK"
+                                    android:text="@string/layout_last_week"
                                     style="@style/ModernText.MetricLabel"
                                     android:layout_marginTop="2dp"/>
 
@@ -376,14 +376,14 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Phone Usage"
+                                android:text="@string/layout_phone_usage_2"
                                 style="@style/ModernText.SectionTitle"/>
 
                             <TextView
                                 android:id="@+id/mobileChange"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="--"
+                                android:text="@string/layout_fragment_analytics"
                                 android:textSize="11sp"
                                 android:fontFamily="sans-serif-medium"
                                 android:textColor="@color/textSecondary"
@@ -410,7 +410,7 @@
                                     android:id="@+id/currentMobileUsage"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0m"
+                                    android:text="@string/layout_0m"
                                     android:textSize="22sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/textPrimary"
@@ -420,7 +420,7 @@
                                     android:id="@+id/currentMobileLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="THIS WEEK"
+                                    android:text="@string/layout_this_week"
                                     style="@style/ModernText.MetricLabel"
                                     android:layout_marginTop="2dp"/>
 
@@ -436,7 +436,7 @@
                                     android:id="@+id/previousMobileUsage"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0m"
+                                    android:text="@string/layout_0m"
                                     android:textSize="22sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/textSecondary"
@@ -446,7 +446,7 @@
                                     android:id="@+id/previousMobileLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="LAST WEEK"
+                                    android:text="@string/layout_last_week"
                                     style="@style/ModernText.MetricLabel"
                                     android:layout_marginTop="2dp"/>
 
@@ -466,7 +466,7 @@
                         android:id="@+id/chartCaption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Last 7 days"
+                        android:text="@string/layout_last_7_days"
                         style="@style/ModernText.MetricLabel"
                         android:layout_marginTop="14dp"/>
 
@@ -508,7 +508,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Most Used Apps"
+                    android:text="@string/layout_most_used_apps"
                     style="@style/ModernText.SectionTitle" />
 
                 <com.google.android.material.tabs.TabLayout
@@ -539,7 +539,7 @@
                     android:id="@+id/mostUsedEmpty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="No usage yet"
+                    android:text="@string/layout_no_usage_yet"
                     style="@style/ModernText.Caption"
                     android:textColor="@color/textTertiary"
                     android:gravity="center"
@@ -582,7 +582,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Recent Sessions"
+                        android:text="@string/layout_recent_sessions"
                         style="@style/ModernText.SectionTitle"/>
 
                     <ImageView
@@ -607,7 +607,7 @@
                         android:id="@+id/recentSessionsText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Complete your first session to see history here"
+                        android:text="@string/layout_complete_your_first_session_to_see_history_here"
                         style="@style/ModernText.Caption"
                         android:textColor="@color/textTertiary"
                         android:gravity="center"

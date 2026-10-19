@@ -54,7 +54,7 @@
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:layout_gravity="center_horizontal"
-        android:text="Next"
+        android:text="@string/layout_next"
         app:icon="@drawable/ic_arrow_forward"
         app:iconGravity="textEnd"
         app:iconSize="18dp" />

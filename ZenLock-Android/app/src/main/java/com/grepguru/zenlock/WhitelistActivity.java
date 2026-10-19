@@ -87,6 +87,7 @@ public class WhitelistActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.grepguru.zenlock.ui.AppLanguage.initializeDefault(this);
         super.onCreate(savedInstanceState);
         com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         if (isLockActive(this)) {
@@ -343,8 +344,8 @@ public class WhitelistActivity extends AppCompatActivity {
     }
 
     private void setupTabs() {
-        appTabs.addTab(appTabs.newTab().setText("System"));
-        appTabs.addTab(appTabs.newTab().setText("Installed"));
+        appTabs.addTab(appTabs.newTab().setText(getString(R.string.screen_system)));
+        appTabs.addTab(appTabs.newTab().setText(getString(R.string.screen_installed)));
         
         appTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -440,7 +441,7 @@ public class WhitelistActivity extends AppCompatActivity {
     }
     
     private void updateSaveButtonText() {
-        saveButton.setText(getString(R.string.save_allowed_apps, selectedApps.size(), MAX_ADDITIONAL_APPS));
+        saveButton.setText(String.format(java.util.Locale.ROOT, getString(R.string.save_allowed_apps), selectedApps.size(), MAX_ADDITIONAL_APPS));
     }
 
 

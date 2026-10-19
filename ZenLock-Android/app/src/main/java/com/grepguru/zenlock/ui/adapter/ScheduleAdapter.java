@@ -80,7 +80,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         void bind(ScheduleModel schedule, int position) {
             scheduleName.setText(schedule.getName());
             scheduleTag.setText(repeatTag(schedule));
-            scheduleTime.setText(schedule.getFormattedStartTime());
+            scheduleTime.setText(schedule.getFormattedStartTime(itemView.getContext()));
             scheduleMeta.setText(buildMeta(schedule));
             scheduleInfo.setAlpha(1f);
             scheduleCard.setActivated(schedule.isEnabled());
@@ -115,27 +115,27 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         }
 
         private String buildMeta(ScheduleModel schedule) {
-            return "– " + schedule.getFormattedEndTime() + " · " + schedule.getFormattedDuration();
+            return itemView.getContext().getString(R.string.screen_schedule_end_and_duration, schedule.getFormattedEndTime(itemView.getContext()), schedule.getFormattedDuration(itemView.getContext()));
         }
 
         private String repeatTag(ScheduleModel schedule) {
             switch (schedule.getRepeatType()) {
-                case ONCE: return "Once";
-                case DAILY: return "Daily";
+                case ONCE: return itemView.getContext().getString(R.string.screen_once);
+                case DAILY: return itemView.getContext().getString(R.string.screen_daily);
                 default: return weeklyTag(schedule.getRepeatDays());
             }
         }
 
         private String weeklyTag(Set<Integer> days) {
-            if (days.size() == 5 && !days.contains(Calendar.SATURDAY) && !days.contains(Calendar.SUNDAY)) return "Weekdays";
-            if (days.size() == 2 && days.contains(Calendar.SATURDAY) && days.contains(Calendar.SUNDAY)) return "Weekends";
-            if (days.isEmpty() || days.size() > 3) return "Weekly";
-            String[] names = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+            if (days.size() == 5 && !days.contains(Calendar.SATURDAY) && !days.contains(Calendar.SUNDAY)) return itemView.getContext().getString(R.string.screen_weekdays);
+            if (days.size() == 2 && days.contains(Calendar.SATURDAY) && days.contains(Calendar.SUNDAY)) return itemView.getContext().getString(R.string.screen_weekends);
+            if (days.isEmpty() || days.size() > 3) return itemView.getContext().getString(R.string.screen_weekly);
+            String[] names = new java.text.DateFormatSymbols(itemView.getResources().getConfiguration().getLocales().get(0)).getShortWeekdays();
             StringBuilder tag = new StringBuilder();
             for (int day = Calendar.SUNDAY; day <= Calendar.SATURDAY; day++) {
                 if (!days.contains(day)) continue;
                 if (tag.length() > 0) tag.append(' ');
-                tag.append(names[day - 1]);
+                tag.append(names[day]);
             }
             return tag.toString();
         }

@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Allow SMS"
+            android:text="@string/layout_allow_sms"
             android:textSize="17sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/textPrimary" />
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="ZenLock texts a one-time unlock code to your partner, only when you ask to end a session early."
+        android:text="@string/layout_zenlock_texts_a_one_time_unlock_code_to_your_partner_only_"
         android:textSize="13sp"
         android:lineSpacingExtra="2dp"
         android:textColor="@color/textPrimary" />
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="It never reads your messages or shares your data. Carrier SMS charges may apply."
+        android:text="@string/layout_it_never_reads_your_messages_or_shares_your_data_carrier_s"
         android:textSize="12sp"
         android:lineSpacingExtra="2dp"
         android:textColor="@color/textSecondary" />
@@ -67,7 +67,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginEnd="8dp"
-            android:text="Not now" />
+            android:text="@string/insights_not_now" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/agreeButton"
@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minHeight="40dp"
-            android:text="Allow" />
+            android:text="@string/layout_allow" />
 
     </LinearLayout>
 

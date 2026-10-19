@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="Set PIN"
+        android:text="@string/layout_set_pin"
         android:textSize="17sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textPrimary" />
@@ -45,8 +45,9 @@
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
             android:background="@drawable/zen_field_background"
-            android:hint="PIN"
+            android:hint="@string/layout_pin"
             android:inputType="numberPassword"
+            android:textDirection="ltr"
             android:maxLength="4"
             android:gravity="center"
             android:textSize="18sp"
@@ -61,8 +62,9 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:background="@drawable/zen_field_background"
-            android:hint="Confirm"
+            android:hint="@string/uninstall_protection_continue"
             android:inputType="numberPassword"
+            android:textDirection="ltr"
             android:maxLength="4"
             android:imeOptions="actionDone"
             android:gravity="center"
@@ -96,7 +98,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:text="@string/layout_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/pinSaveButton"
@@ -104,7 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minHeight="40dp"
-            android:text="Set PIN" />
+            android:text="@string/layout_set_pin" />
 
     </LinearLayout>
 

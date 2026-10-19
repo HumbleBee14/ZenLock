@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -59,8 +60,8 @@ public class LockScreenLauncher {
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_lock)
-                .setContentTitle("Focus Session Started")
-                .setContentText("Tap to open " + scheduleName + " (" + durationMinutes + " min)")
+                .setContentTitle(AppLanguage.localizedContext(context).getString(R.string.background_focus_session_started))
+                .setContentText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_tap_to_open_1_s_2_d_min), scheduleName, durationMinutes))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(fullScreenAllowed)
@@ -135,8 +136,8 @@ public class LockScreenLauncher {
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_lock)
-                .setContentTitle("ZenLock Active")
-                .setContentText(fullScreenAllowed ? "Focus session in progress" : "Tap to return to your focus session")
+                .setContentTitle(AppLanguage.localizedContext(context).getString(R.string.background_zenlock_active))
+                .setContentText(fullScreenAllowed ? AppLanguage.localizedContext(context).getString(R.string.background_focus_session_in_progress) : AppLanguage.localizedContext(context).getString(R.string.background_tap_to_return_to_your_focus_session))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(true)
@@ -161,10 +162,10 @@ public class LockScreenLauncher {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                "Focus Session Launcher",
+                AppLanguage.localizedContext(context).getString(R.string.background_focus_session_launcher),
                 NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Notifications for launching focus sessions");
+            channel.setDescription(AppLanguage.localizedContext(context).getString(R.string.background_notifications_for_launching_focus_sessions));
             channel.enableLights(true);
             channel.enableVibration(true);
             channel.setShowBadge(false);

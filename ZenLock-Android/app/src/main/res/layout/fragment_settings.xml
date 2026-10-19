@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Settings" />
+            android:text="@string/layout_settings" />
         <LinearLayout
             android:id="@+id/whitelistButton"
             style="@style/Settings.Row.Clickable"
@@ -47,7 +47,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Allowed Apps"
+                    android:text="@string/layout_allowed_apps"
                     android:textSize="15sp"
                     android:textColor="@color/textPrimary" />
                 <TextView
@@ -90,7 +90,7 @@
                     android:minHeight="48dp">
                     <TextView
                         style="@style/Zen.RowLabel"
-                        android:text="Phone"
+                        android:text="@string/layout_phone"
                         android:textSize="14sp"
                         android:id="@+id/phoneAppLabel"
                         android:labelFor="@id/phoneAppToggle" />
@@ -108,7 +108,7 @@
                     android:minHeight="48dp">
                     <TextView
                         style="@style/Zen.RowLabel"
-                        android:text="Calendar"
+                        android:text="@string/layout_calendar"
                         android:textSize="14sp"
                         android:id="@+id/calendarAppLabel"
                         android:labelFor="@id/calendarAppToggle" />
@@ -126,7 +126,7 @@
                     android:minHeight="48dp">
                     <TextView
                         style="@style/Zen.RowLabel"
-                        android:text="Clock"
+                        android:text="@string/layout_clock"
                         android:textSize="14sp"
                         android:id="@+id/clockAppLabel"
                         android:labelFor="@id/clockAppToggle" />
@@ -206,7 +206,7 @@
                     android:layout_marginEnd="4dp"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="Clear"
+                    android:text="@string/layout_clear"
                     android:textSize="12sp"
                     android:visibility="gone"
                     android:minWidth="48dp"
@@ -246,12 +246,12 @@
                 android:visibility="gone">
                 <TextView
                     style="@style/Zen.RowLabel"
-                    android:text="Partner Contact"
+                    android:text="@string/layout_partner_contact"
                     android:textSize="14sp" />
                 <TextView
                     android:id="@+id/partnerConfigValue"
                     style="@style/Zen.RowValue"
-                    android:text="Configure" />
+                    android:text="@string/layout_configure" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
             </LinearLayout>
         </LinearLayout>
@@ -276,7 +276,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No unlock method set. You stay locked until the timer ends."
+                android:text="@string/layout_no_unlock_method_set_you_stay_locked_until_the_timer_ends"
                 android:textSize="12sp"
                 android:textColor="@color/textSecondary" />
         </LinearLayout>
@@ -290,6 +290,12 @@
             <LinearLayout android:id="@+id/appearanceRow" style="@style/Settings.Row.Clickable">
                 <TextView style="@style/Zen.RowLabel" android:text="@string/settings_theme" />
                 <TextView android:id="@+id/appearanceValue" style="@style/Zen.RowValue" />
+                <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/languageRow" style="@style/Settings.Row.Clickable">
+                <TextView style="@style/Zen.RowLabel" android:text="@string/change_language"
+                    android:textLocale="en" android:textDirection="ltr" />
+                <TextView android:id="@+id/languageValue" style="@style/Zen.RowValue" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
             </LinearLayout>
         </LinearLayout>
@@ -309,7 +315,7 @@
             <LinearLayout style="@style/Settings.Row">
                 <TextView
                     style="@style/Zen.RowLabel"
-                    android:text="Motivational Quotes"
+                    android:text="@string/layout_motivational_quotes"
                     android:id="@+id/quotesLabel"
                     android:labelFor="@id/quotesToggle" />
                 <ImageView
@@ -323,7 +329,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:focusable="true"
-                    android:contentDescription="Add quote" />
+                    android:contentDescription="@string/layout_add_quote" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/quotesToggle"
                     android:layout_width="wrap_content"
@@ -336,7 +342,7 @@
             <LinearLayout style="@style/Settings.Row">
                 <TextView
                     style="@style/Zen.RowLabel"
-                    android:text="Circular Timer"
+                    android:text="@string/layout_circular_timer"
                     android:id="@+id/circularTimerLabel"
                     android:labelFor="@id/circularTimerToggle" />
                 <androidx.appcompat.widget.SwitchCompat
@@ -351,7 +357,7 @@
             <LinearLayout style="@style/Settings.Row">
                 <TextView
                     style="@style/Zen.RowLabel"
-                    android:text="Vibration Feedback"
+                    android:text="@string/layout_vibration_feedback"
                     android:id="@+id/vibrationLabel"
                     android:labelFor="@id/vibrationToggle" />
                 <androidx.appcompat.widget.SwitchCompat
@@ -468,7 +474,7 @@
                     android:src="@drawable/ic_heart"
                     app:tint="@color/error"
                     android:contentDescription="@null" />
-                <TextView style="@style/Zen.RowLabel" android:text="Support the Developer" />
+                <TextView style="@style/Zen.RowLabel" android:text="@string/layout_support_the_developer" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
             </LinearLayout>
             <View style="@style/Settings.Divider" />
@@ -480,7 +486,7 @@
                     android:src="@drawable/ic_message"
                     app:tint="@color/textSecondary"
                     android:contentDescription="@null" />
-                <TextView style="@style/Zen.RowLabel" android:text="Send Feedback" />
+                <TextView style="@style/Zen.RowLabel" android:text="@string/layout_send_feedback" />
                 <ImageView style="@style/Zen.Chevron" android:contentDescription="@null" />
             </LinearLayout>
         </LinearLayout>
@@ -491,7 +497,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:gravity="center"
-            android:text="Free and open source, built to help people focus. Your feedback and support keep it going."
+            android:text="@string/layout_free_and_open_source_built_to_help_people_focus_your_feedb"
             android:textSize="12sp"
             android:lineSpacingExtra="2dp"
             android:textColor="@color/textSecondary" />

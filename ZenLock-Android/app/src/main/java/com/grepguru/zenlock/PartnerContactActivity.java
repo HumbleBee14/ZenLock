@@ -47,6 +47,7 @@ public class PartnerContactActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.grepguru.zenlock.ui.AppLanguage.initializeDefault(this);
         super.onCreate(savedInstanceState);
         com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         if (isLockActive(this)) {
@@ -59,6 +60,8 @@ public class PartnerContactActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_partner_contact);
         com.grepguru.zenlock.ui.ScreenInsets.applyToContent(this);
+
+        ((TextView) findViewById(R.id.smsValidityNote)).setText(String.format(java.util.Locale.ROOT, getString(R.string.partner_sms_validity_note), OTPManager.validityMinutes()));
 
         // Initialize components
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
@@ -175,18 +178,18 @@ public class PartnerContactActivity extends AppCompatActivity {
         if (smsEnabled && !phoneText.isEmpty() && hasSmsPermission) {
             testOtpButton.setEnabled(true);
             testOtpButton.setAlpha(1.0f);
-            testOtpButton.setText("Send Test OTP");
+            testOtpButton.setText(getString(R.string.screen_send_test_otp));
             testOtpButton.setVisibility(View.VISIBLE);
         } else if (smsEnabled && !hasSmsPermission) {
             // Keep button enabled but with different text for permission request
             testOtpButton.setEnabled(true);
             testOtpButton.setAlpha(0.7f);
-            testOtpButton.setText("Grant SMS Permission");
+            testOtpButton.setText(getString(R.string.screen_grant_sms_permission));
             testOtpButton.setVisibility(View.VISIBLE);
         } else {
             testOtpButton.setEnabled(false);
             testOtpButton.setAlpha(0.5f);
-            testOtpButton.setText("Send Test OTP");
+            testOtpButton.setText(getString(R.string.screen_send_test_otp));
             testOtpButton.setVisibility(smsEnabled ? View.VISIBLE : View.GONE);
         }
         
@@ -216,23 +219,23 @@ public class PartnerContactActivity extends AppCompatActivity {
 
         // First check SMS permission if SMS is enabled
         if (smsEnabled && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Cannot save SMS configuration without SMS permission. Please grant permission first.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.screen_cannot_save_sms_configuration_without_sms_permission_please_grant_permission_first), Toast.LENGTH_LONG).show();
             return;
         }
 
         // Validate SMS configuration
         if (smsEnabled && partnerPhone.isEmpty()) {
-            Toast.makeText(this, "Please enter partner's phone number", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_partner_s_phone_number), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (smsEnabled && !isValidPhoneNumber(partnerPhone)) {
-            Toast.makeText(this, "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_a_valid_phone_number), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (smsEnabled && !isValidCountryCode(countryCode)) {
-            Toast.makeText(this, "Please enter a valid country code (e.g., +1, +44, +91)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_a_valid_country_code_e_g_1_44_91), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -245,8 +248,8 @@ public class PartnerContactActivity extends AppCompatActivity {
 
         // Show success message
         String message = smsEnabled ? 
-            "SMS partner contact configured successfully!" : 
-            "Partner contact disabled successfully!";
+            getString(R.string.screen_sms_partner_contact_configured_successfully) :
+            getString(R.string.screen_partner_contact_disabled_successfully);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
         // Update test button state after save
@@ -265,17 +268,17 @@ public class PartnerContactActivity extends AppCompatActivity {
         String countryCode = countryCodeInput.getText().toString().trim();
         
         if (partnerPhone.isEmpty()) {
-            Toast.makeText(this, "Please enter partner phone number first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_partner_phone_number_first), Toast.LENGTH_SHORT).show();
             return;
         }
         
         if (!isValidPhoneNumber(partnerPhone)) {
-            Toast.makeText(this, "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_a_valid_phone_number), Toast.LENGTH_SHORT).show();
             return;
         }
         
         if (!isValidCountryCode(countryCode)) {
-            Toast.makeText(this, "Please enter a valid country code", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.screen_please_enter_a_valid_country_code), Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -284,7 +287,7 @@ public class PartnerContactActivity extends AppCompatActivity {
         boolean sent = otpManager.sendOTPviaSMS(partnerPhone, testOtp, countryCode);
         
         if (sent) {
-            Toast.makeText(this, "Test OTP sent successfully! Check with your partner.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.screen_test_otp_sent_successfully_check_with_your_partner), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -295,7 +298,7 @@ public class PartnerContactActivity extends AppCompatActivity {
             // Show permission warning
             if (permissionWarning != null) {
                 permissionWarning.setVisibility(View.VISIBLE);
-                permissionWarning.setText("SMS permission needed. Tap to grant.");
+                permissionWarning.setText(getString(R.string.screen_sms_permission_needed_tap_to_grant));
                 permissionWarning.setOnClickListener(v -> requestSmsPermission());
             }
             
@@ -337,7 +340,7 @@ public class PartnerContactActivity extends AppCompatActivity {
             userConsentedToSms = false;
             hasShownSmsDisclosure = true;
             dialog.dismiss();
-            Toast.makeText(this, "SMS permission declined. You can enable it later in settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.screen_sms_permission_declined_you_can_enable_it_later_in_settings), Toast.LENGTH_LONG).show();
             // Disable SMS toggle since user declined
             smsToggle.setChecked(false);
         });
@@ -351,12 +354,12 @@ public class PartnerContactActivity extends AppCompatActivity {
         
         if (requestCode == SMS_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "SMS permission granted!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.screen_sms_permission_granted), Toast.LENGTH_SHORT).show();
                 checkSmsPermission(); // Update UI
                 updateTestButtonState(); // Update button states
                 updateSaveButtonState(); // Update save button state
             } else {
-                Toast.makeText(this, "SMS permission denied. OTP functionality will not work.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.screen_sms_permission_denied_otp_functionality_will_not_work), Toast.LENGTH_LONG).show();
                 updateTestButtonState(); // Update button states even if denied
                 updateSaveButtonState(); // Update save button state
             }

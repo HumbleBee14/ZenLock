@@ -153,9 +153,9 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void setupMostUsedTabs() {
-        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Today"));
-        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Week"));
-        mostUsedTabs.addTab(mostUsedTabs.newTab().setText("Month"));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText(getString(R.string.screen_today)));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText(getString(R.string.screen_week)));
+        mostUsedTabs.addTab(mostUsedTabs.newTab().setText(getString(R.string.screen_month)));
         mostUsedTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -173,7 +173,7 @@ public class AnalyticsFragment extends Fragment {
 
     private void loadMostUsed() {
         if (!analyticsManager.hasUsageStatsPermission()) {
-            showMostUsed(java.util.Collections.emptyList(), "Allow usage access to see your most used apps");
+            showMostUsed(java.util.Collections.emptyList(), getString(R.string.screen_allow_usage_access_to_see_your_most_used_apps));
             return;
         }
         int period = mostUsedPeriod;
@@ -182,7 +182,7 @@ public class AnalyticsFragment extends Fragment {
                     com.grepguru.zenlock.utils.TopAppsUsage.top(requireContext(), period, 10);
             if (getActivity() == null || !isAdded()) return;
             getActivity().runOnUiThread(() -> {
-                if (isAdded() && period == mostUsedPeriod) showMostUsed(entries, "No usage yet");
+                if (isAdded() && period == mostUsedPeriod) showMostUsed(entries, getString(R.string.screen_no_usage_yet));
             });
         }).start();
     }
@@ -256,8 +256,8 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void setupTrendsTabs() {
-        trendsTabs.addTab(trendsTabs.newTab().setText("Weekly"));
-        trendsTabs.addTab(trendsTabs.newTab().setText("Monthly"));
+        trendsTabs.addTab(trendsTabs.newTab().setText(getString(R.string.screen_weekly)));
+        trendsTabs.addTab(trendsTabs.newTab().setText(getString(R.string.screen_monthly)));
         trendsTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -277,13 +277,13 @@ public class AnalyticsFragment extends Fragment {
     private void bindActivePeriod() {
         if (!isAdded()) return;
         PeriodData data = showingMonthly ? monthlyData : weeklyData;
-        String current = showingMonthly ? "THIS MONTH" : "THIS WEEK";
-        String previous = showingMonthly ? "LAST MONTH" : "LAST WEEK";
+        String current = showingMonthly ? getString(R.string.screen_this_month) : getString(R.string.screen_this_week);
+        String previous = showingMonthly ? getString(R.string.screen_last_month) : getString(R.string.screen_last_week);
         currentFocusLabel.setText(current);
         previousFocusLabel.setText(previous);
         currentMobileLabel.setText(current);
         previousMobileLabel.setText(previous);
-        chartCaption.setText(showingMonthly ? "Last 30 days" : "Last 7 days");
+        chartCaption.setText(showingMonthly ? getString(R.string.screen_last_30_days) : getString(R.string.screen_last_7_days));
 
         if (data.statsLoaded) {
             currentFocusTime.setText(formatTime(data.currentFocusMs / (60 * 1000)));
@@ -295,10 +295,10 @@ public class AnalyticsFragment extends Fragment {
             applyChangeLabel(focusChange, computeNormalizedChange(data.currentFocusMs, currentDays, data.previousFocusMs, previousDays), true);
             applyChangeLabel(mobileChange, computeNormalizedChange(data.currentMobileMs, currentDays, data.previousMobileMs, previousDays), false);
         } else {
-            currentFocusTime.setText("0m");
-            previousFocusTime.setText("0m");
-            currentMobileUsage.setText("0m");
-            previousMobileUsage.setText("0m");
+            currentFocusTime.setText(getString(R.string.screen_duration_zero));
+            previousFocusTime.setText(getString(R.string.screen_duration_zero));
+            currentMobileUsage.setText(getString(R.string.screen_duration_zero));
+            previousMobileUsage.setText(getString(R.string.screen_duration_zero));
             focusChange.setText("--");
             mobileChange.setText("--");
         }
@@ -378,6 +378,7 @@ public class AnalyticsFragment extends Fragment {
     // ---- Charts ----
     private void setupChart(CombinedChart chart, int maxLabels) {
         if (chart == null) return;
+        chart.setNoDataText(getString(R.string.screen_no_data_yet));
         chart.setDrawGridBackground(false);
         chart.setDrawBarShadow(false);
         chart.setHighlightFullBarEnabled(false);
@@ -401,6 +402,11 @@ public class AnalyticsFragment extends Fragment {
         x.setTextSize(12f);
         
         // Configure Y-axis for better text visibility
+        chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
+            @Override public String getAxisLabel(float value, com.github.mikephil.charting.components.AxisBase axis) {
+                return String.format(java.util.Locale.ROOT, "%." + axis.mDecimals + "f", value);
+            }
+        });
         chart.getAxisLeft().setDrawGridLines(true);
         chart.getAxisLeft().setTextColor(requireContext().getColor(R.color.textPrimary));
         chart.getAxisLeft().setTextSize(12f);
@@ -445,13 +451,13 @@ public class AnalyticsFragment extends Fragment {
                     labels.add(shortDayLabel(c));
                 }
 
-                BarDataSet barSet = new BarDataSet(focusEntries, "Focus (h)");
+                BarDataSet barSet = new BarDataSet(focusEntries, getString(R.string.screen_focus_h));
                 barSet.setColor(requireContext().getColor(R.color.secondary)); // orange-like
                 barSet.setDrawValues(false);
                 BarData barData = new BarData(barSet);
                 barData.setBarWidth(0.45f);
 
-                LineDataSet lineSet = new LineDataSet(mobileEntries, "Mobile (h)");
+                LineDataSet lineSet = new LineDataSet(mobileEntries, getString(R.string.screen_mobile_h));
                 lineSet.setColor(requireContext().getColor(R.color.warning));
                 lineSet.setCircleColor(requireContext().getColor(R.color.warning));
                 lineSet.setLineWidth(1.8f);
@@ -475,7 +481,7 @@ public class AnalyticsFragment extends Fragment {
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
                         if (trendsChart != null && isAdded()) {
-                            trendsChart.setNoDataText("No data yet");
+                            trendsChart.setNoDataText(getString(R.string.screen_no_data_yet));
                         }
                     });
                 }
@@ -520,13 +526,13 @@ public class AnalyticsFragment extends Fragment {
                     labels.add(dayOfMonthLabel(c));
                 }
 
-                BarDataSet barSet = new BarDataSet(focusEntries, "Focus (h)");
+                BarDataSet barSet = new BarDataSet(focusEntries, getString(R.string.screen_focus_h));
                 barSet.setColor(requireContext().getColor(R.color.secondary));
                 barSet.setDrawValues(false);
                 BarData barData = new BarData(barSet);
                 barData.setBarWidth(0.4f);
 
-                LineDataSet lineSet = new LineDataSet(mobileEntries, "Mobile (h)");
+                LineDataSet lineSet = new LineDataSet(mobileEntries, getString(R.string.screen_mobile_h));
                 lineSet.setColor(requireContext().getColor(R.color.warning));
                 lineSet.setCircleColor(requireContext().getColor(R.color.warning));
                 lineSet.setLineWidth(1.6f);
@@ -550,7 +556,7 @@ public class AnalyticsFragment extends Fragment {
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
                         if (trendsChart != null && isAdded()) {
-                            trendsChart.setNoDataText("No data yet");
+                            trendsChart.setNoDataText(getString(R.string.screen_no_data_yet));
                         }
                     });
                 }
@@ -569,9 +575,9 @@ public class AnalyticsFragment extends Fragment {
 
     private float msToHoursFloat(long ms) { return (float)(ms / 3600000.0); }
     private String shortDayLabel(java.util.Calendar c) {
-        String[] days = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+        String[] days = new java.text.DateFormatSymbols(getResources().getConfiguration().getLocales().get(0)).getShortWeekdays();
         int dow = c.get(java.util.Calendar.DAY_OF_WEEK); // 1..7
-        return days[dow - 1];
+        return days[dow];
     }
     private String dayOfMonthLabel(java.util.Calendar c) { return String.valueOf(c.get(java.util.Calendar.DAY_OF_MONTH)); }
     
@@ -678,11 +684,11 @@ public class AnalyticsFragment extends Fragment {
 
         if (todayTime != null) {
             if (focusTimeMinutes < 60) {
-                todayTime.setText(focusTimeMinutes + "m");
+                todayTime.setText(String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_minutes_short), focusTimeMinutes));
             } else {
                 int hours = (int) (focusTimeMinutes / 60);
                 int minutes = (int) (focusTimeMinutes % 60);
-                todayTime.setText(hours + "h " + minutes + "m");
+                todayTime.setText(String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), hours, minutes));
             }
         }
 
@@ -714,7 +720,7 @@ public class AnalyticsFragment extends Fragment {
                             } else if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
                             } else {
-                                todayMobileUsage.setText("0m");
+                                todayMobileUsage.setText(getString(R.string.screen_duration_zero));
                             }
                         }
                     });
@@ -749,7 +755,7 @@ public class AnalyticsFragment extends Fragment {
                             } else if (mobileUsageMs > 0) {
                                 todayMobileUsage.setText(formatTime(mobileUsageMs / (60 * 1000)));
                             } else {
-                                todayMobileUsage.setText("0m");
+                                todayMobileUsage.setText(getString(R.string.screen_duration_zero));
                             }
                         }
                     });
@@ -761,7 +767,7 @@ public class AnalyticsFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         if (!isAdded()) return; // Double check fragment is still attached
                         if (todayMobileUsage != null) {
-                            todayMobileUsage.setText("Error");
+                            todayMobileUsage.setText(getString(R.string.screen_error));
                         }
                     });
                 }
@@ -808,7 +814,7 @@ public class AnalyticsFragment extends Fragment {
         }
         double cp = changePct;
         // Round to nearest whole percent for UI
-        String text = String.format(Locale.getDefault(), (cp >= 0 ? "+%.0f%%" : "%.0f%%"), cp);
+        String text = String.format(java.util.Locale.ROOT, (cp >= 0 ? "+%.0f%%" : "%.0f%%"), cp);
         label.setText(text);
 
         // Thresholds similar to previous logic
@@ -817,7 +823,7 @@ public class AnalyticsFragment extends Fragment {
         } else if (cp < -5) {
             label.setTextColor(requireContext().getColor(higherIsGood ? R.color.warning : R.color.success));
         } else {
-            label.setText("0%");
+            label.setText(String.format(java.util.Locale.ROOT, "%.0f%%", 0d));
             label.setTextColor(requireContext().getColor(R.color.textSecondary));
         }
     }
@@ -842,7 +848,7 @@ public class AnalyticsFragment extends Fragment {
     
     private void updateRecentSessionsEmpty() {
         if (recentSessionsText != null) {
-            recentSessionsText.setText("No sessions yet. Start your first focus session!");
+            recentSessionsText.setText(getString(R.string.screen_no_sessions_yet_start_your_first_focus_session));
             recentSessionsText.setVisibility(View.VISIBLE);
         }
         if (recentSessionsContainer != null) {
@@ -852,14 +858,14 @@ public class AnalyticsFragment extends Fragment {
     
     private String formatTime(long minutes) {
         if (minutes < 60) {
-            return minutes + "m";
+            return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_minutes_short), minutes);
         } else {
             int hours = (int) (minutes / 60);
             int mins = (int) (minutes % 60);
             if (mins == 0) {
-                return hours + "h";
+                return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_short), hours);
             } else {
-                return hours + "h " + mins + "m";
+                return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), hours, mins);
             }
         }
     }
@@ -871,11 +877,11 @@ public class AnalyticsFragment extends Fragment {
     private String formatDuration(long milliseconds) {
         long minutes = milliseconds / (1000 * 60);
         if (minutes < 60) {
-            return minutes + " minutes";
+            return String.format(java.util.Locale.ROOT, getResources().getQuantityString(R.plurals.screen_duration_minutes, (int) minutes), minutes);
         } else {
             long hours = minutes / 60;
             long remainingMinutes = minutes % 60;
-            return hours + "h " + remainingMinutes + "m";
+            return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), hours, remainingMinutes);
         }
     }
     
@@ -950,7 +956,7 @@ public class AnalyticsFragment extends Fragment {
         timeText.setTextColor(requireContext().getColor(R.color.textPrimary));
         info.addView(timeText);
         TextView sourceText = new TextView(requireContext());
-        sourceText.setText(session.source.startsWith("schedule:") ? session.source.substring(9) : "Focus Session");
+        sourceText.setText(session.source.startsWith("schedule:") ? session.source.substring(9) : getString(R.string.screen_focus_session));
         sourceText.setTextSize(12);
         sourceText.setTextColor(requireContext().getColor(R.color.textSecondary));
         sourceText.setMaxLines(1);
@@ -962,13 +968,13 @@ public class AnalyticsFragment extends Fragment {
         right.setOrientation(LinearLayout.VERTICAL);
         right.setGravity(android.view.Gravity.END);
         TextView durationText = new TextView(requireContext());
-        durationText.setText(session.getFormattedDuration());
+        durationText.setText(session.getFormattedDuration(requireContext()));
         durationText.setTextSize(14);
         durationText.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         durationText.setTextColor(requireContext().getColor(R.color.textPrimary));
         right.addView(durationText);
         TextView statusText = new TextView(requireContext());
-        statusText.setText(session.completed ? "Completed" : session.isPartial() ? "Partial" : "Interrupted");
+        statusText.setText(session.completed ? getString(R.string.screen_completed) : session.isPartial() ? getString(R.string.screen_partial) : getString(R.string.screen_interrupted));
         statusText.setTextSize(11);
         statusText.setTextColor(statusColor);
         right.addView(statusText);
@@ -991,20 +997,20 @@ public class AnalyticsFragment extends Fragment {
         Date today = new Date();
         Date yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
         
-        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", java.util.Locale.US);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd", java.util.Locale.US);
         
         if (isSameDay(date, today)) {
-            return "Today, " + timeFormat.format(date);
+            return getString(R.string.screen_today_1_s, timeFormat.format(date));
         } else if (isSameDay(date, yesterday)) {
-            return "Yesterday, " + timeFormat.format(date);
+            return getString(R.string.screen_yesterday_1_s, timeFormat.format(date));
         } else {
-            return dateFormat.format(date) + ", " + timeFormat.format(date);
+            return getString(R.string.screen_date_time, dateFormat.format(date), timeFormat.format(date));
         }
     }
     
     private boolean isSameDay(Date date1, Date date2) {
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd", java.util.Locale.US);
         return fmt.format(date1).equals(fmt.format(date2));
     }
     

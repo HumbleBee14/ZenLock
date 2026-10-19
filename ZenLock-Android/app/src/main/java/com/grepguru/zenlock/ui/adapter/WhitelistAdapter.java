@@ -65,7 +65,7 @@ public class WhitelistAdapter extends RecyclerView.Adapter<WhitelistAdapter.View
             if (isChecked && selectedApps.size() >= maxAdditionalApps) {
                 buttonView.setChecked(false); // Prevent selecting more than allowed
                 android.widget.Toast.makeText(buttonView.getContext(),
-                    "Up to " + maxAdditionalApps + " apps",
+                    String.format(java.util.Locale.ROOT, buttonView.getContext().getString(R.string.screen_up_to_1_d_apps), maxAdditionalApps),
                     android.widget.Toast.LENGTH_SHORT).show();
             } else {
                 app.setSelected(isChecked);

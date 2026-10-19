@@ -84,9 +84,12 @@ public class HomePermissionFlowTest {
         assertEquals(12,hours.getValue()); assertEquals(59,minutes.getValue());
         assertEquals("PM",((android.widget.TextView)home.requireView().findViewById(R.id.lockUntilPeriodButton)).getText().toString());
         hours.performClick();
-        home.getChildFragmentManager().executePendingTransactions();
-        com.google.android.material.timepicker.MaterialTimePicker popup=(com.google.android.material.timepicker.MaterialTimePicker)home.getChildFragmentManager().findFragmentByTag("lockUntilPicker");
-        assertNotNull(popup); assertEquals(12,popup.getHour()); assertEquals(59,popup.getMinute());
+        android.app.AlertDialog popup = org.robolectric.shadows.ShadowAlertDialog.getLatestAlertDialog();
+        assertTrue(popup instanceof android.app.TimePickerDialog);
+        int timePickerId = popup.getContext().getResources().getIdentifier("timePicker", "id", "android");
+        android.widget.TimePicker clock = popup.findViewById(timePickerId);
+        assertNotNull(clock); assertEquals(12, clock.getHour()); assertEquals(59, clock.getMinute());
+        popup.dismiss();
         host.pause().stop().destroy();
     }
 

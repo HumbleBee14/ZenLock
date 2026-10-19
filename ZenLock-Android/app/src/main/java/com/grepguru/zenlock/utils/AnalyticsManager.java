@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -533,7 +535,7 @@ public class AnalyticsManager {
      */
     public String getTodayMobileUsageFormatted() {
         if (!hasUsageStatsPermission()) {
-            return "Permission needed";
+            return AppLanguage.localizedContext(context).getString(R.string.background_permission_needed);
         }
         return mobileUsageTracker.getFormattedTodayUsage();
     }

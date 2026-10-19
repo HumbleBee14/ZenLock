@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -92,10 +93,10 @@ public class LockScreenService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                "Focus Session Service",
+                AppLanguage.localizedContext(this).getString(R.string.background_focus_session_service),
                 NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Service for managing scheduled focus sessions");
+            channel.setDescription(AppLanguage.localizedContext(this).getString(R.string.background_service_for_managing_scheduled_focus_sessions));
             channel.enableLights(true);
             channel.enableVibration(true);
             channel.setShowBadge(false);
@@ -138,8 +139,8 @@ public class LockScreenService extends Service {
         // Build notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_lock)
-            .setContentTitle("Focus Session Active")
-            .setContentText(scheduleName + " - " + durationMinutes + " minutes")
+            .setContentTitle(AppLanguage.localizedContext(this).getString(R.string.background_focus_session_active))
+            .setContentText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(this).getResources().getQuantityString(R.plurals.background_session_minutes, durationMinutes), scheduleName, durationMinutes))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setTimeoutAfter(Math.max(1, durationMinutes * 60_000L))

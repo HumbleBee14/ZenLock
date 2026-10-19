@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -129,21 +131,14 @@ public class UsageStatsPermissionManager {
     /**
      * Get user-friendly explanation for usage stats permission
      */
-    public static String getPermissionExplanation() {
-        return "ZenLock needs access to usage statistics to show you how much screen time you're saving. " +
-               "This permission allows the app to see which apps you use and for how long, but this data " +
-               "stays private on your device and is only used to calculate your focus statistics.";
+    public static String getPermissionExplanation(Context context) {
+        return AppLanguage.localizedContext(context).getString(R.string.background_zenlock_needs_access_to_usage_statistics_to_show_you_how_much_screen_time_y);
     }
     
     /**
      * Get instructions for granting permission
      */
-    public static String getPermissionInstructions() {
-        return "To enable screen time tracking:\n\n" +
-               "1. Tap 'Grant Permission' below\n" +
-               "2. Find 'ZenLock' in the list\n" +
-               "3. Toggle 'Permit usage access' ON\n" +
-               "4. Return to the app\n\n" +
-               "This helps ZenLock show you accurate focus statistics and time saved.";
+    public static String getPermissionInstructions(Context context) {
+        return AppLanguage.localizedContext(context).getString(R.string.background_to_enable_screen_time_tracking_1_tap_grant_permission_below_2_find_zenlock);
     }
 }

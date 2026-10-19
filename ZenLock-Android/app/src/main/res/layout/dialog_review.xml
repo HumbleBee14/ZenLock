@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="Enjoying ZenLock?"
+        android:text="@string/layout_enjoying_zenlock"
         android:textSize="19sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textPrimary" />
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="It's a small labor of love.\nA few words from you mean the world."
+        android:text="@string/layout_it_s_a_small_labor_of_love_na_few_words_from_you_mean_the_"
         android:textSize="13sp"
         android:lineSpacingExtra="3dp"
         android:textColor="@color/textSecondary" />
@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_marginTop="20dp"
-        android:text="Rate on Play Store" />
+        android:text="@string/layout_rate_on_play_store" />
 
     <TextView
         android:id="@+id/laterButton"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:padding="10dp"
-        android:text="Maybe later"
+        android:text="@string/layout_maybe_later"
         android:textSize="13sp"
         android:textColor="@color/textTertiary"
         android:background="?android:attr/selectableItemBackgroundBorderless"

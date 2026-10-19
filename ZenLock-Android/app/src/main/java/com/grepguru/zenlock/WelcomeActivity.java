@@ -47,6 +47,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.grepguru.zenlock.ui.AppLanguage.initializeDefault(this);
         super.onCreate(savedInstanceState);
         // Only the brand introduction uses the dark palette; never change the
         // user's app-wide appearance preference for onboarding.
@@ -72,7 +73,7 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 updateAppearance(position);
                 updateDots(position);
-                nextButton.setText(position == PAGES.length - 1 ? "Get started" : "Next");
+                nextButton.setText(position == PAGES.length - 1 ? getString(R.string.screen_get_started) : getString(R.string.screen_next));
             }
             @Override public void onPageScrollStateChanged(int state) {
                 nextButton.setEnabled(state == ViewPager2.SCROLL_STATE_IDLE);

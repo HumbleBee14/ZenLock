@@ -21,18 +21,6 @@ public final class QuoteStore {
     private static final String KEY_POOL = "quotes_pool";
     private static final Random RANDOM = new Random();
 
-    private static final String[] DEFAULTS = {
-            "Focus on being productive instead of busy.",
-            "Don't watch the clock, do what it does. Keep going.",
-            "The way to get started is to quit talking and begin doing.",
-            "It always seems impossible until it's done.",
-            "The future depends on what you do today.",
-            "Your time is limited, don't waste it living someone else's life.",
-            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-            "The only limit to our realization of tomorrow is our doubts of today.",
-            "Focus on progress, not perfection.",
-            "The only person you are destined to become is the person you decide to be."
-    };
 
     private QuoteStore() {}
 
@@ -49,7 +37,7 @@ public final class QuoteStore {
 
     public static List<String> all(Context context) {
         SharedPreferences prefs = prefs(context);
-        if (!prefs.contains(KEY_POOL)) save(context, Arrays.asList(DEFAULTS));
+        if (!prefs.contains(KEY_POOL)) save(context, Arrays.asList(context.getResources().getStringArray(com.grepguru.zenlock.R.array.default_quotes)));
         List<String> quotes = new ArrayList<>();
         try {
             JSONArray array = new JSONArray(prefs.getString(KEY_POOL, "[]"));

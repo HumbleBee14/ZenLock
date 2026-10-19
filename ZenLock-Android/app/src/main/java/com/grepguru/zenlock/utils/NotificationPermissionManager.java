@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -77,17 +79,13 @@ public class NotificationPermissionManager {
     private static void showPermissionRationaleDialog(Activity activity, 
                                                      ActivityResultLauncher<String> permissionLauncher) {
         new AlertDialog.Builder(activity)
-                .setTitle("Notifications Required")
-                .setMessage("ZenLock needs notification permission to:\n\n" +
-                           "• Alert you before scheduled focus sessions\n" +
-                           "• Notify when focus sessions start\n" +
-                           "• Keep you informed about your focus schedule\n\n" +
-                           "Without this permission, scheduled sessions won't work properly.")
-                .setPositiveButton("Grant Permission", (dialog, which) -> {
+                .setTitle(AppLanguage.localizedContext(activity).getString(R.string.background_notifications_required))
+                .setMessage(AppLanguage.localizedContext(activity).getString(R.string.background_zenlock_needs_notification_permission_to_alert_you_before_scheduled_focus_s))
+                .setPositiveButton(AppLanguage.localizedContext(activity).getString(R.string.background_grant_permission), (dialog, which) -> {
                     permissionLauncher.launch(NOTIFICATION_PERMISSION);
                 })
-                .setNegativeButton("Not Now", null)
-                .setNeutralButton("Settings", (dialog, which) -> {
+                .setNegativeButton(AppLanguage.localizedContext(activity).getString(R.string.background_not_now), null)
+                .setNeutralButton(AppLanguage.localizedContext(activity).getString(R.string.background_settings), (dialog, which) -> {
                     openAppSettings(activity);
                 })
                 .show();
@@ -98,13 +96,12 @@ public class NotificationPermissionManager {
      */
     public static void showSettingsDialog(Activity activity) {
         new AlertDialog.Builder(activity)
-                .setTitle("Permission Required")
-                .setMessage("Notification permission is required for scheduled focus sessions to work properly.\n\n" +
-                           "Please enable notifications in app settings.")
-                .setPositiveButton("Open Settings", (dialog, which) -> {
+                .setTitle(AppLanguage.localizedContext(activity).getString(R.string.background_permission_required))
+                .setMessage(AppLanguage.localizedContext(activity).getString(R.string.background_notification_permission_is_required_for_scheduled_focus_sessions_to_work_pr))
+                .setPositiveButton(AppLanguage.localizedContext(activity).getString(R.string.background_open_settings), (dialog, which) -> {
                     openAppSettings(activity);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(AppLanguage.localizedContext(activity).getString(R.string.background_cancel), null)
                 .show();
     }
     
@@ -146,13 +143,13 @@ public class NotificationPermissionManager {
      */
     public static String getPermissionStatusMessage(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            return "Notifications are enabled by default";
+            return AppLanguage.localizedContext(context).getString(R.string.background_notifications_are_enabled_by_default);
         }
         
         if (hasNotificationPermission(context)) {
-            return "Notification permission granted";
+            return AppLanguage.localizedContext(context).getString(R.string.background_notification_permission_granted);
         } else {
-            return "Notification permission required for scheduled sessions";
+            return AppLanguage.localizedContext(context).getString(R.string.background_notification_permission_required_for_scheduled_sessions);
         }
     }
 } 

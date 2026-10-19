@@ -24,14 +24,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Accountability Partner" />
+            android:text="@string/settings_partner_title" />
 
-        <TextView style="@style/Zen.SectionLabel" android:text="Partner" />
+        <TextView style="@style/Zen.SectionLabel" android:text="@string/layout_partner" />
 
         <LinearLayout style="@style/Zen.Group">
 
             <LinearLayout style="@style/Zen.Row">
-                <TextView style="@style/Zen.RowLabel" android:text="SMS Contact" />
+                <TextView style="@style/Zen.RowLabel" android:text="@string/layout_sms_contact" />
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/smsToggle"
                     android:layout_width="wrap_content"
@@ -62,8 +62,9 @@
                         android:layout_height="46dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/zen_field_background"
-                        android:hint="+1"
+                        android:hint="@string/layout_1"
                         android:inputType="phone"
+            android:textDirection="ltr"
                         android:gravity="center"
                         android:textSize="15sp"
                         android:textColor="@color/textPrimary"
@@ -75,8 +76,9 @@
                         android:layout_height="46dp"
                         android:layout_weight="1"
                         android:background="@drawable/zen_field_background"
-                        android:hint="Phone number"
+                        android:hint="@string/layout_phone_number"
                         android:inputType="phone"
+            android:textDirection="ltr"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
                         android:textSize="15sp"
@@ -109,7 +111,7 @@
                     android:minHeight="40dp"
                     android:layout_marginTop="12dp"
                     android:layout_gravity="end"
-                    android:text="Send Test OTP"
+                    android:text="@string/layout_send_test_otp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -122,7 +124,7 @@
             android:layout_marginTop="8dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="SMS charges apply. Codes stay valid for 1 hour."
+            android:id="@+id/smsValidityNote"
             android:textSize="12sp"
             android:textColor="@color/textTertiary" />
 
@@ -133,7 +135,7 @@
             android:layout_height="44dp"
             android:layout_marginTop="24dp"
             android:layout_gravity="end"
-            android:text="Save" />
+            android:text="@string/layout_save" />
 
         <TextView
             android:id="@+id/playStoreSmsNote"

@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -53,13 +54,13 @@ public class PreNotificationReceiver extends BroadcastReceiver {
         );
         
         // Format duration for display
-        String durationText = formatDuration(durationMinutes);
+        String durationText = formatDuration(context, durationMinutes);
         
         // Build clean, minimal notification
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_lock)
-            .setContentTitle("Focus Session Starting Soon")
-            .setContentText("Starting in " + preNotifyMinutes + " min (" + durationText + " long session)")
+            .setContentTitle(AppLanguage.localizedContext(context).getString(R.string.background_focus_session_starting_soon))
+            .setContentText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_starting_in_1_d_min_2_s_long_session), preNotifyMinutes, durationText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
@@ -80,14 +81,14 @@ public class PreNotificationReceiver extends BroadcastReceiver {
     /**
      * Format duration for display (e.g., "2h 30m" or "45m")
      */
-    private String formatDuration(int minutes) {
+    private String formatDuration(Context context, int minutes) {
         int hours = minutes / 60;
         int mins = minutes % 60;
         
         if (hours > 0) {
-            return hours + "h " + mins + "m";
+            return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_hours_minutes), hours, mins);
         } else {
-            return mins + "m";
+            return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_minutes), mins);
         }
     }
     
@@ -98,10 +99,10 @@ public class PreNotificationReceiver extends BroadcastReceiver {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                "Focus Session Pre-Notifications",
+                AppLanguage.localizedContext(context).getString(R.string.background_focus_session_pre_notifications),
                 NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Notifications before scheduled focus sessions start");
+            channel.setDescription(AppLanguage.localizedContext(context).getString(R.string.background_notifications_before_scheduled_focus_sessions_start));
             channel.enableLights(true);
             channel.enableVibration(true);
             channel.setShowBadge(true);

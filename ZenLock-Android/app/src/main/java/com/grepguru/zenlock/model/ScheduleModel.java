@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.model;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,18 +35,18 @@ public class ScheduleModel {
     private long lastModified;
     
     public enum RepeatType {
-        ONCE("Once"),
-        DAILY("Daily"),
-        WEEKLY("Weekly");
+        ONCE(R.string.schedule_repeat_once),
+        DAILY(R.string.schedule_repeat_daily),
+        WEEKLY(R.string.schedule_repeat_weekly);
         
-        private final String displayName;
+        private final int displayName;
         
-        RepeatType(String displayName) {
+        RepeatType(int displayName) {
             this.displayName = displayName;
         }
         
-        public String getDisplayName() {
-            return displayName;
+        public String getDisplayName(android.content.Context context) {
+            return AppLanguage.localizedContext(context).getString(displayName);
         }
     }
     
@@ -130,58 +132,62 @@ public class ScheduleModel {
     public void setLastModified(long lastModified) { this.lastModified = lastModified; }
     
     // Utility methods
-    public String getFormattedStartTime() {
-        return formatTime(startHour, startMinute);
+    public String getFormattedStartTime(android.content.Context context) {
+        return formatTime(context, startHour, startMinute);
     }
 
-    public String getFormattedEndTime() {
+    public String getFormattedEndTime(android.content.Context context) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, startHour);
         calendar.set(Calendar.MINUTE, startMinute);
         calendar.add(Calendar.MINUTE, focusDurationMinutes);
-        return formatTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        return formatTime(context, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
     }
 
-    public String getFormattedDuration() {
+    public String getFormattedDuration(android.content.Context context) {
         int hours = focusDurationMinutes / 60;
         int minutes = focusDurationMinutes % 60;
-        if (hours > 0 && minutes > 0) return hours + "h " + minutes + "m";
-        if (hours > 0) return hours + "h";
-        return minutes + "m";
+        if (hours > 0 && minutes > 0) return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_hours_minutes), hours, minutes);
+        if (hours > 0) return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_hours), hours);
+        return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_minutes), minutes);
     }
 
-    private static String formatTime(int hour, int minute) {
-        int displayHour = hour % 12;
-        if (displayHour == 0) displayHour = 12;
-        return String.format("%d:%02d %s", displayHour, minute, hour >= 12 ? "PM" : "AM");
+    private static String formatTime(android.content.Context context, int hour, int minute) {
+        Calendar time = Calendar.getInstance();
+        time.set(Calendar.HOUR_OF_DAY, hour);
+        time.set(Calendar.MINUTE, minute);
+        android.content.Context localized = AppLanguage.localizedContext(context);
+        return new java.text.SimpleDateFormat(
+                android.text.format.DateFormat.is24HourFormat(localized) ? "HH:mm" : "h:mm a",
+                java.util.Locale.US).format(time.getTime());
     }
 
-    public String getRepeatDescription() {
+    public String getRepeatDescription(android.content.Context context) {
         switch (repeatType) {
             case ONCE:
-                return "Once";
+                return AppLanguage.localizedContext(context).getString(R.string.schedule_repeat_once);
             case DAILY:
-                return "Daily";
+                return AppLanguage.localizedContext(context).getString(R.string.schedule_repeat_daily);
             case WEEKLY:
                 if (repeatDays.isEmpty()) {
-                    return "Weekly";
+                    return AppLanguage.localizedContext(context).getString(R.string.schedule_repeat_weekly);
                 }
                 StringBuilder days = new StringBuilder();
-                String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+                String[] dayNames = new java.text.DateFormatSymbols(AppLanguage.localizedContext(context).getResources().getConfiguration().getLocales().get(0)).getShortWeekdays();
                 for (int day : repeatDays) {
                     if (days.length() > 0) days.append(", ");
-                    days.append(dayNames[day - 1]);
+                    days.append(dayNames[day]);
                 }
                 return days.toString();
             default:
-                return "Unknown";
+                return AppLanguage.localizedContext(context).getString(R.string.background_unknown);
         }
     }
     
-    public String getPreNotifyDescription() {
+    public String getPreNotifyDescription(android.content.Context context) {
         if (!preNotifyEnabled) {
-            return "No notification";
+            return AppLanguage.localizedContext(context).getString(R.string.background_no_notification);
         }
-        return preNotifyMinutes + " min before";
+        return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.schedule_notify_minutes_before), preNotifyMinutes);
     }
 } 

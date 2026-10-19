@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="focus_durations">
+        <item>0 Min.</item>
+        <item>1 Min.</item>
+        <item>5 Min.</item>
+        <item>10 Min.</item>
+        <item>15 Min.</item>
+        <item>20 Min.</item>
+        <item>30 Min.</item>
+        <item>40 Min.</item>
+        <item>50 Min.</item>
+    </string-array>
+</resources>

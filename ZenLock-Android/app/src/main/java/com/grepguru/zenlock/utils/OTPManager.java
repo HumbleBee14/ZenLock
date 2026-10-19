@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -30,6 +32,10 @@ public class OTPManager {
     private static final String KEY_OTP_EXPIRY = "otp_expiry";
     private static final String KEY_OTP_GENERATION_TIME = "otp_generation_time";
     private static final long OTP_VALIDITY_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
+    public static int validityMinutes() {
+        return (int) (OTP_VALIDITY_DURATION_MS / 60_000L);
+    }
 
     // Actions for BroadcastReceivers
     private static final String ACTION_SMS_SENT = "com.grepguru.zenlock.SMS_SENT_ACTION";
@@ -109,24 +115,24 @@ public class OTPManager {
     public boolean sendOTPviaSMS(String phoneNumber, String otp, String countryCode) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "SEND_SMS permission not granted.");
-            Toast.makeText(context, "SEND_SMS permission is required to send OTP.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_send_sms_permission_is_required_to_send_otp), Toast.LENGTH_LONG).show();
             return false;
         }
 
         if (!isDeviceSmsCapable()) {
             Log.e(TAG, "Device is not capable of sending SMS.");
-            Toast.makeText(context, "Device cannot send SMS. Check SIM status or network.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_device_cannot_send_sms_check_sim_status_or_network), Toast.LENGTH_LONG).show();
             return false;
         }
 
         String formattedPhone = formatPhoneNumber(phoneNumber, countryCode);
         if (formattedPhone == null || formattedPhone.trim().isEmpty()) {
             Log.e(TAG, "Invalid phone number provided for SMS.");
-            Toast.makeText(context, "Invalid phone number for SMS.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_invalid_phone_number_for_sms), Toast.LENGTH_LONG).show();
             return false;
         }
 
-        String message = "ZenLock Alert!\n\nUnlock code: " + otp + "\n\nYour accountability partner wants to end their focus session early. Share this code if you approve. Expires in 5 minutes.";
+        String message = String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_zenlock_alert_unlock_code_1_s_your_accountability_partner_wants_to_end_thei), otp, validityMinutes());
 
         try {
             // Since minSdk is 28 (which is >= Build.VERSION_CODES.M (23)),
@@ -135,7 +141,7 @@ public class OTPManager {
 
             if (smsManager == null) {
                 Log.e(TAG, "SmsManager not available.");
-                Toast.makeText(context, "SMS service not available on this device.", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_service_not_available_on_this_device), Toast.LENGTH_LONG).show();
                 return false;
             }
 
@@ -178,20 +184,20 @@ public class OTPManager {
             }
 
             Log.d(TAG, "SMS send attempt initiated to: " + maskPhoneNumber(formattedPhone));
-            Toast.makeText(context, "📤 Sending OTP to partner...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sending_otp_to_partner), Toast.LENGTH_SHORT).show();
             return true;
 
         } catch (SecurityException e) {
             Log.e(TAG, "SMS permission error during sending: " + e.getMessage(), e);
-            Toast.makeText(context, "SMS permission denied. Check app settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_permission_denied_check_app_settings), Toast.LENGTH_LONG).show();
             return false;
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid argument for SMS: " + e.getMessage(), e);
-            Toast.makeText(context, "Invalid argument for SMS: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_invalid_argument_for_sms_1_s, e.getMessage()), Toast.LENGTH_LONG).show();
             return false;
         } catch (Exception e) {
             Log.e(TAG, "Failed to send SMS: " + e.getMessage(), e);
-            String errorMsg = "SMS failed: " + (e.getMessage() != null ? e.getMessage() : "Unknown error");
+            String errorMsg = AppLanguage.localizedContext(context).getString(R.string.background_sms_failed_1_s, (e.getMessage() != null ? e.getMessage() : AppLanguage.localizedContext(context).getString(R.string.background_unknown_error)));
             Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show();
             return false;
         }
@@ -362,7 +368,7 @@ public class OTPManager {
         String countryCode = preferences.getString("partner_country_code", "");
 
         if (!smsEnabled) {
-            Toast.makeText(context, "⚠️ SMS notifications not enabled. Configure in settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_notifications_not_enabled_configure_in_settings), Toast.LENGTH_LONG).show();
             Log.w(TAG, "OTP request failed: SMS notifications not enabled.");
             return false;
         }
@@ -372,7 +378,7 @@ public class OTPManager {
 
         if (smsEnabled) {
             if (partnerPhone.isEmpty()) {
-                Toast.makeText(context, "⚠️ SMS enabled but no partner phone number configured.", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_enabled_but_no_partner_phone_number_configured), Toast.LENGTH_LONG).show();
                 Log.w(TAG, "OTP request failed: Partner phone number missing for SMS.");
             } else {
                 anySuccess = sendOTPviaSMS(partnerPhone, otp, countryCode);
@@ -381,7 +387,7 @@ public class OTPManager {
 
         if (!anySuccess) {
             clearOTP(); // Clear OTP if all sending attempts failed
-            Toast.makeText(context, "Failed to send unlock code. Check settings and network.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_failed_to_send_unlock_code_check_settings_and_network), Toast.LENGTH_LONG).show();
             Log.e(TAG, "OTP request failed: All sending methods failed or were not configured.");
         } else {
             Log.d(TAG, "OTP request processed. Success status: " + anySuccess);
@@ -444,27 +450,27 @@ public class OTPManager {
                 switch (getResultCode()) {
                     case Activity.RESULT_OK:
                         Log.d(TAG, "SmsSentReceiver: SMS sent successfully.");
-                        Toast.makeText(context, "Unlock Code sent.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_unlock_code_sent), Toast.LENGTH_SHORT).show();
                         break;
                     case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                         Log.e(TAG, "SmsSentReceiver: Generic failure.");
-                        Toast.makeText(context, "SMS send failed (Generic).", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_send_failed_generic), Toast.LENGTH_LONG).show();
                         break;
                     case SmsManager.RESULT_ERROR_NO_SERVICE:
                         Log.e(TAG, "SmsSentReceiver: No service.");
-                        Toast.makeText(context, "SMS send failed (No service).", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_send_failed_no_service), Toast.LENGTH_LONG).show();
                         break;
                     case SmsManager.RESULT_ERROR_NULL_PDU:
                         Log.e(TAG, "SmsSentReceiver: Null PDU.");
-                        Toast.makeText(context, "SMS send failed (Null PDU).", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_send_failed_null_pdu), Toast.LENGTH_LONG).show();
                         break;
                     case SmsManager.RESULT_ERROR_RADIO_OFF:
                         Log.e(TAG, "SmsSentReceiver: Radio off.");
-                        Toast.makeText(context, "SMS send failed (Radio off).", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_send_failed_radio_off), Toast.LENGTH_LONG).show();
                         break;
                     default:
                         Log.e(TAG, "SmsSentReceiver: Unknown error or non-standard result code: " + getResultCode());
-                        Toast.makeText(context, "SMS send failed (Unknown error code: " + getResultCode() + ").", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_sms_send_failed_unknown_error_code_1_d), getResultCode()), Toast.LENGTH_LONG).show();
                         break;
                 }
             }
@@ -479,11 +485,11 @@ public class OTPManager {
                 switch (getResultCode()) {
                     case Activity.RESULT_OK:
                         Log.d(TAG, "SmsDeliveredReceiver: SMS delivered successfully.");
-                        Toast.makeText(context, "✅ OTP SMS delivered.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_otp_sms_delivered), Toast.LENGTH_SHORT).show();
                         break;
                     case Activity.RESULT_CANCELED: // Or other non-OK codes for failure
                         Log.e(TAG, "SmsDeliveredReceiver: SMS not delivered. Result code: " + getResultCode());
-                        Toast.makeText(context, "SMS not delivered.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_sms_not_delivered), Toast.LENGTH_LONG).show();
                         break;
                     default:
                         Log.w(TAG, "SmsDeliveredReceiver: SMS delivery status code: " + getResultCode());

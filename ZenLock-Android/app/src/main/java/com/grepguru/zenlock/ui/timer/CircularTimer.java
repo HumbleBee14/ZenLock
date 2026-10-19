@@ -120,10 +120,10 @@ public class CircularTimer extends View implements TimerType {
         long minutes = (totalSeconds % 3600) / 60;
         long seconds = totalSeconds % 60;
         if (hours > 0) {
-            mainText = String.format("%d:%02d", hours, minutes);
-            secondsText = String.format("%02d", seconds);
+            mainText = String.format(java.util.Locale.ROOT, "%d:%02d", hours, minutes);
+            secondsText = String.format(java.util.Locale.ROOT, "%02d", seconds);
         } else {
-            mainText = String.format("%02d:%02d", minutes, seconds);
+            mainText = String.format(java.util.Locale.ROOT, "%02d:%02d", minutes, seconds);
             secondsText = "";
         }
     }

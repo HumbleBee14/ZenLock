@@ -1,5 +1,6 @@
 package com.grepguru.zenlock.data.entities;
 
+import com.grepguru.zenlock.utils.DurationText;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -57,17 +58,17 @@ public class AppUsageEntity {
     }
     
     // Utility methods
-    public String getFormattedUsageTime() {
+    public String getFormattedUsageTime(android.content.Context context) {
         long minutes = usageTime / (60 * 1000);
         long hours = minutes / 60;
         minutes = minutes % 60;
         
         if (hours > 0) {
-            return String.format("%dh %dm", hours, minutes);
+            return DurationText.minutes(context, hours * 60 + minutes);
         } else if (minutes > 0) {
-            return String.format("%dm", minutes);
+            return DurationText.minutes(context, minutes);
         } else {
-            return String.format("%ds", usageTime / 1000);
+            return DurationText.seconds(context, usageTime / 1000);
         }
     }
     

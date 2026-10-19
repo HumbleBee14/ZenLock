@@ -10,11 +10,14 @@ android {
         applicationId = "com.grepguru.zenlock"
         minSdk = 28
         targetSdk = 36
-        versionCode = 54
-        versionName = "1.17.0"
+        versionCode = 55
+        versionName = "1.18.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // major.minor.patch
+
+    // Keep every translation available for offline language changes, including Play installs.
+    bundle { language { enableSplit = false } }
 
     buildFeatures {
         buildConfig = true
@@ -36,6 +39,7 @@ android {
             buildConfigField("boolean", "DEBUG_LOGGING", "false")
         }
         debug {
+            isPseudoLocalesEnabled = true
             isMinifyEnabled = false
             isDebuggable = true
             applicationIdSuffix = ".debug"

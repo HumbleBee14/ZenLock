@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Focus"
+                android:text="@string/layout_focus"
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="true"
@@ -45,7 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="00:25"
+                    android:text="@string/layout_00_25"
                     android:textSize="64sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"
@@ -73,14 +73,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Ends at 10:30 AM"
+                android:text="@string/layout_ends_at_10_30_am"
                 android:textSize="13sp"
                 android:textColor="@color/textSecondary" />
             <TextView
                 android:id="@+id/lockscreenMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Stay focused, stay productive!"
+                android:text="@string/layout_stay_focused_stay_productive"
                 android:textSize="15sp"
                 android:textColor="@color/textSecondary"
                 android:fontFamily="sans-serif-light"
@@ -98,7 +98,7 @@
                 android:src="@drawable/ic_expand_more"
                 android:background="@drawable/glass_card_inner"
                 android:padding="8dp"
-                android:contentDescription="Show unlock options"
+                android:contentDescription="@string/layout_show_unlock_options"
                 android:alpha="1"
                 android:layout_marginTop="16dp" />
             <LinearLayout
@@ -115,7 +115,7 @@
                     style="@style/ModernButton.Pill"
                     android:layout_width="wrap_content"
                     android:layout_height="44dp"
-                    android:text="Unlock" />
+                    android:text="@string/settings_section_unlock" />
                 <Space
                     android:layout_width="12dp"
                     android:layout_height="wrap_content" />
@@ -124,7 +124,7 @@
                     style="@style/ModernButton.Pill"
                     android:layout_width="wrap_content"
                     android:layout_height="44dp"
-                    android:text="Extend" />
+                    android:text="@string/layout_extend" />
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/unlockInputsContainer"
@@ -148,10 +148,11 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:hint="Enter 4-digit PIN"
+                        android:hint="@string/layout_enter_4_digit_pin"
                         android:textColor="@color/textPrimary"
                         android:textColorHint="@color/textHint"
                         android:inputType="numberPassword"
+            android:textDirection="ltr"
                         android:maxLength="4"
                         android:background="@null"
                         android:padding="0dp"
@@ -174,7 +175,7 @@
                     style="@style/ModernButton.Pill"
                     android:layout_width="wrap_content"
                     android:layout_height="44dp"
-                    android:text="Confirm Unlock" />
+                    android:text="@string/layout_confirm_unlock" />
             </LinearLayout>
         </LinearLayout>
         <Space
@@ -208,6 +209,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_gravity="left|center_vertical"
+                    android:layoutDirection="ltr"
                     android:src="@drawable/ic_chevron_right"
                     android:rotation="180"
                     android:background="@drawable/app_scroll_edge_fade"
@@ -220,6 +222,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_gravity="right|center_vertical"
+                    android:layoutDirection="ltr"
                     android:src="@drawable/ic_chevron_right"
                     android:background="@drawable/app_scroll_edge_fade"
                     android:alpha="0.9"
@@ -249,7 +252,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No apps allowed"
+                    android:text="@string/layout_no_apps_allowed"
                     android:textSize="14sp"
                     android:textColor="@color/textSecondary" />
             </LinearLayout>

@@ -51,6 +51,14 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ZenLock-Android
 
+      - name: Check localization contracts
+        run: python3 scripts/check_localization.py
+        working-directory: ZenLock-Android
+
+      - name: Test both flavors and lint localization
+        run: ./gradlew testPlaystoreDebugUnitTest testSmsDebugUnitTest lintPlaystoreDebug
+        working-directory: ZenLock-Android
+
       - name: Build both flavors (playstore + sms)
         run: ./gradlew assemblePlaystoreDebug assembleSmsDebug -x lint
         working-directory: ZenLock-Android

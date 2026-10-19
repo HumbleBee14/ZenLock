@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -83,13 +84,13 @@ public class ManualStartDelayReceiver extends BroadcastReceiver {
 
         int durationMinutes = (int) Math.max(1L, durationMillis / 60_000L);
         Intent serviceIntent = new Intent(context, LockScreenService.class);
-        serviceIntent.putExtra(LockScreenService.EXTRA_SCHEDULE_NAME, "Focus Session");
+        serviceIntent.putExtra(LockScreenService.EXTRA_SCHEDULE_NAME, AppLanguage.localizedContext(context).getString(R.string.background_focus_session));
         serviceIntent.putExtra(LockScreenService.EXTRA_SCHEDULE_ID, 41041);
         serviceIntent.putExtra(LockScreenService.EXTRA_DURATION_MINUTES, durationMinutes);
         new Handler(Looper.getMainLooper()).post(() ->
                 Toast.makeText(
                         context.getApplicationContext(),
-                        "Focus session starting now",
+                        AppLanguage.localizedContext(context).getString(R.string.background_focus_session_starting_now),
                         Toast.LENGTH_SHORT
                 ).show()
         );
@@ -103,7 +104,7 @@ public class ManualStartDelayReceiver extends BroadcastReceiver {
             Log.d(TAG, "Started delayed manual focus session");
         } catch (Exception e) {
             Log.e(TAG, "Failed to launch delayed manual focus session via service", e);
-            LockScreenLauncher.launchWithNotification(context, "Focus Session", 41041, durationMinutes);
+            LockScreenLauncher.launchWithNotification(context, AppLanguage.localizedContext(context).getString(R.string.background_focus_session), 41041, durationMinutes);
         }
     }
 }
