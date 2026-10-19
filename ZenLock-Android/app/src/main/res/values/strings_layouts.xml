@@ -22,7 +22,7 @@
     <string name="layout_new_schedule">New schedule</string>
     <string name="layout_schedule_name">Schedule name</string>
     <string name="layout_starts">Starts</string>
-    <string name="layout_9_00_am">9:00 AM</string>
+    <string name="layout_9_00_am" translatable="false">9:00 AM</string>
     <string name="layout_duration">Duration</string>
     <string name="layout_set_duration">Set duration</string>
     <string name="layout_repeat">Repeat</string>
@@ -35,19 +35,19 @@
     <string name="layout_w">W</string>
     <string name="layout_f">F</string>
     <string name="layout_notify_before">Notify before</string>
-    <string name="layout_1m">1m</string>
-    <string name="layout_2m">2m</string>
-    <string name="layout_3m">3m</string>
-    <string name="layout_5m">5m</string>
-    <string name="layout_10m">10m</string>
+    <string name="layout_1m" translatable="false">1m</string>
+    <string name="layout_2m" translatable="false">2m</string>
+    <string name="layout_3m" translatable="false">3m</string>
+    <string name="layout_5m" translatable="false">5m</string>
+    <string name="layout_10m" translatable="false">10m</string>
     <string name="layout_cancel">Cancel</string>
     <string name="layout_create">Create</string>
     <string name="layout_h">h</string>
     <string name="layout_m_2">m</string>
     <string name="layout_set">Set</string>
-    <string name="layout_15m">15m</string>
-    <string name="layout_30m">30m</string>
-    <string name="layout_1h">1h</string>
+    <string name="layout_15m" translatable="false">15m</string>
+    <string name="layout_30m" translatable="false">30m</string>
+    <string name="layout_1h" translatable="false">1h</string>
     <string name="layout_dialog_extend" translatable="false">+</string>
     <string name="layout_enjoying_zenlock">Enjoying ZenLock?</string>
     <string name="layout_it_s_a_small_labor_of_love_na_few_words_from_you_mean_the_">It\'s a small labor of love.\nA few words from you mean the world.</string>
@@ -58,8 +58,8 @@
     <string name="layout_it_never_reads_your_messages_or_shares_your_data_carrier_s">It never reads your messages or shares your data. Carrier SMS charges may apply.</string>
     <string name="layout_allow">Allow</string>
     <string name="layout_set_focus_duration">Set Focus Duration</string>
-    <string name="layout_hours">Hours</string>
-    <string name="layout_minutes">Minutes</string>
+    <string name="layout_hours" translatable="false">Hours</string>
+    <string name="layout_minutes" translatable="false">Minutes</string>
     <string name="layout_set_pin">Set PIN</string>
     <string name="layout_pin">PIN</string>
     <string name="layout_enter_your_pin">Enter your PIN.</string>
@@ -74,7 +74,7 @@
     <string name="layout_sessions">SESSIONS</string>
     <string name="layout_focus_time_2">Focus Time</string>
     <string name="layout_fragment_analytics" translatable="false">--</string>
-    <string name="layout_0m">0m</string>
+    <string name="layout_0m" translatable="false">0m</string>
     <string name="layout_this_week">THIS WEEK</string>
     <string name="layout_last_week">LAST WEEK</string>
     <string name="layout_phone_usage_2">Phone Usage</string>
@@ -85,11 +85,11 @@
     <string name="layout_complete_your_first_session_to_see_history_here">Complete your first session to see history here</string>
     <string name="layout_time_to_focus">Time to focus</string>
     <string name="layout_00_30" translatable="false">00:30</string>
-    <string name="layout_hours_minutes">hours : minutes</string>
+    <string name="layout_hours_minutes" translatable="false">hours : minutes</string>
     <string name="layout_fragment_home" translatable="false">−</string>
-    <string name="layout_15m_2">+15m</string>
-    <string name="layout_30m_2">+30m</string>
-    <string name="layout_1h_2">+1h</string>
+    <string name="layout_15m_2" translatable="false">+15m</string>
+    <string name="layout_30m_2" translatable="false">+30m</string>
+    <string name="layout_1h_2" translatable="false">+1h</string>
     <string name="layout_fragment_home_2" translatable="false">:</string>
     <string name="layout_am" translatable="false">AM</string>
     <string name="layout_switch_to_lock_until_time">Switch to lock until time</string>
@@ -121,7 +121,7 @@
     <string name="layout_granted">Granted</string>
     <string name="layout_remove">Remove</string>
     <string name="layout_morning_focus">Morning Focus</string>
-    <string name="layout_10_30_am_1h_30m">– 10:30 AM · 1h 30m</string>
+    <string name="layout_10_30_am_1h_30m" translatable="false">– 10:30 AM · 1h 30m</string>
     <string name="layout_edit">Edit</string>
     <string name="layout_delete">Delete</string>
     <string name="layout_needed_for_zenlock_to_work_seamlessly">Needed for ZenLock to work seamlessly</string>

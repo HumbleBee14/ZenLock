@@ -48,8 +48,6 @@
     <string name="settings_home_title">Startbildschirm erlauben</string>
     <string name="settings_home_summary">Erlaube den Launcher während einer Fokussitzung</string>
     <string name="settings_clear_pin">Gespeicherte PIN löschen</string>
-    <string name="lock_until_hours">Stunde</string>
-    <string name="lock_until_minutes">Minute</string>
     <string name="lock_until_period_action">%1$s. Zu %2$s wechseln</string>
     <string name="lock_until_today">Heute · %1$s</string>
     <string name="lock_until_tomorrow">Morgen · %1$s</string>

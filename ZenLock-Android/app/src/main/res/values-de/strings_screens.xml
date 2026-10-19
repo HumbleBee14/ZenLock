@@ -15,21 +15,16 @@
     <string name="screen_cancel_session">Sitzung abbrechen</string>
     <string name="screen_cannot_exit_focus_mode">Der Fokusmodus kann nicht beendet werden!</string>
     <string name="screen_cannot_save_sms_configuration_without_sms_permission_please_grant_permission_first">Die SMS-Konfiguration kann ohne SMS-Berechtigung nicht gespeichert werden. Erteile zuerst die Berechtigung.</string>
-    <string name="screen_clock_time">%1$d:%2$02d %3$s</string>
     <string name="screen_completed">Abgeschlossen</string>
     <string name="screen_configure">Einrichten</string>
     <string name="screen_couldn_t_schedule_your_focus_session_yet">Deine Fokussitzung konnte noch nicht geplant werden.</string>
-    <string name="screen_countdown_days_hours">in %1$d T %2$d Std.</string>
-    <string name="screen_countdown_hours_minutes">in %1$d Std. %2$d Min.</string>
-    <string name="screen_countdown_minutes">in %1$d Min.</string>
+    <string name="screen_countdown_days_hours">in %1$dd %2$dh</string>
+    <string name="screen_countdown_hours_minutes">in %1$dh %2$dm</string>
+    <string name="screen_countdown_minutes">in %1$dm</string>
     <string name="screen_create_anyway">Trotzdem erstellen</string>
     <string name="screen_daily">Täglich</string>
     <string name="screen_date_time">%1$s, %2$s</string>
     <string name="screen_done">Fertig</string>
-    <string name="screen_duration_hours_minutes">%1$d Std. %2$d Min.</string>
-    <string name="screen_duration_hours_short">%1$d Std.</string>
-    <string name="screen_duration_minutes_short">%1$d Min.</string>
-    <string name="screen_duration_zero">0 Min.</string>
     <string name="screen_edit_schedule">Zeitplan bearbeiten</string>
     <string name="screen_enable_anyway">Trotzdem aktivieren</string>
     <string name="screen_ends_at_1_s">Endet um %1$s</string>
@@ -112,7 +107,7 @@
     <string name="screen_sms_permission_denied_otp_functionality_will_not_work">SMS-Berechtigung verweigert. Die Einmalcode-Funktion wird nicht funktionieren.</string>
     <string name="screen_sms_permission_granted">SMS-Berechtigung erteilt!</string>
     <string name="screen_sms_permission_needed_tap_to_grant">SMS-Berechtigung erforderlich. Tippe zum Erteilen.</string>
-    <string name="screen_start_delay_minutes">In %1$d Min.</string>
+    <string name="screen_start_delay_minutes">In %1$d min</string>
     <string name="screen_start_focus">Fokus starten</string>
     <string name="screen_starts">Beginn</string>
     <string name="screen_starts_at">Beginnt um</string>
@@ -144,8 +139,4 @@
     <string name="screen_zenlock_active">ZenLock aktiv</string>
     <string name="screen_zenlock_feedback_suggestions">ZenLock - Feedback und Vorschläge</string>
     <string name="screen_zenlock_focus_session">ZenLock-Fokussitzung</string>
-    <plurals name="screen_duration_minutes">
-        <item quantity="one">%1$d Minute</item>
-        <item quantity="other">%1$d Minuten</item>
-    </plurals>
 </resources>

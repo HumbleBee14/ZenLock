@@ -15,21 +15,16 @@
     <string name="screen_cancel_session">Annuler la séance</string>
     <string name="screen_cannot_exit_focus_mode">Impossible de quitter le mode concentration !</string>
     <string name="screen_cannot_save_sms_configuration_without_sms_permission_please_grant_permission_first">Impossible d’enregistrer la configuration SMS sans l’autorisation SMS. Accordez d’abord cette autorisation.</string>
-    <string name="screen_clock_time">%1$d:%2$02d %3$s</string>
     <string name="screen_completed">Terminée</string>
     <string name="screen_configure">Configurer</string>
     <string name="screen_couldn_t_schedule_your_focus_session_yet">Impossible de programmer votre séance de concentration pour le moment.</string>
-    <string name="screen_countdown_days_hours">dans %1$d j %2$d h</string>
-    <string name="screen_countdown_hours_minutes">dans %1$d h %2$d min</string>
-    <string name="screen_countdown_minutes">dans %1$d min</string>
+    <string name="screen_countdown_days_hours">dans %1$dd %2$dh</string>
+    <string name="screen_countdown_hours_minutes">dans %1$dh %2$dm</string>
+    <string name="screen_countdown_minutes">dans %1$dm</string>
     <string name="screen_create_anyway">Créer quand même</string>
     <string name="screen_daily">Tous les jours</string>
     <string name="screen_date_time">%1$s, %2$s</string>
     <string name="screen_done">Terminé</string>
-    <string name="screen_duration_hours_minutes">%1$d h %2$d min</string>
-    <string name="screen_duration_hours_short">%1$d h</string>
-    <string name="screen_duration_minutes_short">%1$d min</string>
-    <string name="screen_duration_zero">0 min</string>
     <string name="screen_edit_schedule">Modifier la programmation</string>
     <string name="screen_enable_anyway">Activer quand même</string>
     <string name="screen_ends_at_1_s">Se termine à %1$s</string>
@@ -144,9 +139,4 @@
     <string name="screen_zenlock_active">ZenLock actif</string>
     <string name="screen_zenlock_feedback_suggestions">ZenLock - Commentaires et suggestions</string>
     <string name="screen_zenlock_focus_session">Séance de concentration ZenLock</string>
-    <plurals name="screen_duration_minutes">
-        <item quantity="one">%1$d minute</item>
-        <item quantity="many">%1$d minutes</item>
-        <item quantity="other">%1$d minutes</item>
-    </plurals>
 </resources>

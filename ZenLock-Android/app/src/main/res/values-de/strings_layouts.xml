@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="layout_focus">Fokus</string>
-    <string name="layout_ends_at_10_30_am">Endet um 10:30 Uhr</string>
+    <string name="layout_ends_at_10_30_am">Endet um 10:30 AM</string>
     <string name="layout_stay_focused_stay_productive">Bleib fokussiert und produktiv!</string>
     <string name="layout_show_unlock_options">Entsperroptionen anzeigen</string>
     <string name="layout_extend">Verlängern</string>
@@ -19,7 +19,6 @@
     <string name="layout_new_schedule">Neuer Zeitplan</string>
     <string name="layout_schedule_name">Name des Zeitplans</string>
     <string name="layout_starts">Beginn</string>
-    <string name="layout_9_00_am">9:00 Uhr</string>
     <string name="layout_duration">Dauer</string>
     <string name="layout_set_duration">Dauer festlegen</string>
     <string name="layout_repeat">Wiederholen</string>
@@ -32,19 +31,11 @@
     <string name="layout_w">M</string>
     <string name="layout_f">F</string>
     <string name="layout_notify_before">Vorher benachrichtigen</string>
-    <string name="layout_1m">1 Min.</string>
-    <string name="layout_2m">2 Min.</string>
-    <string name="layout_3m">3 Min.</string>
-    <string name="layout_5m">5 Min.</string>
-    <string name="layout_10m">10 Min.</string>
     <string name="layout_cancel">Abbrechen</string>
     <string name="layout_create">Erstellen</string>
     <string name="layout_h">Std.</string>
     <string name="layout_m_2">Min.</string>
     <string name="layout_set">Festlegen</string>
-    <string name="layout_15m">15 Min.</string>
-    <string name="layout_30m">30 Min.</string>
-    <string name="layout_1h">1 Std.</string>
     <string name="layout_enjoying_zenlock">Gefällt dir ZenLock?</string>
     <string name="layout_it_s_a_small_labor_of_love_na_few_words_from_you_mean_the_">Ein kleines Herzensprojekt.\nEin paar Worte von dir bedeuten uns viel.</string>
     <string name="layout_rate_on_play_store">Im Play Store bewerten</string>
@@ -54,8 +45,6 @@
     <string name="layout_it_never_reads_your_messages_or_shares_your_data_carrier_s">Die App liest niemals deine Nachrichten und gibt keine Daten weiter. Dein Anbieter kann SMS-Gebühren berechnen.</string>
     <string name="layout_allow">Erlauben</string>
     <string name="layout_set_focus_duration">Fokusdauer festlegen</string>
-    <string name="layout_hours">Stunden</string>
-    <string name="layout_minutes">Minuten</string>
     <string name="layout_set_pin">PIN festlegen</string>
     <string name="layout_pin">PIN</string>
     <string name="layout_enter_your_pin">Gib deine PIN ein.</string>
@@ -67,7 +56,6 @@
     <string name="layout_phone_usage">HANDYNUTZUNG</string>
     <string name="layout_sessions">SITZUNGEN</string>
     <string name="layout_focus_time_2">Fokuszeit</string>
-    <string name="layout_0m">0 Min.</string>
     <string name="layout_this_week">DIESE WOCHE</string>
     <string name="layout_last_week">LETZTE WOCHE</string>
     <string name="layout_phone_usage_2">Handynutzung</string>
@@ -77,18 +65,14 @@
     <string name="layout_recent_sessions">Letzte Sitzungen</string>
     <string name="layout_complete_your_first_session_to_see_history_here">Schließe deine erste Sitzung ab, um hier den Verlauf zu sehen</string>
     <string name="layout_time_to_focus">Zeit für Fokus</string>
-    <string name="layout_hours_minutes">Stunden : Minuten</string>
-    <string name="layout_15m_2">+15 Min.</string>
-    <string name="layout_30m_2">+30 Min.</string>
-    <string name="layout_1h_2">+1 Std.</string>
     <string name="layout_switch_to_lock_until_time">Zu Sperren bis Uhrzeit wechseln</string>
     <string name="layout_now">Jetzt</string>
     <string name="layout_start_focus">Fokus starten</string>
     <string name="layout_schedule">Zeitpläne</string>
     <string name="layout_up_next">ALS NÄCHSTES</string>
     <string name="layout_nothing_scheduled">Nichts geplant</string>
-    <string name="layout_in_14h_22m">in 14 Std. 22 Min.</string>
-    <string name="layout_tomorrow_9_00_am_1h_30m">Morgen · 9:00 Uhr · 1 Std. 30 Min.</string>
+    <string name="layout_in_14h_22m">in 14h 22m</string>
+    <string name="layout_tomorrow_9_00_am_1h_30m">Morgen · 9:00 AM · 1h 30m</string>
     <string name="layout_settings">Einstellungen</string>
     <string name="layout_allowed_apps">Erlaubte Apps</string>
     <string name="layout_phone">Telefon</string>
@@ -110,7 +94,6 @@
     <string name="layout_granted">Gewährt</string>
     <string name="layout_remove">Entfernen</string>
     <string name="layout_morning_focus">Morgenfokus</string>
-    <string name="layout_10_30_am_1h_30m">– 10:30 Uhr · 1 Std. 30 Min.</string>
     <string name="layout_edit">Bearbeiten</string>
     <string name="layout_delete">Löschen</string>
     <string name="layout_needed_for_zenlock_to_work_seamlessly">Für den reibungslosen Betrieb von ZenLock erforderlich</string>

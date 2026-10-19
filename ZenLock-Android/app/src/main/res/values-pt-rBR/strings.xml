@@ -48,8 +48,6 @@
     <string name="settings_home_title">Permitir tela inicial</string>
     <string name="settings_home_summary">Permita o iniciador durante uma sessão de foco</string>
     <string name="settings_clear_pin">Apagar PIN salvo</string>
-    <string name="lock_until_hours">Hora</string>
-    <string name="lock_until_minutes">Minuto</string>
     <string name="lock_until_period_action">%1$s. Mudar para %2$s</string>
     <string name="lock_until_today">Hoje · %1$s</string>
     <string name="lock_until_tomorrow">Amanhã · %1$s</string>

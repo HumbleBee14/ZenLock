@@ -29,19 +29,19 @@ public class BackgroundLocalizationTest {
         schedule.setRepeatType(ScheduleModel.RepeatType.DAILY);
         AppLanguage.select(context, "de");
         assertEquals("Täglich", schedule.getRepeatDescription(context));
-        assertEquals("1 Std. 30 Min.", schedule.getFormattedDuration(context));
+        assertEquals("1h 30m", schedule.getFormattedDuration(context));
         AppLanguage.select(context, "es");
         assertEquals("A diario", schedule.getRepeatDescription(context));
-        assertEquals("1 h 30 min", schedule.getFormattedDuration(context));
+        assertEquals("1h 30m", schedule.getFormattedDuration(context));
         assertEquals("My morning focus", schedule.getName());
     }
 
-    @Test public void analyticsDurationUsesAppLanguageFromApplicationContext() {
+    @Test public void analyticsDurationKeepsCompactEnglishNotation() {
         AppLanguage.select(context, "de");
         SessionEntity session = new SessionEntity();
         session.actualDuration = 90 * 60_000L;
-        assertEquals("1 Std. 30 Min.", session.getFormattedDuration(context));
-        assertEquals("45 Sek.", DurationText.seconds(context, 45));
+        assertEquals("1h 30m", session.getFormattedDuration(context));
+        assertEquals("45s", DurationText.seconds(context, 45));
     }
 
     @Test public void backgroundNotificationUsesSingularAndPlural() {

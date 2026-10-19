@@ -15,7 +15,7 @@
     <string name="screen_cancel_session">Cancel Session</string>
     <string name="screen_cannot_exit_focus_mode">Cannot exit Focus Mode!</string>
     <string name="screen_cannot_save_sms_configuration_without_sms_permission_please_grant_permission_first">Cannot save SMS configuration without SMS permission. Please grant permission first.</string>
-    <string name="screen_clock_time">%1$d:%2$02d %3$s</string>
+    <string name="screen_clock_time" translatable="false">%1$d:%2$02d %3$s</string>
     <string name="screen_completed">Completed</string>
     <string name="screen_configure">Configure</string>
     <string name="screen_couldn_t_schedule_your_focus_session_yet">Couldn\'t schedule your focus session yet.</string>
@@ -26,10 +26,10 @@
     <string name="screen_daily">Daily</string>
     <string name="screen_date_time">%1$s, %2$s</string>
     <string name="screen_done">Done</string>
-    <string name="screen_duration_hours_minutes">%1$dh %2$dm</string>
-    <string name="screen_duration_hours_short">%1$dh</string>
-    <string name="screen_duration_minutes_short">%1$dm</string>
-    <string name="screen_duration_zero">0m</string>
+    <string name="screen_duration_hours_minutes" translatable="false">%1$dh %2$dm</string>
+    <string name="screen_duration_hours_short" translatable="false">%1$dh</string>
+    <string name="screen_duration_minutes_short" translatable="false">%1$dm</string>
+    <string name="screen_duration_zero" translatable="false">0m</string>
     <string name="screen_edit_schedule">Edit schedule</string>
     <string name="screen_enable_anyway">Enable anyway</string>
     <string name="screen_ends_at_1_s">Ends at %1$s</string>
@@ -146,7 +146,7 @@
     <string name="screen_zenlock_active">ZenLock Active</string>
     <string name="screen_zenlock_feedback_suggestions">ZenLock - Feedback &amp; Suggestions</string>
     <string name="screen_zenlock_focus_session">ZenLock Focus Session</string>
-    <plurals name="screen_duration_minutes">
+    <plurals name="screen_duration_minutes" translatable="false">
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
     </plurals>

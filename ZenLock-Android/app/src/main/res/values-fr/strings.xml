@@ -48,8 +48,6 @@
     <string name="settings_home_title">Autoriser l’écran d’accueil</string>
     <string name="settings_home_summary">Autorisez le lanceur pendant une session de concentration</string>
     <string name="settings_clear_pin">Effacer le PIN enregistré</string>
-    <string name="lock_until_hours">Heure</string>
-    <string name="lock_until_minutes">Minute</string>
     <string name="lock_until_period_action">%1$s. Passer à %2$s</string>
     <string name="lock_until_today">Aujourd’hui · %1$s</string>
     <string name="lock_until_tomorrow">Demain · %1$s</string>

@@ -96,9 +96,9 @@
     <string name="schedule_repeat_once">Once</string>
     <string name="schedule_repeat_daily">Daily</string>
     <string name="schedule_repeat_weekly">Weekly</string>
-    <string name="background_duration_hours_minutes">%1$dh %2$dm</string>
-    <string name="background_duration_hours">%1$dh</string>
-    <string name="background_duration_minutes">%1$dm</string>
+    <string name="background_duration_hours_minutes" translatable="false">%1$dh %2$dm</string>
+    <string name="background_duration_hours" translatable="false">%1$dh</string>
+    <string name="background_duration_minutes" translatable="false">%1$dm</string>
     <string name="background_unknown">Unknown</string>
     <string name="background_no_notification">No notification</string>
     <string name="schedule_notify_minutes_before">%1$d min before</string>
@@ -125,7 +125,7 @@
         <item quantity="other">Starts in %1$d minutes</item>
     </plurals>
     <string name="background_permission_needed">Permission needed</string>
-    <string name="background_duration_seconds">%1$ds</string>
+    <string name="background_duration_seconds" translatable="false">%1$ds</string>
     <plurals name="background_session_minutes">
         <item quantity="one">%1$s - %2$d minute</item>
         <item quantity="other">%1$s - %2$d minutes</item>

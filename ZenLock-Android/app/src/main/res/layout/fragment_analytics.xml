@@ -119,6 +119,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:gravity="center"
                             android:text="@string/layout_focus_time" />
 
                     </LinearLayout>
@@ -150,6 +151,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:gravity="center"
                             android:text="@string/layout_phone_usage" />
 
                     </LinearLayout>
@@ -181,6 +183,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:gravity="center"
                             android:text="@string/layout_sessions" />
 
                     </LinearLayout>
