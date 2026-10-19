@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZenLock</string>
+    <string name="app_name" translatable="false">ZenLock</string>
     <string name="accessibility_disclosure_title">Accessibility for app blocking</string>
     <string name="accessibility_disclosure_message">During a session, ZenLock uses Android’s Accessibility Service to detect which app and screen is open, and app interaction events such as taps. This lets ZenLock show the lock screen when you open a blocked app and keep allowed apps available.\n\nApp-access statistics are stored on your device for Insights. ZenLock does not read message contents or typed text, or send this accessibility data to its servers.\n\nDo you agree to this use?</string>
     <string name="accessibility_disclosure_agree">Agree and open settings</string>
@@ -48,8 +48,8 @@
     <string name="settings_home_title">Allow Home Screen</string>
     <string name="settings_home_summary">Allow the launcher during a focus session</string>
     <string name="settings_clear_pin">Clear saved PIN</string>
-    <string name="lock_until_hours">Hour</string>
-    <string name="lock_until_minutes">Minute</string>
+    <string name="lock_until_hours" translatable="false">Hour</string>
+    <string name="lock_until_minutes" translatable="false">Minute</string>
     <string name="lock_until_period_action">%1$s. Switch to %2$s</string>
     <string name="lock_until_today">Today · %1$s</string>
     <string name="lock_until_tomorrow">Tomorrow · %1$s</string>

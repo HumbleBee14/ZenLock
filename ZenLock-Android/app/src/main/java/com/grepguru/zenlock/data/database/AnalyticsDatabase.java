@@ -60,7 +60,7 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
                     // Allow queries on main thread for simple operations (not recommended for complex queries)
                     .allowMainThreadQueries()
                     // Fallback to destructive migration for now (will add proper migrations later)
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(false)
                     // Add callback for database creation
                     .addCallback(roomDatabaseCallback)
                     .build();
@@ -122,9 +122,9 @@ public abstract class AnalyticsDatabase extends RoomDatabase {
         if (sizeInBytes < 1024) {
             return sizeInBytes + " B";
         } else if (sizeInBytes < 1024 * 1024) {
-            return String.format("%.1f KB", sizeInBytes / 1024.0);
+            return String.format(java.util.Locale.ROOT, "%.1f KB", sizeInBytes / 1024.0);
         } else {
-            return String.format("%.1f MB", sizeInBytes / (1024.0 * 1024.0));
+            return String.format(java.util.Locale.ROOT, "%.1f MB", sizeInBytes / (1024.0 * 1024.0));
         }
     }
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_disclosure_title">Accessibilité pour bloquer les applis</string>
+    <string name="accessibility_disclosure_message">Pendant une session, ZenLock utilise le service d’accessibilité d’Android pour détecter l’appli et l’écran ouverts, ainsi que les interactions comme les appuis. ZenLock peut ainsi afficher l’écran de verrouillage quand vous ouvrez une appli bloquée et laisser les applis autorisées accessibles.\n\nLes statistiques d’accès aux applis sont stockées sur votre appareil pour les Statistiques. ZenLock ne lit ni le contenu des messages ni le texte saisi, et n’envoie pas ces données d’accessibilité à ses serveurs.\n\nAcceptez-vous cette utilisation ?</string>
+    <string name="accessibility_disclosure_agree">Accepter et ouvrir les paramètres</string>
+    <string name="accessibility_disclosure_decline">Pas maintenant</string>
+    <string name="accessibility_settings_hint">Activez ZenLock dans la liste</string>
+    <string name="allowed_apps_title">Applis autorisées</string>
+    <string name="save_allowed_apps">Enregistrer les applis · %1$d/%2$d</string>
+    <string name="remove_allowed_app">Retirer %1$s</string>
+    <string name="search_allowed_apps">Rechercher des applis</string>
+    <string name="close_app_search">Fermer la recherche</string>
+    <string name="allowed_apps_saved">Applis autorisées mises à jour</string>
+    <string name="allowed_apps_summary">Choisissez jusqu’à 8 applis supplémentaires à utiliser pendant les sessions de concentration.</string>
+    <string name="cannot_open_app">Impossible d’ouvrir %1$s</string>
+    <string name="show_allowed_apps">Afficher les applis autorisées</string>
+    <string name="hide_allowed_apps">Masquer les applis autorisées</string>
+    <string name="schedule_future_time">Choisissez une heure ultérieure pour une programmation ponctuelle.</string>
+    <string name="unlock_accessible_wait">Lancer l’attente d’une seconde avant le déverrouillage. Activez à nouveau pour annuler.</string>
+    <string name="play_store_sms_note"><![CDATA[Indisponible dans la version Play Store en raison des règles de Google sur les SMS. Téléchargez l’APK sur <a href="https://github.com/HumbleBee14/ZenLock/releases/latest">GitHub</a>.]]></string>
+    <string name="scroll_allowed_apps_left">Faire défiler les applis autorisées vers la gauche</string>
+    <string name="scroll_allowed_apps_right">Faire défiler les applis autorisées vers la droite</string>
+    <string name="permission_optional">Facultatif</string>
+    <string name="focus_preparing">Préparation de votre session de concentration…</string>
+    <string name="focus_checking_setup">Vérification de votre configuration</string>
+    <string name="show_pin">Afficher le PIN</string>
+    <string name="hide_pin">Masquer le PIN</string>
+    <string name="settings_section_unlock">Déverrouillage</string>
+    <string name="settings_section_reliability">Fiabilité</string>
+    <string name="settings_section_lock_screen">Écran de verrouillage</string>
+    <string name="settings_section_about">À propos</string>
+    <string name="settings_default_apps_title">Applis autorisées par défaut</string>
+    <string name="settings_default_apps_summary">Choisissez les applis intégrées qui restent accessibles</string>
+    <string name="settings_block_notifications_title">Bloquer les notifications</string>
+    <string name="settings_block_notifications_summary">Couper les notifications des applis bloquées</string>
+    <string name="settings_pin_title">Déverrouillage par PIN</string>
+    <string name="settings_pin_summary">Terminez une session plus tôt avec votre PIN</string>
+    <string name="settings_partner_title">Partenaire d’engagement</string>
+    <string name="settings_partner_summary">Demandez un code de déverrouillage à votre partenaire</string>
+    <string name="settings_battery_title">Batterie sans restriction</string>
+    <string name="settings_battery_summary">Aidez les sessions programmées à démarrer de façon fiable</string>
+    <string name="settings_reboot_title">Reprendre après redémarrage</string>
+    <string name="settings_reboot_summary">Reprenez une session active après un redémarrage</string>
+    <string name="settings_permissions_title">Autorisations</string>
+    <string name="settings_permissions_summary">Consultez les accès utilisés par chaque fonction</string>
+    <string name="settings_notification_title">Notification de session</string>
+    <string name="settings_notification_summary">Gardez les détails de la session dans le volet de notifications</string>
+    <string name="settings_home_title">Autoriser l’écran d’accueil</string>
+    <string name="settings_home_summary">Autorisez le lanceur pendant une session de concentration</string>
+    <string name="settings_clear_pin">Effacer le PIN enregistré</string>
+    <string name="lock_until_period_action">%1$s. Passer à %2$s</string>
+    <string name="lock_until_today">Aujourd’hui · %1$s</string>
+    <string name="lock_until_tomorrow">Demain · %1$s</string>
+    <string name="settings_appearance">Apparence</string>
+    <string name="settings_theme">Thème</string>
+    <string-array name="theme_choices">
+        <item>Suivre le téléphone</item>
+        <item>Clair</item>
+        <item>Sombre</item>
+    </string-array>
+    <string name="schedule_list_heading">Vos programmations</string>
+    <string name="schedule_empty_hint">Commencez par une routine ci-dessous ou créez la vôtre.</string>
+    <string name="schedule_none_upcoming">Aucune session à venir</string>
+    <string name="schedule_none_upcoming_hint">Activez une programmation ou créez-en une pour prévoir votre prochaine session de concentration.</string>
+    <string name="schedule_enabled">Activée</string>
+    <string name="schedule_paused">En pause</string>
+    <string name="insights_usage_title">Consultez votre utilisation du téléphone</string>
+    <string name="insights_usage_message">Activez l’accès aux données d’utilisation pour voir le temps passé dans les autres applis. Vos sessions de concentration sont suivies sans cet accès.</string>
+    <string name="insights_open_settings">Ouvrir les paramètres</string>
+    <string name="insights_not_now">Pas maintenant</string>
+    <string name="insights_usage_banner">Utilisation du téléphone indisponible. Appuyez pour activer l’accès aux données d’utilisation.</string>
+    <string name="blocked_app_notice">Cette appli n’est pas autorisée pendant la concentration.</string>
+    <string name="uninstall_protection_title">Empêcher la désinstallation</string>
+    <string name="uninstall_protection_summary">Facultatif · Rend ZenLock plus difficile à supprimer sur un coup de tête.</string>
+    <string name="uninstall_protection_explanation">ZenLock utilise l’administration de l’appareil uniquement pour rester installé. Aucun accès aux mots de passe, au verrouillage de l’écran ou à l’effacement des données n’est demandé.</string>
+    <string name="uninstall_protection_admin_description">Maintient ZenLock installé.</string>
+    <string name="uninstall_protection_dialog_message">Maintient ZenLock installé pendant que vous prenez l’habitude.\n\nUtilise l’autorisation d’administrateur de l’appareil d’Android.\n\nAucun accès aux mots de passe, au verrouillage de l’écran ou à l’effacement des données n’est demandé.</string>
+    <string name="uninstall_protection_continue">Confirmer</string>
+    <string name="uninstall_protection_disable_title">Désactiver la protection contre la désinstallation ?</string>
+    <string name="uninstall_protection_disable_message">ZenLock pourra à nouveau être désinstallé en un appui. Gardez la protection si vous avez tendance à supprimer l’appli quand la concentration devient difficile.</string>
+    <string name="uninstall_protection_keep">Garder activée</string>
+    <string name="uninstall_protection_disable">Désactiver</string>
+    <string name="uninstall_protection_disable_warning">ZenLock pourra être désinstallé une fois cette option désactivée. Toute session de concentration en cours continue.</string>
+    <string name="uninstall_protection_error">Impossible de modifier la protection contre la désinstallation. Réessayez.</string>
+</resources>

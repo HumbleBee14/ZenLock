@@ -1,0 +1,4 @@
+<resources>
+    <!-- Always readable when someone accidentally selects a language they cannot read. -->
+    <string name="change_language" translatable="false">Change language</string>
+</resources>

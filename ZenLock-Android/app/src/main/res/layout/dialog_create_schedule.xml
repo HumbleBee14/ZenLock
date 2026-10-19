@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:text="New schedule"
+            android:text="@string/layout_new_schedule"
             android:textSize="17sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/textPrimary" />
@@ -36,7 +36,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/zen_field_background"
-            android:hint="Schedule name"
+            android:hint="@string/layout_schedule_name"
             android:textSize="15sp"
             android:textColor="@color/textPrimary"
             android:textColorHint="@color/textHint"
@@ -62,7 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Starts"
+                android:text="@string/layout_starts"
                 android:textSize="15sp"
                 android:textColor="@color/textPrimary" />
 
@@ -70,7 +70,7 @@
                 android:id="@+id/startTimeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="9:00 AM"
+                android:text="@string/layout_9_00_am"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/primaryLight" />
@@ -104,7 +104,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Duration"
+                android:text="@string/layout_duration"
                 android:textSize="15sp"
                 android:textColor="@color/textPrimary" />
 
@@ -112,7 +112,7 @@
                 android:id="@+id/selectedDurationDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Set duration"
+                android:text="@string/layout_set_duration"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/primaryLight" />
@@ -136,7 +136,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Repeat"
+            android:text="@string/layout_repeat"
             android:textSize="15sp"
             android:textColor="@color/textPrimary" />
 
@@ -153,7 +153,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Once" />
+                android:text="@string/layout_once" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/dailyChip"
@@ -162,7 +162,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Daily" />
+                android:text="@string/layout_daily" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/weeklyChip"
@@ -170,7 +170,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:text="Weekly" />
+                android:text="@string/layout_weekly" />
 
         </LinearLayout>
 
@@ -189,7 +189,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="S" />
+                android:text="@string/layout_s" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/mondayChip"
@@ -198,7 +198,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="M" />
+                android:text="@string/layout_m" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/tuesdayChip"
@@ -207,7 +207,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="T" />
+                android:text="@string/layout_t" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/wednesdayChip"
@@ -216,7 +216,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="W" />
+                android:text="@string/layout_w" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/thursdayChip"
@@ -225,7 +225,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="T" />
+                android:text="@string/layout_t" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/fridayChip"
@@ -234,7 +234,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="F" />
+                android:text="@string/layout_f" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/saturdayChip"
@@ -242,7 +242,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:text="S" />
+                android:text="@string/layout_s" />
 
         </LinearLayout>
 
@@ -257,7 +257,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Notify before"
+                android:text="@string/layout_notify_before"
                 android:textSize="15sp"
                 android:textColor="@color/textPrimary" />
 
@@ -283,7 +283,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="1m" />
+                android:text="@string/layout_1m" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/notify2Chip"
@@ -292,7 +292,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="2m" />
+                android:text="@string/layout_2m" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/notify3Chip"
@@ -301,7 +301,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="3m" />
+                android:text="@string/layout_3m" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/notify5Chip"
@@ -310,7 +310,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:text="5m" />
+                android:text="@string/layout_5m" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/notify10Chip"
@@ -318,7 +318,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:text="10m" />
+                android:text="@string/layout_10m" />
 
         </LinearLayout>
 
@@ -336,7 +336,7 @@
                 android:layout_height="40dp"
                 android:minHeight="40dp"
                 android:layout_marginEnd="8dp"
-                android:text="Cancel" />
+                android:text="@string/layout_cancel" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/createButton"
@@ -344,7 +344,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:minHeight="40dp"
-                android:text="Create" />
+                android:text="@string/layout_create" />
 
         </LinearLayout>
 

@@ -39,7 +39,7 @@
             android:layout_height="44dp"
             android:layout_weight="1"
             android:background="@drawable/zen_field_background"
-            android:hint="New quote"
+            android:hint="@string/layout_new_quote"
             android:textSize="14sp"
             android:textColor="@color/textPrimary"
             android:textColorHint="@color/textHint"
@@ -57,7 +57,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginStart="10dp"
-            android:text="Add" />
+            android:text="@string/layout_add" />
 
     </LinearLayout>
 

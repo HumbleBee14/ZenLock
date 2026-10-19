@@ -1,5 +1,6 @@
 package com.grepguru.zenlock;
 
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -116,6 +117,7 @@ public class LockScreenActivity extends AppCompatActivity {
             // Only use non-deprecated flag for older versions
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        com.grepguru.zenlock.ui.AppLanguage.initializeDefault(this);
         super.onCreate(savedInstanceState);
         com.grepguru.zenlock.ui.ScreenInsets.enable(this);
         preferences = getSharedPreferences("FocusLockPrefs", Context.MODE_PRIVATE);
@@ -461,7 +463,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     pinInput.setText("");
                 } else {
                     // Prevent exiting the app
-                    Toast.makeText(LockScreenActivity.this, "Cannot exit Focus Mode!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LockScreenActivity.this, getString(R.string.screen_cannot_exit_focus_mode), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -683,7 +685,7 @@ public class LockScreenActivity extends AppCompatActivity {
     private void handleUnlockSuccess(UnlockMethod method) {
         // Vibrate for feedback if enabled
         VibrationUtils.vibrate(this, 50);
-        Toast.makeText(this, "Unlocked via " + method.getDisplayName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.screen_unlocked_via_1_s, method.getDisplayName(this)), Toast.LENGTH_SHORT).show();
 
         // Mark as manually unlocked to prevent completion toast
         wasManuallyUnlocked = true;
@@ -745,7 +747,7 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView sessionTitle = findViewById(R.id.sessionTitle);
         String source = preferences.getString("current_session_source", "");
         String name = source.startsWith("schedule:") ? source.substring("schedule:".length()).trim() : "";
-        sessionTitle.setText(name.isEmpty() ? "Focus" : name);
+        sessionTitle.setText(name.isEmpty() ? getString(R.string.screen_focus) : name);
         updateEndsAt();
     }
 
@@ -753,13 +755,13 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView endsAtText = findViewById(R.id.endsAtText);
         long lockEndTime = preferences.getLong("lockEndTime", 0);
         if (endsAtText == null || lockEndTime <= 0) return;
-        String time = new SimpleDateFormat("h:mm a", Locale.getDefault()).format(new Date(lockEndTime));
+        String time = new SimpleDateFormat("h:mm a", Locale.US).format(new Date(lockEndTime));
         Calendar now = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(lockEndTime);
         boolean sameDay = now.get(Calendar.YEAR) == end.get(Calendar.YEAR)
                 && now.get(Calendar.DAY_OF_YEAR) == end.get(Calendar.DAY_OF_YEAR);
-        endsAtText.setText(sameDay ? "Ends at " + time : "Ends tomorrow at " + time);
+        endsAtText.setText(getString(sameDay ? R.string.screen_ends_at_1_s : R.string.screen_ends_tomorrow_at_1_s, time));
     }
 
     private void updateProgress(long totalTimeMs, long remainingTimeMs) {
@@ -770,13 +772,13 @@ public class LockScreenActivity extends AppCompatActivity {
         fill.setScaleX(Math.max(0f, Math.min(1f, progress)));
     }
 
-    private static String formatDuration(long millis) {
+    private String formatDuration(long millis) {
         long minutes = Math.max(1, Math.round(millis / 60000.0));
         long hours = minutes / 60;
         minutes %= 60;
-        if (hours == 0) return minutes + "m";
-        if (minutes == 0) return hours + "h";
-        return hours + "h " + minutes + "m";
+        if (hours == 0) return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_minutes_short), minutes);
+        if (minutes == 0) return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_short), hours);
+        return String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), hours, minutes);
     }
 
     private void showFinishMoment(long totalTimeMs) {
@@ -790,11 +792,11 @@ public class LockScreenActivity extends AppCompatActivity {
 
         TextView sessionTitle = findViewById(R.id.sessionTitle);
         TextView endsAtText = findViewById(R.id.endsAtText);
-        sessionTitle.setText("Done");
+        sessionTitle.setText(getString(R.string.screen_done));
         endsAtText.animate().cancel();
         endsAtText.setVisibility(View.VISIBLE);
         endsAtText.setAlpha(1f);
-        endsAtText.setText(formatDuration(totalTimeMs) + " focused");
+        endsAtText.setText(getString(R.string.screen_duration_focused, formatDuration(totalTimeMs)));
         findViewById(R.id.mainContentContainer).setClickable(false);
 
         int[] fade = {R.id.lockscreenMessage, R.id.unlockArrow, R.id.unlockExtendButtonContainer,
@@ -940,9 +942,10 @@ public class LockScreenActivity extends AppCompatActivity {
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
 
         hoursPicker.setMinValue(0);
+        hoursPicker.setFormatter(value -> String.valueOf(value));
         hoursPicker.setMaxValue(5);
         hoursPicker.setValue(0);
-        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "45"};
+        String[] minuteValues = new String[]{"0", "5", "10", "15", "20", "30", "45"};
         minutesPicker.setMinValue(0);
         minutesPicker.setMaxValue(minuteValues.length - 1);
         minutesPicker.setDisplayedValues(minuteValues);
@@ -969,7 +972,7 @@ public class LockScreenActivity extends AppCompatActivity {
                     ? presetMinutes[selected[0]]
                     : hoursPicker.getValue() * 60L + Integer.parseInt(minuteValues[minutesPicker.getValue()]);
             if (minutes <= 0) {
-                Toast.makeText(this, "Pick a duration", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.screen_pick_a_duration), Toast.LENGTH_SHORT).show();
                 return;
             }
             extendLockDuration(minutes * 60 * 1000L);
@@ -1047,10 +1050,10 @@ public class LockScreenActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                "ZenLock Focus Session",
+                getString(R.string.screen_zenlock_focus_session),
                 NotificationManager.IMPORTANCE_LOW
             );
-            channel.setDescription("Persistent notification when focus session is active");
+            channel.setDescription(getString(R.string.screen_persistent_notification_when_focus_session_is_active));
             channel.enableLights(false);
             channel.enableVibration(false);
             channel.setShowBadge(false);
@@ -1076,13 +1079,13 @@ public class LockScreenActivity extends AppCompatActivity {
         
         // Get end time for display
         long lockEndTime = preferences.getLong("lockEndTime", 0);
-        java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.US);
         String endTimeText = timeFormat.format(new java.util.Date(lockEndTime));
         
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_lock)
-            .setContentTitle("ZenLock Active")
-            .setContentText("Ends at " + endTimeText)
+            .setContentTitle(getString(R.string.screen_zenlock_active))
+            .setContentText(getString(R.string.screen_ends_at_1_s, endTimeText))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(false)

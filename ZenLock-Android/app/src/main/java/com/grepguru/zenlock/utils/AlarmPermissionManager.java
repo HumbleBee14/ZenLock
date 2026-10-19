@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
@@ -53,14 +55,13 @@ public class AlarmPermissionManager {
      */
     private static void showExactAlarmPermissionDialog(AppCompatActivity activity) {
         new AlertDialog.Builder(activity)
-                .setTitle("Schedule Permission Required")
-                .setMessage("ZenLock needs this permission to ensure your focus sessions begin at the scheduled time.\n\n" +
-                           "You'll be taken to Android Settings to grant this permission.")
-                .setPositiveButton("Grant Permission", (dialog, which) -> {
+                .setTitle(AppLanguage.localizedContext(activity).getString(R.string.background_schedule_permission_required))
+                .setMessage(AppLanguage.localizedContext(activity).getString(R.string.background_zenlock_needs_this_permission_to_ensure_your_focus_sessions_begin_at_the_sc))
+                .setPositiveButton(AppLanguage.localizedContext(activity).getString(R.string.background_grant_permission), (dialog, which) -> {
                     openExactAlarmSettings(activity);
                 })
-                .setNegativeButton("Skip", (dialog, which) -> {
-                    Toast.makeText(activity, "Scheduled focus sessions may not work without this permission", Toast.LENGTH_LONG).show();
+                .setNegativeButton(AppLanguage.localizedContext(activity).getString(R.string.background_skip), (dialog, which) -> {
+                    Toast.makeText(activity, AppLanguage.localizedContext(activity).getString(R.string.background_scheduled_focus_sessions_may_not_work_without_this_permission), Toast.LENGTH_LONG).show();
                 })
                 .setCancelable(false)
                 .show();
@@ -79,7 +80,7 @@ public class AlarmPermissionManager {
                 Log.d(TAG, "Opened exact alarm permission settings");
             } catch (Exception e) {
                 Log.e(TAG, "Failed to open exact alarm settings", e);
-                Toast.makeText(context, "Please enable exact alarm permission in Settings > Apps > ZenLock > Permissions", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, AppLanguage.localizedContext(context).getString(R.string.background_please_enable_exact_alarm_permission_in_settings_apps_zenlock_permissions), Toast.LENGTH_LONG).show();
             }
         }
     }

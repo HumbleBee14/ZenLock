@@ -14,7 +14,7 @@
         android:id="@+id/unlockTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Unlock"
+        android:text="@string/settings_section_unlock"
         android:textSize="19sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textPrimary" />
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="PIN" />
+            android:text="@string/layout_pin" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/partnerChip"
@@ -44,7 +44,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Partner" />
+            android:text="@string/layout_partner" />
 
     </LinearLayout>
 
@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Enter your PIN."
+        android:text="@string/layout_enter_your_pin"
         android:textSize="13sp"
         android:lineSpacingExtra="2dp"
         android:textColor="@color/textSecondary" />
@@ -75,7 +75,7 @@
             android:minHeight="40dp"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            android:text="Send code" />
+            android:text="@string/layout_send_code" />
 
         <TextView
             android:id="@+id/sendStatus"
@@ -104,8 +104,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:hint="••••"
+            android:hint="@string/layout_dialog_unlock"
             android:inputType="numberPassword"
+            android:textDirection="ltr"
             android:maxLength="4"
             android:imeOptions="actionDone"
             android:background="@null"
@@ -122,7 +123,7 @@
             android:padding="8dp"
             android:src="@drawable/ic_eye"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Toggle PIN visibility"
+            android:contentDescription="@string/layout_toggle_pin_visibility"
             app:tint="@color/textSecondary" />
 
     </LinearLayout>
@@ -150,7 +151,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:text="@string/layout_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/unlockButton"
@@ -158,7 +159,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minHeight="40dp"
-            android:text="Unlock" />
+            android:text="@string/settings_section_unlock" />
 
     </LinearLayout>
 

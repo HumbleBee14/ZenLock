@@ -20,7 +20,7 @@
             android:id="@+id/scheduleTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Schedule"
+            android:text="@string/layout_schedule"
             style="@style/ModernText.PageTitle"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,7 @@
             style="@style/ModernButton.Pill"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="New schedule"
+            android:text="@string/layout_new_schedule"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary"
             app:iconTint="@color/white"
@@ -136,7 +136,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="UP NEXT"
+                android:text="@string/layout_up_next"
                 android:accessibilityHeading="true"
                 android:textSize="11sp"
                 android:letterSpacing="0.1"
@@ -155,7 +155,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Nothing scheduled"
+                    android:text="@string/layout_nothing_scheduled"
                     android:textSize="20sp"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="@color/textPrimary"
@@ -167,7 +167,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:text="in 14h 22m"
+                    android:text="@string/layout_in_14h_22m"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="@color/primaryLight" />
@@ -179,7 +179,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Tomorrow · 9:00 AM · 1h 30m"
+                android:text="@string/layout_tomorrow_9_00_am_1h_30m"
                 android:textSize="13sp"
                 android:textColor="@color/textSecondary" />
 

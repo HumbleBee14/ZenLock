@@ -1,5 +1,6 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -220,9 +221,7 @@ public final class ManualStartDelayScheduler {
         int remainingMinutes = Math.max(1, (int) Math.ceil(
                 Math.max(0L, triggerAtMillis - System.currentTimeMillis()) / 60_000d
         ));
-        String contentText = remainingMinutes == 1
-                ? "Starts in 1 minute"
-                : "Starts in " + remainingMinutes + " minutes";
+        String contentText = String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getResources().getQuantityString(R.plurals.background_starts_in_minutes, remainingMinutes), remainingMinutes);
 
         Intent appIntent = new Intent(context, MainActivity.class);
         appIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -244,7 +243,7 @@ public final class ManualStartDelayScheduler {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_lock)
-                .setContentTitle("Focus session scheduled")
+                .setContentTitle(AppLanguage.localizedContext(context).getString(R.string.background_focus_session_scheduled))
                 .setContentText(contentText)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(contentText))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -253,7 +252,7 @@ public final class ManualStartDelayScheduler {
                 .setAutoCancel(false)
                 .setContentIntent(contentIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-                .addAction(0, "Cancel", cancelPendingIntent);
+                .addAction(0, AppLanguage.localizedContext(context).getString(R.string.background_cancel), cancelPendingIntent);
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -274,10 +273,10 @@ public final class ManualStartDelayScheduler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Manual Focus Scheduling",
+                    AppLanguage.localizedContext(context).getString(R.string.background_manual_focus_scheduling),
                     NotificationManager.IMPORTANCE_DEFAULT
             );
-            channel.setDescription("Notifications for delayed focus sessions");
+            channel.setDescription(AppLanguage.localizedContext(context).getString(R.string.background_notifications_for_delayed_focus_sessions));
             channel.enableVibration(false);
             channel.setShowBadge(false);
 

@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -553,9 +555,9 @@ public class MobileUsageTracker {
         long hours = minutes / 60;
         
         if (hours > 0) {
-            return String.format(Locale.US, "%dh %dm", hours, minutes % 60);
+            return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_hours_minutes), hours, minutes % 60);
         } else {
-            return String.format(Locale.US, "%dm", minutes);
+            return String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_duration_minutes), minutes);
         }
     }
     

@@ -10,7 +10,7 @@
         android:id="@+id/dayLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="M"
+        android:text="@string/layout_m"
         android:textSize="12sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textTertiary" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Focus Duration Options (matching main app timer) -->
-    <string-array name="focus_durations">
+    <string-array name="focus_durations" translatable="false">
         <item>0 min</item>
         <item>1 min</item>
         <item>5 min</item>

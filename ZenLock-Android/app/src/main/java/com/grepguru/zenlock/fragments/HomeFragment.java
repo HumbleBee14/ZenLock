@@ -45,8 +45,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 import com.grepguru.zenlock.LockScreenActivity;
 import com.grepguru.zenlock.R;
 import com.grepguru.zenlock.guards.UnlockMethodGuard;
@@ -93,7 +91,6 @@ public class HomeFragment extends Fragment {
     private int selectedMinutes = 0;
     private static final int TIME_INCREMENT = 5;
     private static final int[] START_DELAY_OPTIONS_MINUTES = {0, 1, 2, 3, 4, 5, 10, 15, 20, 30, 40, 50, 60};
-    private static final String[] START_DELAY_DISPLAY_VALUES = {"Now", "1m", "2m", "3m", "4m", "5m", "10m", "15m", "20m", "30m", "40m", "50m", "60m"};
     private static final String PREF_START_DELAY_SELECTION = "manual_start_delay_selection";
     private static final long START_DELAY_SCROLL_DISMISS_DELAY_MS = 260;
     private AnalyticsManager analyticsManager;
@@ -261,8 +258,10 @@ public class HomeFragment extends Fragment {
         View popupContent = getLayoutInflater().inflate(R.layout.overlay_start_delay_picker, null);
         startDelayPicker = popupContent.findViewById(R.id.startDelayPicker);
         startDelayPicker.setMinValue(0);
-        startDelayPicker.setMaxValue(START_DELAY_DISPLAY_VALUES.length - 1);
-        startDelayPicker.setDisplayedValues(START_DELAY_DISPLAY_VALUES);
+        startDelayPicker.setMaxValue(START_DELAY_OPTIONS_MINUTES.length - 1);
+        String[] delayLabels = new String[START_DELAY_OPTIONS_MINUTES.length];
+        for (int i = 0; i < delayLabels.length; i++) delayLabels[i] = i == 0 ? getString(R.string.screen_now) : String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_minutes_short), START_DELAY_OPTIONS_MINUTES[i]);
+        startDelayPicker.setDisplayedValues(delayLabels);
         startDelayPicker.setWrapSelectorWheel(true);
         startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         styleStartDelayPicker();
@@ -495,7 +494,7 @@ public class HomeFragment extends Fragment {
 
             if (isLockUntilMode) {
                 modeToggleButton.setImageResource(R.drawable.ic_timer);
-                modeToggleButton.setContentDescription("Switch to duration mode");
+                modeToggleButton.setContentDescription(getString(R.string.screen_switch_to_duration_mode));
                 durationModeContainer.setVisibility(View.GONE);
                 lockUntilContainer.setVisibility(View.VISIBLE);
 
@@ -509,7 +508,7 @@ public class HomeFragment extends Fragment {
                 updateLockButtonState();
             } else {
                 modeToggleButton.setImageResource(R.drawable.ic_schedule);
-                modeToggleButton.setContentDescription("Switch to lock until time");
+                modeToggleButton.setContentDescription(getString(R.string.screen_switch_to_lock_until_time));
                 durationModeContainer.setVisibility(View.VISIBLE);
                 lockUntilContainer.setVisibility(View.GONE);
                 updateTimeDisplay();
@@ -521,10 +520,11 @@ public class HomeFragment extends Fragment {
 
     private void setupLockUntilWheels() {
         lockUntilHoursPicker.setMinValue(1);
+        lockUntilHoursPicker.setFormatter(value -> String.valueOf(value));
         lockUntilHoursPicker.setMaxValue(12);
         lockUntilMinutesPicker.setMinValue(0);
         lockUntilMinutesPicker.setMaxValue(59);
-        lockUntilMinutesPicker.setFormatter(value -> String.format(java.util.Locale.getDefault(), "%02d", value));
+        lockUntilMinutesPicker.setFormatter(value -> String.format(java.util.Locale.ROOT, "%02d", value));
         for (NumberPicker wheel : new NumberPicker[]{lockUntilHoursPicker, lockUntilMinutesPicker}) {
             wheel.setWrapSelectorWheel(true);
             wheel.setOnClickListener(v -> showLockUntilTimePicker());
@@ -555,42 +555,43 @@ public class HomeFragment extends Fragment {
     }
 
     private void showLockUntilTimePicker() {
-        if (getChildFragmentManager().findFragmentByTag("lockUntilPicker") != null) return;
         int hour = lockUntilHour != -1 ? lockUntilHour : Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1;
         int minute = lockUntilMinute != -1 ? lockUntilMinute : 0;
-
-        MaterialTimePicker picker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(hour % 24)
-                .setMinute(minute)
-                .setTitleText("Lock until")
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .setTheme(R.style.ZenTimePicker)
-                .build();
-        picker.addOnPositiveButtonClickListener(v -> {
-            lockUntilHour = picker.getHour();
-            lockUntilMinute = picker.getMinute();
-            updateLockUntilDisplay();
-            updateLockButtonState();
-        });
-        picker.show(getChildFragmentManager(), "lockUntilPicker");
+        android.content.res.Configuration numbers = new android.content.res.Configuration(getResources().getConfiguration());
+        numbers.setLocale(java.util.Locale.US);
+        androidx.appcompat.view.ContextThemeWrapper numberContext =
+                new androidx.appcompat.view.ContextThemeWrapper(requireActivity(), R.style.Theme_ZenLock);
+        numberContext.applyOverrideConfiguration(numbers);
+        android.app.TimePickerDialog picker = new android.app.TimePickerDialog(numberContext,
+                (view, selectedHour, selectedMinute) -> {
+                    lockUntilHour = selectedHour;
+                    lockUntilMinute = selectedMinute;
+                    updateLockUntilDisplay();
+                    updateLockButtonState();
+                }, hour % 24, minute, false);
+        picker.setTitle(getString(R.string.screen_lock_until));
+        picker.setButton(android.content.DialogInterface.BUTTON_POSITIVE, getString(android.R.string.ok), picker);
+        picker.setButton(android.content.DialogInterface.BUTTON_NEGATIVE, getString(android.R.string.cancel),
+                (dialog, which) -> dialog.dismiss());
+        picker.show();
     }
 
     private void updateLockUntilDisplay() {
         int displayHour = lockUntilHour % 12;
         if (displayHour == 0) displayHour = 12;
-        String amPm = lockUntilHour < 12 ? "AM" : "PM";
+        String[] periods = new java.text.DateFormatSymbols(getResources().getConfiguration().getLocales().get(0)).getAmPmStrings();
+        String amPm = periods[lockUntilHour < 12 ? 0 : 1];
         lockUntilHoursPicker.setValue(displayHour);
         lockUntilMinutesPicker.setValue(lockUntilMinute);
         lockUntilPeriodButton.setText(amPm);
         lockUntilPeriodButton.setContentDescription(getString(R.string.lock_until_period_action,
-                amPm, lockUntilHour < 12 ? "PM" : "AM"));
+                amPm, periods[lockUntilHour < 12 ? 1 : 0]));
         Calendar now = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(getNextLockUntilEndTimeMillis());
         boolean today = now.get(Calendar.YEAR) == end.get(Calendar.YEAR)
                 && now.get(Calendar.DAY_OF_YEAR) == end.get(Calendar.DAY_OF_YEAR);
-        String time = String.format(java.util.Locale.getDefault(), "%d:%02d %s", displayHour, lockUntilMinute, amPm);
+        String time = String.format(java.util.Locale.ROOT, "%d:%02d %s", displayHour, lockUntilMinute, amPm);
         lockUntilTimeDisplay.setText(getString(today ? R.string.lock_until_today : R.string.lock_until_tomorrow, time));
     }
 
@@ -740,7 +741,7 @@ public class HomeFragment extends Fragment {
         int minutes = selectedMinutes % 60;
         
         // Format: HH:MM
-        selectedTimeDisplay.setText(String.format("%02d:%02d", hours, minutes));
+        selectedTimeDisplay.setText(String.format(java.util.Locale.ROOT, "%02d:%02d", hours, minutes));
         
         updateLockButtonState();
     }
@@ -750,17 +751,17 @@ public class HomeFragment extends Fragment {
             startDelayPicker.setValue(getStartDelayIndex(selectedStartDelayMinutes));
         }
         startDelayValue.setText(formatStartDelayLabel(selectedStartDelayMinutes));
-        startDelayLabel.setText(selectedStartDelayMinutes > 0 ? "Starts in" : "Starts");
+        startDelayLabel.setText(selectedStartDelayMinutes > 0 ? getString(R.string.screen_starts_in) : getString(R.string.screen_starts));
     }
 
     private String formatStartDelayLabel(int minutes) {
         if (minutes <= 0) {
-            return "Now";
+            return getString(R.string.screen_now);
         }
         if (minutes == 1) {
-            return "In 1 min";
+            return String.format(java.util.Locale.ROOT, getString(R.string.screen_start_delay_minutes), 1);
         }
-        return "In " + minutes + " min";
+        return String.format(java.util.Locale.ROOT, getString(R.string.screen_start_delay_minutes), minutes);
     }
 
     private int getStartDelayIndex(int minutes) {
@@ -779,10 +780,11 @@ public class HomeFragment extends Fragment {
 
     private void setupNumberPickers() {
         hoursPicker.setMinValue(0);
+        hoursPicker.setFormatter(value -> String.valueOf(value));
         hoursPicker.setMaxValue(23);
         minutesPicker.setMinValue(0);
         minutesPicker.setMaxValue(7);
-        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "40", "50"};
+        String[] minuteValues = new String[]{"0", "5", "10", "15", "20", "30", "40", "50"};
         minutesPicker.setDisplayedValues(minuteValues);
 
         hoursPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateFromPickers());
@@ -816,10 +818,11 @@ public class HomeFragment extends Fragment {
         
         // Setup pickers
         dialogHoursPicker.setMinValue(0);
+        dialogHoursPicker.setFormatter(value -> String.valueOf(value));
         dialogHoursPicker.setMaxValue(23);
         dialogMinutesPicker.setMinValue(0);
         dialogMinutesPicker.setMaxValue(7);
-        String[] minuteValues = {"0", "5", "10", "15", "20", "30", "40", "50"};
+        String[] minuteValues = new String[]{"0", "5", "10", "15", "20", "30", "40", "50"};
         dialogMinutesPicker.setDisplayedValues(minuteValues);
         
         // Set current values
@@ -839,13 +842,13 @@ public class HomeFragment extends Fragment {
         dialogMinutesPicker.setValue(closestIndex);
         
         builder.setView(dialogView)
-                .setPositiveButton("Set", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.screen_set), (dialog, which) -> {
                     int hours = dialogHoursPicker.getValue();
                     int minuteIndex = dialogMinutesPicker.getValue();
                     int minutes = minuteValuesInt[minuteIndex];
                     setTimeInMinutes((hours * 60) + minutes);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.screen_cancel), null)
                 .show();
     }
 
@@ -884,8 +887,8 @@ public class HomeFragment extends Fragment {
             return;
         }
         if (!UnlockMethodGuard.isSatisfied(requireContext())) {
-            UnlockMethodGuard.ensure(requireActivity(), "Got it", () -> {
-                if (isAdded()) Toast.makeText(requireContext(), "Hold Start Focus to begin", Toast.LENGTH_SHORT).show();
+            UnlockMethodGuard.ensure(requireActivity(), getString(R.string.screen_got_it), () -> {
+                if (isAdded()) Toast.makeText(requireContext(), getString(R.string.screen_hold_start_focus_to_begin), Toast.LENGTH_SHORT).show();
             });
             return;
         }
@@ -912,9 +915,9 @@ public class HomeFragment extends Fragment {
             zenCircularProgress.setProgress(progress);
 
             if (progress < 33) {
-                zenProgressMessage.setText("🌱 Preparing your zen space...");
+                zenProgressMessage.setText(getString(R.string.screen_preparing_your_zen_space));
             } else {
-                zenProgressMessage.setText("🧘‍♂️ Entering ZEN Mode...");
+                zenProgressMessage.setText(getString(R.string.screen_entering_zen_mode));
             }
         });
         progressAnimator.start();
@@ -949,7 +952,7 @@ public class HomeFragment extends Fragment {
                 .withEndAction(() -> {
                     zenProgressOverlay.setVisibility(View.GONE);
                     zenCircularProgress.setProgress(0);
-                    zenProgressMessage.setText("Entering ZEN Mode...");
+                    zenProgressMessage.setText(getString(R.string.screen_entering_zen_mode_plain));
                 })
                 .start();
     }
@@ -976,8 +979,8 @@ public class HomeFragment extends Fragment {
                 .withEndAction(() -> {
                     zenProgressOverlay.setVisibility(View.GONE);
                     zenCircularProgress.setProgress(0);
-                    zenProgressMessage.setText("Entering ZEN Mode...");
-                    zenProgressSubtitle.setText("Hold to begin your mindful focus session");
+                    zenProgressMessage.setText(getString(R.string.screen_entering_zen_mode_plain));
+                    zenProgressSubtitle.setText(getString(R.string.screen_hold_to_begin_your_mindful_focus_session));
                 })
                 .start();
     }
@@ -1028,7 +1031,7 @@ public class HomeFragment extends Fragment {
 
         if (isLockUntilMode) {
             if (lockUntilHour == -1) {
-                Toast.makeText(getActivity(), "Please select a lock until time!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.screen_please_select_a_lock_until_time), Toast.LENGTH_SHORT).show();
                 return;
             }
             absoluteLockEndTimeMillis = getNextLockUntilEndTimeMillis();
@@ -1036,7 +1039,7 @@ public class HomeFragment extends Fragment {
         } else {
             lockDurationMillis = selectedMinutes * 60 * 1000L;
             if (lockDurationMillis <= 0) {
-                Toast.makeText(getActivity(), "Please select a valid lock time!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.screen_please_select_a_valid_lock_time), Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -1044,15 +1047,15 @@ public class HomeFragment extends Fragment {
         if (lockDurationMillis > 8 * 60 * 60 * 1000L) {
             long hours = lockDurationMillis / (60 * 60 * 1000L);
             long mins = (lockDurationMillis % (60 * 60 * 1000L)) / (60 * 1000L);
-            String durationText = hours + "h " + mins + "m";
+            String durationText = String.format(java.util.Locale.ROOT, getString(R.string.screen_duration_hours_minutes), hours, mins);
             Long finalAbsoluteLockEndTimeMillis = absoluteLockEndTimeMillis;
             new AlertDialog.Builder(getActivity())
-                    .setTitle("Long Session")
-                    .setMessage("You're about to lock for " + durationText + ". Are you sure?")
-                    .setPositiveButton("Lock", (dialog, which) -> startOrScheduleLockSession(
+                    .setTitle(getString(R.string.screen_long_session))
+                    .setMessage(getString(R.string.screen_you_re_about_to_lock_for_1_s_are_you_sure, durationText))
+                    .setPositiveButton(getString(R.string.screen_lock), (dialog, which) -> startOrScheduleLockSession(
                             preferences, lockDurationMillis, finalAbsoluteLockEndTimeMillis
                     ))
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(getString(R.string.screen_cancel), null)
                     .show();
         } else {
             startOrScheduleLockSession(preferences, lockDurationMillis, absoluteLockEndTimeMillis);
@@ -1080,7 +1083,7 @@ public class HomeFragment extends Fragment {
         if (absoluteLockEndTimeMillis != null && absoluteLockEndTimeMillis <= scheduledStartTimeMillis) {
             Toast.makeText(
                     requireContext(),
-                    "Pick a later lock-until time or a shorter start delay.",
+                    getString(R.string.screen_pick_a_later_lock_until_time_or_a_shorter_start_delay),
                     Toast.LENGTH_LONG
             ).show();
             return;
@@ -1094,7 +1097,7 @@ public class HomeFragment extends Fragment {
         );
 
         if (!scheduled) {
-            Toast.makeText(requireContext(), "Couldn't schedule your focus session yet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.screen_couldn_t_schedule_your_focus_session_yet), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -1102,7 +1105,7 @@ public class HomeFragment extends Fragment {
         updateLockButtonState();
         Toast.makeText(
                 requireContext(),
-                "Focus session starts " + formatStartDelayLabel(selectedStartDelayMinutes).toLowerCase(java.util.Locale.ROOT),
+                String.format(java.util.Locale.ROOT, getString(R.string.screen_focus_session_starts_in_1_d_min), selectedStartDelayMinutes),
                 Toast.LENGTH_LONG
         ).show();
     }
@@ -1161,7 +1164,7 @@ public class HomeFragment extends Fragment {
         if (ManualStartDelayScheduler.hasPendingSession(requireContext())) {
             enableLockButton.setEnabled(true);
             enableLockButton.setAlpha(0.55f);
-            enableLockButton.setText("Focus Scheduled");
+            enableLockButton.setText(getString(R.string.screen_focus_scheduled));
             if (startFocusHint != null) {
                 startFocusHint.setText(getPendingStartHint());
                 startFocusHint.setVisibility(View.VISIBLE);
@@ -1169,7 +1172,7 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        enableLockButton.setText("Start Focus");
+        enableLockButton.setText(getString(R.string.screen_start_focus));
         if (startFocusHint != null) {
             startFocusHint.setVisibility(View.GONE);
         }
@@ -1182,38 +1185,40 @@ public class HomeFragment extends Fragment {
     private String getPendingStartHint() {
         long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
         if (pendingStartAtMillis <= 0L) {
-            return "Tap to cancel";
+            return getString(R.string.screen_tap_to_cancel);
         }
-        return "Starts at " + formatClockTime(pendingStartAtMillis) + " (tap to cancel)";
+        return getString(R.string.screen_starts_at_1_s_tap_to_cancel, formatClockTime(pendingStartAtMillis));
     }
 
     private String getPendingStartBlockedMessage() {
         long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
         if (pendingStartAtMillis <= 0L) {
-            return "A focus session is already scheduled.";
+            return getString(R.string.screen_a_focus_session_is_already_scheduled);
         }
-        return "A focus session is already scheduled for " + formatClockTime(pendingStartAtMillis);
+        return getString(R.string.screen_a_focus_session_is_already_scheduled_for_1_s, formatClockTime(pendingStartAtMillis));
     }
 
     private String formatClockTime(long timeInMillis) {
-        return android.text.format.DateFormat.getTimeFormat(requireContext()).format(new Date(timeInMillis));
+        return new java.text.SimpleDateFormat(
+                android.text.format.DateFormat.is24HourFormat(requireContext()) ? "HH:mm" : "h:mm a",
+                java.util.Locale.US).format(new Date(timeInMillis));
     }
 
     private void showCancelPendingDialog() {
         long pendingStartAtMillis = ManualStartDelayScheduler.getPendingStartAtMillis(requireContext());
         String message = pendingStartAtMillis > 0L
-                ? "A focus session is scheduled for " + formatClockTime(pendingStartAtMillis) + ". Cancel it?"
-                : "A focus session is scheduled. Cancel it?";
+                ? getString(R.string.screen_a_focus_session_is_scheduled_for_1_s_cancel_it, formatClockTime(pendingStartAtMillis))
+                : getString(R.string.screen_a_focus_session_is_scheduled_cancel_it);
 
         new AlertDialog.Builder(requireActivity())
-                .setTitle("Cancel Scheduled Session")
+                .setTitle(getString(R.string.screen_cancel_scheduled_session))
                 .setMessage(message)
-                .setPositiveButton("Cancel Session", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.screen_cancel_session), (dialog, which) -> {
                     ManualStartDelayScheduler.cancelPendingSession(requireContext());
                     updateLockButtonState();
-                    Toast.makeText(requireContext(), "Scheduled session cancelled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.screen_scheduled_session_cancelled), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Keep", null)
+                .setNegativeButton(getString(R.string.screen_keep), null)
                 .show();
     }
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_disclosure_title">Acessibilidade para bloquear apps</string>
+    <string name="accessibility_disclosure_message">Durante uma sessão, o ZenLock usa o Serviço de Acessibilidade do Android para detectar qual app e tela estão abertos, além de eventos de interação, como toques. Isso permite que o ZenLock mostre a tela de bloqueio ao abrir um app bloqueado e mantenha os apps permitidos disponíveis.\n\nAs estatísticas de acesso a apps são armazenadas no seu dispositivo para as Estatísticas. O ZenLock não lê o conteúdo de mensagens nem textos digitados, nem envia esses dados de acessibilidade aos seus servidores.\n\nVocê concorda com esse uso?</string>
+    <string name="accessibility_disclosure_agree">Concordar e abrir configurações</string>
+    <string name="accessibility_disclosure_decline">Agora não</string>
+    <string name="accessibility_settings_hint">Ative o ZenLock na lista</string>
+    <string name="allowed_apps_title">Apps permitidos</string>
+    <string name="save_allowed_apps">Salvar apps · %1$d/%2$d</string>
+    <string name="remove_allowed_app">Remover %1$s</string>
+    <string name="search_allowed_apps">Buscar apps</string>
+    <string name="close_app_search">Fechar busca</string>
+    <string name="allowed_apps_saved">Apps permitidos atualizados</string>
+    <string name="allowed_apps_summary">Escolha até 8 apps adicionais para usar durante as sessões de foco.</string>
+    <string name="cannot_open_app">Não foi possível abrir %1$s</string>
+    <string name="show_allowed_apps">Mostrar apps permitidos</string>
+    <string name="hide_allowed_apps">Ocultar apps permitidos</string>
+    <string name="schedule_future_time">Escolha um horário futuro para um agendamento único.</string>
+    <string name="unlock_accessible_wait">Iniciar espera de um segundo para desbloquear. Ative novamente para cancelar.</string>
+    <string name="play_store_sms_note"><![CDATA[Indisponível na versão da Play Store devido à política de SMS do Google. Baixe o APK no <a href="https://github.com/HumbleBee14/ZenLock/releases/latest">GitHub</a>.]]></string>
+    <string name="scroll_allowed_apps_left">Rolar apps permitidos para a esquerda</string>
+    <string name="scroll_allowed_apps_right">Rolar apps permitidos para a direita</string>
+    <string name="permission_optional">Opcional</string>
+    <string name="focus_preparing">Preparando sua sessão de foco…</string>
+    <string name="focus_checking_setup">Verificando sua configuração</string>
+    <string name="show_pin">Mostrar PIN</string>
+    <string name="hide_pin">Ocultar PIN</string>
+    <string name="settings_section_unlock">Desbloqueio</string>
+    <string name="settings_section_reliability">Confiabilidade</string>
+    <string name="settings_section_lock_screen">Tela de bloqueio</string>
+    <string name="settings_section_about">Sobre</string>
+    <string name="settings_default_apps_title">Apps permitidos por padrão</string>
+    <string name="settings_default_apps_summary">Escolha quais apps integrados ficam disponíveis</string>
+    <string name="settings_block_notifications_title">Bloquear notificações</string>
+    <string name="settings_block_notifications_summary">Silenciar notificações de apps bloqueados</string>
+    <string name="settings_pin_title">Desbloqueio por PIN</string>
+    <string name="settings_pin_summary">Encerre uma sessão antes do fim com seu PIN</string>
+    <string name="settings_partner_title">Parceiro de compromisso</string>
+    <string name="settings_partner_summary">Peça um código de desbloqueio ao seu parceiro</string>
+    <string name="settings_battery_title">Bateria sem restrições</string>
+    <string name="settings_battery_summary">Ajude as sessões agendadas a iniciar corretamente</string>
+    <string name="settings_reboot_title">Retomar após reiniciar</string>
+    <string name="settings_reboot_summary">Continue uma sessão ativa após reiniciar</string>
+    <string name="settings_permissions_title">Permissões</string>
+    <string name="settings_permissions_summary">Revise os acessos usados por cada recurso</string>
+    <string name="settings_notification_title">Notificação da sessão</string>
+    <string name="settings_notification_summary">Mantenha os detalhes da sessão no painel de notificações</string>
+    <string name="settings_home_title">Permitir tela inicial</string>
+    <string name="settings_home_summary">Permita o iniciador durante uma sessão de foco</string>
+    <string name="settings_clear_pin">Apagar PIN salvo</string>
+    <string name="lock_until_period_action">%1$s. Mudar para %2$s</string>
+    <string name="lock_until_today">Hoje · %1$s</string>
+    <string name="lock_until_tomorrow">Amanhã · %1$s</string>
+    <string name="settings_appearance">Aparência</string>
+    <string name="settings_theme">Tema</string>
+    <string-array name="theme_choices">
+        <item>Seguir o celular</item>
+        <item>Claro</item>
+        <item>Escuro</item>
+    </string-array>
+    <string name="schedule_list_heading">Seus agendamentos</string>
+    <string name="schedule_empty_hint">Comece com uma rotina abaixo ou crie a sua.</string>
+    <string name="schedule_none_upcoming">Nenhuma sessão futura</string>
+    <string name="schedule_none_upcoming_hint">Ative um agendamento ou crie um novo para planejar sua próxima sessão de foco.</string>
+    <string name="schedule_enabled">Ativado</string>
+    <string name="schedule_paused">Pausado</string>
+    <string name="insights_usage_title">Veja o uso do seu celular</string>
+    <string name="insights_usage_message">Ative o acesso ao uso para ver o tempo gasto em outros apps. Suas sessões de foco são registradas mesmo sem ele.</string>
+    <string name="insights_open_settings">Abrir configurações</string>
+    <string name="insights_not_now">Agora não</string>
+    <string name="insights_usage_banner">Uso do celular indisponível. Toque para ativar o acesso ao uso.</string>
+    <string name="blocked_app_notice">Este app não é permitido durante o foco.</string>
+    <string name="uninstall_protection_title">Impedir desinstalação</string>
+    <string name="uninstall_protection_summary">Opcional · Dificulta excluir o ZenLock por impulso.</string>
+    <string name="uninstall_protection_explanation">O ZenLock usa a administração do dispositivo apenas para continuar instalado. Não solicita acesso a senhas, bloqueio de tela ou apagamento de dados.</string>
+    <string name="uninstall_protection_admin_description">Mantém o ZenLock instalado.</string>
+    <string name="uninstall_protection_dialog_message">Mantém o ZenLock instalado enquanto você cria o hábito.\n\nUsa a permissão de administrador do dispositivo do Android.\n\nNão solicita acesso a senhas, bloqueio de tela ou apagamento de dados.</string>
+    <string name="uninstall_protection_continue">Confirmar</string>
+    <string name="uninstall_protection_disable_title">Desativar proteção contra desinstalação?</string>
+    <string name="uninstall_protection_disable_message">O ZenLock poderá ser desinstalado com um toque novamente. Mantenha a proteção se você costuma excluir o app quando fica difícil se concentrar.</string>
+    <string name="uninstall_protection_keep">Manter ativada</string>
+    <string name="uninstall_protection_disable">Desativar</string>
+    <string name="uninstall_protection_disable_warning">O ZenLock poderá ser desinstalado após desativar esta opção. Qualquer sessão de foco em andamento continuará.</string>
+    <string name="uninstall_protection_error">Não foi possível alterar a proteção contra desinstalação. Tente novamente.</string>
+</resources>

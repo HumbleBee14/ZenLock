@@ -63,8 +63,10 @@ public class PermissionSheet extends BottomSheetDialogFragment {
         rows = view.findViewById(R.id.permissionRows);
         continueButton = view.findViewById(R.id.permissionsContinue);
         if (request != null) {
-            title.setText(request.title);
-            continueButton.setText(request.actionLabel);
+            if (request.titleRes != 0) title.setText(request.titleRes);
+            else title.setText(request.title);
+            if (request.actionLabelRes != 0) continueButton.setText(request.actionLabelRes);
+            else continueButton.setText(request.actionLabel);
         }
         continueButton.setVisibility(resultKey == null ? View.GONE : View.VISIBLE);
         continueButton.setOnClickListener(v -> {

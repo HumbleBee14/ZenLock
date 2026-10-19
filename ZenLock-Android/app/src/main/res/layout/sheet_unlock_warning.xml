@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="No unlock method set"
+            android:text="@string/layout_no_unlock_method_set"
             android:textSize="17sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/textPrimary" />
@@ -46,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="You will stay locked until the timer ends. Add a PIN or partner in Settings to unlock early."
+        android:text="@string/layout_you_will_stay_locked_until_the_timer_ends_add_a_pin_or_par"
         android:textSize="12sp"
         android:textColor="@color/textSecondary" />
 
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginStart="-6dp"
-        android:text="Don't ask again"
+        android:text="@string/layout_don_t_ask_again"
         android:textSize="13sp"
         android:textColor="@color/textPrimary"
         app:buttonTint="@color/primaryLight" />
@@ -75,7 +75,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:text="@string/layout_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/unlockWarningProceed"
@@ -83,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minHeight="40dp"
-            android:text="Got it" />
+            android:text="@string/layout_got_it" />
 
     </LinearLayout>
 

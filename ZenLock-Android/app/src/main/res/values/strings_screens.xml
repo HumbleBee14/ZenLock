@@ -1,0 +1,166 @@
+<resources>
+    <string name="screen_quote_capacity">%1$d of %2$d</string>
+    <string name="screen_schedule_end_and_duration">– %1$s · %2$s</string>
+    <string name="screen_duration_focused">%1$s focused</string>
+    <string name="screen_a_focus_session_is_already_scheduled">A focus session is already scheduled.</string>
+    <string name="screen_a_focus_session_is_already_scheduled_for_1_s">A focus session is already scheduled for %1$s</string>
+    <string name="screen_a_focus_session_is_scheduled_cancel_it">A focus session is scheduled. Cancel it?</string>
+    <string name="screen_a_focus_session_is_scheduled_for_1_s_cancel_it">A focus session is scheduled for %1$s. Cancel it?</string>
+    <string name="screen_allow_anyway">Allow anyway</string>
+    <string name="screen_allow_home_screen">Allow home screen?</string>
+    <string name="screen_allow_usage_access_to_see_your_most_used_apps">Allow usage access to see your most used apps</string>
+    <string name="screen_ask_someone_you_trust_to_set_it_so_you_can_t_undo_it_on_a_whim">Ask someone you trust to set it so you can\'t undo it on a whim.</string>
+    <string name="screen_cancel">Cancel</string>
+    <string name="screen_cancel_scheduled_session">Cancel Scheduled Session</string>
+    <string name="screen_cancel_session">Cancel Session</string>
+    <string name="screen_cannot_exit_focus_mode">Cannot exit Focus Mode!</string>
+    <string name="screen_cannot_save_sms_configuration_without_sms_permission_please_grant_permission_first">Cannot save SMS configuration without SMS permission. Please grant permission first.</string>
+    <string name="screen_clock_time" translatable="false">%1$d:%2$02d %3$s</string>
+    <string name="screen_completed">Completed</string>
+    <string name="screen_configure">Configure</string>
+    <string name="screen_couldn_t_schedule_your_focus_session_yet">Couldn\'t schedule your focus session yet.</string>
+    <string name="screen_countdown_days_hours">in %1$dd %2$dh</string>
+    <string name="screen_countdown_hours_minutes">in %1$dh %2$dm</string>
+    <string name="screen_countdown_minutes">in %1$dm</string>
+    <string name="screen_create_anyway">Create anyway</string>
+    <string name="screen_daily">Daily</string>
+    <string name="screen_date_time">%1$s, %2$s</string>
+    <string name="screen_done">Done</string>
+    <string name="screen_duration_hours_minutes" translatable="false">%1$dh %2$dm</string>
+    <string name="screen_duration_hours_short" translatable="false">%1$dh</string>
+    <string name="screen_duration_minutes_short" translatable="false">%1$dm</string>
+    <string name="screen_duration_zero" translatable="false">0m</string>
+    <string name="screen_edit_schedule">Edit schedule</string>
+    <string name="screen_enable_anyway">Enable anyway</string>
+    <string name="screen_ends_at_1_s">Ends at %1$s</string>
+    <string name="screen_ends_tomorrow_at_1_s">Ends tomorrow at %1$s</string>
+    <string name="screen_enter_a_new_pin_twice_to_replace_the_current_one">Enter a new PIN twice to replace the current one.</string>
+    <string name="screen_enter_a_schedule_name">Enter a schedule name</string>
+    <string name="screen_enter_the_pin_in_both_fields">Enter the PIN in both fields</string>
+    <string name="screen_entering_zen_mode">🧘‍♂️ Entering ZEN Mode...</string>
+    <string name="screen_entering_zen_mode_plain">Entering ZEN Mode...</string>
+    <string name="screen_error">Error</string>
+    <string name="screen_error_loading_schedules_1_s">Error loading schedules: %1$s</string>
+    <string name="screen_focus">Focus</string>
+    <string name="screen_focus_h">Focus (h)</string>
+    <string name="screen_focus_scheduled">Focus Scheduled</string>
+    <string name="screen_focus_session">Focus Session</string>
+    <string name="screen_focus_session_starts_in_1_d_min">Focus session starts in %1$d min</string>
+    <string name="screen_get_started" translatable="false">Get started</string>
+    <string name="screen_got_it">Got it</string>
+    <string name="screen_grant_sms_permission">Grant SMS Permission</string>
+    <string name="screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_">Hi Dinesh! I\'d like to share some feedback about ZenLock:\n\nApp Version: %1$s\nAndroid Version: %2$s\nDevice: %3$s\n\nMy feedback:\n</string>
+    <string name="screen_hold_start_focus_to_begin">Hold Start Focus to begin</string>
+    <string name="screen_hold_to_begin_your_mindful_focus_session">Hold to begin your mindful focus session</string>
+    <string name="screen_installed">Installed</string>
+    <string name="screen_interrupted">Interrupted</string>
+    <string name="screen_keep">Keep</string>
+    <string name="screen_keep_off">Keep off</string>
+    <string name="screen_last_30_days">Last 30 days</string>
+    <string name="screen_last_7_days">Last 7 days</string>
+    <string name="screen_last_month">LAST MONTH</string>
+    <string name="screen_last_week">LAST WEEK</string>
+    <string name="screen_lock">Lock</string>
+    <string name="screen_lock_until">Lock until</string>
+    <string name="screen_long_session">Long Session</string>
+    <string name="screen_lunch_break">Lunch break</string>
+    <string name="screen_mobile_h">Mobile (h)</string>
+    <string name="screen_month">Month</string>
+    <string name="screen_monthly">Monthly</string>
+    <string name="screen_morning_deep_work">Morning deep work</string>
+    <string name="screen_new_quote">New quote</string>
+    <string name="screen_next" translatable="false">Next</string>
+    <string name="screen_no_data_yet">No data yet</string>
+    <string name="screen_no_email_app_found">No email app found.</string>
+    <string name="screen_no_sessions_yet_start_your_first_focus_session">No sessions yet. Start your first focus session!</string>
+    <string name="screen_no_usage_yet">No usage yet</string>
+    <string name="screen_not_recommended_reaching_the_launcher_makes_it_easy_to_slip_into_other_apps_mid_session">Not recommended. Reaching the launcher makes it easy to slip into other apps mid-session.</string>
+    <string name="screen_now">Now</string>
+    <string name="screen_once">Once</string>
+    <string name="screen_partial">Partial</string>
+    <string name="screen_partner_contact_disabled_successfully">Partner contact disabled successfully!</string>
+    <string name="screen_persistent_notification_when_focus_session_is_active">Persistent notification when focus session is active</string>
+    <string name="screen_pick_a_duration">Pick a duration</string>
+    <string name="screen_pick_a_later_lock_until_time_or_a_shorter_start_delay">Pick a later lock-until time or a shorter start delay.</string>
+    <string name="screen_pick_at_least_one_day">Pick at least one day</string>
+    <string name="screen_pin_must_be_4_digits">PIN must be 4 digits</string>
+    <string name="screen_pin_set">PIN set</string>
+    <string name="screen_pins_don_t_match">PINs don\'t match</string>
+    <string name="screen_please_enter_a_valid_country_code">Please enter a valid country code</string>
+    <string name="screen_please_enter_a_valid_country_code_e_g_1_44_91">Please enter a valid country code (e.g., +1, +44, +91)</string>
+    <string name="screen_please_enter_a_valid_phone_number">Please enter a valid phone number</string>
+    <string name="screen_please_enter_partner_phone_number_first">Please enter partner phone number first</string>
+    <string name="screen_please_enter_partner_s_phone_number">Please enter partner\'s phone number</string>
+    <string name="screen_please_select_a_lock_until_time">Please select a lock until time!</string>
+    <string name="screen_please_select_a_valid_lock_time">Please select a valid lock time!</string>
+    <string name="screen_preparing_your_zen_space">🌱 Preparing your zen space...</string>
+    <string name="screen_save">Save</string>
+    <string name="screen_schedule_activated_1_s">Schedule activated: %1$s</string>
+    <string name="screen_schedule_created_1_s">Schedule created: %1$s</string>
+    <string name="screen_schedule_created_and_activated_1_s">Schedule created and activated: %1$s</string>
+    <string name="screen_schedule_deactivated_1_s">Schedule deactivated: %1$s</string>
+    <string name="screen_schedule_deleted_1_s">Schedule deleted: %1$s</string>
+    <string name="screen_schedule_next_summary">%1$s · %2$s · %3$s</string>
+    <string name="screen_schedule_template_summary">%1$s · %2$s</string>
+    <string name="screen_schedule_updated_1_s">Schedule updated: %1$s</string>
+    <string name="screen_schedule_updated_and_activated_1_s">Schedule updated and activated: %1$s</string>
+    <string name="screen_scheduled_session_cancelled">Scheduled session cancelled</string>
+    <string name="screen_send_test_otp">Send Test OTP</string>
+    <string name="screen_set">Set</string>
+    <string name="screen_set_a_duration">Set a duration</string>
+    <string name="screen_set_duration">Set duration</string>
+    <string name="screen_sms_partner_contact_configured_successfully">SMS partner contact configured successfully!</string>
+    <string name="screen_sms_permission_declined_you_can_enable_it_later_in_settings">SMS permission declined. You can enable it later in settings.</string>
+    <string name="screen_sms_permission_denied_otp_functionality_will_not_work">SMS permission denied. OTP functionality will not work.</string>
+    <string name="screen_sms_permission_granted">SMS permission granted!</string>
+    <string name="screen_sms_permission_needed_tap_to_grant">SMS permission needed. Tap to grant.</string>
+    <string name="screen_start_delay_minutes">In %1$d min</string>
+    <string name="screen_start_focus">Start Focus</string>
+    <string name="screen_starts">Starts</string>
+    <string name="screen_starts_at">Starts at</string>
+    <string name="screen_starts_at_1_s_tap_to_cancel">Starts at %1$s (tap to cancel)</string>
+    <string name="screen_starts_in">Starts in</string>
+    <string name="screen_switch_to_duration_mode">Switch to duration mode</string>
+    <string name="screen_switch_to_lock_until_time">Switch to lock until time</string>
+    <string name="screen_system">System</string>
+    <string name="screen_tap_to_cancel">Tap to cancel</string>
+    <string name="screen_test_otp_sent_successfully_check_with_your_partner">Test OTP sent successfully! Check with your partner.</string>
+    <string name="screen_this_month">THIS MONTH</string>
+    <string name="screen_this_week">THIS WEEK</string>
+    <string name="screen_today">Today</string>
+    <string name="screen_today_1_s">Today, %1$s</string>
+    <string name="screen_tomorrow">Tomorrow</string>
+    <string name="screen_unable_to_open_browser_please_visit_github_com_sponsors_humblebee14">Unable to open browser. Please visit: github.com/sponsors/HumbleBee14</string>
+    <string name="screen_unable_to_open_email_app">Unable to open email app.</string>
+    <string name="screen_unlocked_via_1_s">Unlocked via %1$s</string>
+    <string name="screen_up_to_1_d_apps">Up to %1$d apps</string>
+    <string name="screen_update">Update</string>
+    <string name="screen_week">Week</string>
+    <string name="screen_weekdays">Weekdays</string>
+    <string name="screen_weekends">Weekends</string>
+    <string name="screen_weekly">Weekly</string>
+    <string name="screen_wind_down">Wind down</string>
+    <string name="screen_yesterday_1_s">Yesterday, %1$s</string>
+    <string name="screen_you_re_about_to_lock_for_1_s_are_you_sure">You\'re about to lock for %1$s. Are you sure?</string>
+    <string name="screen_zenlock_1_s">ZenLock %1$s</string>
+    <string name="screen_zenlock_active">ZenLock Active</string>
+    <string name="screen_zenlock_feedback_suggestions">ZenLock - Feedback &amp; Suggestions</string>
+    <string name="screen_zenlock_focus_session">ZenLock Focus Session</string>
+    <plurals name="screen_duration_minutes" translatable="false">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <!-- Bundled quotes are intentionally English. User quotes are never translated. -->
+    <string-array name="default_quotes" translatable="false">
+        <item>Focus on being productive instead of busy.</item>
+        <item>Don\'t watch the clock, do what it does. Keep going.</item>
+        <item>The way to get started is to quit talking and begin doing.</item>
+        <item>It always seems impossible until it\'s done.</item>
+        <item>The future depends on what you do today.</item>
+        <item>Your time is limited, don\'t waste it living someone else\'s life.</item>
+        <item>Success is not final, failure is not fatal: it is the courage to continue that counts.</item>
+        <item>The only limit to our realization of tomorrow is our doubts of today.</item>
+        <item>Focus on progress, not perfection.</item>
+        <item>The only person you are destined to become is the person you decide to be.</item>
+    </string-array>
+</resources>

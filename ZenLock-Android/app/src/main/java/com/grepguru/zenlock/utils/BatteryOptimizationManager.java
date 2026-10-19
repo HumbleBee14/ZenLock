@@ -1,5 +1,7 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
+import com.grepguru.zenlock.R;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -64,22 +66,17 @@ public class BatteryOptimizationManager {
         }
         prefs.edit().putLong(KEY_LAST_PROMPT, now).apply();
 
-        String message = "To make sure scheduled sessions start on time every day, "
-                + "ZenLock needs to be excluded from battery optimization.\n\n"
-                + "Without this, the system can put ZenLock to sleep after a day or two "
-                + "and your schedules will silently stop running.";
+        String message = AppLanguage.localizedContext(context).getString(R.string.background_to_make_sure_scheduled_sessions_start_on_time_every_day_zenlock_needs_to_be);
 
         if (isSamsungDevice()) {
-            message += "\n\nOn Samsung devices, also check Settings > Battery > "
-                    + "Background usage limits and make sure ZenLock is not in the "
-                    + "Sleeping apps list (add it to Never sleeping apps).";
+            message += AppLanguage.localizedContext(context).getString(R.string.background_on_samsung_devices_also_check_settings_battery_background_usage_limits_and);
         }
 
         new AlertDialog.Builder(context)
-                .setTitle("Keep schedules running")
+                .setTitle(AppLanguage.localizedContext(context).getString(R.string.background_keep_schedules_running))
                 .setMessage(message)
-                .setPositiveButton("Allow", (dialog, which) -> requestExemption(context))
-                .setNegativeButton("Not now", null)
+                .setPositiveButton(AppLanguage.localizedContext(context).getString(R.string.background_allow), (dialog, which) -> requestExemption(context))
+                .setNegativeButton(AppLanguage.localizedContext(context).getString(R.string.background_not_now_677), null)
                 .show();
     }
 }

@@ -1,5 +1,6 @@
 package com.grepguru.zenlock.utils;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
@@ -84,11 +85,11 @@ public class EnhancedUnlockManager {
         com.grepguru.zenlock.ui.Popups.size(currentDialog);
 
         if (!hasPin && !hasPartner) {
-            hint.setText("No unlock method set. Add a PIN or a partner in Settings.");
+            hint.setText(AppLanguage.localizedContext(context).getString(R.string.background_no_unlock_method_set_add_a_pin_or_a_partner_in_settings));
             chips.setVisibility(View.GONE);
             codeField.setVisibility(View.GONE);
             unlockButton.setVisibility(View.GONE);
-            cancelButton.setText("Close");
+            cancelButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_close));
         } else {
             chips.setVisibility(hasPin && hasPartner ? View.VISIBLE : View.GONE);
             pinChip.setOnClickListener(v -> selectMethod(UnlockMethod.PIN_UNLOCK, pinChip, partnerChip));
@@ -131,28 +132,28 @@ public class EnhancedUnlockManager {
         partnerRow.setVisibility(partner ? View.VISIBLE : View.GONE);
         errorText.setVisibility(View.GONE);
         pinInput.setText("");
-        pinInput.setHint(partner ? "Code" : "••••");
+        pinInput.setHint(partner ? AppLanguage.localizedContext(context).getString(R.string.background_code) : "••••");
         if (!partner) {
-            hint.setText("Enter your PIN.");
+            hint.setText(AppLanguage.localizedContext(context).getString(R.string.background_enter_your_pin));
             return;
         }
-        hint.setText("Your partner gets a code by SMS. Enter it here.");
+        hint.setText(AppLanguage.localizedContext(context).getString(R.string.background_your_partner_gets_a_code_by_sms_enter_it_here));
         refreshSendState();
     }
 
     private void refreshSendState() {
         if (!otpManager.hasSmsPermission()) {
-            sendCodeButton.setText("Allow SMS");
+            sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_allow_sms));
             sendCodeButton.setEnabled(true);
-            sendStatus.setText("SMS permission needed");
+            sendStatus.setText(AppLanguage.localizedContext(context).getString(R.string.background_sms_permission_needed));
         } else if (otpManager.hasValidOTP()) {
-            sendCodeButton.setText("Send again");
+            sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_send_again));
             sendCodeButton.setEnabled(true);
-            sendStatus.setText("Code sent · valid " + remainingMinutes() + " min");
+            sendStatus.setText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_code_sent_valid_1_d_min), remainingMinutes()));
         } else {
-            sendCodeButton.setText("Send code");
+            sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_send_code));
             sendCodeButton.setEnabled(true);
-            sendStatus.setText("Valid for 5 minutes");
+            sendStatus.setText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_valid_for_minutes), OTPManager.validityMinutes()));
         }
     }
 
@@ -162,34 +163,34 @@ public class EnhancedUnlockManager {
             return;
         }
         sendCodeButton.setEnabled(false);
-        sendCodeButton.setText("Sending");
+        sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_sending));
         boolean sent = otpManager.requestOTPFromPartner();
         if (sent) {
-            sendCodeButton.setText("Sent");
-            sendStatus.setText("Code sent · valid 5 min");
+            sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_sent));
+            sendStatus.setText(String.format(java.util.Locale.ROOT, AppLanguage.localizedContext(context).getString(R.string.background_code_sent_valid_1_d_min), OTPManager.validityMinutes()));
             handler.postDelayed(() -> {
                 if (currentDialog != null && currentDialog.isShowing()) refreshSendState();
             }, RESEND_DELAY_MS);
         } else {
             sendCodeButton.setEnabled(true);
-            sendCodeButton.setText("Send code");
-            sendStatus.setText("Could not send. Check partner settings.");
+            sendCodeButton.setText(AppLanguage.localizedContext(context).getString(R.string.background_send_code));
+            sendStatus.setText(AppLanguage.localizedContext(context).getString(R.string.background_could_not_send_check_partner_settings));
         }
     }
 
-    private String remainingMinutes() {
+    private long remainingMinutes() {
         long remaining = otpManager.getRemainingOTPTime();
-        return String.valueOf(Math.max(1, (remaining + 59_000) / 60_000));
+        return Math.max(1, (remaining + 59_000) / 60_000);
     }
 
     private boolean validate(String entered) {
-        if (entered.length() != 4) return fail("Enter the 4 digits.");
+        if (entered.length() != 4) return fail(AppLanguage.localizedContext(context).getString(R.string.background_enter_the_4_digits));
         if (method == UnlockMethod.PIN_UNLOCK) {
             String pin = PinUnlock.activePin(context);
-            if (pin.isEmpty()) return fail("PIN not set.");
-            return pin.equals(entered) || fail("Wrong PIN.");
+            if (pin.isEmpty()) return fail(AppLanguage.localizedContext(context).getString(R.string.background_pin_not_set));
+            return pin.equals(entered) || fail(AppLanguage.localizedContext(context).getString(R.string.background_wrong_pin));
         }
-        return otpManager.verifyOTP(entered) || fail("Wrong or expired code.");
+        return otpManager.verifyOTP(entered) || fail(AppLanguage.localizedContext(context).getString(R.string.background_wrong_or_expired_code));
     }
 
     private boolean fail(String message) {

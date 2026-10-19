@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="Permissions"
+        android:text="@string/settings_permissions_title"
         android:textSize="17sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textPrimary" />
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Needed for ZenLock to work seamlessly"
+        android:text="@string/layout_needed_for_zenlock_to_work_seamlessly"
         android:textSize="11sp"
         android:textColor="@color/textSecondary" />
 
@@ -49,7 +49,7 @@
         android:minHeight="40dp"
         android:layout_gravity="end"
         android:layout_marginTop="10dp"
-        android:text="Continue"
+        android:text="@string/layout_continue"
         app:icon="@drawable/ic_arrow_forward"
         app:iconGravity="textEnd"
         app:iconSize="18dp" />

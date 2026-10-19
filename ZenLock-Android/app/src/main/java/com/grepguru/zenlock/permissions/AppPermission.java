@@ -1,5 +1,6 @@
 package com.grepguru.zenlock.permissions;
 
+import com.grepguru.zenlock.ui.AppLanguage;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +21,7 @@ import com.grepguru.zenlock.utils.UsageStatsPermissionManager;
 import android.accessibilityservice.AccessibilityServiceInfo;
 
 public enum AppPermission {
-    ACCESSIBILITY("Accessibility service", "Closes blocked apps during a session", R.drawable.ic_accessibility) {
+    ACCESSIBILITY(R.string.permission_accessibility_title, R.string.permission_accessibility_reason, R.drawable.ic_accessibility) {
         @Override
         public boolean isGranted(Context context) {
             AccessibilityManager manager = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -36,7 +37,7 @@ public enum AppPermission {
             AccessibilityDisclosureDialog.show((androidx.fragment.app.FragmentActivity) activity);
         }
     },
-    OVERLAY("Display over other apps", "Shows the lock screen over blocked apps", R.drawable.ic_overlay) {
+    OVERLAY(R.string.permission_overlay_title, R.string.permission_overlay_reason, R.drawable.ic_overlay) {
         @Override
         public boolean isGranted(Context context) {
             return Settings.canDrawOverlays(context);
@@ -47,7 +48,7 @@ public enum AppPermission {
             open(activity, packageIntent(activity, Settings.ACTION_MANAGE_OVERLAY_PERMISSION), null);
         }
     },
-    NOTIFICATION_ACCESS("Notification access", "Hides notifications from blocked apps", R.drawable.ic_message) {
+    NOTIFICATION_ACCESS(R.string.permission_notification_access_title, R.string.permission_notification_access_reason, R.drawable.ic_message) {
         @Override
         public boolean isGranted(Context context) {
             String listeners = Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
@@ -56,10 +57,10 @@ public enum AppPermission {
 
         @Override
         public void request(Activity activity) {
-            open(activity, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), "Turn on ZenLock in the list");
+            open(activity, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), AppLanguage.localizedContext(activity).getString(R.string.background_turn_on_zenlock_in_the_list));
         }
     },
-    EXACT_ALARM("Exact alarms", "Starts schedules on time", R.drawable.ic_alarm) {
+    EXACT_ALARM(R.string.permission_exact_alarm_title, R.string.permission_exact_alarm_reason, R.drawable.ic_alarm) {
         @Override
         public boolean appliesTo(Context context) {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
@@ -75,7 +76,7 @@ public enum AppPermission {
             open(activity, packageIntent(activity, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM), null);
         }
     },
-    UNRESTRICTED_BATTERY("Unrestricted battery", "Keeps schedules running while asleep", R.drawable.ic_battery_protect) {
+    UNRESTRICTED_BATTERY(R.string.permission_unrestricted_battery_title, R.string.permission_unrestricted_battery_reason, R.drawable.ic_battery_protect) {
         @Override
         public boolean isGranted(Context context) {
             return BatteryOptimizationManager.isExempt(context);
@@ -86,7 +87,7 @@ public enum AppPermission {
             BatteryOptimizationManager.requestExemption(activity);
         }
     },
-    USAGE_ACCESS("Usage access", "Shows phone usage in Insights", R.drawable.ic_usage_new) {
+    USAGE_ACCESS(R.string.permission_usage_access_title, R.string.permission_usage_access_reason, R.drawable.ic_usage_new) {
         @Override
         public boolean isGranted(Context context) {
             return UsageStatsPermissionManager.hasUsageStatsPermission(context);
@@ -94,10 +95,10 @@ public enum AppPermission {
 
         @Override
         public void request(Activity activity) {
-            open(activity, new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), "Turn on ZenLock in the list");
+            open(activity, new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), AppLanguage.localizedContext(activity).getString(R.string.background_turn_on_zenlock_in_the_list));
         }
     },
-    XIAOMI_BACKGROUND_POPUP("Background pop-ups", "Opens the lock screen from the background", R.drawable.ic_overlay) {
+    XIAOMI_BACKGROUND_POPUP(R.string.permission_xiaomi_background_popup_title, R.string.permission_xiaomi_background_popup_reason, R.drawable.ic_overlay) {
         @Override
         public boolean appliesTo(Context context) {
             return MiuiUtils.isXiaomiDevice();
@@ -111,16 +112,16 @@ public enum AppPermission {
         @Override
         public void request(Activity activity) {
             MiuiUtils.openMiuiPermissionEditor(activity);
-            Toast.makeText(activity, "Allow 'Display pop-up windows while running in background'", Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, AppLanguage.localizedContext(activity).getString(R.string.background_allow_display_pop_up_windows_while_running_in_background), Toast.LENGTH_LONG).show();
         }
     };
 
-    public final String title;
-    public final String reason;
+    public final int title;
+    public final int reason;
     @DrawableRes
     public final int icon;
 
-    AppPermission(String title, String reason, @DrawableRes int icon) {
+    AppPermission(int title, int reason, @DrawableRes int icon) {
         this.title = title;
         this.reason = reason;
         this.icon = icon;
@@ -145,7 +146,7 @@ public enum AppPermission {
             activity.startActivity(intent);
             if (hint != null) Toast.makeText(activity, hint, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(activity, "Couldn't open Settings", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, AppLanguage.localizedContext(activity).getString(R.string.background_couldn_t_open_settings), Toast.LENGTH_SHORT).show();
         }
     }
 }

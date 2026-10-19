@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_focus">Focus</string>
+    <string name="layout_00_25" translatable="false">00:25</string>
+    <string name="layout_ends_at_10_30_am">Ends at 10:30 AM</string>
+    <string name="layout_stay_focused_stay_productive">Stay focused, stay productive!</string>
+    <string name="layout_show_unlock_options">Show unlock options</string>
+    <string name="layout_extend">Extend</string>
+    <string name="layout_enter_4_digit_pin">Enter 4-digit PIN</string>
+    <string name="layout_confirm_unlock">Confirm Unlock</string>
+    <string name="layout_no_apps_allowed">No apps allowed</string>
+    <string name="layout_partner">Partner</string>
+    <string name="layout_sms_contact">SMS Contact</string>
+    <string name="layout_1" translatable="false">+1</string>
+    <string name="layout_phone_number">Phone number</string>
+    <string name="layout_send_test_otp">Send Test OTP</string>
+    <string name="partner_sms_validity_note">SMS charges apply. Codes stay valid for %1$d minutes.</string>
+    <string name="layout_save">Save</string>
+    <string name="layout_next" translatable="false">Next</string>
+    <string name="layout_search_apps">Search apps...</string>
+    <string name="layout_loading_apps">Loading apps</string>
+    <string name="layout_new_schedule">New schedule</string>
+    <string name="layout_schedule_name">Schedule name</string>
+    <string name="layout_starts">Starts</string>
+    <string name="layout_9_00_am" translatable="false">9:00 AM</string>
+    <string name="layout_duration">Duration</string>
+    <string name="layout_set_duration">Set duration</string>
+    <string name="layout_repeat">Repeat</string>
+    <string name="layout_once">Once</string>
+    <string name="layout_daily">Daily</string>
+    <string name="layout_weekly">Weekly</string>
+    <string name="layout_s">S</string>
+    <string name="layout_m">M</string>
+    <string name="layout_t">T</string>
+    <string name="layout_w">W</string>
+    <string name="layout_f">F</string>
+    <string name="layout_notify_before">Notify before</string>
+    <string name="layout_1m" translatable="false">1m</string>
+    <string name="layout_2m" translatable="false">2m</string>
+    <string name="layout_3m" translatable="false">3m</string>
+    <string name="layout_5m" translatable="false">5m</string>
+    <string name="layout_10m" translatable="false">10m</string>
+    <string name="layout_cancel">Cancel</string>
+    <string name="layout_create">Create</string>
+    <string name="layout_h">h</string>
+    <string name="layout_m_2">m</string>
+    <string name="layout_set">Set</string>
+    <string name="layout_15m" translatable="false">15m</string>
+    <string name="layout_30m" translatable="false">30m</string>
+    <string name="layout_1h" translatable="false">1h</string>
+    <string name="layout_dialog_extend" translatable="false">+</string>
+    <string name="layout_enjoying_zenlock">Enjoying ZenLock?</string>
+    <string name="layout_it_s_a_small_labor_of_love_na_few_words_from_you_mean_the_">It\'s a small labor of love.\nA few words from you mean the world.</string>
+    <string name="layout_rate_on_play_store">Rate on Play Store</string>
+    <string name="layout_maybe_later">Maybe later</string>
+    <string name="layout_allow_sms">Allow SMS</string>
+    <string name="layout_zenlock_texts_a_one_time_unlock_code_to_your_partner_only_">ZenLock texts a one-time unlock code to your partner, only when you ask to end a session early.</string>
+    <string name="layout_it_never_reads_your_messages_or_shares_your_data_carrier_s">It never reads your messages or shares your data. Carrier SMS charges may apply.</string>
+    <string name="layout_allow">Allow</string>
+    <string name="layout_set_focus_duration">Set Focus Duration</string>
+    <string name="layout_hours" translatable="false">Hours</string>
+    <string name="layout_minutes" translatable="false">Minutes</string>
+    <string name="layout_set_pin">Set PIN</string>
+    <string name="layout_pin">PIN</string>
+    <string name="layout_enter_your_pin">Enter your PIN.</string>
+    <string name="layout_send_code">Send code</string>
+    <string name="layout_dialog_unlock" translatable="false">••••</string>
+    <string name="layout_toggle_pin_visibility">Toggle PIN visibility</string>
+    <string name="layout_insights">Insights</string>
+    <string name="layout_today_s_focus">Today\'s Focus</string>
+    <string name="layout_0" translatable="false">0</string>
+    <string name="layout_focus_time">FOCUS TIME</string>
+    <string name="layout_phone_usage">PHONE USAGE</string>
+    <string name="layout_sessions">SESSIONS</string>
+    <string name="layout_focus_time_2">Focus Time</string>
+    <string name="layout_fragment_analytics" translatable="false">--</string>
+    <string name="layout_0m" translatable="false">0m</string>
+    <string name="layout_this_week">THIS WEEK</string>
+    <string name="layout_last_week">LAST WEEK</string>
+    <string name="layout_phone_usage_2">Phone Usage</string>
+    <string name="layout_last_7_days">Last 7 days</string>
+    <string name="layout_most_used_apps">Most Used Apps</string>
+    <string name="layout_no_usage_yet">No usage yet</string>
+    <string name="layout_recent_sessions">Recent Sessions</string>
+    <string name="layout_complete_your_first_session_to_see_history_here">Complete your first session to see history here</string>
+    <string name="layout_time_to_focus">Time to focus</string>
+    <string name="layout_00_30" translatable="false">00:30</string>
+    <string name="layout_hours_minutes" translatable="false">hours : minutes</string>
+    <string name="layout_fragment_home" translatable="false">−</string>
+    <string name="layout_15m_2" translatable="false">+15m</string>
+    <string name="layout_30m_2" translatable="false">+30m</string>
+    <string name="layout_1h_2" translatable="false">+1h</string>
+    <string name="layout_fragment_home_2" translatable="false">:</string>
+    <string name="layout_am" translatable="false">AM</string>
+    <string name="layout_switch_to_lock_until_time">Switch to lock until time</string>
+    <string name="layout_now">Now</string>
+    <string name="layout_start_focus">Start Focus</string>
+    <string name="layout_schedule">Schedule</string>
+    <string name="layout_up_next">UP NEXT</string>
+    <string name="layout_nothing_scheduled">Nothing scheduled</string>
+    <string name="layout_in_14h_22m">in 14h 22m</string>
+    <string name="layout_tomorrow_9_00_am_1h_30m">Tomorrow · 9:00 AM · 1h 30m</string>
+    <string name="layout_settings">Settings</string>
+    <string name="layout_allowed_apps">Allowed Apps</string>
+    <string name="layout_phone">Phone</string>
+    <string name="layout_calendar">Calendar</string>
+    <string name="layout_clock">Clock</string>
+    <string name="layout_clear">Clear</string>
+    <string name="layout_partner_contact">Partner Contact</string>
+    <string name="layout_configure">Configure</string>
+    <string name="layout_no_unlock_method_set_you_stay_locked_until_the_timer_ends">No unlock method set. You stay locked until the timer ends.</string>
+    <string name="layout_motivational_quotes">Motivational Quotes</string>
+    <string name="layout_add_quote">Add quote</string>
+    <string name="layout_circular_timer">Circular Timer</string>
+    <string name="layout_vibration_feedback">Vibration Feedback</string>
+    <string name="layout_support_the_developer">Support the Developer</string>
+    <string name="layout_send_feedback">Send Feedback</string>
+    <string name="layout_free_and_open_source_built_to_help_people_focus_your_feedb">Free and open source, built to help people focus. Your feedback and support keep it going.</string>
+    <string name="layout_app_name">App Name</string>
+    <string name="layout_enable">Enable</string>
+    <string name="layout_granted">Granted</string>
+    <string name="layout_remove">Remove</string>
+    <string name="layout_morning_focus">Morning Focus</string>
+    <string name="layout_10_30_am_1h_30m" translatable="false">– 10:30 AM · 1h 30m</string>
+    <string name="layout_edit">Edit</string>
+    <string name="layout_delete">Delete</string>
+    <string name="layout_needed_for_zenlock_to_work_seamlessly">Needed for ZenLock to work seamlessly</string>
+    <string name="layout_continue">Continue</string>
+    <string name="layout_new_quote">New quote</string>
+    <string name="layout_add">Add</string>
+    <string name="layout_no_unlock_method_set">No unlock method set</string>
+    <string name="layout_you_will_stay_locked_until_the_timer_ends_add_a_pin_or_par">You will stay locked until the timer ends. Add a PIN or partner in Settings to unlock early.</string>
+    <string name="layout_don_t_ask_again">Don\'t ask again</string>
+    <string name="layout_got_it">Got it</string>
+    <string name="layout_where_attention_goes" translatable="false">Where attention goes</string>
+    <string name="layout_96" translatable="false">96</string>
+    <string name="layout_times_a_day_the_average_person_checks_their_phone_about_on" translatable="false">times a day the average person checks their phone. About once every ten minutes.</string>
+    <string name="layout_47_sec" translatable="false">47 sec</string>
+    <string name="layout_average_attention_on_one_screen_before_switching_it_was_2_" translatable="false">average attention on one screen before switching. It was 2½ minutes twenty years ago.</string>
+    <string name="layout_23_min" translatable="false">23 min</string>
+    <string name="layout_to_get_fully_back_into_deep_work_after_a_single_interrupti" translatable="false">to get fully back into deep work after a single interruption.</string>
+    <string name="layout_40_days" translatable="false">40+ days</string>
+    <string name="layout_a_year_spent_looking_at_a_phone_at_today_s_average_of_over" translatable="false">a year spent looking at a phone, at today\'s average of over three hours a day.</string>
+    <string name="layout_focus_your_way" translatable="false">Focus, your way</string>
+    <string name="layout_everything_you_need_nothing_that_pulls_you_back" translatable="false">Everything you need. Nothing that pulls you back.</string>
+    <string name="layout_lock_it" translatable="false">Lock it</string>
+    <string name="layout_for_25_minutes_or_every_weekday_morning_on_a_schedule" translatable="false">For 25 minutes, or every weekday morning on a schedule.</string>
+    <string name="layout_essentials_stay" translatable="false">Essentials stay</string>
+    <string name="layout_phone_clock_and_calendar_plus_up_to_8_apps_you_pick" translatable="false">Phone, Clock and Calendar, plus up to 8 apps you pick.</string>
+    <string name="layout_no_easy_exit" translatable="false">No easy exit</string>
+    <string name="layout_a_pin_or_a_trusted_partner_decides_when_you_end_early" translatable="false">A PIN or a trusted partner decides when you end early.</string>
+    <string name="layout_free_always" translatable="false">Free, always</string>
+    <string name="layout_open_source_no_ads_no_tracking_no_upsell" translatable="false">Open source. No ads, no tracking, no upsell.</string>
+    <string name="layout_put_the_phone_down_keep_the_day" translatable="false">Put the phone down. Keep the day.</string>
+    <string name="layout_zen_mode_progress_overlay" translatable="false">🧘‍♂️</string>
+    <string name="layout_entering_zen_mode">Entering ZEN Mode...</string>
+    <string name="layout_hold_to_begin_your_mindful_focus_session">Hold to begin your mindful focus session</string>
+    <string name="layout_lock">Lock</string>
+</resources>

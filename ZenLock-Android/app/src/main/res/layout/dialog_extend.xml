@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Extend"
+        android:text="@string/layout_extend"
         android:textSize="19sp"
         android:fontFamily="sans-serif-medium"
         android:textColor="@color/textPrimary" />
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="15m" />
+            android:text="@string/layout_15m" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/extend30Chip"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="30m" />
+            android:text="@string/layout_30m" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/extend60Chip"
@@ -51,14 +51,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="1h" />
+            android:text="@string/layout_1h" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/extendCustomChip"
             style="@style/ZenChip"
             android:layout_width="52dp"
             android:layout_height="wrap_content"
-            android:text="+"
+            android:text="@string/layout_dialog_extend"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -83,7 +83,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="h"
+            android:text="@string/layout_h"
             android:textSize="15sp"
             android:textColor="@color/textSecondary"
             android:layout_marginEnd="16dp" />
@@ -98,7 +98,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="m"
+            android:text="@string/layout_m_2"
             android:textSize="15sp"
             android:textColor="@color/textSecondary" />
 
@@ -118,7 +118,7 @@
             android:layout_height="40dp"
             android:minHeight="40dp"
             android:layout_marginEnd="8dp"
-            android:text="Cancel" />
+            android:text="@string/layout_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/extendButton"
@@ -126,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minHeight="40dp"
-            android:text="Extend" />
+            android:text="@string/layout_extend" />
 
     </LinearLayout>
 

@@ -41,6 +41,25 @@ public class SettingsFragment extends Fragment {
     private SwitchCompat quotesToggle, circularTimerToggle, persistentNotificationToggle;
     private ImageView addQuoteButton;
 
+    private void setupLanguagePicker(View view) {
+        String[] tags = com.grepguru.zenlock.ui.AppLanguage.languageTags(requireContext());
+        String[] names = com.grepguru.zenlock.ui.AppLanguage.languageNames(requireContext());
+        String current = com.grepguru.zenlock.ui.AppLanguage.selectedTag(requireContext());
+        int selected = 0;
+        for (int i = 0; i < tags.length; i++) if (tags[i].equals(current)) selected = i;
+        ((TextView) view.findViewById(R.id.languageValue)).setText(names[selected]);
+        final int checked = selected;
+        view.findViewById(R.id.languageRow).setOnClickListener(v ->
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.change_language)
+                        .setSingleChoiceItems(names, checked, (dialog, which) -> {
+                            dialog.dismiss();
+                            com.grepguru.zenlock.ui.AppLanguage.select(requireContext(), tags[which]);
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show());
+    }
+
     // Individual default app toggles
     private SwitchCompat phoneAppToggle, calendarAppToggle, clockAppToggle;
     
@@ -142,6 +161,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        setupLanguagePicker(view);
         String[] themes = getResources().getStringArray(R.array.theme_choices);
         TextView appearanceValue = view.findViewById(R.id.appearanceValue);
         appearanceValue.setText(themes[com.grepguru.zenlock.ui.ThemePreference.selectedIndex(requireContext())]);
@@ -252,9 +272,9 @@ public class SettingsFragment extends Fragment {
             }
             if (preferences.getBoolean("allow_launcher_during_lock", false)) return;
             allowLauncherToggle.setChecked(false);
-            ConfirmSheet.show(requireActivity(), "Allow home screen?",
-                    "Not recommended. Reaching the launcher makes it easy to slip into other apps mid-session.",
-                    "Keep off", "Allow anyway", () -> {
+            ConfirmSheet.show(requireActivity(), getString(R.string.screen_allow_home_screen),
+                    getString(R.string.screen_not_recommended_reaching_the_launcher_makes_it_easy_to_slip_into_other_apps_mid_session),
+                    getString(R.string.screen_keep_off), getString(R.string.screen_allow_anyway), () -> {
                         if (!isAdded()) return;
                         preferences.edit().putBoolean("allow_launcher_during_lock", true).apply();
                         allowLauncherToggle.setChecked(true);
@@ -265,7 +285,7 @@ public class SettingsFragment extends Fragment {
         try {
             String versionName = requireContext().getPackageManager()
                     .getPackageInfo(requireContext().getPackageName(), 0).versionName;
-            versionText.setText("ZenLock " + versionName);
+            versionText.setText(getString(R.string.screen_zenlock_1_s, versionName));
         } catch (Exception e) {
             versionText.setVisibility(View.GONE);
         }
@@ -391,7 +411,7 @@ public class SettingsFragment extends Fragment {
         partnerUnlockToggle.setChecked(partnerConfigured);
         partnerConfigSection.setVisibility(partnerConfigured ? View.VISIBLE : View.GONE);
         
-        partnerConfigValue.setText(partnerConfigured ? "Update" : "Configure");
+        partnerConfigValue.setText(partnerConfigured ? getString(R.string.screen_update) : getString(R.string.screen_configure));
         
         // Show/hide warning message based on unlock method availability
         boolean hasAnyUnlockMethod = pinConfigured || partnerConfigured;
@@ -506,9 +526,9 @@ public class SettingsFragment extends Fragment {
         setupPinSetupInputWatcher(newPinInput, confirmPinInput, pinStatusText);
 
         if (PinUnlock.isConfigured(requireContext())) {
-            instructionText.setText("Enter a new PIN twice to replace the current one.");
+            instructionText.setText(getString(R.string.screen_enter_a_new_pin_twice_to_replace_the_current_one));
         } else {
-            instructionText.setText("Ask someone you trust to set it so you can't undo it on a whim.");
+            instructionText.setText(getString(R.string.screen_ask_someone_you_trust_to_set_it_so_you_can_t_undo_it_on_a_whim));
         }
 
         dialogView.findViewById(R.id.pinCancelButton).setOnClickListener(v -> dialog.dismiss());
@@ -519,7 +539,7 @@ public class SettingsFragment extends Fragment {
                 PinUnlock.save(requireContext(), newPin);
                 updateUnlockMethodStates();
                 dialog.dismiss();
-                Toast.makeText(requireContext(), "PIN set", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.screen_pin_set), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -552,17 +572,17 @@ public class SettingsFragment extends Fragment {
     
     private boolean validatePinSetup(String newPin, String confirmPin, EditText newPinInput, EditText confirmPinInput, TextView statusText) {
         if (newPin.isEmpty() || confirmPin.isEmpty()) {
-            showPinSetupError("Enter the PIN in both fields", newPinInput, confirmPinInput, statusText);
+            showPinSetupError(getString(R.string.screen_enter_the_pin_in_both_fields), newPinInput, confirmPinInput, statusText);
             return false;
         }
         
         if (newPin.length() != 4 || !newPin.matches("\\d{4}")) {
-            showPinSetupError("PIN must be 4 digits", newPinInput, confirmPinInput, statusText);
+            showPinSetupError(getString(R.string.screen_pin_must_be_4_digits), newPinInput, confirmPinInput, statusText);
             return false;
         }
         
         if (!newPin.equals(confirmPin)) {
-            showPinSetupError("PINs don't match", newPinInput, confirmPinInput, statusText);
+            showPinSetupError(getString(R.string.screen_pins_don_t_match), newPinInput, confirmPinInput, statusText);
             return false;
         }
         
@@ -595,21 +615,17 @@ public class SettingsFragment extends Fragment {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
             emailIntent.setData(Uri.parse("mailto:")); // Only email apps can handle this
             emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"idineshy@gmail.com"});
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "ZenLock - Feedback & Suggestions");
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.screen_zenlock_feedback_suggestions));
             emailIntent.putExtra(Intent.EXTRA_TEXT, 
-                "Hi Dinesh! I'd like to share some feedback about ZenLock:\n\n" +
-                "App Version: " + appVersion + "\n" +
-                "Android Version: " + android.os.Build.VERSION.RELEASE + "\n" +
-                "Device: " + android.os.Build.MODEL + "\n\n" +
-                "My feedback:\n");
+                getString(R.string.screen_hi_dinesh_i_d_like_to_share_some_feedback_about_zenlock_app_version_1_s_android_version_2_, appVersion, android.os.Build.VERSION.RELEASE, android.os.Build.MODEL));
             
             if (emailIntent.resolveActivity(requireContext().getPackageManager()) != null) {
                 startActivity(emailIntent); // No chooser needed since only email apps will show
             } else {
-                Toast.makeText(getContext(), "No email app found.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), getString(R.string.screen_no_email_app_found), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Unable to open email app.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), getString(R.string.screen_unable_to_open_email_app), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -622,7 +638,7 @@ public class SettingsFragment extends Fragment {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supportUrl));
             startActivity(browserIntent);
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Unable to open browser. Please visit: github.com/sponsors/HumbleBee14", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), getString(R.string.screen_unable_to_open_browser_please_visit_github_com_sponsors_humblebee14), Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Focus, your way"
+        android:text="@string/layout_focus_your_way"
         android:textSize="30sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif"
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="16dp"
-        android:text="Everything you need. Nothing that pulls you back."
+        android:text="@string/layout_everything_you_need_nothing_that_pulls_you_back"
         android:textSize="14sp"
         android:gravity="center"
         android:textColor="@color/textSecondary" />
@@ -47,11 +47,11 @@
 
             <TextView
                 style="@style/Zen.FeatureTitle"
-                android:text="Lock it" />
+                android:text="@string/layout_lock_it" />
 
             <TextView
                 style="@style/Zen.FeatureText"
-                android:text="For 25 minutes, or every weekday morning on a schedule." />
+                android:text="@string/layout_for_25_minutes_or_every_weekday_morning_on_a_schedule" />
 
         </LinearLayout>
 
@@ -69,11 +69,11 @@
 
             <TextView
                 style="@style/Zen.FeatureTitle"
-                android:text="Essentials stay" />
+                android:text="@string/layout_essentials_stay" />
 
             <TextView
                 style="@style/Zen.FeatureText"
-                android:text="Phone, Clock and Calendar, plus up to 8 apps you pick." />
+                android:text="@string/layout_phone_clock_and_calendar_plus_up_to_8_apps_you_pick" />
 
         </LinearLayout>
 
@@ -99,11 +99,11 @@
 
             <TextView
                 style="@style/Zen.FeatureTitle"
-                android:text="No easy exit" />
+                android:text="@string/layout_no_easy_exit" />
 
             <TextView
                 style="@style/Zen.FeatureText"
-                android:text="A PIN or a trusted partner decides when you end early." />
+                android:text="@string/layout_a_pin_or_a_trusted_partner_decides_when_you_end_early" />
 
         </LinearLayout>
 
@@ -121,11 +121,11 @@
 
             <TextView
                 style="@style/Zen.FeatureTitle"
-                android:text="Free, always" />
+                android:text="@string/layout_free_always" />
 
             <TextView
                 style="@style/Zen.FeatureText"
-                android:text="Open source. No ads, no tracking, no upsell." />
+                android:text="@string/layout_open_source_no_ads_no_tracking_no_upsell" />
 
         </LinearLayout>
 

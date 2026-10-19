@@ -24,7 +24,7 @@
         android:id="@+id/welcomeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time to focus"
+        android:text="@string/layout_time_to_focus"
         style="@style/ModernText.PageTitle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,7 +79,7 @@
                     android:id="@+id/selectedTimeDisplay"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="00:30"
+                    android:text="@string/layout_00_30"
                     android:textSize="64sp"
                     android:textColor="@color/primary"
                     android:fontFamily="sans-serif"
@@ -94,7 +94,7 @@
                     android:id="@+id/durationModeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="hours : minutes"
+                    android:text="@string/layout_hours_minutes"
                     android:textSize="11sp"
                     android:textColor="@color/textTertiary"
                     android:fontFamily="sans-serif"
@@ -119,7 +119,7 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:text="−"
+                    android:text="@string/layout_fragment_home"
                     android:textSize="24sp"
                     android:textColor="@color/textPrimary"
                     app:cornerRadius="24dp"
@@ -129,7 +129,7 @@
                     app:rippleColor="@color/primaryLight"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="8dp"
                     android:padding="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"/>
@@ -138,7 +138,7 @@
                     android:id="@+id/preset15min"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:text="+15m"
+                    android:text="@string/layout_15m_2"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
                     app:chipBackgroundColor="@android:color/transparent"
@@ -152,7 +152,7 @@
                     android:id="@+id/preset30min"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:text="+30m"
+                    android:text="@string/layout_30m_2"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
                     app:chipBackgroundColor="@android:color/transparent"
@@ -166,7 +166,7 @@
                     android:id="@+id/preset60min"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:text="+1h"
+                    android:text="@string/layout_1h_2"
                     android:textColor="@color/textSecondary"
                     android:textSize="13sp"
                     app:chipBackgroundColor="@android:color/transparent"
@@ -181,7 +181,7 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:text="+"
+                    android:text="@string/layout_dialog_extend"
                     android:textSize="20sp"
                     android:textColor="@color/textPrimary"
                     app:cornerRadius="24dp"
@@ -191,7 +191,7 @@
                     app:rippleColor="@color/primaryLight"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="8dp"
                     android:padding="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"/>
@@ -217,7 +217,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hours"
+                        android:text="@string/layout_hours"
                         style="@style/ModernText.Caption"
                         android:layout_marginBottom="8dp"/>
 
@@ -239,7 +239,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Minutes"
+                        android:text="@string/layout_minutes"
                         style="@style/ModernText.Caption"
                         android:layout_marginBottom="8dp"/>
 
@@ -292,7 +292,7 @@
                     <TextView
                         android:layout_width="16dp"
                         android:layout_height="wrap_content"
-                        android:text=":"
+                        android:text="@string/layout_fragment_home_2"
                         android:gravity="center"
                         android:textSize="28sp"
                         android:textColor="@color/textPrimary"
@@ -324,7 +324,7 @@
                         android:minWidth="56dp"
                         android:layout_marginStart="8dp"
                         android:paddingHorizontal="10dp"
-                        android:text="AM"
+                        android:text="@string/layout_am"
                         android:textColor="@color/primaryLight"
                         app:cornerRadius="12dp"
                         app:strokeColor="@color/border" />
@@ -352,7 +352,7 @@
             android:src="@drawable/ic_schedule"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
-            android:contentDescription="Switch to lock until time"
+            android:contentDescription="@string/layout_switch_to_lock_until_time"
             android:scaleType="fitCenter"
             app:tint="@color/textSecondary"/>
 
@@ -382,7 +382,7 @@
                 android:id="@+id/startDelayLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Starts"
+                android:text="@string/layout_starts"
                 android:textColor="@color/textSecondary"
                 android:textSize="14sp" />
 
@@ -405,7 +405,7 @@
                     android:id="@+id/startDelayValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Now"
+                    android:text="@string/layout_now"
                     android:textColor="@color/textPrimary"
                     android:textSize="15sp"
                     android:fontFamily="sans-serif-medium" />
@@ -435,7 +435,7 @@
         android:minHeight="52dp"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
-        android:text="Start Focus"
+        android:text="@string/layout_start_focus"
         android:textSize="16sp"
         app:icon="@drawable/ic_lock"
         app:iconGravity="textStart"

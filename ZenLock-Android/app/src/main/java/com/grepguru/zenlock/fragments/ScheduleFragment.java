@@ -71,7 +71,6 @@ public class ScheduleFragment extends Fragment {
     private LinearLayout weekStrip;
     private final android.os.Handler ticker = new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable tick = this::refreshOverview;
-    private static final String[] DAY_LETTERS = {"S", "M", "T", "W", "T", "F", "S"};
     
     private static final String SCHEDULE_PERMISSION_RESULT = "schedule.permissions";
 
@@ -134,7 +133,7 @@ public class ScheduleFragment extends Fragment {
         for (int day = Calendar.MONDAY; day <= Calendar.MONDAY + 6; day++) {
             int dayOfWeek = ((day - 1) % 7) + 1;
             View item = inflater.inflate(R.layout.item_week_day, weekStrip, false);
-            ((TextView) item.findViewById(R.id.dayLabel)).setText(DAY_LETTERS[dayOfWeek - 1]);
+            ((TextView) item.findViewById(R.id.dayLabel)).setText(new java.text.DateFormatSymbols(getResources().getConfiguration().getLocales().get(0)).getShortWeekdays()[dayOfWeek]);
             item.setTag(dayOfWeek);
             weekStrip.addView(item);
         }
@@ -144,13 +143,13 @@ public class ScheduleFragment extends Fragment {
         templateList.removeAllViews();
         Set<Integer> weekdays = new HashSet<>(Arrays.asList(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY));
         ScheduleModel[] templates = {
-                template("Morning deep work", 9, 0, 120, ScheduleModel.RepeatType.WEEKLY, weekdays),
-                template("Lunch break", 13, 0, 45, ScheduleModel.RepeatType.WEEKLY, weekdays),
-                template("Wind down", 22, 0, 60, ScheduleModel.RepeatType.DAILY, new HashSet<>())};
+                template(getString(R.string.screen_morning_deep_work), 9, 0, 120, ScheduleModel.RepeatType.WEEKLY, weekdays),
+                template(getString(R.string.screen_lunch_break), 13, 0, 45, ScheduleModel.RepeatType.WEEKLY, weekdays),
+                template(getString(R.string.screen_wind_down), 22, 0, 60, ScheduleModel.RepeatType.DAILY, new HashSet<>())};
         for (ScheduleModel model : templates) {
             View row = getLayoutInflater().inflate(R.layout.item_schedule_template, templateList, false);
             ((TextView) row.findViewById(R.id.templateName)).setText(model.getName());
-            ((TextView) row.findViewById(R.id.templateSummary)).setText(model.getFormattedStartTime() + " · " + model.getFormattedDuration());
+            ((TextView) row.findViewById(R.id.templateSummary)).setText(getString(R.string.screen_schedule_template_summary, model.getFormattedStartTime(requireContext()), model.getFormattedDuration(requireContext())));
             row.setOnClickListener(v -> showCreateScheduleDialog(model));
             templateList.addView(row);
         }
@@ -204,7 +203,7 @@ public class ScheduleFragment extends Fragment {
             upNextCountdown.setVisibility(View.VISIBLE);
             upNextTime.setVisibility(View.VISIBLE);
             upNextCountdown.setText(countdown(nextTime.getTimeInMillis() - now.getTimeInMillis()));
-            upNextTime.setText(dayLabel(now, nextTime) + " · " + nextSchedule.getFormattedStartTime() + " · " + nextSchedule.getFormattedDuration());
+            upNextTime.setText(getString(R.string.screen_schedule_next_summary, dayLabel(now, nextTime), nextSchedule.getFormattedStartTime(requireContext()), nextSchedule.getFormattedDuration(requireContext())));
             long untilNextMinute = 60000 - (now.getTimeInMillis() % 60000);
             ticker.postDelayed(tick, untilNextMinute + 50);
         }
@@ -219,21 +218,21 @@ public class ScheduleFragment extends Fragment {
         }
     }
 
-    private static String countdown(long millis) {
+    private String countdown(long millis) {
         long minutes = Math.max(0, millis / 60000);
-        if (minutes < 60) return "in " + Math.max(1, minutes) + "m";
+        if (minutes < 60) return String.format(java.util.Locale.ROOT, getString(R.string.screen_countdown_minutes), Math.max(1, minutes));
         long hours = minutes / 60;
-        if (hours < 24) return "in " + hours + "h " + (minutes % 60) + "m";
+        if (hours < 24) return String.format(java.util.Locale.ROOT, getString(R.string.screen_countdown_hours_minutes), hours, minutes % 60);
         long days = hours / 24;
-        return "in " + days + "d " + (hours % 24) + "h";
+        return String.format(java.util.Locale.ROOT, getString(R.string.screen_countdown_days_hours), days, hours % 24);
     }
 
-    private static String dayLabel(Calendar now, Calendar target) {
+    private String dayLabel(Calendar now, Calendar target) {
         Calendar tomorrow = (Calendar) now.clone();
         tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-        if (sameDay(now, target)) return "Today";
-        if (sameDay(tomorrow, target)) return "Tomorrow";
-        return new java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault()).format(target.getTime());
+        if (sameDay(now, target)) return getString(R.string.screen_today);
+        if (sameDay(tomorrow, target)) return getString(R.string.screen_tomorrow);
+        return new java.text.SimpleDateFormat("EEE", getResources().getConfiguration().getLocales().get(0)).format(target.getTime());
     }
 
     private static boolean sameDay(Calendar a, Calendar b) {
@@ -250,7 +249,7 @@ public class ScheduleFragment extends Fragment {
                 } else {
                     Bundle action = new Bundle();
                     action.putInt("enable_id", schedule.getId());
-                    UnlockMethodGuard.ensure(requireActivity(), "Enable anyway", () ->
+                    UnlockMethodGuard.ensure(requireActivity(), getString(R.string.screen_enable_anyway), () ->
                             PermissionGate.ensure(ScheduleFragment.this, FeaturePermissions.schedule(requireContext()),
                                     SCHEDULE_PERMISSION_RESULT, action));
                 }
@@ -280,11 +279,11 @@ public class ScheduleFragment extends Fragment {
             if (updatedSchedule.isEnabled()) {
                 // Schedule was enabled, activate it
                 scheduleActivator.scheduleSchedule(updatedSchedule);
-                Toast.makeText(requireContext(), "Schedule activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.screen_schedule_activated_1_s, updatedSchedule.getName()), Toast.LENGTH_SHORT).show();
             } else {
                 // Schedule was disabled, cancel it
                 scheduleActivator.cancelSchedule(updatedSchedule);
-                Toast.makeText(requireContext(), "Schedule deactivated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.screen_schedule_deactivated_1_s, updatedSchedule.getName()), Toast.LENGTH_SHORT).show();
             }
         }
         
@@ -314,7 +313,7 @@ public class ScheduleFragment extends Fragment {
             refreshOverview();
         } catch (Exception e) {
             Log.e(TAG, "Error loading schedules", e);
-            Toast.makeText(requireContext(), "Error loading schedules: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), getString(R.string.screen_error_loading_schedules_1_s, e.getMessage()), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -336,7 +335,7 @@ public class ScheduleFragment extends Fragment {
     private void showCreateScheduleDialog(ScheduleModel template) {
         Bundle action = new Bundle();
         if (template != null) action.putString("template", new com.google.gson.Gson().toJson(template));
-        UnlockMethodGuard.ensure(requireActivity(), "Create anyway", () ->
+        UnlockMethodGuard.ensure(requireActivity(), getString(R.string.screen_create_anyway), () ->
                 PermissionGate.ensure(this, FeaturePermissions.schedule(requireContext()), SCHEDULE_PERMISSION_RESULT, action));
     }
 
@@ -371,9 +370,9 @@ public class ScheduleFragment extends Fragment {
                 // Activate the schedule if enabled
                 if (newSchedule.isEnabled()) {
                     scheduleActivator.scheduleSchedule(newSchedule);
-                    Toast.makeText(requireContext(), "Schedule created and activated: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.screen_schedule_created_and_activated_1_s, newSchedule.getName()), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(requireContext(), "Schedule created: " + newSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.screen_schedule_created_1_s, newSchedule.getName()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -392,10 +391,10 @@ public class ScheduleFragment extends Fragment {
                 // Reactivate the updated schedule if enabled
                 if (updatedSchedule.isEnabled()) {
                     scheduleActivator.scheduleSchedule(updatedSchedule);
-                    Toast.makeText(requireContext(), "Schedule updated and activated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.screen_schedule_updated_and_activated_1_s, updatedSchedule.getName()), Toast.LENGTH_SHORT).show();
                 } else {
                     scheduleActivator.cancelSchedule(updatedSchedule);
-                    Toast.makeText(requireContext(), "Schedule updated: " + updatedSchedule.getName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.screen_schedule_updated_1_s, updatedSchedule.getName()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -408,7 +407,7 @@ public class ScheduleFragment extends Fragment {
         
         scheduleManager.deleteSchedule(schedule.getId());
         loadSchedules();
-        Toast.makeText(requireContext(), "Schedule deleted: " + schedule.getName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.screen_schedule_deleted_1_s, schedule.getName()), Toast.LENGTH_SHORT).show();
     }
     
     @Override

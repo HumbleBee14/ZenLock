@@ -71,6 +71,6 @@ public class QuotesSheet extends BottomSheetDialogFragment {
         boolean canAdd = QuoteStore.canAdd(requireContext());
         input.setEnabled(canAdd);
         addButton.setEnabled(canAdd);
-        input.setHint(canAdd ? "New quote" : QuoteStore.MAX_QUOTES + " of " + QuoteStore.MAX_QUOTES);
+        input.setHint(canAdd ? getString(R.string.screen_new_quote) : String.format(java.util.Locale.ROOT, getString(R.string.screen_quote_capacity), QuoteStore.MAX_QUOTES, QuoteStore.MAX_QUOTES));
     }
 }

@@ -26,6 +26,6 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:focusable="true"
-        android:contentDescription="Remove" />
+        android:contentDescription="@string/layout_remove" />
 
 </LinearLayout>

@@ -15,8 +15,8 @@
         android:text="@string/allowed_apps_title"
         style="@style/ModernText.PageTitle"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="12dp"/>
 
     <!-- Search Icon (Initially visible) -->
@@ -65,7 +65,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:hint="Search apps..."
+            android:hint="@string/layout_search_apps"
             android:textColor="@android:color/white"
             android:textColorHint="@color/textHint"
             android:textSize="16sp"
@@ -152,8 +152,8 @@
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ProgressBar
             android:id="@+id/loadingSpinner"
@@ -165,7 +165,7 @@
             android:id="@+id/loadingText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Loading apps"
+            android:text="@string/layout_loading_apps"
             android:textColor="@color/textSecondary"
             android:textSize="14sp"
             android:layout_marginTop="16dp"/>
@@ -188,6 +188,6 @@
             style="@style/ModernButton.Pill"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="Save" />
+            android:text="@string/layout_save" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,22 +3,22 @@
     <item
         android:id="@+id/home"
         android:icon="@drawable/ic_lock"
-        android:title="Lock" />
+        android:title="@string/layout_lock" />
 
     <item
         android:id="@+id/schedule"
         android:icon="@drawable/ic_schedule"
-        android:title="Schedule" />
+        android:title="@string/layout_schedule" />
 
     <item
         android:id="@+id/analytics"
         android:icon="@drawable/ic_analytics"
-        android:title="Insights" />
+        android:title="@string/layout_insights" />
 
     <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings"
-        android:title="Settings" />
+        android:title="@string/layout_settings" />
 
 </menu>
 

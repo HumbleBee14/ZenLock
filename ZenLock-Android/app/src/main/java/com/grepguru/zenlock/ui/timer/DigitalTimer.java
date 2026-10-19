@@ -33,6 +33,7 @@ public class DigitalTimer implements TimerType {
             timerTextView.setAutoSizeTextTypeUniformWithConfiguration(24, 72, 1,
                     android.util.TypedValue.COMPLEX_UNIT_SP);
             timerTextView.setGravity(android.view.Gravity.CENTER);
+            timerTextView.setTextDirection(View.TEXT_DIRECTION_LTR);
             timerTextView.setTextColor(context.getColor(R.color.textPrimary));
             timerTextView.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.BOLD));
             timerTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -51,7 +52,7 @@ public class DigitalTimer implements TimerType {
             // Show hours, minutes, and seconds (HH:MM ss format with smaller, regular seconds)
             long hours = totalMinutes / 60;
             long minutes = totalMinutes % 60;
-            String timeText = String.format("%02d:%02d %02d", hours, minutes, seconds);
+            String timeText = String.format(java.util.Locale.ROOT, "%02d:%02d %02d", hours, minutes, seconds);
             
             // Make seconds smaller (half size) and regular font (not bold)
             SpannableString spannableString = new SpannableString(timeText);
@@ -60,7 +61,7 @@ public class DigitalTimer implements TimerType {
             timerTextView.setText(spannableString);
         } else {
             // Show minutes and seconds (MM:SS format - unchanged)
-            timerTextView.setText(String.format("%02d:%02d", totalMinutes, seconds));
+            timerTextView.setText(String.format(java.util.Locale.ROOT, "%02d:%02d", totalMinutes, seconds));
         }
     }
     

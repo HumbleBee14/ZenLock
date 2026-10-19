@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Focus Duration"
+        android:text="@string/layout_set_focus_duration"
         android:textSize="20sp"
         android:textColor="@color/textPrimary"
         android:fontFamily="sans-serif-medium"
@@ -37,7 +37,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hours"
+                android:text="@string/layout_hours"
                 android:textSize="13sp"
                 android:textColor="@color/textSecondary"
                 android:fontFamily="sans-serif"
@@ -62,7 +62,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Minutes"
+                android:text="@string/layout_minutes"
                 android:textSize="13sp"
                 android:textColor="@color/textSecondary"
                 android:fontFamily="sans-serif"

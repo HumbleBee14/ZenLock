@@ -1,5 +1,6 @@
 package com.grepguru.zenlock.data.entities;
 
+import com.grepguru.zenlock.utils.DurationText;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -84,27 +85,27 @@ public class MonthlyStatsEntity {
     }
     
     // Utility methods
-    public String getFormattedTotalFocusTime() {
+    public String getFormattedTotalFocusTime(android.content.Context context) {
         long minutes = totalFocusTime / (60 * 1000);
         long hours = minutes / 60;
         minutes = minutes % 60;
         
         if (hours > 0) {
-            return String.format("%dh %dm", hours, minutes);
+            return DurationText.minutes(context, hours * 60 + minutes);
         } else {
-            return String.format("%dm", minutes);
+            return DurationText.minutes(context, minutes);
         }
     }
     
-    public String getFormattedAvgDailyFocusTime() {
+    public String getFormattedAvgDailyFocusTime(android.content.Context context) {
         long minutes = avgDailyFocusTime / (60 * 1000);
         long hours = minutes / 60;
         minutes = minutes % 60;
         
         if (hours > 0) {
-            return String.format("%dh %dm", hours, minutes);
+            return DurationText.minutes(context, hours * 60 + minutes);
         } else {
-            return String.format("%dm", minutes);
+            return DurationText.minutes(context, minutes);
         }
     }
     
